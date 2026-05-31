@@ -27,6 +27,12 @@ function getTheme() {
   return localStorage.getItem("theme") || "dark";
 }
 
+function setThemeIcon(theme) {
+  const icon = $("themeIcon");
+  if (!icon) return;
+  icon.className = theme === "light" ? "bi bi-sun-fill" : "bi bi-moon-stars-fill";
+}
+
 function openModal() {
   $("modalOverlay").classList.remove("hidden");
   $("proModal").classList.remove("hidden");
@@ -365,11 +371,12 @@ async function activatePromo() {
 function initUi() {
   const initialTheme = getTheme();
   setTheme(initialTheme);
-  $("themeToggle").checked = initialTheme === "light";
+  setThemeIcon(initialTheme);
 
-  $("themeToggle").onchange = (e) => {
-    const next = e.target.checked ? "light" : "dark";
+  $("themeToggle").onclick = () => {
+    const next = getTheme() === "dark" ? "light" : "dark";
     setTheme(next);
+    setThemeIcon(next);
   };
 
   $("proBtn").onclick = openModal;
