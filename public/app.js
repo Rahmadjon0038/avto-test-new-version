@@ -12,7 +12,9 @@ const state = {
 
 const FALLBACK_IMAGE = "/placeholder.svg";
 const IMAGE_PROXY_PATH = "/img?u=";
-const BOT_LINK = "https://t.me/JorabekAvtotest_bot";
+const BOT_USERNAME = "JorabekAvtotest_bot";
+const BOT_LINK = `https://t.me/${BOT_USERNAME}`;
+const BOT_BUY_LINK = `https://t.me/${BOT_USERNAME}?start=buy`;
 
 function $(id) {
   return document.getElementById(id);
@@ -388,10 +390,10 @@ function initUi() {
   $("buyPromo").onclick = () => {
     // Go back to bot chat (works in Telegram and in regular browser)
     try {
-      if (tg?.openTelegramLink) tg.openTelegramLink(BOT_LINK);
-      else window.open(BOT_LINK, "_blank", "noopener,noreferrer");
+      if (tg?.openTelegramLink) tg.openTelegramLink(BOT_BUY_LINK);
+      else window.open(BOT_BUY_LINK, "_blank", "noopener,noreferrer");
     } catch {
-      window.open(BOT_LINK, "_blank", "noopener,noreferrer");
+      window.open(BOT_BUY_LINK, "_blank", "noopener,noreferrer");
     }
     try {
       tg?.close();

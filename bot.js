@@ -95,6 +95,14 @@ bot.start(async (ctx) => {
     return;
   }
 
+  if (startPayload === "buy") {
+    await ctx.reply(
+      `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.`
+    );
+    await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
+    return;
+  }
+
   await ctx.reply(isAdmin(ctx) ? "Admin panelga xush kelibsiz." : "Jo‘rabek Avto Test botiga xush kelibsiz!", replyMenuKeyboard(isAdmin(ctx)));
   await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
 });
