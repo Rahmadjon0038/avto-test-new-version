@@ -18,6 +18,11 @@ if [[ ! -f ".env" ]]; then
   exit 1
 fi
 
+if ! grep -q '^HOST_WEB_PORT=' .env 2>/dev/null; then
+  echo ".env ichida HOST_WEB_PORT topilmadi. Masalan: HOST_WEB_PORT=18080"
+  exit 1
+fi
+
 echo "Building images..."
 docker compose build
 
