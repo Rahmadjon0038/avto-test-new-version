@@ -331,13 +331,11 @@ async function refreshTickets() {
 function renderProfile() {
   const chip = $("profileChip");
   if (!state.me) return chip.classList.add("hidden");
-  const name = state.me.first_name || "User";
-  const uname = state.me.username ? `@${state.me.username}` : null;
+  const name = state.me.first_name || state.me.username || "User";
   chip.classList.remove("hidden");
   chip.innerHTML = `
     <div>
       <div>${escapeHtml(name)}</div>
-      <div class="sub">${uname ? escapeHtml(uname) : ""}</div>
     </div>
     ${state.isPro ? `<div class="badgePro"><i class="bi bi-lightning-charge-fill"></i> PRO</div>` : ""}
   `;
@@ -375,25 +373,6 @@ function initUi() {
   };
 
   $("proBtn").onclick = openModal;
-  if (tg) {
-    $("openBrowserBtn").classList.remove("hidden");
-    $("openBrowserBtn").onclick = async () => {
-      try {
-        const data = await api("/api/browser-token", { method: "POST" });
-        const url = `${window.location.origin}/webapp?token=${encodeURIComponent(data.token)}`;
-        // Best effort: open in external browser/tab
-        try {
-          if (tg?.openLink) tg.openLink(url);
-          else window.open(url, "_blank", "noopener,noreferrer");
-        } catch {
-          window.open(url, "_blank", "noopener,noreferrer");
-        }
-      } catch (e) {
-        openModal();
-        showPromoMsg(e.message || "Xatolik", "bad");
-      }
-    };
-  }
   $("examBtn").onclick = async () => {
     try {
       await api("/api/me");

@@ -94,12 +94,6 @@ body {
   white-space: nowrap;
 }
 
-.profileChip .sub {
-  font-weight: 700;
-  color: var(--muted);
-  font-size: 12px;
-}
-
 .badgePro {
   display: inline-flex;
   align-items: center;
@@ -125,6 +119,16 @@ body {
   }
   .navCenter {
     display: none;
+  }
+
+  .actions {
+    gap: 6px;
+  }
+
+  .profileChip {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -216,6 +220,12 @@ body {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 360px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (min-width: 520px) {
@@ -313,6 +323,19 @@ body {
   background: var(--primary);
   border-color: color-mix(in srgb, var(--primary) 65%, var(--border));
   color: white;
+}
+
+.labelShort {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .labelFull {
+    display: none;
+  }
+  .labelShort {
+    display: inline;
+  }
 }
 
 .btn-danger {
