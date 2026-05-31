@@ -25,5 +25,4 @@ echo "Starting containers..."
 docker compose up -d
 
 echo "Done."
-echo "Web: http://<server-ip>:3000 (domain/proxy bilan 443/https ga o'zingiz yo'naltirasiz)"
-
+echo "Web: http://127.0.0.1:${HOST_WEB_PORT:-18080} (Nginx/proxy orqali domeningizga yo'naltirasiz)"
