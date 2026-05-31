@@ -1,0 +1,24 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DB_PATH=/app/db.sqlite
+    volumes:
+      - ./db.sqlite:/app/db.sqlite
+    ports:
+      - "3000:3000"
+
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DB_PATH=/app/db.sqlite
+    volumes:
+      - ./db.sqlite:/app/db.sqlite
+    command: ["node", "bot.js"]
+    depends_on:
+      - web
+
