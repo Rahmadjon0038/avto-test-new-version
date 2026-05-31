@@ -92,3 +92,6 @@ Containerlar:
 
 > Default’da Docker host’da port band bo‘lib qolmasligi uchun web `127.0.0.1:18080` ga publish qilinadi
 > (`HOST_WEB_PORT` bilan o‘zgartirsa bo‘ladi). Nginx/reverse-proxy: `http://127.0.0.1:18080` ga proxy qiling.
+
+Ma’lumotlar:
+- SQLite fayl Docker’da `./storage/db.sqlite` ichida saqlanadi (persist bo‘lib turadi).
