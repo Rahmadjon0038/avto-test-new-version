@@ -44,9 +44,13 @@ function replyMenuKeyboard(admin) {
 function startInlineKeyboard(webappUrl) {
   const webAppSupported = supportsWebAppUrl(webappUrl);
   const btn = webAppSupported
-    ? Markup.button.webApp("✅ Testni boshlash", webappUrl)
+    ? Markup.button.webApp("Testni boshlash", webappUrl)
     : Markup.button.url("🌐 Saytni ochish (local)", webappUrl);
   return Markup.inlineKeyboard([btn]);
+}
+
+async function sendStartButton(ctx, webappUrl) {
+  await ctx.reply("👇 Web ilovani ochish", startInlineKeyboard(webappUrl));
 }
 
 function makePromoCode() {
@@ -91,20 +95,20 @@ bot.start(async (ctx) => {
       "✅ Telegram orqali kirish tayyor.\nEndi “Testni boshlash” tugmasini bosing (Web App).",
       replyMenuKeyboard(isAdmin(ctx))
     );
-    await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
+    await sendStartButton(ctx, webappUrl);
     return;
   }
 
   if (startPayload === "buy") {
     await ctx.reply(
-      `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.`
+      `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.\n\n(So‘ng web ilovaga qaytish uchun pastdagi tugmani bosing)`,
+      startInlineKeyboard(webappUrl)
     );
-    await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
     return;
   }
 
   await ctx.reply(isAdmin(ctx) ? "Admin panelga xush kelibsiz." : "Jo‘rabek Avto Test botiga xush kelibsiz!", replyMenuKeyboard(isAdmin(ctx)));
-  await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
+  await sendStartButton(ctx, webappUrl);
 });
 
 bot.command("myid", async (ctx) => {
@@ -120,7 +124,7 @@ bot.command("hide", async (ctx) => {
 bot.command("menu", async (ctx) => {
   const webappUrl = `${BASE_URL.replace(/\/$/, "")}/webapp`;
   await ctx.reply("📋 Menu:", replyMenuKeyboard(isAdmin(ctx)));
-  await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
+  await sendStartButton(ctx, webappUrl);
 });
 
 async function sendAdminPanel(ctx) {
@@ -229,7 +233,12 @@ bot.action(/approve:(.+)/, async (ctx) => {
     [telegramId]
   );
 
-  await ctx.telegram.sendMessage(telegramId, `✅ To‘lov tasdiqlandi!\nSizning promo kodingiz: ${code}\n\nWeb App ichida “PRO ga o‘tish” -> promo kodni kiriting.`);
+  const webappUrl = `${BASE_URL.replace(/\/$/, "")}/webapp`;
+  await ctx.telegram.sendMessage(
+    telegramId,
+    `✅ To‘lov tasdiqlandi!\nSizning promo kodingiz: ${code}\n\nWeb App ichida “PRO ga o‘tish” -> promo kodni kiriting.\n\nPastdagi tugma orqali web ilovani oching:`,
+    { reply_markup: startInlineKeyboard(webappUrl).reply_markup }
+  );
   await ctx.editMessageCaption((ctx.update.callback_query.message.caption || "") + `\n\n✅ Approved. Code: ${code}`);
   await ctx.answerCbQuery("Approved");
 });

@@ -332,6 +332,7 @@ async function refreshTickets() {
   const data = await api("/api/tickets");
   state.tickets = data.tickets;
   state.isPro = data.isPro;
+  updateProButton();
   renderTickets();
 }
 
@@ -346,6 +347,43 @@ function showPromoMsg(text, type = "info") {
   el.style.borderColor = type === "ok" ? "rgba(54,211,153,0.5)" : "rgba(255,107,107,0.5)";
 }
 
+function getProUsage(proUntilIso) {
+  if (!proUntilIso) return null;
+  const until = new Date(proUntilIso);
+  if (Number.isNaN(until.getTime())) return null;
+  const msLeft = until.getTime() - Date.now();
+  const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+  const total = 30;
+  const used = Math.min(total, Math.max(0, total - daysLeft));
+  return { used, total, daysLeft };
+}
+
+function updateProButton() {
+  const btn = $("proBtn");
+  if (!btn) return;
+
+  if (!state.isPro) {
+    btn.classList.remove("proActive");
+    btn.disabled = false;
+    btn.innerHTML = `
+      <span class="labelFull">PRO ga o‘tish</span>
+      <span class="labelShort">PRO</span>
+    `;
+    btn.onclick = openModal;
+    return;
+  }
+
+  const usage = getProUsage(state.me?.pro_until);
+  const text = usage ? `${usage.used}/${usage.total}` : "PRO";
+  btn.classList.add("proActive");
+  btn.disabled = true;
+  btn.innerHTML = `
+    <span class="labelFull"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> ${text}</span>
+    <span class="labelShort">${text}</span>
+  `;
+  btn.onclick = null;
+}
+
 async function activatePromo() {
   const code = $("promoInput").value.trim();
   if (!code) return showPromoMsg("Promo kod kiriting.", "bad");
@@ -356,6 +394,7 @@ async function activatePromo() {
     state.isPro = data.isPro;
     showPromoMsg("✅ PRO faollashdi! Endi barcha biletlar ochildi.", "ok");
     await refreshTickets();
+    closeModal();
   } catch (e) {
     showPromoMsg(e.message || "Xatolik", "bad");
   }
@@ -372,7 +411,7 @@ function initUi() {
     setThemeIcon(next);
   };
 
-  $("proBtn").onclick = openModal;
+  updateProButton();
   $("examBtn").onclick = async () => {
     try {
       await api("/api/me");

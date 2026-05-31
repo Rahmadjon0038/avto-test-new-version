@@ -313,6 +313,16 @@ body {
   color: white;
 }
 
+.btn.proActive {
+  background: color-mix(in srgb, var(--ok) 20%, var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+  color: var(--text);
+}
+
+.btn.proActive i {
+  margin-right: 6px;
+}
+
 .labelShort {
   display: none;
 }
