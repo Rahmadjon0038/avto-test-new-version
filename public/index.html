@@ -23,14 +23,16 @@
         </button>
       </div>
       <div class="actions">
-        <button id="themeToggle" class="iconBtn" type="button" title="Dark/Light" aria-label="Theme toggle">
-          <i id="themeIcon" class="bi bi-moon-stars-fill" aria-hidden="true"></i>
-        </button>
-        <button id="proBtn" class="btn btn-primary" type="button">
-          <span class="labelFull">PRO ga o‘tish</span>
-          <span class="labelShort">PRO</span>
-        </button>
-        <div id="profileChip" class="profileChip hidden"></div>
+        <div class="actionRow">
+          <button id="themeToggle" class="iconBtn" type="button" title="Dark/Light" aria-label="Theme toggle">
+            <i id="themeIcon" class="bi bi-moon-stars-fill" aria-hidden="true"></i>
+          </button>
+          <button id="proBtn" class="btn btn-primary" type="button">
+            <span class="labelFull">PRO ga o‘tish</span>
+            <span class="labelShort">PRO</span>
+          </button>
+        </div>
+        <div id="profileName" class="profileName hidden"></div>
       </div>
     </header>
 
@@ -102,19 +104,9 @@
         <button id="modalClose" class="btn btn-ghost" type="button">✕</button>
       </div>
       <div class="modalBody">
-        <input id="promoInput" class="input" placeholder="Masalan: JORABEK-8F3K2L" />
+        <input id="promoInput" class="input" placeholder="Masalan: 12345" inputmode="numeric" maxlength="5" />
         <button id="promoActivate" class="btn btn-primary" type="button">Faollashtirish</button>
         <button id="buyPromo" class="btn btn-ghost" type="button">Promo kod sotib olish</button>
-        <div class="help">
-          <ol>
-            <li>“Promo kod sotib olish” tugmasini bosing.</li>
-            <li>Telegram botga qaytasiz.</li>
-            <li>Bot ko‘rsatgan karta raqamiga to‘lov qiling.</li>
-            <li>To‘lov screenshotini botga yuboring.</li>
-            <li>Admin tasdiqlagach sizga promo kod yuboriladi.</li>
-            <li>Promo kodni shu oynaga kiriting.</li>
-          </ol>
-        </div>
         <div id="promoMsg" class="msg hidden"></div>
       </div>
     </div>

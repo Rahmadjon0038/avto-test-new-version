@@ -562,6 +562,7 @@ app.post("/api/promo/activate", requireTelegramUser, async (req, res) => {
   const telegramId = String(req.telegramUser.id);
   const code = String(req.body?.code || "").trim();
   if (!code) return res.status(400).json({ error: "Promo code required" });
+  if (!/^\d{5}$/.test(code)) return res.status(400).json({ error: "Promo kod 5 xonali bo‘lishi kerak" });
 
   const row = await dbApi.get("SELECT * FROM promo_codes WHERE code = ?", [code]);
   if (!row) return res.status(404).json({ error: "Promo code not found" });

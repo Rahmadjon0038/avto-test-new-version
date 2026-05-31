@@ -335,16 +335,11 @@ async function refreshTickets() {
 }
 
 function renderProfile() {
-  const chip = $("profileChip");
-  if (!state.me) return chip.classList.add("hidden");
+  const el = $("profileName");
+  if (!state.me) return el.classList.add("hidden");
   const name = state.me.first_name || state.me.username || "User";
-  chip.classList.remove("hidden");
-  chip.innerHTML = `
-    <div>
-      <div>${escapeHtml(name)}</div>
-    </div>
-    ${state.isPro ? `<div class="badgePro"><i class="bi bi-lightning-charge-fill"></i> PRO</div>` : ""}
-  `;
+  el.classList.remove("hidden");
+  el.textContent = name;
 }
 
 function showPromoMsg(text, type = "info") {
@@ -357,6 +352,7 @@ function showPromoMsg(text, type = "info") {
 async function activatePromo() {
   const code = $("promoInput").value.trim();
   if (!code) return showPromoMsg("Promo kod kiriting.", "bad");
+  if (!/^\d{5}$/.test(code)) return showPromoMsg("Promo kod 5 xonali bo‘lishi kerak.", "bad");
 
   try {
     const data = await api("/api/promo/activate", { method: "POST", body: { code } });
