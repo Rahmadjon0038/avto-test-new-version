@@ -34,20 +34,19 @@ function supportsWebAppUrl(url) {
   return /^https:\/\//i.test(String(url || ""));
 }
 
-function mainKeyboard(webappUrl, admin) {
-  const webAppSupported = supportsWebAppUrl(webappUrl);
-  const startBtn = webAppSupported
-    ? Markup.button.webApp("Testni boshlash", webappUrl)
-    : Markup.button.url("Saytni ochish (local)", webappUrl);
-
+function replyMenuKeyboard(admin) {
   if (admin) {
-    return Markup.keyboard([[startBtn], ["Admin panel"]])
-      .resize()
-      .persistent();
+    return Markup.keyboard([["Admin panel"]]).resize().persistent();
   }
-  return Markup.keyboard([[startBtn], ["Promo kod sotib olish"]])
-    .resize()
-    .persistent();
+  return Markup.keyboard([["Promo kod sotib olish"]]).resize().persistent();
+}
+
+function startInlineKeyboard(webappUrl) {
+  const webAppSupported = supportsWebAppUrl(webappUrl);
+  const btn = webAppSupported
+    ? Markup.button.webApp("✅ Testni boshlash", webappUrl)
+    : Markup.button.url("🌐 Saytni ochish (local)", webappUrl);
+  return Markup.inlineKeyboard([btn]);
 }
 
 function makePromoCode() {
@@ -83,23 +82,21 @@ bot.start(async (ctx) => {
     if (!supportsWebAppUrl(webappUrl)) {
       await ctx.reply(
         "⚠️ Web App tugmasi faqat HTTPS bilan ishlaydi.\nHozir BASE_URL HTTP bo‘lgani uchun saytni brauzerda oching.",
-        mainKeyboard(webappUrl, isAdmin(ctx))
+        replyMenuKeyboard(isAdmin(ctx))
       );
+      await ctx.reply("Saytni ochish:", startInlineKeyboard(webappUrl));
       return;
     }
     await ctx.reply(
       "✅ Telegram orqali kirish tayyor.\nEndi “Testni boshlash” tugmasini bosing (Web App).",
-      mainKeyboard(webappUrl, isAdmin(ctx))
+      replyMenuKeyboard(isAdmin(ctx))
     );
+    await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
     return;
   }
 
-  await ctx.reply(
-    isAdmin(ctx)
-      ? "Admin panelga xush kelibsiz. Quyidagi tugmalar orqali boshqaring."
-      : "Jo‘rabek Avto Test botiga xush kelibsiz!",
-    mainKeyboard(webappUrl, isAdmin(ctx))
-  );
+  await ctx.reply(isAdmin(ctx) ? "Admin panelga xush kelibsiz." : "Jo‘rabek Avto Test botiga xush kelibsiz!", replyMenuKeyboard(isAdmin(ctx)));
+  await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
 });
 
 bot.command("myid", async (ctx) => {
@@ -114,7 +111,8 @@ bot.command("hide", async (ctx) => {
 
 bot.command("menu", async (ctx) => {
   const webappUrl = `${BASE_URL.replace(/\/$/, "")}/webapp`;
-  await ctx.reply("📋 Menu:", mainKeyboard(webappUrl, isAdmin(ctx)));
+  await ctx.reply("📋 Menu:", replyMenuKeyboard(isAdmin(ctx)));
+  await ctx.reply("Testni boshlash:", startInlineKeyboard(webappUrl));
 });
 
 async function sendAdminPanel(ctx) {
