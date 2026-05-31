@@ -330,16 +330,11 @@ async function refreshTickets() {
   const data = await api("/api/tickets");
   state.tickets = data.tickets;
   state.isPro = data.isPro;
-  renderProfile();
   renderTickets();
 }
 
 function renderProfile() {
-  const el = $("profileName");
-  if (!state.me) return el.classList.add("hidden");
-  const name = state.me.first_name || state.me.username || "User";
-  el.classList.remove("hidden");
-  el.textContent = name;
+  // Username/profile is not shown in the WebApp UI (Telegram already shows user context).
 }
 
 function showPromoMsg(text, type = "info") {
