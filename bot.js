@@ -6,6 +6,7 @@ const { openDb, initDb } = require("./db");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const ADMIN_TELEGRAM_ID = String(process.env.ADMIN_TELEGRAM_ID || "");
+const ADMIN_USERNAME = String(process.env.ADMIN_USERNAME || "astroCoder1").replace(/^@/, "");
 const BASE_URL = process.env.BASE_URL || "";
 const CARD_NUMBER = process.env.CARD_NUMBER || "8600 xxxx xxxx xxxx";
 const DB_PATH = process.env.DB_PATH || "./db.sqlite";
@@ -101,7 +102,7 @@ bot.start(async (ctx) => {
 
   if (startPayload === "buy") {
     await ctx.reply(
-      `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.\n\n(So‘ng web ilovaga qaytish uchun pastdagi tugmani bosing)`,
+      `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.\n\nAdmin: @${ADMIN_USERNAME}\n\n(So‘ng web ilovaga qaytish uchun pastdagi tugmani bosing)`,
       startInlineKeyboard(webappUrl)
     );
     return;
@@ -194,7 +195,7 @@ bot.hears("Promo kod sotib olish", async (ctx) => {
   }
   await ensureUser(ctx);
   await ctx.reply(
-    `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.`
+    `Promo kod sotib olish uchun quyidagi kartaga to‘lov qiling:\n\n${CARD_NUMBER}\n\nKeyin to‘lov screenshotini shu chatga yuboring.\n\nAdmin: @${ADMIN_USERNAME}`
   );
 });
 
@@ -220,6 +221,7 @@ bot.on("photo", async (ctx) => {
   });
 
   await ctx.reply("Screenshot qabul qilindi. Admin tekshiradi.");
+  await ctx.reply(`Agar uzoq vaqt javob bo‘lmasa, adminga yozing: @${ADMIN_USERNAME}`);
 });
 
 bot.action(/approve:(.+)/, async (ctx) => {
