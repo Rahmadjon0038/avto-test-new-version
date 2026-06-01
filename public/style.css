@@ -43,6 +43,7 @@ body {
   z-index: 10;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: "brand navCenter actions";
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
@@ -51,6 +52,7 @@ body {
 }
 
 .brand {
+  grid-area: brand;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -76,6 +78,7 @@ body {
 }
 
 .actions {
+  grid-area: actions;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -134,6 +137,7 @@ body {
 }
 
 .navCenter {
+  grid-area: navCenter;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -142,9 +146,19 @@ body {
 @media (max-width: 520px) {
   .navbar {
     grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand actions"
+      "navCenter navCenter";
   }
   .navCenter {
-    display: none;
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+
+  #examBtn {
+    width: 100%;
+    justify-content: center;
   }
 
   .actions {
