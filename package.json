@@ -2,17 +2,31 @@
   "name": "jorabek-avto-test",
   "version": "0.1.0",
   "private": true,
-  "description": "Jo‘rabek Avto Test — Telegram Web App MVP (Node.js + Express + SQLite3)",
-  "main": "server.js",
+  "description": "Jo‘rabek Avto Test — frontend va backendga ajratilgan test platformasi",
   "scripts": {
-    "start": "node server.js",
-    "dev": "NODE_ENV=development node server.js",
-    "bot": "node bot.js"
+    "dev": "node scripts/run.mjs dev",
+    "start": "node scripts/run.mjs start",
+    "build": "npm --prefix frontend run build"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1060.0",
+    "@tanstack/react-query": "^5.100.14",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.6.1",
-    "express": "^5.1.0",
-    "sqlite3": "^5.1.7",
-    "telegraf": "^4.16.3"
+    "express": "^5.2.1",
+    "jose": "^6.2.3",
+    "lucide-react": "^1.17.0",
+    "next": "^16.2.6",
+    "pg": "^8.16.3",
+    "react": "^19.2.6",
+    "react-cookie": "^8.1.2",
+    "react-dom": "^19.2.6",
+    "react-hot-toast": "^2.6.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "typescript": "^6.0.3"
   }
 }

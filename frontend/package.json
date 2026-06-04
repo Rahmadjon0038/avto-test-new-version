@@ -1,0 +1,12 @@
+{
+  "name": "jorabek-avto-test-frontend",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000"
+  },
+  "dependencies": {
+    "recharts": "^3.8.1"
+  }
+}

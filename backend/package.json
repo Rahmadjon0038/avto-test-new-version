@@ -1,0 +1,8 @@
+{
+  "name": "jorabek-avto-test-backend",
+  "private": true,
+  "scripts": {
+    "dev": "PORT=4000 node server.js",
+    "start": "PORT=4000 node server.js"
+  }
+}

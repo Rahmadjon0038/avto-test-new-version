@@ -1,6 +1,6 @@
-# Jo‘rabek Avto Test (MVP)
+# Jo‘rabek Avto Test
 
-Telegram Web App ichida ishlaydigan haydovchilik test platformasi: Node.js + Express + SQLite3 + Telegraf.
+Haydovchilik test platformasi: Next.js + PostgreSQL.
 
 ## 1) O‘rnatish
 
@@ -18,80 +18,43 @@ cp .env.example .env
 
 `.env` ichida quyidagilarni to‘ldiring:
 
-- `BOT_TOKEN` — BotFather bergan token
-- `ADMIN_TELEGRAM_ID` — admin telegram id (raqam)
 - `BASE_URL` — public HTTPS URL (ngrok yoki hosting). Masalan: `https://xxxx.ngrok-free.app`
 - `CARD_NUMBER` — to‘lov uchun karta raqami (matn)
 - `SESSION_SECRET` — random string (browser login session uchun)
+- `DATABASE_URL` — local Postgres connection string, masalan: `postgresql:///avtotest`
 
 ## 3) Serverni ishga tushirish
 
 ```bash
-npm start
+npm run dev
 ```
 
+Bu buyruq `frontend/` va `backend/` ni birga ishga tushiradi.
+
 Server:
+- Landing (sayt auth): `GET /`
+- App: `GET /app`
 - Web App: `GET /webapp`
 - Health: `GET /health`
 
-## 4) Botni ishga tushirish
+## 4) Ngrok bilan test qilish
 
-Albatta alohida terminalda:
-
-```bash
-npm run bot
-```
-
-Bot long-polling ishlaydi.
-
-## 5) Ngrok bilan test qilish
-
-1) Web serverni ishga tushiring: `npm start`
-2) Yangi terminal:  
+1) Yangi terminal:
    ```bash
    ngrok http 3000
    ```
-3) Ngrok bergan `https://...` URL ni `.env` dagi `BASE_URL` ga yozing.
-4) Botni qayta ishga tushiring (`npm run bot`).
+2) Ngrok bergan `https://...` URL ni `.env` dagi `BASE_URL` ga yozing.
+3) Ilovani qayta ishga tushiring.
 
-## 6) Telegram bot button / webapp sozlash
+## 5) Development
 
-- Botda `/start` bosilganda “Testni boshlash” web_app tugmasi chiqadi.
-- Web App URL: `${BASE_URL}/webapp`
-
-## 7) Development (initData bo‘lmasa)
-
-Telegram ichida emas (brauzerda) test qilish uchun:
+Brauzerda test qilish uchun:
 
 - `NODE_ENV=development` qilib ishga tushiring:
   ```bash
   npm run dev
   ```
-- `.env` da `DEV_TELEGRAM_ID` qo‘ying.
 
-> TODO: Production’da doim Telegram `initData` tekshirilsin.
+## 6) Browser orqali login
 
-## 8) Browser orqali login (Telegram Login Widget)
-
-Agar saytingizni Telegram’dan tashqarida (oddiy brauzerda) ochsangiz, u `login.html` sahifaga yo‘naltiradi.
-U yerda Telegram Login Widget orqali kirib, keyin `webapp` ochiladi.
-
-## 9) Deploy (Docker)
-
-Serverda Docker o‘rnatilgan bo‘lsa:
-
-1) `.env` ni to‘ldiring (`BASE_URL` domeningizning `https://...` ko‘rinishi bo‘lsin)
-2) Deploy:
-   ```bash
-   ./deploy.sh
-   ```
-
-Containerlar:
-- `web` — Express server (`3000` port)
-- `bot` — Telegram bot (long polling)
-
-> Default’da Docker host’da port band bo‘lib qolmasligi uchun web `127.0.0.1:18080` ga publish qilinadi
-> (`HOST_WEB_PORT` bilan o‘zgartirsa bo‘ladi). Nginx/reverse-proxy: `http://127.0.0.1:18080` ga proxy qiling.
-
-Ma’lumotlar:
-- SQLite fayl Docker’da `./storage/db.sqlite` ichida saqlanadi (persist bo‘lib turadi).
+Sayt bosh sahifasida ism + telefon orqali kirish (MVP) mavjud.
