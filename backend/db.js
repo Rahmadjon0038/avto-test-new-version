@@ -110,6 +110,23 @@ async function initDb(dbApi) {
   `);
 
   await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS user_mistakes (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      question_key TEXT NOT NULL,
+      source_kind TEXT NOT NULL,
+      source_id TEXT NOT NULL,
+      source_title TEXT NOT NULL DEFAULT '',
+      question_index INTEGER NOT NULL DEFAULT 0,
+      question JSONB NOT NULL,
+      wrong_answer INTEGER NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(user_id, question_key)
+    );
+  `);
+
+  await dbApi.run(`
     CREATE TABLE IF NOT EXISTS refresh_tokens (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -173,6 +190,22 @@ async function initDb(dbApi) {
       score INTEGER NOT NULL DEFAULT 0,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE(user_id, custom_test_id)
+    );
+  `);
+
+  await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS exam_sessions (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      exam_count INTEGER NOT NULL DEFAULT 50,
+      duration_seconds INTEGER NOT NULL DEFAULT 3000,
+      started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      completed BOOLEAN NOT NULL DEFAULT FALSE,
+      score INTEGER NOT NULL DEFAULT 0,
+      selection JSONB NOT NULL DEFAULT '[]'::jsonb,
+      answers JSONB NOT NULL DEFAULT '{}'::jsonb,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(user_id)
     );
   `);
 

@@ -48,6 +48,18 @@ function parseQuestionsValue(value) {
   return [];
 }
 
+function parseJsonValue(value, fallback) {
+  if (value && typeof value === "object") return value;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+}
+
 async function getTicketsFromDb() {
   const rows = await dbApi.all("SELECT * FROM tickets ORDER BY created_at ASC, id ASC");
   return rows.map(parseTicketRow);
@@ -1450,6 +1462,303 @@ function buildAnswerQuestion({ kind, id, title, question, questionIndex }) {
   };
 }
 
+function buildMistakeQuestion({ kind, id, title, question, questionIndex, wrongAnswer }) {
+  const base = buildAnswerQuestion({ kind, id, title, question, questionIndex });
+  return {
+    ...base,
+    wrongAnswer: Number.isFinite(Number(wrongAnswer)) ? Number(wrongAnswer) : null
+  };
+}
+
+async function deleteUserMistake(userId, questionKey) {
+  await dbApi.run("DELETE FROM user_mistakes WHERE user_id = ? AND question_key = ?", [String(userId), String(questionKey)]);
+}
+
+async function upsertUserMistake({ userId, question, wrongAnswer }) {
+  await dbApi.run(
+    `
+    INSERT INTO user_mistakes (
+      user_id,
+      question_key,
+      source_kind,
+      source_id,
+      source_title,
+      question_index,
+      question,
+      wrong_answer,
+      created_at,
+      updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?, NOW(), NOW())
+    ON CONFLICT (user_id, question_key) DO UPDATE SET
+      source_kind = EXCLUDED.source_kind,
+      source_id = EXCLUDED.source_id,
+      source_title = EXCLUDED.source_title,
+      question_index = EXCLUDED.question_index,
+      question = EXCLUDED.question,
+      wrong_answer = EXCLUDED.wrong_answer,
+      updated_at = EXCLUDED.updated_at
+  `,
+    [
+      String(userId),
+      String(question.id),
+      String(question.kind || ""),
+      String(question.sourceId || ""),
+      String(question.sourceTitle || ""),
+      Number(question.questionIndex || 0),
+      JSON.stringify(question),
+      Number.isFinite(Number(wrongAnswer)) ? Number(wrongAnswer) : null
+    ]
+  );
+}
+
+async function syncMistakesFromQuestions({ userId, kind, id, title, questions, answers }) {
+  for (const [index, question] of (Array.isArray(questions) ? questions : []).entries()) {
+    const nextAnswer = answers?.[question?.id];
+    if (nextAnswer === undefined || nextAnswer === null) continue;
+
+    const mistakeQuestion = buildMistakeQuestion({ kind, id, title, question, questionIndex: index, wrongAnswer: nextAnswer });
+    if (Number(nextAnswer) === mistakeQuestion.correctIndex) {
+      await deleteUserMistake(userId, mistakeQuestion.id);
+    } else {
+      await upsertUserMistake({ userId, question: mistakeQuestion, wrongAnswer: nextAnswer });
+    }
+  }
+}
+
+async function syncMistakesFromExam({ userId, selection, answers, pool }) {
+  const byKey = new Map(
+    (Array.isArray(pool) ? pool : []).map((item) => [
+      `${String(item.kind || "ticket")}:${String(item.sourceId || item.ticketId || "")}:${String(item.question?.id || "")}`,
+      item
+    ])
+  );
+
+  for (const selected of Array.isArray(selection) ? selection : []) {
+    const poolItem = byKey.get(
+      `${String(selected.kind || "ticket")}:${String(selected.sourceId || selected.ticketId || "")}:${String(selected.questionId || selected.question?.id || "")}`
+    );
+    if (!poolItem) continue;
+
+    const nextAnswer = answers?.[poolItem.question.id];
+    if (nextAnswer === undefined || nextAnswer === null) continue;
+
+    const mistakeQuestion = buildMistakeQuestion({
+      kind: poolItem.kind || "ticket",
+      id: poolItem.sourceId || poolItem.ticketId,
+      title: poolItem.sourceTitle || poolItem.ticketTitle,
+      question: poolItem.question,
+      questionIndex: poolItem.questionIndex,
+      wrongAnswer: nextAnswer
+    });
+
+    if (Number(nextAnswer) === mistakeQuestion.correctIndex) {
+      await deleteUserMistake(userId, mistakeQuestion.id);
+    } else {
+      await upsertUserMistake({ userId, question: mistakeQuestion, wrongAnswer: nextAnswer });
+    }
+  }
+}
+
+function getExamDurationSeconds(examCount) {
+  return 25 * 60;
+}
+
+function normalizeExamCount(value) {
+  return 20;
+}
+
+function buildExamQuestionKey({ kind, sourceId, questionId }) {
+  return `${String(kind)}:${String(sourceId)}:${String(questionId)}`;
+}
+
+async function getExamQuestionPool() {
+  const [tickets, topics, customTests] = await Promise.all([getTicketsFromDb(), getTopicsFromDb(), getCustomTestsFromDb()]);
+  const questions = [
+    ...tickets.flatMap((ticket) =>
+      (Array.isArray(ticket.questions) ? ticket.questions : []).map((question, index) => ({
+        kind: "ticket",
+        sourceId: String(ticket.id),
+        sourceTitle: String(ticket.title || ""),
+        questionIndex: index,
+        question,
+        questionKey: buildExamQuestionKey({ kind: "ticket", sourceId: ticket.id, questionId: question.id || index })
+      }))
+    ),
+    ...topics.flatMap((topic) =>
+      (Array.isArray(topic.questions) ? topic.questions : []).map((question, index) => ({
+        kind: "topic",
+        sourceId: String(topic.id),
+        sourceTitle: String(topic.title || ""),
+        questionIndex: index,
+        question,
+        questionKey: buildExamQuestionKey({ kind: "topic", sourceId: topic.id, questionId: question.id || index })
+      }))
+    ),
+    ...customTests.flatMap((customTest) =>
+      (Array.isArray(customTest.questions) ? customTest.questions : []).map((question, index) => ({
+        kind: "custom",
+        sourceId: String(customTest.id),
+        sourceTitle: String(customTest.title || ""),
+        questionIndex: index,
+        question,
+        questionKey: buildExamQuestionKey({ kind: "custom", sourceId: customTest.id, questionId: question.id || index })
+      }))
+    )
+  ];
+
+  return questions;
+}
+
+function buildExamQuestionItem(poolItem) {
+  const normalized = normalizeAnswerQuestion(poolItem.question);
+  return {
+    id: poolItem.questionKey,
+    kind: poolItem.kind,
+    sourceId: poolItem.sourceId,
+    sourceTitle: poolItem.sourceTitle,
+    questionIndex: Number(poolItem.questionIndex) + 1,
+    ...normalized
+  };
+}
+
+function getExamQuestionSelectionSize(requestedCount) {
+  return normalizeExamCount(requestedCount);
+}
+
+async function selectRandomExamQuestions(count) {
+  const pool = await getExamQuestionPool();
+  const desiredCount = getExamQuestionSelectionSize(count);
+  if (pool.length < desiredCount) {
+    const err = new Error("Imtihon uchun savollar yetarli emas");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const poolCopy = [...pool];
+  shuffleInPlace(poolCopy);
+  const seen = new Set();
+  const selection = [];
+  for (const item of poolCopy) {
+    if (seen.has(item.questionKey)) continue;
+    seen.add(item.questionKey);
+    selection.push(item);
+    if (selection.length >= desiredCount) break;
+  }
+
+  if (selection.length < desiredCount) {
+    const err = new Error("Imtihon uchun savollar yetarli emas");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  return selection;
+}
+
+async function getExamSession(userId) {
+  return dbApi.get("SELECT * FROM exam_sessions WHERE user_id = ?", [String(userId)]);
+}
+
+async function updateExamSession(userId, fields) {
+  const current = await getExamSession(userId);
+  if (!current) return null;
+  const nextCount = Number.isFinite(Number(fields.examCount)) ? Number(fields.examCount) : Number(current.exam_count || 50);
+  const nextDuration = Number.isFinite(Number(fields.durationSeconds))
+    ? Number(fields.durationSeconds)
+    : Number(current.duration_seconds || getExamDurationSeconds(nextCount));
+  const nextSelection = fields.selection !== undefined ? JSON.stringify(fields.selection) : JSON.stringify(current.selection || []);
+  const nextAnswers = fields.answers !== undefined ? JSON.stringify(fields.answers) : JSON.stringify(current.answers || {});
+  const nextCompleted = fields.completed !== undefined ? Boolean(fields.completed) : Boolean(current.completed);
+  const nextScore = Number.isFinite(Number(fields.score)) ? Number(fields.score) : Number(current.score || 0);
+  const nextStartedAt = fields.startedAt ? new Date(fields.startedAt).toISOString() : String(current.started_at);
+  const result = await dbApi.get(
+    `
+    UPDATE exam_sessions
+    SET exam_count = ?,
+        duration_seconds = ?,
+        started_at = ?,
+        completed = ?,
+        score = ?,
+        selection = ?::jsonb,
+        answers = ?::jsonb,
+        updated_at = NOW()
+    WHERE user_id = ?
+    RETURNING *
+  `,
+    [
+      nextCount,
+      nextDuration,
+      nextStartedAt,
+      nextCompleted,
+      nextScore,
+      nextSelection,
+      nextAnswers,
+      String(userId)
+    ]
+  );
+  return result;
+}
+
+function getExamTiming(session) {
+  const startedAtValue = session.started_at || session.startedAt;
+  const durationValue = session.duration_seconds || session.durationSeconds;
+  const examCountValue = session.exam_count || session.examCount || 50;
+  const startedAt = new Date(startedAtValue).getTime();
+  const durationSeconds = Number(durationValue || getExamDurationSeconds(examCountValue));
+  const expiresAt = startedAt + durationSeconds * 1000;
+  const remainingSeconds = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+  return {
+    startedAt: new Date(startedAt).toISOString(),
+    durationSeconds,
+    expiresAt: new Date(expiresAt).toISOString(),
+    remainingSeconds,
+    expired: remainingSeconds <= 0
+  };
+}
+
+async function finalizeExamSession(userId, session, poolOverride = null) {
+  const currentSession = session || (await getExamSession(userId));
+  if (!currentSession) return null;
+
+  const timing = getExamTiming(currentSession);
+  if (!timing.expired || currentSession.completed) {
+    return { session: currentSession, timing };
+  }
+
+  const selection = parseJsonValue(currentSession.selection || [], []);
+  const answers = parseJsonValue(currentSession.answers || {}, {});
+
+  let score = 0;
+  let answeredCount = 0;
+  for (const selected of selection) {
+    const nextAnswer = answers?.[selected.questionKey];
+    if (nextAnswer === undefined || nextAnswer === null) continue;
+    answeredCount += 1;
+    if (Number(nextAnswer) === Number(selected.question?.correctIndex)) score += 1;
+  }
+
+  const updated = await dbApi.get(
+    `
+    UPDATE exam_sessions
+    SET completed = TRUE,
+        score = ?,
+        updated_at = NOW()
+    WHERE user_id = ?
+    RETURNING *
+  `,
+    [score, String(userId)]
+  );
+
+  await syncMistakesFromExam({
+    userId,
+    selection,
+    answers,
+    pool: selection
+  }).catch(() => {});
+
+  return { session: updated || currentSession, timing: getExamTiming(updated || currentSession), score, answeredCount };
+}
+
 function deriveR2KeyFromPublicUrl(urlValue) {
   const value = String(urlValue || "").trim();
   if (!value) return null;
@@ -1643,6 +1952,15 @@ app.post("/api/custom-test-progress/:testId", requireUser, async (req, res) => {
     [userId, testId, JSON.stringify(answers), completed, correct, nowIso]
   );
 
+  await syncMistakesFromQuestions({
+    userId,
+    kind: "custom",
+    id: testId,
+    title: customTest.title,
+    questions: customTest.questions,
+    answers
+  });
+
   res.json({ ok: true, completed, score: correct, total: customTest.questions.length });
 });
 
@@ -1687,6 +2005,72 @@ app.get("/api/answers", requireUser, async (_req, res) => {
   ];
 
   res.json({ questions });
+});
+
+app.get("/api/mistakes", requireUser, async (req, res) => {
+  const userId = String(req.user.id);
+  const rows = await dbApi.all(
+    `
+    SELECT question_key, source_kind, source_id, source_title, question_index, question, wrong_answer, created_at, updated_at
+    FROM user_mistakes
+    WHERE user_id = ?
+    ORDER BY updated_at DESC, created_at DESC
+  `,
+    [userId]
+  );
+
+  const questions = rows.map((row) => ({
+    ...(row.question || {}),
+    id: String(row.question_key || row.question?.id || ""),
+    kind: String(row.source_kind || row.question?.kind || ""),
+    sourceId: String(row.source_id || row.question?.sourceId || ""),
+    sourceTitle: String(row.source_title || row.question?.sourceTitle || ""),
+    questionIndex: Number(row.question_index || row.question?.questionIndex || 0),
+    wrongAnswer: Number.isFinite(Number(row.wrong_answer)) ? Number(row.wrong_answer) : null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  }));
+
+  res.json({ questions });
+});
+
+app.post("/api/mistakes/progress", requireUser, async (req, res) => {
+  const userId = String(req.user.id);
+  const answers = req.body?.answers;
+  if (!answers || typeof answers !== "object") return res.status(400).json({ error: "Javoblar obyekti kerak" });
+
+  const rows = await dbApi.all(
+    `
+    SELECT question_key, source_kind, source_id, source_title, question_index, question, wrong_answer
+    FROM user_mistakes
+    WHERE user_id = ?
+  `,
+    [userId]
+  );
+
+  let fixed = 0;
+  for (const row of rows) {
+    const question = row.question || {};
+    const nextAnswer = answers[row.question_key];
+    if (nextAnswer === undefined || nextAnswer === null) continue;
+
+    if (Number(nextAnswer) === Number(question.correctIndex)) {
+      await deleteUserMistake(userId, row.question_key);
+      fixed += 1;
+    } else {
+      await dbApi.run(
+        `
+        UPDATE user_mistakes
+        SET wrong_answer = ?, updated_at = NOW()
+        WHERE user_id = ? AND question_key = ?
+      `,
+        [Number(nextAnswer), userId, row.question_key]
+      );
+    }
+  }
+
+  const remaining = await dbApi.get("SELECT COUNT(*)::int AS count FROM user_mistakes WHERE user_id = ?", [userId]);
+  res.json({ ok: true, fixed, remaining: Number(remaining?.count || 0) });
 });
 
 app.get("/api/topic-progress/:topicId", requireUser, async (req, res) => {
@@ -1740,6 +2124,15 @@ app.post("/api/topic-progress/:topicId", requireUser, async (req, res) => {
   `,
     [userId, topicId, JSON.stringify(answers), completed, correct, nowIso]
   );
+
+  await syncMistakesFromQuestions({
+    userId,
+    kind: "topic",
+    id: topicId,
+    title: topic.title,
+    questions: topic.questions,
+    answers
+  });
 
   res.json({ ok: true, completed, score: correct, total: topic.questions.length });
 });
@@ -1805,21 +2198,6 @@ app.get("/api/progress/:ticketId", requireUser, async (req, res) => {
   });
 });
 
-async function getAllQuestionsPool() {
-  const pool = [];
-  const tickets = await getTicketsFromDb();
-  for (const t of tickets) {
-    for (const q of t.questions) {
-      pool.push({
-        ticketId: t.id,
-        ticketTitle: t.title,
-        question: q
-      });
-    }
-  }
-  return pool;
-}
-
 function shuffleInPlace(arr) {
   for (let i = arr.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1827,79 +2205,120 @@ function shuffleInPlace(arr) {
   }
 }
 
-async function buildExamQuestions(count = 50) {
-  const pool = await getAllQuestionsPool();
-  shuffleInPlace(pool);
-  const out = [];
-  if (pool.length === 0) return out;
-
-  while (out.length < count) {
-    for (const p of pool) {
-      out.push({
-        ticketId: p.ticketId,
-        ticketTitle: p.ticketTitle,
-        ...p.question
-      });
-      if (out.length >= count) break;
-    }
+async function buildExamSelection(count = 50) {
+  const pool = await getExamQuestionPool();
+  const desiredCount = normalizeExamCount(count);
+  if (pool.length === 0) {
+    const error = new Error("Imtihon uchun savol topilmadi");
+    error.statusCode = 400;
+    throw error;
   }
-  return out.slice(0, count);
+
+  const shuffled = [...pool];
+  shuffleInPlace(shuffled);
+  return shuffled.slice(0, Math.min(desiredCount, shuffled.length)).map((item) => ({
+    questionKey: item.questionKey,
+    kind: item.kind,
+    sourceId: item.sourceId,
+    sourceTitle: item.sourceTitle,
+    questionIndex: item.questionIndex,
+    question: normalizeAnswerQuestion(item.question)
+  }));
+}
+
+function serializeExamSessionRow(row) {
+  const selection = parseJsonValue(row.selection, []);
+  const answers = parseJsonValue(row.answers, {});
+  return {
+    id: Number(row.id),
+    userId: Number(row.user_id),
+    examCount: Number(row.exam_count || 50),
+    durationSeconds: Number(row.duration_seconds || getExamDurationSeconds(row.exam_count || 50)),
+    startedAt: String(row.started_at),
+    completed: Boolean(row.completed),
+    score: Number(row.score || 0),
+    selection: Array.isArray(selection) ? selection : [],
+    answers: answers && typeof answers === "object" ? answers : {},
+    updatedAt: row.updated_at ? String(row.updated_at) : null
+  };
 }
 
 app.post("/api/exam/start", requireUser, async (req, res) => {
   const userId = String(req.user.id);
-  const questions = await buildExamQuestions(50);
-  if (questions.length !== 50) return res.status(400).json({ error: "Imtihon savollari yetarli emas" });
+  const examCount = normalizeExamCount(req.body?.count);
+  const durationSeconds = getExamDurationSeconds(examCount);
+  const selection = await buildExamSelection(examCount);
+  const startedAt = new Date().toISOString();
 
-  const selection = questions.map((q) => ({ ticketId: q.ticketId, questionId: q.id }));
-  const payload = { selection, answers: {} };
-
-  await dbApi.run(
+  const result = await dbApi.get(
     `
-    INSERT INTO test_progress (user_id, ticket_id, answers, completed, score, updated_at)
-    VALUES (?, 'exam', ?, FALSE, 0, NOW())
-    ON CONFLICT(user_id, ticket_id) DO UPDATE SET
-      answers = excluded.answers,
+    INSERT INTO exam_sessions (user_id, exam_count, duration_seconds, started_at, completed, score, selection, answers, updated_at)
+    VALUES (?, ?, ?, ?, FALSE, 0, ?::jsonb, ?::jsonb, NOW())
+    ON CONFLICT (user_id) DO UPDATE SET
+      exam_count = EXCLUDED.exam_count,
+      duration_seconds = EXCLUDED.duration_seconds,
+      started_at = EXCLUDED.started_at,
       completed = FALSE,
       score = 0,
-      updated_at = excluded.updated_at
+      selection = EXCLUDED.selection,
+      answers = EXCLUDED.answers,
+      updated_at = EXCLUDED.updated_at
+    RETURNING *
   `,
-    [userId, JSON.stringify(payload)]
+    [userId, examCount, durationSeconds, startedAt, JSON.stringify(selection), JSON.stringify({})]
   );
 
-  res.json({ ok: true, exam: { questionsCount: 50 } });
+  res.json({
+    ok: true,
+    exam: {
+      questionsCount: examCount,
+      durationSeconds,
+      startedAt,
+      expiresAt: new Date(Date.now() + durationSeconds * 1000).toISOString()
+    }
+  });
 });
 
 app.get("/api/exam", requireUser, async (req, res) => {
   const userId = String(req.user.id);
-  const row = await dbApi.get("SELECT * FROM test_progress WHERE user_id = ? AND ticket_id = 'exam'", [
-    userId
-  ]);
-  if (!row) return res.status(404).json({ error: "Exam not started" });
+  const row = await dbApi.get("SELECT * FROM exam_sessions WHERE user_id = ?", [userId]);
+  if (!row) return res.json({ exam: null });
 
-  const parsed = JSON.parse(row.answers || "{}");
-  const selection = Array.isArray(parsed.selection) ? parsed.selection : [];
-  const answers = parsed.answers && typeof parsed.answers === "object" ? parsed.answers : {};
+  const session = serializeExamSessionRow(row);
+  const timing = getExamTiming(session);
+  let activeSession = session;
 
-  const pool = await getAllQuestionsPool();
-  const byKey = new Map(pool.map((p) => [`${p.ticketId}:${p.question.id}`, p]));
+  if (timing.expired && !session.completed) {
+    const finalized = await finalizeExamSession(userId, row);
+    if (finalized?.session) {
+      activeSession = serializeExamSessionRow(finalized.session);
+    }
+  }
 
-  const questions = selection
-    .map((s) => {
-      const key = `${s.ticketId}:${s.questionId}`;
-      const p = byKey.get(key);
-      if (!p) return null;
-      return { ticketId: p.ticketId, ticketTitle: p.ticketTitle, ...p.question };
-    })
-    .filter(Boolean);
+  const questions = activeSession.selection.map((item) => ({
+    id: String(item.questionKey || item.id || ""),
+    kind: String(item.kind || ""),
+    sourceId: String(item.sourceId || ""),
+    sourceTitle: String(item.sourceTitle || ""),
+    questionIndex: Number(item.questionIndex || 0) + 1,
+    ...normalizeAnswerQuestion(item.question)
+  }));
+
+  const freshTiming = getExamTiming(activeSession);
 
   res.json({
     exam: {
       questions,
-      answers,
-      completed: !!row.completed,
-      score: row.score,
-      updatedAt: row.updated_at
+      answers: activeSession.answers,
+      completed: !!activeSession.completed,
+      score: Number(activeSession.score || 0),
+      updatedAt: activeSession.updatedAt,
+      examCount: Number(activeSession.examCount || 50),
+      durationSeconds: freshTiming.durationSeconds,
+      startedAt: freshTiming.startedAt,
+      expiresAt: freshTiming.expiresAt,
+      remainingSeconds: freshTiming.remainingSeconds,
+      expired: freshTiming.expired
     }
   });
 });
@@ -1907,48 +2326,53 @@ app.get("/api/exam", requireUser, async (req, res) => {
 app.post("/api/exam/progress", requireUser, async (req, res) => {
   const userId = String(req.user.id);
   const newAnswers = req.body?.answers;
+  const finalize = Boolean(req.body?.finalize);
   if (!newAnswers || typeof newAnswers !== "object") return res.status(400).json({ error: "Javoblar obyekti kerak" });
 
-  const row = await dbApi.get("SELECT * FROM test_progress WHERE user_id = ? AND ticket_id = 'exam'", [
-    userId
-  ]);
-  if (!row) return res.status(404).json({ error: "Exam not started" });
+  const row = await dbApi.get("SELECT * FROM exam_sessions WHERE user_id = ?", [userId]);
+  if (!row) return res.status(404).json({ error: "Imtihon hali boshlanmagan" });
 
-  const parsed = JSON.parse(row.answers || "{}");
-  const selection = Array.isArray(parsed.selection) ? parsed.selection : [];
-
-  const pool = await getAllQuestionsPool();
-  const byKey = new Map(pool.map((p) => [`${p.ticketId}:${p.question.id}`, p]));
+  const session = serializeExamSessionRow(row);
+  const timing = getExamTiming(session);
+  const selection = session.selection || [];
 
   let correct = 0;
   let answeredCount = 0;
-  for (const s of selection) {
-    const p = byKey.get(`${s.ticketId}:${s.questionId}`);
-    if (!p) continue;
-    const a = newAnswers[p.question.id];
-    if (a === undefined || a === null) continue;
+  for (const item of selection) {
+    const nextAnswer = newAnswers[item.questionKey];
+    if (nextAnswer === undefined || nextAnswer === null) continue;
     answeredCount += 1;
-    if (Number(a) === p.question.correctIndex) correct += 1;
+    if (Number(nextAnswer) === Number(item.question?.correctIndex)) correct += 1;
   }
 
-  const completed = answeredCount === selection.length && selection.length === 50;
-  const payload = { selection, answers: newAnswers };
+  const completed = finalize || timing.expired || answeredCount === selection.length;
 
   await dbApi.run(
     `
-    UPDATE test_progress
-    SET answers = ?, completed = ?, score = ?, updated_at = ?
-    WHERE user_id = ? AND ticket_id = 'exam'
+    UPDATE exam_sessions
+    SET answers = ?::jsonb,
+        completed = ?,
+        score = ?,
+        updated_at = NOW()
+    WHERE user_id = ?
   `,
-    [JSON.stringify(payload), completed, correct, new Date().toISOString(), userId]
+    [JSON.stringify(newAnswers), completed, correct, userId]
   );
 
-  res.json({ ok: true, completed, score: correct, total: selection.length });
+  await syncMistakesFromExam({
+    userId,
+    selection,
+    answers: newAnswers,
+    pool: selection
+  });
+
+  const remainingSeconds = timing.expired ? 0 : timing.remainingSeconds;
+  res.json({ ok: true, completed, score: correct, total: selection.length, remainingSeconds, expired: timing.expired });
 });
 
 app.post("/api/exam/reset", requireUser, async (req, res) => {
   const userId = String(req.user.id);
-  await dbApi.run("DELETE FROM test_progress WHERE user_id = ? AND ticket_id = 'exam'", [userId]);
+  await dbApi.run("DELETE FROM exam_sessions WHERE user_id = ?", [userId]);
   res.json({ ok: true });
 });
 
@@ -1985,6 +2409,15 @@ app.post("/api/progress/:ticketId", requireUser, async (req, res) => {
   `,
     [userId, ticketId, JSON.stringify(answers), completed, correct, nowIso]
   );
+
+  await syncMistakesFromQuestions({
+    userId,
+    kind: "ticket",
+    id: ticketId,
+    title: ticket.title,
+    questions: ticket.questions,
+    answers
+  });
 
   res.json({ ok: true, completed, score: correct, total: ticket.questions.length });
 });

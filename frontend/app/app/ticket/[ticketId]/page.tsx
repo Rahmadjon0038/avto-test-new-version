@@ -404,14 +404,22 @@ export default function TicketPage() {
 
       <div className="qnav">
         {ticket.questions.map((qq, i) => (
+          (() => {
+            const selected = answers[qq.id];
+            const hasAnswered = selected !== undefined;
+            const isWrong = hasAnswered && Number(selected) !== Number(qq.correctIndex);
+            const isCorrect = hasAnswered && Number(selected) === Number(qq.correctIndex);
+            return (
           <button
             key={qq.id}
-            className={`qbtn ${i === idx ? "active" : ""} ${answers[qq.id] !== undefined ? "answered" : ""}`}
+            className={`qbtn ${i === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
             type="button"
             onClick={() => setIdx(i)}
           >
             {i + 1}
           </button>
+            );
+          })()
         ))}
       </div>
 
@@ -464,7 +472,7 @@ export default function TicketPage() {
               aria-label="Rasmni kattalashtirish"
             >
               <img
-                className="qimg"
+                className={`qimg ${imageLoading ? "isLoading" : ""}`}
                 src={resolveQuestionImage(q?.image)}
                 alt="Savol rasmi"
                 onLoad={() => setImageLoading(false)}

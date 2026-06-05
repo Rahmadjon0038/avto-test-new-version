@@ -103,8 +103,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <header className="navbar">
         <div className="navbarInner">
           <div className="brand" role="button" tabIndex={0} onClick={() => router.push("/app")}>
-            <div className="logo">JA</div>
-            <div className="title">Jo‘rabek Avto Test</div>
+            <div className="textLogo" aria-label="ROAD TEST">
+              <span className="textLogoRoad">ROAD</span>
+              <span className="textLogoTest">TEST</span>
+            </div>
           </div>
 
           <div className="actions">

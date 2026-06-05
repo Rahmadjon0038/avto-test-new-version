@@ -33,10 +33,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     <div className={`adminLayout ${collapsed ? "collapsed" : ""}`}>
       <aside className="adminSidebar">
         <div className="adminBrand" onClick={() => router.push("/app")} role="button" tabIndex={0}>
-          <div className="adminLogo">JA</div>
           <div className="adminBrandText">
-            <div className="adminBrandTitle">Admin panel</div>
-            <div className="adminBrandSub">Jo‘rabek Avto Test</div>
+            <div className="textLogo textLogoAdmin" aria-label="ROAD TEST">
+              <span className="textLogoRoad">ROAD</span>
+              <span className="textLogoTest">TEST</span>
+            </div>
+            <div className="adminBrandSub">Admin panel</div>
           </div>
         </div>
 

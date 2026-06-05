@@ -127,8 +127,10 @@ export default function AuthPage() {
       <header className="navbar">
         <div className="navbarInner">
           <div className="brand">
-            <div className="logo">JA</div>
-            <div className="title">Jo‘rabek Avto Test</div>
+            <div className="textLogo textLogoAuth" aria-label="ROAD TEST">
+              <span className="textLogoRoad">ROAD</span>
+              <span className="textLogoTest">TEST</span>
+            </div>
           </div>
           <div className="navCenter" />
           <div className="actions" />
