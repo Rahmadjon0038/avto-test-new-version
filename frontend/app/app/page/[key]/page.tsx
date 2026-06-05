@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
@@ -8,15 +9,27 @@ const titleMap: Record<string, string> = {
   custom: "Sozlamali testlar",
   mistakes: "Mening xatolarim",
   marathon: "Marafon rejimi",
+  videos: "Video darsliklar",
   answers: "Barcha testlar javoblari",
   exam: "Imtihon topshirish"
 };
+
+const comingSoonKeys = new Set(["marathon", "videos"]);
 
 export default function StubPage() {
   const router = useRouter();
   const params = useParams<{ key: string }>();
   const key = String(params.key || "");
   const title = titleMap[key] || "Bo‘lim";
+  const comingSoon = comingSoonKeys.has(key);
+
+  useEffect(() => {
+    if (comingSoon) router.replace("/app");
+  }, [comingSoon, router]);
+
+  if (comingSoon) {
+    return null;
+  }
 
   return (
     <section className="view">
@@ -28,14 +41,19 @@ export default function StubPage() {
           <div className="h2" style={{ margin: 0 }}>
             {title}
           </div>
-          <div className="muted">Hozircha demo sahifa</div>
+          <div className="muted">{comingSoon ? "Tez kunda ishga tushadi" : "Hozircha demo sahifa"}</div>
         </div>
       </div>
 
       <div className="card" style={{ padding: 14 }}>
-        <div className="muted">Bu bo‘lim keyinroq to‘ldiriladi.</div>
+        <div className="comingSoonCard">
+          <div className="comingSoonPill">Tez kunda</div>
+          <div className="comingSoonTitle">{title}</div>
+          <div className="comingSoonText">
+            {comingSoon ? "Bu bo‘lim hozircha yopiq. Tayyor bo‘lganda avtomatik ochiladi." : "Bu bo‘lim keyinroq to‘ldiriladi."}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
-

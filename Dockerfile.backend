@@ -1,0 +1,16 @@
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY backend ./backend
+COPY data ./data
+COPY scripts ./scripts
+
+EXPOSE 4000
+
+CMD ["npm", "--prefix", "backend", "run", "start"]

@@ -188,6 +188,24 @@ function uzErrorMessage(error: unknown, fallback: string) {
   return message;
 }
 
+function examFinishedToast() {
+  toast.error("Imtihon yakunlangan. Qayta boshlash uchun \"Qayta boshlash\" tugmasini bosing.");
+}
+
+function calculateExamResult(
+  questionList: ExamQuestion[],
+  selectedAnswers: Record<string, number>
+) {
+  const total = questionList.length;
+  const correct = questionList.reduce((count, question) => {
+    const selected = selectedAnswers[question.id];
+    return count + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
+  }, 0);
+  const wrong = Math.max(0, total - correct);
+  const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+  return { correct, wrong, total, percent };
+}
+
 export default function ExamPage() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -202,8 +220,12 @@ export default function ExamPage() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [timerReady, setTimerReady] = useState(false);
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
+  const [examBootstrapping, setExamBootstrapping] = useState(false);
+  const autoStartRequestedRef = useRef(false);
   const autoSubmittedRef = useRef(false);
   const activeExamKeyRef = useRef<string | null>(null);
+  const latestAnswersRef = useRef<Record<string, number>>({});
+  const hasSeenPositiveTimerRef = useRef(false);
 
   const examQuery = useQuery({
     queryKey: ["exam"],
@@ -224,7 +246,6 @@ export default function ExamPage() {
   const completed = Boolean(exam?.completed);
   const expired = Boolean(exam?.expired);
   const locked = completed || expired || finalResult !== null;
-  const autoReplaceFinishedSession = Boolean(exam && (exam.completed || exam.expired) && !finalResult);
   const draftScore = questions.reduce((total, question) => {
     const selected = answers[question.id];
     return total + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
@@ -233,9 +254,13 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (!exam) return;
+    setExamBootstrapping(false);
+    setAutoStartAttempted(true);
     const nextExamKey = `${exam.startedAt}::${exam.examCount}`;
     const isNewSession = activeExamKeyRef.current !== nextExamKey;
     activeExamKeyRef.current = nextExamKey;
+    latestAnswersRef.current = exam.answers || {};
+    hasSeenPositiveTimerRef.current = Number(exam.remainingSeconds || 0) > 0;
     setAnswers(exam.answers || {});
     setSecondsLeft(Number(exam.remainingSeconds || 0));
     setTimerReady(true);
@@ -263,6 +288,7 @@ export default function ExamPage() {
     setTimerReady(false);
     const updateRemaining = () => {
       const next = Math.max(0, Math.ceil((new Date(exam.expiresAt).getTime() - Date.now()) / 1000));
+      if (next > 0) hasSeenPositiveTimerRef.current = true;
       setSecondsLeft(next);
     };
     updateRemaining();
@@ -289,12 +315,14 @@ export default function ExamPage() {
       autoSubmittedRef.current = false;
       return;
     }
+    if (examBootstrapping) return;
     if (!timerReady) return;
+    if (!hasSeenPositiveTimerRef.current) return;
     if (secondsLeft > 0) return;
     if (autoSubmittedRef.current) return;
     autoSubmittedRef.current = true;
     saveMutation.mutate({ answers, finalize: true });
-  }, [answers, completed, exam, locked, secondsLeft, timerReady]);
+  }, [answers, completed, exam, examBootstrapping, locked, secondsLeft, timerReady]);
 
   const startMutation = useMutation({
     mutationFn: (nextCount: ModeCount) =>
@@ -303,12 +331,22 @@ export default function ExamPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ count: nextCount })
       }).then(jsonOrError),
-    onError: (error: any) => toast.error(uzErrorMessage(error, "Imtihonni boshlashda xatolik")),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["exam"] });
-      await examQuery.refetch();
+    onError: (error: any) => {
+      setExamBootstrapping(false);
+      toast.error(uzErrorMessage(error, "Imtihonni boshlashda xatolik"));
+    },
+    onSuccess: async (data: any) => {
+      if (data?.exam) {
+        qc.setQueryData(["exam"], data.exam);
+      } else {
+        await qc.invalidateQueries({ queryKey: ["exam"] });
+        await examQuery.refetch();
+      }
       setIdx(0);
       setFinalResult(null);
+      setFinishOpen(false);
+      setExamBootstrapping(false);
+      hasSeenPositiveTimerRef.current = false;
       toast.success("Imtihon boshlandi");
     }
   });
@@ -332,8 +370,16 @@ export default function ExamPage() {
       await qc.invalidateQueries({ queryKey: ["exam"] });
       await examQuery.refetch();
       if (variables?.finalize) {
-        const total = Number(_data?.total || questions.length || 0);
-        const correct = Number(_data?.score || 0);
+        const serverTotal = Number(_data?.total);
+        const serverScore = Number(_data?.score);
+        const fallbackResult = calculateExamResult(questions, latestAnswersRef.current);
+        const useServer =
+          Number.isFinite(serverTotal) &&
+          serverTotal > 0 &&
+          Number.isFinite(serverScore) &&
+          (serverScore > 0 || fallbackResult.correct === 0);
+        const total = useServer ? serverTotal : fallbackResult.total;
+        const correct = useServer ? serverScore : fallbackResult.correct;
         const wrong = Math.max(0, total - correct);
         const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
         setFinalResult({ correct, wrong, total, percent });
@@ -343,45 +389,53 @@ export default function ExamPage() {
     }
   });
 
+  const canFinalize = Boolean(exam && !completed && !expired && !examBootstrapping && !saveMutation.isPending);
+
   const resetMutation = useMutation({
     mutationFn: () => authFetch("/api/exam/reset", { method: "POST" }).then(jsonOrError),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["exam"] });
+    onMutate: async () => {
+      setExamBootstrapping(true);
+      setFinishOpen(false);
+      setFinalResult(null);
       setAnswers({});
+      latestAnswersRef.current = {};
       setIdx(0);
       setSecondsLeft(0);
-      setFinalResult(null);
       setAutoStartAttempted(true);
       activeExamKeyRef.current = null;
-      await startMutation.mutateAsync(20);
-      toast.success("Yangi imtihon boshlandi");
+      hasSeenPositiveTimerRef.current = false;
+      await qc.invalidateQueries({ queryKey: ["exam"] });
+    },
+    onError: () => {
+      setExamBootstrapping(false);
+    },
+    onSuccess: () => {
+      toast.success("Imtihon qayta boshlanmoqda...");
+      window.location.reload();
     }
   });
 
   function save(nextAnswers: Record<string, number>) {
     const previousAnswers = answers;
+    latestAnswersRef.current = nextAnswers;
     setAnswers(nextAnswers);
     saveMutation.mutate({ answers: nextAnswers, finalize: false, previousAnswers });
   }
 
   useEffect(() => {
     if (!authReady) return;
-    if (examQuery.isLoading) return;
-    if (autoStartAttempted) return;
-    if (exam) {
-      if (exam.completed || exam.expired) {
-        if (!finalResult) {
-          setAutoStartAttempted(true);
-          startMutation.mutate(20);
-        }
-        return;
-      }
-      setAutoStartAttempted(true);
-      return;
-    }
+    if (!examQuery.isFetched) return;
+    if (autoStartAttempted || autoStartRequestedRef.current) return;
+    autoStartRequestedRef.current = true;
+    setExamBootstrapping(true);
     setAutoStartAttempted(true);
+    setFinishOpen(false);
+    setFinalResult(null);
+    setAnswers({});
+    latestAnswersRef.current = {};
+    setIdx(0);
     startMutation.mutate(20);
-  }, [authReady, exam, examQuery.isLoading, autoStartAttempted, startMutation, finalResult]);
+  }, [authReady, examQuery.isFetched, autoStartAttempted, startMutation]);
 
   useEffect(() => {
     if (!exam || !exam.startedAt || locked) return;
@@ -389,10 +443,20 @@ export default function ExamPage() {
     window.localStorage.setItem(`exam:index:${exam.startedAt}::${exam.examCount}`, String(idx));
   }, [exam, idx, locked]);
 
-  if (examQuery.isLoading || !authReady || startMutation.isPending || !exam || autoReplaceFinishedSession) {
+  const showExamLoading =
+    !exam &&
+    (examQuery.isLoading || !authReady || startMutation.isPending || resetMutation.isPending || examBootstrapping || !autoStartAttempted);
+
+  if (showExamLoading) {
     return (
-      <section className="view">
-        <div className="muted">Imtihon boshlanmoqda...</div>
+      <section className="view examLoadingView">
+        <div className="examLoadingCard">
+          <div className="examLoadingSpinnerWrap">
+            <span className="examLoadingSpinner" />
+          </div>
+          <div className="examLoadingTitle">Imtihon boshlanmoqda</div>
+          <div className="examLoadingText">Savollar tayyorlanmoqda, biroz kuting...</div>
+        </div>
       </section>
     );
   }
@@ -471,11 +535,15 @@ export default function ExamPage() {
                   return (
                     <button
                       key={optionIndex}
-                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""} ${locked ? "locked" : ""}`}
                       type="button"
-                      disabled={locked || hasAnswered}
+                      disabled={hasAnswered}
                       onClick={() => {
-                        if (locked || hasAnswered) return;
+                        if (locked) {
+                          examFinishedToast();
+                          return;
+                        }
+                        if (hasAnswered) return;
                         const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
                         save(nextAnswers);
                       }}
@@ -538,7 +606,7 @@ export default function ExamPage() {
           </button>
         </div>
         <div className="footerRight">
-          <button className="btn btn-primary" type="button" onClick={() => saveMutation.mutate({ answers, finalize: true })} disabled={locked || saveMutation.isPending}>
+          <button className="btn btn-primary" type="button" onClick={() => saveMutation.mutate({ answers, finalize: true })} disabled={!canFinalize}>
             <Flag className="lucide" aria-hidden="true" /> Yakunlash
           </button>
         </div>
@@ -557,21 +625,21 @@ export default function ExamPage() {
             <div className="modalBody">
               <div className="resultBlock resultChartBlock">
                 <div className="resultChart">
-                  <div
-                    className="resultChartRing"
-                    style={{
-                      background: `conic-gradient(var(--ok) 0 ${chartPercent}%, var(--bad) ${chartPercent}% 100%)`
-                    }}
-                  >
-                    <div className="resultChartCenter">
-                      <div className="resultChartValue">{finalResult.percent}%</div>
-                      <div className="resultChartLabel">Foiz</div>
-                    </div>
-                  </div>
                   <div className="resultSolved">
                     <div className="muted">Yechilgan</div>
                     <div className="resultSolvedValue">
                       {finalResult.correct}/{finalResult.total}
+                    </div>
+                  </div>
+                  <div
+                    className="resultChartRing"
+                    style={{
+                      background: `conic-gradient(var(--primary) 0 ${chartPercent}%, rgba(255, 255, 255, 0.12) ${chartPercent}% 100%)`
+                    }}
+                  >
+                    <div className="resultChartCenter">
+                    <div className="resultChartValue">{finalResult.percent}%</div>
+                    <div className="resultChartLabel">Foiz</div>
                     </div>
                   </div>
                 </div>

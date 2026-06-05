@@ -1320,12 +1320,13 @@ function hashToken(token) {
   return crypto.createHash("sha256").update(String(token || "")).digest("hex");
 }
 
-function signAccessToken(userId) {
+function signAccessToken(userId, isAdmin = false) {
   const payload = {
     typ: "access",
     sub: String(userId),
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + ACCESS_TOKEN_MAX_AGE_SECONDS
+    exp: Math.floor(Date.now() / 1000) + ACCESS_TOKEN_MAX_AGE_SECONDS,
+    adm: Boolean(isAdmin)
   };
   const payloadB64 = base64UrlEncode(Buffer.from(JSON.stringify(payload)));
   return `${payloadB64}.${signPayload(payloadB64)}`;
@@ -1369,7 +1370,9 @@ function clearRefreshCookie(req) {
 }
 
 async function issueTokensForUser(userId, req, res) {
-  const accessToken = signAccessToken(userId);
+  const user = await dbApi.get("SELECT * FROM users WHERE id = ?", [String(userId)]);
+  const isAdmin = Boolean(user && (user.is_admin === true || String(user.id) === "1"));
+  const accessToken = signAccessToken(userId, isAdmin);
   const refreshToken = signRefreshToken(userId);
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_SECONDS * 1000).toISOString();
   await dbApi.run(
@@ -1727,15 +1730,7 @@ async function finalizeExamSession(userId, session, poolOverride = null) {
 
   const selection = parseJsonValue(currentSession.selection || [], []);
   const answers = parseJsonValue(currentSession.answers || {}, {});
-
-  let score = 0;
-  let answeredCount = 0;
-  for (const selected of selection) {
-    const nextAnswer = answers?.[selected.questionKey];
-    if (nextAnswer === undefined || nextAnswer === null) continue;
-    answeredCount += 1;
-    if (Number(nextAnswer) === Number(selected.question?.correctIndex)) score += 1;
-  }
+  const scored = calculateExamScore(selection, answers);
 
   const updated = await dbApi.get(
     `
@@ -1746,7 +1741,7 @@ async function finalizeExamSession(userId, session, poolOverride = null) {
     WHERE user_id = ?
     RETURNING *
   `,
-    [score, String(userId)]
+    [scored.correct, String(userId)]
   );
 
   await syncMistakesFromExam({
@@ -1756,7 +1751,35 @@ async function finalizeExamSession(userId, session, poolOverride = null) {
     pool: selection
   }).catch(() => {});
 
-  return { session: updated || currentSession, timing: getExamTiming(updated || currentSession), score, answeredCount };
+  return {
+    session: updated || currentSession,
+    timing: getExamTiming(updated || currentSession),
+    score: scored.correct,
+    answeredCount: scored.answeredCount
+  };
+}
+
+function calculateExamScore(selection, answers) {
+  let correct = 0;
+  let answeredCount = 0;
+
+  for (const [index, selected] of (Array.isArray(selection) ? selection : []).entries()) {
+    const candidateKeys = [
+      selected?.questionKey,
+      selected?.id,
+      selected?.question?.id,
+      String(index)
+    ]
+      .map((value) => String(value || "").trim())
+      .filter(Boolean);
+
+    const nextAnswer = candidateKeys.map((key) => answers?.[key]).find((value) => value !== undefined && value !== null);
+    if (nextAnswer === undefined || nextAnswer === null) continue;
+    answeredCount += 1;
+    if (Number(nextAnswer) === Number(selected?.question?.correctIndex)) correct += 1;
+  }
+
+  return { correct, answeredCount };
 }
 
 function deriveR2KeyFromPublicUrl(urlValue) {
@@ -2158,7 +2181,7 @@ app.post("/api/topic-progress/:topicId/reset", requireUser, async (req, res) => 
 });
 
 app.post("/api/browser-token", requireUser, async (req, res) => {
-  const token = signAccessToken(req.user.id);
+  const token = signAccessToken(req.user.id, Boolean(req.user.is_admin === true || String(req.user.id) === "1"));
   res.json({ ok: true, token });
 });
 
@@ -2268,13 +2291,32 @@ app.post("/api/exam/start", requireUser, async (req, res) => {
     [userId, examCount, durationSeconds, startedAt, JSON.stringify(selection), JSON.stringify({})]
   );
 
+  const inserted = result || (await dbApi.get("SELECT * FROM exam_sessions WHERE user_id = ?", [userId]));
+  const session = serializeExamSessionRow(inserted);
+  const timing = getExamTiming(session);
+  const questions = session.selection.map((item) => ({
+    id: String(item.questionKey || item.id || ""),
+    kind: String(item.kind || ""),
+    sourceId: String(item.sourceId || ""),
+    sourceTitle: String(item.sourceTitle || ""),
+    questionIndex: Number(item.questionIndex || 0) + 1,
+    ...normalizeAnswerQuestion(item.question)
+  }));
+
   res.json({
     ok: true,
     exam: {
-      questionsCount: examCount,
-      durationSeconds,
-      startedAt,
-      expiresAt: new Date(Date.now() + durationSeconds * 1000).toISOString()
+      questions,
+      answers: session.answers,
+      completed: !!session.completed,
+      score: Number(session.score || 0),
+      updatedAt: session.updatedAt,
+      examCount: Number(session.examCount || examCount),
+      durationSeconds: timing.durationSeconds,
+      startedAt: timing.startedAt,
+      expiresAt: timing.expiresAt,
+      remainingSeconds: timing.remainingSeconds,
+      expired: timing.expired
     }
   });
 });
@@ -2335,17 +2377,9 @@ app.post("/api/exam/progress", requireUser, async (req, res) => {
   const session = serializeExamSessionRow(row);
   const timing = getExamTiming(session);
   const selection = session.selection || [];
+  const scored = calculateExamScore(selection, newAnswers);
 
-  let correct = 0;
-  let answeredCount = 0;
-  for (const item of selection) {
-    const nextAnswer = newAnswers[item.questionKey];
-    if (nextAnswer === undefined || nextAnswer === null) continue;
-    answeredCount += 1;
-    if (Number(nextAnswer) === Number(item.question?.correctIndex)) correct += 1;
-  }
-
-  const completed = finalize || timing.expired || answeredCount === selection.length;
+  const completed = finalize || timing.expired;
 
   await dbApi.run(
     `
@@ -2356,7 +2390,7 @@ app.post("/api/exam/progress", requireUser, async (req, res) => {
         updated_at = NOW()
     WHERE user_id = ?
   `,
-    [JSON.stringify(newAnswers), completed, correct, userId]
+    [JSON.stringify(newAnswers), completed, scored.correct, userId]
   );
 
   await syncMistakesFromExam({
@@ -2367,7 +2401,7 @@ app.post("/api/exam/progress", requireUser, async (req, res) => {
   });
 
   const remainingSeconds = timing.expired ? 0 : timing.remainingSeconds;
-  res.json({ ok: true, completed, score: correct, total: selection.length, remainingSeconds, expired: timing.expired });
+  res.json({ ok: true, completed, score: scored.correct, total: selection.length, remainingSeconds, expired: timing.expired });
 });
 
 app.post("/api/exam/reset", requireUser, async (req, res) => {
