@@ -206,6 +206,32 @@ function normalizeTopicInput(input = {}, fallbackTitle = "", current = null) {
   };
 }
 
+function normalizeImportedTopicQuestion(input = {}, index = 0) {
+  const source = input && typeof input === "object" ? input : {};
+  const text = String(source.text || "").trim();
+  if (!text) throw new Error(`Savol ${index + 1}: matn kiritilishi kerak`);
+
+  const image = String(source.image || "").trim();
+  const explanation = String(source.explanation || "").trim();
+  const options = Array.isArray(source.options) ? source.options.map((option) => String(option || "").trim()) : [];
+  const correctIndex = Number.isFinite(Number(source.correctIndex)) ? Number(source.correctIndex) : 0;
+
+  if (options.length < 2) throw new Error(`Savol ${index + 1}: kamida 2 ta variant bo‘lishi kerak`);
+  if (options.some((option) => !option)) throw new Error(`Savol ${index + 1}: barcha variantlarni to‘ldiring`);
+  if (correctIndex < 0 || correctIndex >= options.length) {
+    throw new Error(`Savol ${index + 1}: to‘g‘ri javob variantini qayta tanlang`);
+  }
+
+  return {
+    id: crypto.randomUUID(),
+    image,
+    text,
+    options,
+    correctIndex,
+    explanation
+  };
+}
+
 async function getTopicsFromDb() {
   const rows = await dbApi.all("SELECT id, slug, title, questions FROM topics ORDER BY id ASC");
   return rows.map(normalizeTopicRow);
@@ -267,6 +293,26 @@ async function deleteTopic(topicId) {
   if (!current) throw new Error("Mavzu topilmadi");
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(current.id)]);
   await dbApi.run("DELETE FROM topics WHERE id = ?", [String(current.id)]);
+}
+
+async function importTopicQuestions(topicId, questionItems, replace = false) {
+  const current = await getTopicFromDb(topicId);
+  if (!current) throw new Error("Mavzu topilmadi");
+  if (!Array.isArray(questionItems)) throw new Error("questions massivi kerak");
+
+  const importedQuestions = questionItems.map((item, index) => normalizeImportedTopicQuestion(item, index));
+  const nextQuestions = replace ? importedQuestions : [...current.questions, ...importedQuestions];
+
+  const updated = await dbApi.get(
+    `
+      UPDATE topics
+      SET questions = ?::jsonb, updated_at = NOW()
+      WHERE id = ?
+      RETURNING *
+    `,
+    [JSON.stringify(nextQuestions), String(current.id)]
+  );
+  return normalizeTopicRow(updated);
 }
 
 async function importTopics(topicItems) {
@@ -2721,6 +2767,24 @@ app.delete("/api/admin/topics/:topicId", async (req, res) => {
   try {
     await deleteTopic(String(req.params.topicId));
     res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.post("/api/admin/topics/:topicId/import-questions", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const payload = Array.isArray(req.body)
+      ? { questions: req.body }
+      : req.body && typeof req.body === "object"
+        ? req.body
+        : {};
+    const questionItems = Array.isArray(payload.questions) ? payload.questions : [];
+    if (!questionItems.length) return res.status(400).json({ error: "questions massivi kerak" });
+    const topic = await importTopicQuestions(String(req.params.topicId), questionItems, Boolean(payload.replace));
+    res.json({ ok: true, topic });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
   }

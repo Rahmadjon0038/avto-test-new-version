@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Save, Trash2, Upload } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -60,6 +60,14 @@ function normalizeQuestionForSave(question: Question): Question {
   };
 }
 
+function parseQuestionImportPayload(rawText: string) {
+  const parsed = JSON.parse(rawText);
+  const questions = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.questions) ? parsed.questions : null;
+  if (!Array.isArray(questions)) throw new Error("JSON array yoki questions massivi yuboring");
+  if (!questions.length) throw new Error("Kamida bitta savol kiritilishi kerak");
+  return questions;
+}
+
 async function fileToDataUrl(file: File) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -76,6 +84,7 @@ export default function AdminTopicDetailPage() {
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const [topic, setTopic] = useState<AdminTopic | null>(null);
+  const [importText, setImportText] = useState("[]");
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
@@ -174,7 +183,29 @@ export default function AdminTopicDetailPage() {
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
 
-  const questionCount = useMemo(() => topic?.questions?.length || 0, [topic]);
+  const importMutation = useMutation({
+    mutationFn: async () => {
+      const questions = parseQuestionImportPayload(importText);
+      const res = await authFetch(`/api/admin/topics/${encodeURIComponent(topicId)}/import-questions`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ questions })
+      });
+      return (await jsonOrError(res)) as { topic: AdminTopic };
+    },
+    onSuccess: async (data) => {
+      setTopic({
+        id: String(data.topic.id),
+        title: String(data.topic.title || ""),
+        questions: Array.isArray(data.topic.questions) ? data.topic.questions.map(cloneQuestion) : []
+      });
+      setImportText("[]");
+      await qc.invalidateQueries({ queryKey: ["admin-topics"] });
+      await qc.invalidateQueries({ queryKey: ["admin-topic", topicId] });
+      toast.success("Savollar import qilindi");
+    },
+    onError: (error: any) => toast.error(error?.message || "Xatolik")
+  });
 
   async function uploadQuestionImage(questionId: string, file: File) {
     const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -328,6 +359,34 @@ export default function AdminTopicDetailPage() {
               placeholder="Masalan: Umumiy qoidalar"
             />
           </label>
+        </div>
+      </div>
+
+      <div className="card adminPanelCard">
+        <div className="adminPanelCardHead">
+          <div className="adminPanelCardTitle">
+            <Upload className="lucide" aria-hidden="true" /> JSON import
+          </div>
+        </div>
+
+        <div className="adminFieldGroup">
+          <div className="adminFieldLabel">
+            JSON ichiga savollar massivi yuboring. Har bir savolda text, options, correctIndex, explanation va image bo‘lishi mumkin.
+            id yubormang, backend uni avtomatik yaratadi.
+          </div>
+          <textarea
+            className="input adminTextarea"
+            rows={9}
+            value={importText}
+            onChange={(event) => setImportText(event.target.value)}
+            placeholder={`[\n  {\n    "correctIndex": 1,\n    "explanation": "",\n    "image": "",\n    "options": ["Variant 1", "Variant 2"],\n    "text": "Savol matni"\n  }\n]`}
+          />
+        </div>
+
+        <div className="adminOptionsToolbar">
+          <button className="btn btn-primary" type="button" onClick={() => importMutation.mutate()} disabled={importMutation.isPending}>
+            <Upload className="lucide" aria-hidden="true" /> Import qilish
+          </button>
         </div>
       </div>
 
