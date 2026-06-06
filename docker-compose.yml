@@ -42,11 +42,15 @@ services:
       dockerfile: Dockerfile.frontend
       args:
         BACKEND_URL: http://backend:4000
+        BASE_URL: https://road-test.uz
+        NEXT_PUBLIC_SITE_URL: https://road-test.uz
     restart: unless-stopped
     env_file:
       - .env.docker
     environment:
       BACKEND_URL: http://backend:4000
+      BASE_URL: https://road-test.uz
+      NEXT_PUBLIC_SITE_URL: https://road-test.uz
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
       - "3010:3000"

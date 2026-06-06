@@ -5,11 +5,14 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 DEPLOY_ENV="$ROOT_DIR/.env.docker"
-SOURCE_ENV="$ROOT_DIR/.env"
+SOURCE_ENV="$ROOT_DIR/.env.production"
+ALT_SOURCE_ENV="$ROOT_DIR/.env"
 EXAMPLE_ENV="$ROOT_DIR/.env.example"
 
 if [ -f "$SOURCE_ENV" ]; then
   cp "$SOURCE_ENV" "$DEPLOY_ENV"
+elif [ -f "$ALT_SOURCE_ENV" ]; then
+  cp "$ALT_SOURCE_ENV" "$DEPLOY_ENV"
 elif [ -f "$EXAMPLE_ENV" ]; then
   cp "$EXAMPLE_ENV" "$DEPLOY_ENV"
 else
@@ -56,9 +59,10 @@ maybe_set_default POSTGRES_USER "avtotest"
 maybe_set_default POSTGRES_PASSWORD "avtotest"
 set_env DATABASE_URL "postgresql://avtotest:avtotest@db:5432/avtotest"
 current_base_url="$(get_env BASE_URL)"
-if [ -z "$current_base_url" ] || [ "$current_base_url" = "https://your-domain-or-ngrok-url.example" ]; then
-  set_env BASE_URL "http://localhost:3001"
+if [ -z "$current_base_url" ] || [ "$current_base_url" = "https://your-domain-or-ngrok-url.example" ] || [ "$current_base_url" = "http://localhost:3001" ] || [ "$current_base_url" = "http://localhost:3000" ] || [ "$current_base_url" = "http://127.0.0.1:3000" ]; then
+  set_env BASE_URL "https://road-test.uz"
 fi
+maybe_set_default NEXT_PUBLIC_SITE_URL "https://road-test.uz"
 maybe_set_default CARD_NUMBER "8600 xxxx xxxx xxxx"
 
 secret_value="$(get_env AUTH_JWT_SECRET)"
@@ -91,5 +95,5 @@ fi
 "${compose_cmd[@]}" --env-file "$DEPLOY_ENV" up -d --build --remove-orphans
 
 echo "Deploy tayyor."
-echo "Frontend: http://localhost:3001"
+echo "Frontend: https://road-test.uz"
 echo "Backend:  http://localhost:4001"

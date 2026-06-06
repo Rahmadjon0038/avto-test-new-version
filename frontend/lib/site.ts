@@ -27,11 +27,11 @@ export function getSiteUrl() {
   const rawUrl =
     process.env.NODE_ENV === "development"
       ? process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-      : process.env.NEXT_PUBLIC_SITE_URL || process.env.BASE_URL || "http://localhost:3000";
+      : process.env.NEXT_PUBLIC_SITE_URL || process.env.BASE_URL || "https://road-test.uz";
 
   try {
     return new URL(rawUrl);
   } catch {
-    return new URL("http://localhost:3000");
+    return new URL(process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://road-test.uz");
   }
 }
