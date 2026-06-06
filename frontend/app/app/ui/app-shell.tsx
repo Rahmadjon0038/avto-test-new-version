@@ -24,6 +24,7 @@ function getInitials(name: string) {
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { authFetch, setAccessToken, setUser, authReady, accessToken, user } = useAuth();
+  const showSubscriptionButton = false;
 
   const [me, setMe] = useState<any>(null);
 
@@ -117,10 +118,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </button>
               ) : null}
 
-              <button className="btn btn-primary headerActionBtn" type="button" onClick={openSubscription}>
-                <span className="labelFull">Obunani sotib olish</span>
-                <span className="labelShort">Obuna</span>
-              </button>
+              {showSubscriptionButton ? (
+                <button className="btn btn-primary headerActionBtn" type="button" onClick={openSubscription}>
+                  <span className="labelFull">Obunani sotib olish</span>
+                  <span className="labelShort">Obuna</span>
+                </button>
+              ) : null}
 
               <button className="profileChip headerActionBtn" type="button" title="Profil" onClick={openProfile}>
                 <span className="avatarCircle">{initials}</span>

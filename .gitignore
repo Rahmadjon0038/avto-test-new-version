@@ -11,3 +11,4 @@ storage/
 coverage/
 dist/
 build/
+frontend/.next/

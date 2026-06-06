@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, KeyRound, LogIn, UserPlus, UserRound } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
+  PlayCircle,
+  ShieldCheck,
+  Send,
+  UserPlus,
+  UserRound,
+  Video
+} from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -35,10 +47,21 @@ function normalizeUzLocalDigits(value: string) {
   return local.slice(0, 9);
 }
 
+function InstagramMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17.1" cy="6.9" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
 export default function AuthPage() {
   const router = useRouter();
   const { setAccessToken, setUser, authReady, accessToken } = useAuth();
   const [tab, setTab] = useState<Tab>("login");
+  const [authOpen, setAuthOpen] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
@@ -50,9 +73,29 @@ export default function AuthPage() {
     if (authReady && accessToken) router.replace("/app");
   }, [authReady, accessToken, router]);
 
+  useEffect(() => {
+    document.body.style.overflow = authOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [authOpen]);
+
   function switchTab(nextTab: Tab) {
     toast.dismiss();
     setTab(nextTab);
+  }
+
+  function openAuth(nextTab: Tab = "login") {
+    setTab(nextTab);
+    setAuthOpen(true);
+  }
+
+  function closeAuth() {
+    setAuthOpen(false);
+  }
+
+  function scrollToVideo() {
+    document.getElementById("video-lessons")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   const registerMutation = useMutation({
@@ -65,7 +108,6 @@ export default function AuthPage() {
     onSuccess: (data: any) => {
       if (data?.accessToken) setAccessToken(String(data.accessToken));
       if (data?.user) setUser(data.user);
-      // auto login
       toast.success("Ro‘yxatdan o‘tildi");
       router.push("/app");
     },
@@ -132,25 +174,136 @@ export default function AuthPage() {
               <span className="textLogoTest">TEST</span>
             </div>
           </div>
-          <div className="navCenter" />
-          <div className="actions" />
+          <div className="navRight">
+            <button className="btn btn-ghost headerActionBtn" type="button" onClick={() => openAuth("login")}>
+              <ArrowRight className="lucide" aria-hidden="true" />
+              Tizimga kirish
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="container authContainer">
-        <div className="authShell">
-          <section className="card authCardSimple">
+        <div className="landingLayout">
+          <section className="landingHero">
+            <div className="heroGrid">
+              <div className="heroCopy">
+                <h1 className="landingTitle">
+                  <span className="landingLine">Haydovchilikka</span>
+                  <span className="landingLine">tayyorlanish uchun tezkor</span>
+                  <span className="landingLine">
+                    va <span className="landingAccent">qulay</span> platforma.
+                  </span>
+                </h1>
+                <p className="landingLead">
+                  Mavzular, biletlar, xatolarni ko‘rish, imtihon rejimi va video darslar bir joyda.
+                </p>
+
+                <div className="landingCtaRow">
+                  <button className="btn btn-primary landingStartBtn" type="button" onClick={() => openAuth("login")}>
+                    Boshlash
+                  </button>
+                  <button className="btn btn-ghost landingVideoBtn" type="button" onClick={() => openAuth("login")}>
+                    <PlayCircle className="lucide" aria-hidden="true" />
+                    Video darslar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="landingStats">
+              <div className="landingStat">
+                <ShieldCheck className="lucide" aria-hidden="true" />
+                <span>Mavzu bo‘yicha testlar</span>
+              </div>
+              <div className="landingStat">
+                <CheckCircle2 className="lucide" aria-hidden="true" />
+                <span>Biletlar rejimi</span>
+              </div>
+              <div className="landingStat">
+                <Video className="lucide" aria-hidden="true" />
+                <span>Video darslar</span>
+              </div>
+            </div>
+
+            <div className="featureGrid">
+              <article className="featureCard">
+                <div className="featureTitle">Nima beradi?</div>
+                <div className="featureText">Savollarni bo‘limlarga ajratib ishlaysiz, xatolaringizni ko‘rasiz va imtihon uslubida tayyorlanasiz.</div>
+              </article>
+              <article className="featureCard">
+                <div className="featureTitle">Qulayliklar</div>
+                <div className="featureText">Tez kirish, sodda interfeys, telefon orqali qulay foydalanish va bir joydagi barcha darslar.</div>
+              </article>
+              <article className="featureCard">
+                <div className="featureTitle">Kimlar uchun?</div>
+                <div className="featureText">Haydovchilikka tayyorlanayotganlar, bilet ishlayotganlar va imtihonga shug‘ullanayotganlar uchun.</div>
+              </article>
+            </div>
+
+            <section className="videoSection" id="video-lessons">
+              <div className="sectionHead">
+                <div>
+                  <h2 className="sectionTitle">Mavzulashtirilgan video darslar</h2>
+                </div>
+                <button className="btn btn-ghost sectionAction" type="button" onClick={() => openAuth("login")}>Barchasini ko‘rish <ArrowRight className="lucide" aria-hidden="true" /></button>
+              </div>
+              <div className="videoCard">
+                <div className="videoCardIcon">
+                  <Video className="lucide" aria-hidden="true" />
+                </div>
+                <div className="videoCardBody">
+                  <div className="videoCardTitle">Qoidalar, belgilar va testlar bo‘yicha video tushuntirishlar</div>
+                  <div className="videoCardText">
+                    Har bir mavzuni video orqali ko‘rib chiqish, keyin esa shu mavzuga oid testlarni yechish imkoniyati bor.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="seoHidden" aria-hidden="true">avto test road test roadt test avto imtihon haydovchilik testlari biletlar bo‘yicha test PDD test yo'l harakati qoidalari driving test</div>
+          </section>
+        </div>
+      </main>
+
+      <footer className="siteFooter">
+        <div className="siteFooterInner">
+          <div className="siteFooterLogo">
+            <span className="textLogoRoad">ROAD</span>
+            <span className="textLogoTest">TEST</span>
+          </div>
+          <div className="siteFooterLinks" aria-label="Social links">
+            <a className="siteSocialLink" href="#" aria-label="Instagram">
+              <InstagramMark />
+            </a>
+            <a className="siteSocialLink" href="#" aria-label="Telegram">
+              <Send className="lucide" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {authOpen ? (
+        <div className="authModalOverlay" role="presentation" onClick={closeAuth}>
+          <div className="authModal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" onClick={(event) => event.stopPropagation()}>
+            <div className="authModalHeader">
+              <div>
+                <div className="authModalTitle" id="auth-modal-title">
+                  Tizimga kirish
+                </div>
+                <div className="authModalText">Kirish yoki ro‘yxatdan o‘tish orqali testlar, biletlar va video darslardan foydalanasiz.</div>
+              </div>
+              <button className="btn btn-ghost" type="button" onClick={closeAuth}>
+                ✕
+              </button>
+            </div>
+
             <div className="authTabs" role="tablist" aria-label="Auth tabs">
               <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
-                <LogIn className="lucide" aria-hidden="true" />
+                <ArrowRight className="lucide" aria-hidden="true" />
                 Tizimga kirish
               </button>
-              <button
-                type="button"
-                className={`authTab ${tab === "register" ? "active" : ""}`}
-                onClick={() => switchTab("register")}
-                aria-pressed={tab === "register"}
-              >
+              <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
                 <UserPlus className="lucide" aria-hidden="true" />
                 Ro‘yxatdan o‘tish
               </button>
@@ -258,9 +411,9 @@ export default function AuthPage() {
                 </button>
               </form>
             )}
-          </section>
+          </div>
         </div>
-      </main>
+      ) : null}
     </>
   );
 }
