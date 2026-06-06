@@ -298,7 +298,7 @@ export default function ExamPage() {
   }, [exam?.expiresAt, locked]);
 
   useEffect(() => {
-    setImageLoading(true);
+    setImageLoading(Boolean(currentQuestion?.image));
   }, [currentQuestion?.id, currentQuestion?.image]);
 
   useEffect(() => {

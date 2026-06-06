@@ -301,7 +301,7 @@ export default function TopicPage() {
   }, [progressQuery.error]);
 
   useEffect(() => {
-    setImageLoading(true);
+    setImageLoading(Boolean(q?.image));
   }, [q?.id, q?.image]);
 
   useEffect(() => {

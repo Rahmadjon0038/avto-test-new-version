@@ -271,7 +271,7 @@ export default function MistakesPage() {
   }, [currentQuestions.length, idx]);
 
   useEffect(() => {
-    setImageLoading(true);
+    setImageLoading(Boolean(currentQuestion?.image));
   }, [currentQuestion?.id, currentQuestion?.image]);
 
   useEffect(() => {
