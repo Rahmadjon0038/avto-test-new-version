@@ -49,7 +49,7 @@ services:
       BACKEND_URL: http://backend:4000
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
-      - "3001:3000"
+      - "3010:3000"
     depends_on:
       backend:
         condition: service_healthy
