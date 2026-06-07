@@ -1947,9 +1947,21 @@ app.get("/api/me", requireUser, async (req, res) => {
   res.json({ user: { ...u, phone: phoneUi }, isPro: isUserPro(u) });
 });
 
-app.get("/api/topics", async (_req, res) => {
+app.get("/api/topics", async (req, res) => {
+  const user = await getUserFromAccess(req);
   const topics = await getTopicsFromDb();
-  res.json({ topics: topics.map((topic) => ({ id: topic.id, title: topic.title })) });
+  let completedMap = new Map();
+  if (user) {
+    const rows = await dbApi.all("SELECT ticket_id, completed FROM test_progress WHERE user_id = ?", [String(user.id)]);
+    completedMap = new Map(rows.map((row) => [String(row.ticket_id), row.completed === true]));
+  }
+  res.json({
+    topics: topics.map((topic) => ({
+      id: topic.id,
+      title: topic.title,
+      completed: completedMap.get(String(topic.id)) || false
+    }))
+  });
 });
 
 app.get("/api/topics/:topicId", async (req, res) => {
@@ -2204,6 +2216,35 @@ app.post("/api/topic-progress/:topicId", requireUser, async (req, res) => {
   });
 
   res.json({ ok: true, completed, score: correct, total: topic.questions.length });
+});
+
+app.post("/api/topic-progress/:topicId/complete", requireUser, async (req, res) => {
+  const userId = String(req.user.id);
+  const topicId = String(req.params.topicId);
+  const completed = Boolean(req.body?.completed);
+
+  const topic = await getTopicFromDb(topicId);
+  if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
+
+  const existing = await dbApi.get("SELECT * FROM test_progress WHERE user_id = ? AND ticket_id = ?", [userId, topicId]);
+  const answers = parseJsonValue(existing?.answers, {});
+  const score = Number(existing?.score || 0);
+  const nowIso = new Date().toISOString();
+
+  await dbApi.run(
+    `
+    INSERT INTO test_progress (user_id, ticket_id, answers, completed, score, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id, ticket_id) DO UPDATE SET
+      answers = excluded.answers,
+      completed = excluded.completed,
+      score = excluded.score,
+      updated_at = excluded.updated_at
+  `,
+    [userId, topicId, JSON.stringify(answers), completed, score, nowIso]
+  );
+
+  res.json({ ok: true, completed });
 });
 
 app.post("/api/topic-progress/:topicId/reset", requireUser, async (req, res) => {

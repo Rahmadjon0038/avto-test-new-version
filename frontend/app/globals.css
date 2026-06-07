@@ -1154,6 +1154,11 @@ body {
   overflow: hidden;
 }
 
+.topicCard.isCompleted {
+  border-color: color-mix(in srgb, var(--ok) 40%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 12%, var(--panel)), var(--panel));
+}
+
 .topicCard::before {
   content: "";
   position: absolute;
@@ -1165,6 +1170,34 @@ body {
 .topicCard:hover {
   transform: translateY(-2px);
   background: var(--panel2);
+}
+
+.topicCheck {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 84%, transparent);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.topicCheck:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  color: var(--text);
+}
+
+.topicCheck.active {
+  background: color-mix(in srgb, var(--ok) 20%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 50%, var(--border));
+  color: var(--ok);
 }
 
 .topicIndex {

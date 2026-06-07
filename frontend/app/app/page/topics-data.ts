@@ -1,6 +1,7 @@
 export type TopicCard = {
   id: number;
   title: string;
+  completed?: boolean;
   questions?: Array<{
     id: string;
     text: string;
