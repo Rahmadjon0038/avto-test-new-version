@@ -68,6 +68,32 @@ function parseQuestionImportPayload(rawText: string) {
   return questions;
 }
 
+async function persistTopicQuestions(authFetch: ReturnType<typeof useAuth>["authFetch"], topicId: string, nextTopic: AdminTopic) {
+  const normalizedQuestions = nextTopic.questions.map(normalizeQuestionForSave);
+  for (const question of normalizedQuestions) {
+    if (!question.text) throw new Error("Savol matnini kiriting");
+    if (!Array.isArray(question.options) || question.options.length < 2) {
+      throw new Error("Har bir savolda kamida 2 ta variant bo‘lishi kerak");
+    }
+    if (question.options.some((option) => !option)) {
+      throw new Error("Barcha variantlarni to‘ldiring");
+    }
+    if (question.correctIndex < 0 || question.correctIndex >= question.options.length) {
+      throw new Error("To‘g‘ri javob variantini qayta tanlang");
+    }
+  }
+
+  const res = await authFetch(`/api/admin/topics/${encodeURIComponent(topicId)}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      title: nextTopic.title,
+      questions: normalizedQuestions
+    })
+  });
+  return (await jsonOrError(res)) as { topic: AdminTopic };
+}
+
 async function fileToDataUrl(file: File) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -130,30 +156,8 @@ export default function AdminTopicDetailPage() {
   }, [topicQuery.error]);
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      if (!topic) throw new Error("Mavzu topilmadi");
-      const normalizedQuestions = topic.questions.map(normalizeQuestionForSave);
-      for (const question of normalizedQuestions) {
-        if (!question.text) throw new Error("Savol matnini kiriting");
-        if (!Array.isArray(question.options) || question.options.length < 2) {
-          throw new Error("Har bir savolda kamida 2 ta variant bo‘lishi kerak");
-        }
-        if (question.options.some((option) => !option)) {
-          throw new Error("Barcha variantlarni to‘ldiring");
-        }
-        if (question.correctIndex < 0 || question.correctIndex >= question.options.length) {
-          throw new Error("To‘g‘ri javob variantini qayta tanlang");
-        }
-      }
-      const res = await authFetch(`/api/admin/topics/${encodeURIComponent(topicId)}`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          title: topic.title,
-          questions: normalizedQuestions
-        })
-      });
-      return (await jsonOrError(res)) as { topic: AdminTopic };
+    mutationFn: async (nextTopic: AdminTopic) => {
+      return persistTopicQuestions(authFetch, topicId, nextTopic);
     },
     onSuccess: async (data) => {
       setTopic({
@@ -183,6 +187,21 @@ export default function AdminTopicDetailPage() {
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
 
+  const deleteQuestionMutation = useMutation({
+    mutationFn: async (nextTopic: AdminTopic) => persistTopicQuestions(authFetch, topicId, nextTopic),
+    onSuccess: async (data) => {
+      setTopic({
+        id: String(data.topic.id),
+        title: String(data.topic.title || ""),
+        questions: Array.isArray(data.topic.questions) ? data.topic.questions.map(cloneQuestion) : []
+      });
+      await qc.invalidateQueries({ queryKey: ["admin-topics"] });
+      await qc.invalidateQueries({ queryKey: ["admin-topic", topicId] });
+      toast.success("Savol o‘chirildi");
+    },
+    onError: (error: any) => toast.error(error?.message || "Xatolik")
+  });
+
   const importMutation = useMutation({
     mutationFn: async () => {
       const questions = parseQuestionImportPayload(importText);
@@ -203,6 +222,27 @@ export default function AdminTopicDetailPage() {
       await qc.invalidateQueries({ queryKey: ["admin-topics"] });
       await qc.invalidateQueries({ queryKey: ["admin-topic", topicId] });
       toast.success("Savollar import qilindi");
+    },
+    onError: (error: any) => toast.error(error?.message || "Xatolik")
+  });
+
+  const clearQuestionsMutation = useMutation({
+    mutationFn: async () => {
+      if (!topic) throw new Error("Mavzu topilmadi");
+      return persistTopicQuestions(authFetch, topicId, {
+        ...topic,
+        questions: []
+      });
+    },
+    onSuccess: async (data) => {
+      setTopic({
+        id: String(data.topic.id),
+        title: String(data.topic.title || ""),
+        questions: []
+      });
+      await qc.invalidateQueries({ queryKey: ["admin-topics"] });
+      await qc.invalidateQueries({ queryKey: ["admin-topic", topicId] });
+      toast.success("Barcha savollar o‘chirildi");
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
@@ -392,9 +432,24 @@ export default function AdminTopicDetailPage() {
 
       <div className="adminQuestionsHeader">
         <div className="adminPanelCardTitle">Savollar</div>
-        <button className="btn btn-primary" type="button" onClick={() => setTopic((prev) => (prev ? { ...prev, questions: [...prev.questions, createEmptyQuestion(prev.questions.length + 1)] } : prev))}>
-          <Plus className="lucide" aria-hidden="true" /> Savol qo‘shish
-        </button>
+        <div className="adminTopicActions">
+          <button
+            className="btn btn-danger"
+            type="button"
+            onClick={() => {
+              const count = topic?.questions?.length || 0;
+              if (!count) return toast("O‘chirish uchun savol yo‘q");
+              if (!window.confirm(`Mavzudagi barcha ${count} ta savolni o‘chirishni tasdiqlaysizmi? Bu bazadan o‘chadi.`)) return;
+              clearQuestionsMutation.mutate();
+            }}
+            disabled={clearQuestionsMutation.isPending || !topic?.questions?.length}
+          >
+            <Trash2 className="lucide" aria-hidden="true" /> Hammasini o‘chirish
+          </button>
+          <button className="btn btn-primary" type="button" onClick={() => setTopic((prev) => (prev ? { ...prev, questions: [...prev.questions, createEmptyQuestion(prev.questions.length + 1)] } : prev))}>
+            <Plus className="lucide" aria-hidden="true" /> Savol qo‘shish
+          </button>
+        </div>
       </div>
 
       <div className="adminQuestionsGrid">
@@ -406,16 +461,16 @@ export default function AdminTopicDetailPage() {
                 <button
                   className="btn btn-sm"
                   type="button"
-                  onClick={() =>
-                    setTopic((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            questions: prev.questions.filter((item) => item.id !== question.id)
-                          }
-                        : prev
-                    )
-                  }
+                  onClick={() => {
+                    if (!topic) return;
+                    const nextQuestions = topic.questions.filter((item) => item.id !== question.id);
+                    if (!window.confirm("Bu savolni bazadan o‘chirishni tasdiqlaysizmi?")) return;
+                    deleteQuestionMutation.mutate({
+                      ...topic,
+                      questions: nextQuestions
+                    });
+                  }}
+                  disabled={deleteQuestionMutation.isPending}
                 >
                   <Trash2 className="lucide" aria-hidden="true" /> O‘chirish
                 </button>
@@ -644,7 +699,7 @@ export default function AdminTopicDetailPage() {
         )}
       </div>
 
-      <button className="btn btn-primary adminSaveFloating" type="button" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || !topic}>
+      <button className="btn btn-primary adminSaveFloating" type="button" onClick={() => topic && saveMutation.mutate(topic)} disabled={saveMutation.isPending || !topic}>
         <Save className="lucide" aria-hidden="true" /> Saqlash
       </button>
 
