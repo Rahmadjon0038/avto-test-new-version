@@ -2647,7 +2647,13 @@ app.get("/api/admin/topics", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const topics = await getTopicsFromDb();
-  res.json({ topics: topics.map((topic) => ({ id: topic.id, title: topic.title })) });
+  res.json({
+    topics: topics.map((topic) => ({
+      id: topic.id,
+      title: topic.title,
+      questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0
+    }))
+  });
 });
 
 app.delete("/api/admin/topics", async (req, res) => {

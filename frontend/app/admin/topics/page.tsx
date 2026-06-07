@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, RefreshCw, Save, Trash2, Upload } from "lucide-react";
+import { Check, LayoutGrid, RefreshCw, Save, Trash2, Upload } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -17,6 +17,7 @@ type TopicForm = {
 type TopicItem = {
   id: number;
   title: string;
+  questionCount?: number;
 };
 
 const emptyForm = (): TopicForm => ({
@@ -231,12 +232,29 @@ export default function AdminTopicsPage() {
             }}
           >
             <div className="adminTopicBody">
+              <button
+                className={`adminTopicCheck ${Number(topic.questionCount || 0) > 0 ? "active" : ""}`}
+                type="button"
+                tabIndex={-1}
+                aria-label={Number(topic.questionCount || 0) > 0 ? "Savollar bor" : "Savollar yo‘q"}
+                aria-pressed={Number(topic.questionCount || 0) > 0}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!Number(topic.questionCount || 0)) return toast("Bu mavzuda savol yo‘q");
+                  router.push(`/admin/topics/${topic.id}`);
+                }}
+              >
+                <Check className="lucide" aria-hidden="true" />
+              </button>
               <div className="adminTopicTop">
                 <div>
                   <Link href={`/admin/topics/${topic.id}`} className="adminTopicTitleLink">
                     <div className="adminTopicTitle">{topic.title}</div>
                   </Link>
                 </div>
+              </div>
+              <div className="adminTopicMeta">
+                <span className="adminTopicMetaBadge">{Number(topic.questionCount || 0)} ta savol</span>
               </div>
             </div>
             <span className="adminTopicIndex" aria-hidden="true">
