@@ -18,6 +18,7 @@ type TopicItem = {
   id: number;
   title: string;
   questionCount?: number;
+  adminMarked?: boolean;
 };
 
 const emptyForm = (): TopicForm => ({
@@ -115,6 +116,26 @@ export default function AdminTopicsPage() {
       const deletedCount = Number(data?.deletedCount || 0);
       toast.success(deletedCount ? `${deletedCount} ta mavzu o‘chirildi` : "Mavzular o‘chirildi");
       setForm(emptyForm());
+      await qc.invalidateQueries({ queryKey: ["admin-topics"] });
+    },
+    onError: (error: any) => toast.error(error?.message || "Xatolik")
+  });
+
+  const markMutation = useMutation({
+    mutationFn: async ({ topicId, adminMarked }: { topicId: number; adminMarked: boolean }) => {
+      const topic = (topicsQuery.data || []).find((item: TopicItem) => Number(item.id) === Number(topicId));
+      if (!topic) throw new Error("Mavzu topilmadi");
+      const res = await authFetch(`/api/admin/topics/${encodeURIComponent(String(topicId))}/mark`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          adminMarked,
+          title: topic.title
+        })
+      });
+      return jsonOrError(res);
+    },
+    onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["admin-topics"] });
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
@@ -223,7 +244,7 @@ export default function AdminTopicsPage() {
         {(topicsQuery.data || []).map((topic: TopicItem, index: number) => (
           <article
             key={topic.id}
-            className={`card adminTopicCard ${form.id === topic.id ? "active" : ""}`}
+            className={`card adminTopicCard ${form.id === topic.id ? "active" : ""} ${topic.adminMarked ? "isMarked" : ""}`}
             role="button"
             tabIndex={0}
             onClick={() => router.push(`/admin/topics/${topic.id}`)}
@@ -233,15 +254,14 @@ export default function AdminTopicsPage() {
           >
             <div className="adminTopicBody">
               <button
-                className={`adminTopicCheck ${Number(topic.questionCount || 0) > 0 ? "active" : ""}`}
+                className={`adminTopicCheck ${topic.adminMarked ? "active" : ""}`}
                 type="button"
                 tabIndex={-1}
-                aria-label={Number(topic.questionCount || 0) > 0 ? "Savollar bor" : "Savollar yo‘q"}
-                aria-pressed={Number(topic.questionCount || 0) > 0}
+                aria-label={topic.adminMarked ? "Tegishli mavzu belgilangan" : "Tegishli mavzu belgilanmagan"}
+                aria-pressed={Boolean(topic.adminMarked)}
                 onClick={(event) => {
                   event.stopPropagation();
-                  if (!Number(topic.questionCount || 0)) return toast("Bu mavzuda savol yo‘q");
-                  router.push(`/admin/topics/${topic.id}`);
+                  markMutation.mutate({ topicId: topic.id, adminMarked: !topic.adminMarked });
                 }}
               >
                 <Check className="lucide" aria-hidden="true" />
@@ -255,6 +275,7 @@ export default function AdminTopicsPage() {
               </div>
               <div className="adminTopicMeta">
                 <span className="adminTopicMetaBadge">{Number(topic.questionCount || 0)} ta savol</span>
+                {topic.adminMarked ? <span className="adminTopicMetaBadge adminTopicMetaBadgeMarked">Belgilangan</span> : null}
               </div>
             </div>
             <span className="adminTopicIndex" aria-hidden="true">

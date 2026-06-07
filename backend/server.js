@@ -185,7 +185,8 @@ function normalizeTopicRow(row) {
     id: Number(row.id),
     slug: String(row.slug || ""),
     title: String(row.title || ""),
-    questions: parseQuestionsValue(row.questions)
+    questions: parseQuestionsValue(row.questions),
+    adminMarked: row.admin_marked === true
   };
 }
 
@@ -197,6 +198,7 @@ function normalizeTopicInput(input = {}, fallbackTitle = "", current = null) {
   return {
     title,
     slug: String(source.slug || current?.slug || "").trim() || slugifyTopic(title),
+    adminMarked: source.adminMarked !== undefined ? Boolean(source.adminMarked) : Boolean(current?.adminMarked || false),
     questions:
       source.questions !== undefined
         ? normalizeQuestions(source.questions)
@@ -233,14 +235,14 @@ function normalizeImportedTopicQuestion(input = {}, index = 0) {
 }
 
 async function getTopicsFromDb() {
-  const rows = await dbApi.all("SELECT id, slug, title, questions FROM topics ORDER BY id ASC");
+  const rows = await dbApi.all("SELECT id, slug, title, questions, admin_marked FROM topics ORDER BY id ASC");
   return rows.map(normalizeTopicRow);
 }
 
 async function getTopicFromDb(topicId) {
   const key = String(topicId || "").trim();
   if (!key) return null;
-  const row = await dbApi.get("SELECT id, slug, title, questions FROM topics WHERE CAST(id AS TEXT) = ? OR slug = ? LIMIT 1", [key, key]);
+  const row = await dbApi.get("SELECT id, slug, title, questions, admin_marked FROM topics WHERE CAST(id AS TEXT) = ? OR slug = ? LIMIT 1", [key, key]);
   return row ? normalizeTopicRow(row) : null;
 }
 
@@ -262,11 +264,11 @@ async function createTopic(input) {
   const slug = await ensureUniqueTopicSlug(next.slug);
   const result = await dbApi.get(
     `
-      INSERT INTO topics (slug, title, questions, created_at, updated_at)
-      VALUES (?, ?, ?::jsonb, NOW(), NOW())
+      INSERT INTO topics (slug, title, questions, admin_marked, created_at, updated_at)
+      VALUES (?, ?, ?::jsonb, ?, NOW(), NOW())
       RETURNING *
     `,
-    [slug, next.title, JSON.stringify(next.questions)]
+    [slug, next.title, JSON.stringify(next.questions), next.adminMarked]
   );
   return normalizeTopicRow(result);
 }
@@ -279,11 +281,11 @@ async function updateTopic(topicId, input) {
   const result = await dbApi.get(
     `
       UPDATE topics
-      SET slug = ?, title = ?, questions = ?::jsonb, updated_at = NOW()
+      SET slug = ?, title = ?, questions = ?::jsonb, admin_marked = ?, updated_at = NOW()
       WHERE id = ?
       RETURNING *
     `,
-    [slug, next.title, JSON.stringify(next.questions), current.id]
+    [slug, next.title, JSON.stringify(next.questions), next.adminMarked, current.id]
   );
   return normalizeTopicRow(result);
 }
@@ -306,11 +308,11 @@ async function importTopicQuestions(topicId, questionItems, replace = false) {
   const updated = await dbApi.get(
     `
       UPDATE topics
-      SET questions = ?::jsonb, updated_at = NOW()
+      SET questions = ?::jsonb, admin_marked = ?, updated_at = NOW()
       WHERE id = ?
       RETURNING *
     `,
-    [JSON.stringify(nextQuestions), String(current.id)]
+    [JSON.stringify(nextQuestions), current.adminMarked, String(current.id)]
   );
   return normalizeTopicRow(updated);
 }
@@ -321,12 +323,12 @@ async function importTopics(topicItems) {
   for (let index = 0; index < topicItems.length; index += 1) {
     const item = topicItems[index];
     const existingInput = typeof item === "string" ? { title: item } : item || {};
-    const existingBySlug = String(existingInput.slug || "").trim()
-      ? await dbApi.get("SELECT id, slug, title, questions FROM topics WHERE slug = ?", [String(existingInput.slug).trim()])
+      const existingBySlug = String(existingInput.slug || "").trim()
+      ? await dbApi.get("SELECT id, slug, title, questions, admin_marked FROM topics WHERE slug = ?", [String(existingInput.slug).trim()])
       : null;
     const next = normalizeTopicInput(existingInput, existingInput.title || `Mavzu ${index + 1}`, existingBySlug ? normalizeTopicRow(existingBySlug) : null);
     const slug = existingBySlug ? String(existingBySlug.slug) : await ensureUniqueTopicSlug(next.slug);
-    const existing = await dbApi.get("SELECT id, slug, title, questions FROM topics WHERE slug = ?", [slug]);
+    const existing = await dbApi.get("SELECT id, slug, title, questions, admin_marked FROM topics WHERE slug = ?", [slug]);
     if (existing) {
       const updated = await dbApi.get(
         `
@@ -2651,7 +2653,8 @@ app.get("/api/admin/topics", async (req, res) => {
     topics: topics.map((topic) => ({
       id: topic.id,
       title: topic.title,
-      questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0
+      questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0,
+      adminMarked: topic.adminMarked === true
     }))
   });
 });
@@ -2802,6 +2805,23 @@ app.patch("/api/admin/topics/:topicId", async (req, res) => {
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
     const topic = await updateTopic(String(req.params.topicId), req.body || {});
+    res.json({ ok: true, topic });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.post("/api/admin/topics/:topicId/mark", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const current = await getTopicFromDb(String(req.params.topicId));
+    if (!current) return res.status(404).json({ error: "Mavzu topilmadi" });
+    const topic = await updateTopic(String(req.params.topicId), {
+      title: current.title,
+      questions: current.questions,
+      adminMarked: Boolean(req.body?.adminMarked)
+    });
     res.json({ ok: true, topic });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });

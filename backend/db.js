@@ -153,6 +153,7 @@ async function initDb(dbApi) {
       slug TEXT UNIQUE NOT NULL,
       title TEXT NOT NULL,
       questions JSONB NOT NULL DEFAULT '[]'::jsonb,
+      admin_marked BOOLEAN NOT NULL DEFAULT FALSE,
       description TEXT NOT NULL DEFAULT '',
       accent TEXT NOT NULL DEFAULT '#2f6dff',
       sort_order INTEGER NOT NULL DEFAULT 0,
@@ -162,6 +163,7 @@ async function initDb(dbApi) {
   `);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS slug TEXT;`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS questions JSONB NOT NULL DEFAULT '[]'::jsonb;`);
+  await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS admin_marked BOOLEAN NOT NULL DEFAULT FALSE;`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS accent TEXT NOT NULL DEFAULT '#2f6dff';`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0;`);

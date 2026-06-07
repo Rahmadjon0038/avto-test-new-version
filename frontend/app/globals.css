@@ -1653,6 +1653,11 @@ body {
   border-color: color-mix(in srgb, var(--primary) 65%, var(--border));
 }
 
+.adminTopicCard.isMarked {
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 10%, var(--panel)), var(--panel));
+}
+
 .adminTopicCard:hover {
   transform: translateY(-2px);
   background: var(--panel2);
@@ -1736,6 +1741,12 @@ body {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
+}
+
+.adminTopicMetaBadgeMarked {
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--border));
+  background: color-mix(in srgb, var(--ok) 14%, var(--panel2));
+  color: var(--text);
 }
 
 .adminTopicIndex {
