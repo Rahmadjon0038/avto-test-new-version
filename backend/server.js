@@ -10,9 +10,26 @@ const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/cl
 
 const PORT = Number(process.env.PORT || 3000);
 const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || "15mb";
+const ALLOWED_ORIGINS = new Set(
+  String(process.env.ALLOWED_ORIGINS || "https://road-test.uz,https://www.road-test.uz,https://api.road-test.uz")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
 
 const app = express();
 app.use(express.json({ limit: JSON_BODY_LIMIT }));
+app.use((req, res, next) => {
+  const origin = String(req.headers.origin || "").trim();
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,PUT,DELETE,OPTIONS");
+  }
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
 
 const dbApi = openDb();
 const r2 = new S3Client({
