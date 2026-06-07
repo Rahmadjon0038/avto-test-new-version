@@ -348,10 +348,15 @@ export default function TopicPage() {
 
   const total = topicQuestions.length;
   const answered = Object.keys(answers).length;
-  const percent = total > 0 ? Math.round((answered / total) * 100) : 0;
+  const correct = topicQuestions.reduce((sum, question) => {
+    const selected = answers[question.id];
+    return sum + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
+  }, 0);
+  const wrong = Math.max(answered - correct, 0);
+  const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
   const chartData = [
-    { name: "Yechilgan", value: answered },
-    { name: "Qolgan", value: Math.max(total - answered, 0) }
+    { name: "To‘g‘ri", value: correct },
+    { name: "Noto‘g‘ri", value: wrong }
   ];
 
   const resetMutation = useMutation({
@@ -545,12 +550,12 @@ export default function TopicPage() {
                     </PieChart>
                     <div className="chartCenter">
                       <div className="chartValue">{percent}%</div>
-                      <div className="chartLabel">Foiz</div>
+                      <div className="chartLabel">To‘g‘ri</div>
                     </div>
                   </div>
                     <div className="chartMeta">
-                      <div className="muted">Yechilgan</div>
-                      <div className="chartCount">{answered}/{total}</div>
+                      <div className="muted">To‘g‘ri / jami</div>
+                      <div className="chartCount">{correct}/{total}</div>
                     </div>
                   </div>
               </div>
