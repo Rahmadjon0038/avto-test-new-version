@@ -22,7 +22,7 @@ export default function CustomTestsPage() {
 
   return (
     <section className="view">
-      <div className="sectionTopBar">
+      <div className="sectionTopBar" style={{ marginBottom: 12 }}>
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>

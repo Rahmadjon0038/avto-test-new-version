@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpen, Filter, Image, ImageOff, Search } from "lucide-react";
+import { ArrowLeft, BookOpen, Filter, Image, ImageOff, Search } from "lucide-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -109,6 +109,12 @@ export default function AnswersPage() {
 
   return (
     <section className="view">
+      <div className="sectionTopBar" style={{ marginBottom: 12 }}>
+        <button className="btn btn-ghost btn-sm" type="button" onClick={() => window.history.back()}>
+          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+        </button>
+      </div>
+
       <div className="answersHero card">
         <div className="answersHeroLeft">
           <div className="answersHeroIcon">
