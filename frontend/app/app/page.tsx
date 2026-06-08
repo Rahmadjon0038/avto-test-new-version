@@ -54,14 +54,13 @@ export default function AppHome() {
 
       <div className="homeSoonBlock">
         <div className="homeMenu homeMenuSoon">
-          <MenuItem
+        <MenuItem
             page="marathon"
             icon={<Flame className="lucide" />}
             title="Marafon rejimi"
             desc="Uzluksiz savollar: tezlik va aniqlikni oshiring."
             href="/app/page/marathon"
-            badge="Tez kunda"
-            comingSoon
+            comingSoon={false}
           />
           <MenuItem
             page="videos"
