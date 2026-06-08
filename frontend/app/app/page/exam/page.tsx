@@ -253,9 +253,7 @@ export default function ExamPage() {
     const selected = answers[question.id];
     return total + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
   }, 0);
-  const chartAnsweredPercent = finalResult
-    ? Math.round(((finalResult.correct + finalResult.wrong) / Math.max(finalResult.total, 1)) * 100)
-    : 0;
+  const chartCorrectPercent = finalResult ? finalResult.percent : 0;
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
 
   useTestInteractions({
@@ -671,12 +669,12 @@ export default function ExamPage() {
                     <div
                       className="resultChartRing"
                       style={{
-                        background: `conic-gradient(var(--primary) 0 ${chartAnsweredPercent}%, rgba(255, 255, 255, 0.12) ${chartAnsweredPercent}% 100%)`
+                        background: `conic-gradient(var(--primary) 0 ${chartCorrectPercent}%, rgba(255, 255, 255, 0.12) ${chartCorrectPercent}% 100%)`
                       }}
                     >
                       <div className="resultChartCenter">
-                    <div className="resultChartValue">{chartAnsweredPercent}%</div>
-                    <div className="resultChartLabel">Yechilgan</div>
+                    <div className="resultChartValue">{chartCorrectPercent}%</div>
+                    <div className="resultChartLabel">To‘g‘ri</div>
                       </div>
                     </div>
                 </div>

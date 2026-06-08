@@ -355,10 +355,10 @@ export default function TopicPage() {
     return sum + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
   }, 0);
   const wrong = Math.max(answered - correct, 0);
-  const answeredPercent = total > 0 ? Math.round((answered / total) * 100) : 0;
+  const correctPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
   const chartData = [
-    { name: "Yechilgan", value: answered },
-    { name: "Qolgan", value: Math.max(total - answered, 0) }
+    { name: "To‘g‘ri", value: correct },
+    { name: "Noto‘g‘ri", value: Math.max(total - correct, 0) }
   ];
 
   const resetMutation = useMutation({
@@ -566,15 +566,15 @@ export default function TopicPage() {
                       </Pie>
                     </PieChart>
                     <div className="chartCenter">
-                      <div className="chartValue">{answeredPercent}%</div>
-                      <div className="chartLabel">Yechilgan</div>
+                      <div className="chartValue">{correctPercent}%</div>
+                      <div className="chartLabel">To‘g‘ri</div>
                     </div>
                   </div>
-                    <div className="chartMeta">
-                      <div className="muted">To‘g‘ri / jami</div>
-                      <div className="chartCount">{correct}/{total}</div>
-                    </div>
+                  <div className="chartMeta">
+                    <div className="muted">To‘g‘ri / jami</div>
+                    <div className="chartCount">{correct}/{total}</div>
                   </div>
+                </div>
               </div>
               <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(false)}>
                 Yopish
