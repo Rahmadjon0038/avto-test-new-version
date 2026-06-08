@@ -253,7 +253,9 @@ export default function ExamPage() {
     const selected = answers[question.id];
     return total + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
   }, 0);
-  const chartPercent = finalResult?.percent ?? 0;
+  const chartAnsweredPercent = finalResult
+    ? Math.round(((finalResult.correct + finalResult.wrong) / Math.max(finalResult.total, 1)) * 100)
+    : 0;
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
 
   useTestInteractions({
@@ -666,17 +668,17 @@ export default function ExamPage() {
                       {finalResult.correct}/{finalResult.total}
                     </div>
                   </div>
-                  <div
-                    className="resultChartRing"
-                    style={{
-                      background: `conic-gradient(var(--primary) 0 ${chartPercent}%, rgba(255, 255, 255, 0.12) ${chartPercent}% 100%)`
-                    }}
-                  >
-                    <div className="resultChartCenter">
-                    <div className="resultChartValue">{finalResult.percent}%</div>
-                    <div className="resultChartLabel">Foiz</div>
+                    <div
+                      className="resultChartRing"
+                      style={{
+                        background: `conic-gradient(var(--primary) 0 ${chartAnsweredPercent}%, rgba(255, 255, 255, 0.12) ${chartAnsweredPercent}% 100%)`
+                      }}
+                    >
+                      <div className="resultChartCenter">
+                    <div className="resultChartValue">{chartAnsweredPercent}%</div>
+                    <div className="resultChartLabel">Yechilgan</div>
+                      </div>
                     </div>
-                  </div>
                 </div>
               </div>
               <button className="btn btn-primary resultCloseBtn" type="button" onClick={() => setFinishOpen(false)}>

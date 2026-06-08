@@ -352,10 +352,10 @@ export default function TicketPage() {
   const correctCount = ticket?.questions.filter(
     (question) => answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
   ).length || 0;
-  const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const answeredPercent = total > 0 ? Math.round((answered / total) * 100) : 0;
   const chartData = [
-    { name: "To‘g‘ri", value: correctCount },
-    { name: "Qolgan", value: Math.max(total - correctCount, 0) }
+    { name: "Yechilgan", value: answered },
+    { name: "Qolgan", value: Math.max(total - answered, 0) }
   ];
 
   const resetMutation = useMutation({
@@ -556,8 +556,8 @@ export default function TicketPage() {
                       </Pie>
                     </PieChart>
                     <div className="chartCenter">
-                      <div className="chartValue">{percent}%</div>
-                      <div className="chartLabel">Foiz</div>
+                      <div className="chartValue">{answeredPercent}%</div>
+                      <div className="chartLabel">Yechilgan</div>
                     </div>
                   </div>
                   <div className="chartMeta">
