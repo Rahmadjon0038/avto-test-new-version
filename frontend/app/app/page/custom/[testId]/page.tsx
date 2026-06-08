@@ -342,7 +342,7 @@ export default function CustomTestPage() {
         if (cur !== nextIndex - 1) return cur;
         return nextIndex;
       });
-    }, 550);
+    }, 900);
   }
 
   useEffect(() => {
@@ -430,27 +430,6 @@ export default function CustomTestPage() {
         </button>
       </div>
 
-      <div className="qnav">
-        {customTestQuestions.map((qq, i) => (
-          (() => {
-            const selected = answers[qq.id];
-            const hasAnswered = selected !== undefined;
-            const isWrong = hasAnswered && Number(selected) !== Number(qq.correctIndex);
-            const isCorrect = hasAnswered && Number(selected) === Number(qq.correctIndex);
-            return (
-          <button
-            key={qq.id}
-            className={`qbtn ${i === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
-            type="button"
-            onClick={() => setIdx(i)}
-          >
-            {i + 1}
-          </button>
-            );
-          })()
-        ))}
-      </div>
-
       <div className="card" ref={questionCardRef}>
         <div className="qTitleBar">{q?.text}</div>
         <div className="qLayout">
@@ -513,6 +492,27 @@ export default function CustomTestPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="qnav">
+        {customTestQuestions.map((qq, i) => (
+          (() => {
+            const selected = answers[qq.id];
+            const hasAnswered = selected !== undefined;
+            const isWrong = hasAnswered && Number(selected) !== Number(qq.correctIndex);
+            const isCorrect = hasAnswered && Number(selected) === Number(qq.correctIndex);
+            return (
+              <button
+                key={qq.id}
+                className={`qbtn ${i === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
+                type="button"
+                onClick={() => setIdx(i)}
+              >
+                {i + 1}
+              </button>
+            );
+          })()
+        ))}
       </div>
 
       <div className="topicFooter">

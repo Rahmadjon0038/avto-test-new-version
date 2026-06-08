@@ -437,6 +437,12 @@ async function getGeneratedTicketByIdFromDb(ticketId) {
   return buildGeneratedTicketFromBankChunk(chunk, index);
 }
 
+async function getProgressTicketById(ticketId) {
+  const current = await getTicketByIdFromDb(ticketId);
+  if (current) return current;
+  return getGeneratedTicketByIdFromDb(ticketId);
+}
+
 async function getGeneratedCustomTestsFromDb() {
   const bank = await getTopicQuestionBankFromDb();
   const results = [];
@@ -2265,7 +2271,7 @@ app.post("/api/custom-test-progress/:testId/reset", requireUser, async (req, res
   res.json({ ok: true });
 });
 
-app.get("/api/answers", requireUser, async (_req, res) => {
+app.get("/api/answers", requireUser, async (req, res) => {
   const bank = await getTopicQuestionBankFromDb();
   const questions = bank.map((item) =>
     buildAnswerQuestion({
@@ -2277,7 +2283,45 @@ app.get("/api/answers", requireUser, async (_req, res) => {
     })
   );
 
-  res.json({ questions });
+  const hasPagingParams =
+    req.query.limit !== undefined ||
+    req.query.offset !== undefined ||
+    req.query.q !== undefined ||
+    req.query.filter !== undefined;
+
+  if (!hasPagingParams) {
+    return res.json({ questions });
+  }
+
+  const limitValue = Number.parseInt(String(req.query.limit ?? "40"), 10);
+  const offsetValue = Number.parseInt(String(req.query.offset ?? "0"), 10);
+  const filterValue = String(req.query.filter ?? "all").trim();
+  const searchValue = String(req.query.q ?? "").trim().toLowerCase();
+  const limit = Number.isFinite(limitValue) ? Math.max(1, Math.min(100, limitValue)) : 40;
+  const offset = Number.isFinite(offsetValue) ? Math.max(0, offsetValue) : 0;
+
+  let filtered = questions;
+  if (filterValue === "with-image") filtered = filtered.filter((question) => question.hasImage);
+  if (filterValue === "without-image") filtered = filtered.filter((question) => !question.hasImage);
+  if (searchValue) {
+    filtered = filtered.filter((question) => {
+      const text = String(question.text || "").toLowerCase();
+      const source = String(question.sourceTitle || "").toLowerCase();
+      const answer = String(question.correctAnswer || "").toLowerCase();
+      const explanation = String(question.explanation || "").toLowerCase();
+      return text.includes(searchValue) || source.includes(searchValue) || answer.includes(searchValue) || explanation.includes(searchValue);
+    });
+  }
+
+  const total = filtered.length;
+  const items = filtered.slice(offset, offset + limit);
+  res.json({
+    questions: items,
+    total,
+    offset,
+    limit,
+    hasMore: offset + items.length < total
+  });
 });
 
 app.get("/api/mistakes", requireUser, async (req, res) => {
@@ -2700,7 +2744,7 @@ app.post("/api/progress/:ticketId", requireUser, async (req, res) => {
   const answers = req.body?.answers;
   if (!answers || typeof answers !== "object") return res.status(400).json({ error: "Javoblar obyekti kerak" });
 
-  const ticket = await getTicketByIdFromDb(ticketId);
+  const ticket = await getProgressTicketById(ticketId);
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
   let correct = 0;

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Filter, Image, ImageOff, Search } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -20,6 +20,14 @@ type AnswerQuestion = {
   correctAnswer: string;
   explanation: string;
   hasImage: boolean;
+};
+
+type AnswersPage = {
+  questions: AnswerQuestion[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
 };
 
 type FilterKey = "all" | "with-image" | "without-image";
@@ -56,47 +64,48 @@ export default function AnswersPage() {
   const { authFetch } = useAuth();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
+  const pageSize = 40;
 
-  const answersQuery = useQuery({
-    queryKey: ["answers"],
-    queryFn: async () => {
-      const res = await authFetch("/api/answers");
+  const answersQuery = useInfiniteQuery({
+    queryKey: ["answers", search, filter],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const params = new URLSearchParams({
+        offset: String(pageParam || 0),
+        limit: String(pageSize),
+        filter,
+        q: search.trim()
+      });
+      const res = await authFetch(`/api/answers?${params.toString()}`);
       const data = await jsonOrError(res);
-      return Array.isArray(data.questions) ? data.questions : [];
-    }
+      return {
+        questions: Array.isArray(data.questions) ? (data.questions as AnswerQuestion[]) : [],
+        total: Number(data.total || 0),
+        offset: Number(data.offset || 0),
+        limit: Number(data.limit || pageSize),
+        hasMore: Boolean(data.hasMore)
+      } as AnswersPage;
+    },
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.offset + lastPage.limit : undefined)
   });
 
   useEffect(() => {
     if (answersQuery.error) toast.error((answersQuery.error as any)?.message || "Xatolik");
   }, [answersQuery.error]);
 
-  const questions = (answersQuery.data || []) as AnswerQuestion[];
-
-  const filteredQuestions = useMemo(() => {
-    let output = questions;
-    if (filter === "with-image") output = output.filter((question) => question.hasImage);
-    if (filter === "without-image") output = output.filter((question) => !question.hasImage);
-
-    const query = search.trim().toLowerCase();
-    if (!query) return output;
-
-    return output.filter((question) => {
-      const text = String(question.text || "").toLowerCase();
-      const source = String(question.sourceTitle || "").toLowerCase();
-      const answer = String(question.correctAnswer || "").toLowerCase();
-      const explanation = String(question.explanation || "").toLowerCase();
-      return text.includes(query) || source.includes(query) || answer.includes(query) || explanation.includes(query);
-    });
-  }, [filter, questions, search]);
+  const questions = useMemo(() => (answersQuery.data?.pages || []).flatMap((page) => page.questions), [answersQuery.data]);
+  const total = answersQuery.data?.pages?.[0]?.total ?? questions.length;
 
   const counts = useMemo(
     () => ({
-      all: questions.length,
-      withImage: questions.filter((question) => question.hasImage).length,
-      withoutImage: questions.filter((question) => !question.hasImage).length
+      all: total,
+      loaded: questions.length
     }),
-    [questions]
+    [questions.length, total]
   );
+
+  const isLoadingInitial = answersQuery.isLoading || (answersQuery.isFetching && !answersQuery.data);
+  const isLoadingMore = answersQuery.isFetchingNextPage;
 
   return (
     <section className="view">
@@ -112,8 +121,8 @@ export default function AnswersPage() {
         </div>
         <div className="answersHeroMeta">
           <span className="badge">{counts.all} ta savol</span>
-          <span className="badge">{counts.withImage} ta rasmli</span>
-          <span className="badge">{counts.withoutImage} ta rasmsiz</span>
+          <span className="badge">{counts.loaded} yuklandi</span>
+          <span className="badge">{answersQuery.hasNextPage ? "Davom etadi" : "Hammasi"}</span>
         </div>
       </div>
 
@@ -121,17 +130,14 @@ export default function AnswersPage() {
         <button className={`answersFilter ${filter === "all" ? "active" : ""}`} type="button" onClick={() => setFilter("all")}>
           <Filter className="lucide" aria-hidden="true" />
           <span>{resolveFilterLabel("all")}</span>
-          <span className="badge">{counts.all}</span>
         </button>
         <button className={`answersFilter ${filter === "with-image" ? "active" : ""}`} type="button" onClick={() => setFilter("with-image")}>
           <Image className="lucide" aria-hidden="true" />
           <span>{resolveFilterLabel("with-image")}</span>
-          <span className="badge">{counts.withImage}</span>
         </button>
         <button className={`answersFilter ${filter === "without-image" ? "active" : ""}`} type="button" onClick={() => setFilter("without-image")}>
           <ImageOff className="lucide" aria-hidden="true" />
           <span>{resolveFilterLabel("without-image")}</span>
-          <span className="badge">{counts.withoutImage}</span>
         </button>
       </div>
 
@@ -152,9 +158,9 @@ export default function AnswersPage() {
         </div>
       </div>
 
-      {answersQuery.isLoading ? <div className="muted">Savollar yuklanmoqda...</div> : null}
+      {isLoadingInitial ? <div className="muted">Savollar yuklanmoqda...</div> : null}
 
-      {!answersQuery.isLoading && filteredQuestions.length === 0 ? (
+      {!isLoadingInitial && questions.length === 0 ? (
         <section className="card answersEmpty">
           <div className="adminEmptyTitle">Hech narsa topilmadi</div>
           <div className="adminEmptyText">Tanlangan filtr bo‘yicha savol yo‘q.</div>
@@ -162,7 +168,7 @@ export default function AnswersPage() {
       ) : null}
 
       <div className="answersQuestionGrid">
-        {filteredQuestions.map((question, index) => (
+        {questions.map((question, index) => (
           <article className="card answersQuestionCard" key={question.id || `${question.sourceId}-${index}`}>
             <div className="answersQuestionCardHead">
               <div className="answersQuestionCardTitle">{questionKeyLabel(index)}</div>
@@ -193,6 +199,14 @@ export default function AnswersPage() {
           </article>
         ))}
       </div>
+
+      {answersQuery.hasNextPage ? (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+          <button className="btn btn-ghost" type="button" onClick={() => answersQuery.fetchNextPage()} disabled={isLoadingMore}>
+            {isLoadingMore ? "Yuklanmoqda..." : "Ko‘proq yuklash"}
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

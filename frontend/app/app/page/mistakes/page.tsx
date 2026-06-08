@@ -306,7 +306,7 @@ export default function MistakesPage() {
         if (cur !== nextIndex - 1) return cur;
         return nextIndex;
       });
-    }, 500);
+    }, 900);
   }
 
   function answerCurrent(nextAnswer: number) {
@@ -468,27 +468,6 @@ export default function MistakesPage() {
                 </div>
               </div>
 
-              <div className="qnav">
-                {currentQuestions.map((question, questionIndex) => (
-                  (() => {
-                    const selected = answers[question.id];
-                    const hasAnswered = selected !== undefined;
-                    const isWrong = hasAnswered && Number(selected) !== Number(question.correctIndex);
-                    const isCorrect = hasAnswered && Number(selected) === Number(question.correctIndex);
-                    return (
-                  <button
-                    key={question.id}
-                    className={`qbtn ${questionIndex === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
-                    type="button"
-                    onClick={() => setIdx(questionIndex)}
-                  >
-                    {questionIndex + 1}
-                  </button>
-                    );
-                  })()
-                ))}
-              </div>
-
               {currentQuestion ? (
                 <div className="card" ref={questionCardRef}>
                   <div className="qTitleBar">{currentQuestion.text}</div>
@@ -544,6 +523,27 @@ export default function MistakesPage() {
                   </div>
                 </div>
               ) : null}
+
+              <div className="qnav">
+                {currentQuestions.map((question, questionIndex) => (
+                  (() => {
+                    const selected = answers[question.id];
+                    const hasAnswered = selected !== undefined;
+                    const isWrong = hasAnswered && Number(selected) !== Number(question.correctIndex);
+                    const isCorrect = hasAnswered && Number(selected) === Number(question.correctIndex);
+                    return (
+                      <button
+                        key={question.id}
+                        className={`qbtn ${questionIndex === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
+                        type="button"
+                        onClick={() => setIdx(questionIndex)}
+                      >
+                        {questionIndex + 1}
+                      </button>
+                    );
+                  })()
+                ))}
+              </div>
 
               <div className="topicFooter">
                 <div className="footerLeft">
