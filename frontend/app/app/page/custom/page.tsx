@@ -42,9 +42,6 @@ export default function CustomTestsPage() {
             </span>
             <div className="topicNameRow">
               <div className="topicName">{customTest.title}</div>
-              {typeof customTest.questionsCount === "number" ? (
-                <div className="topicMeta">{customTest.questionsCount} savol</div>
-              ) : null}
             </div>
           </button>
         ))}

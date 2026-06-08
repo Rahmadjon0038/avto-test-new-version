@@ -449,25 +449,6 @@ export default function MistakesPage() {
             </div>
           ) : (
             <>
-              <div className="mistakesPracticeStats card">
-                <div className="mistakesPracticeStat">
-                  <div className="mistakesPracticeValue">{answered}/{currentQuestions.length}</div>
-                  <div className="muted">Yechilgan</div>
-                </div>
-                <div className="mistakesPracticeStat">
-                  <div className="mistakesPracticeValue">{correctPlanned}</div>
-                  <div className="muted">To‘g‘ri bo‘lishi kutilgan</div>
-                </div>
-                <div className="mistakesPracticeStat">
-                  <div className="mistakesPracticeValue">{wrongPlanned}</div>
-                  <div className="muted">Qoladigan xatolar</div>
-                </div>
-                <div className="mistakesPracticeStat">
-                  <div className="mistakesPracticeValue">{percent}%</div>
-                  <div className="muted">Progress</div>
-                </div>
-              </div>
-
               {currentQuestion ? (
                 <div className="card" ref={questionCardRef}>
                   <div className="qTitleBar">{currentQuestion.text}</div>

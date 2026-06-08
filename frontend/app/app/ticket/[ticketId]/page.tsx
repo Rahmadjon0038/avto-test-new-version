@@ -349,10 +349,13 @@ export default function TicketPage() {
 
   const total = ticket?.questions.length || 0;
   const answered = Object.keys(answers).length;
-  const percent = total > 0 ? Math.round((answered / total) * 100) : 0;
+  const correctCount = ticket?.questions.filter(
+    (question) => answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
+  ).length || 0;
+  const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const chartData = [
-    { name: "Yechilgan", value: answered },
-    { name: "Qolgan", value: Math.max(total - answered, 0) }
+    { name: "To‘g‘ri", value: correctCount },
+    { name: "Qolgan", value: Math.max(total - correctCount, 0) }
   ];
 
   const resetMutation = useMutation({
@@ -558,8 +561,8 @@ export default function TicketPage() {
                     </div>
                   </div>
                   <div className="chartMeta">
-                    <div className="muted">Yechilgan</div>
-                    <div className="chartCount">{answered}/{total}</div>
+                    <div className="muted">To‘g‘ri javoblar</div>
+                    <div className="chartCount">{correctCount}/{total}</div>
                   </div>
                 </div>
               </div>
