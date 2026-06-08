@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { LayoutGrid } from "lucide-react";
+import { ArrowLeft, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -22,6 +22,12 @@ export default function CustomTestsPage() {
 
   return (
     <section className="view">
+      <div className="sectionTopBar">
+        <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
+          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+        </button>
+      </div>
+
       <div className="topicsHero card">
         <div className="topicsHeroIcon">
           <LayoutGrid className="lucide" aria-hidden="true" />
