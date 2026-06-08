@@ -192,9 +192,7 @@ export default function MarathonPage() {
         setNextBankIndex((prev) => prev + 1);
       }
 
-      if (currentIndex < visibleQuestions.length - 1 || nextQuestion) {
-        scheduleAutoNext(currentIndex + 1);
-      }
+      scheduleAutoNext(currentIndex + 1);
       return;
     }
 
@@ -244,7 +242,17 @@ export default function MarathonPage() {
 
   return (
     <section className="view">
-      <div className="sectionTopBar" style={{ marginBottom: 12 }}>
+      <div
+        className="sectionTopBar"
+        style={{
+          marginBottom: 12,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          gap: 12
+        }}
+      >
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>
@@ -272,9 +280,10 @@ export default function MarathonPage() {
         </div>
         <div className="answersHeroMeta">
           <span className="badge">{correctCount} to‘g‘ri</span>
-          <span className="badge">{hasMoreBank ? "Bank davom etadi" : "Bank tugadi"}</span>
         </div>
       </div>
+
+      <div style={{ height: 14 }} />
 
       <div className="card" ref={questionCardRef}>
         <div className="qTitleBar">{currentQuestion.text}</div>
