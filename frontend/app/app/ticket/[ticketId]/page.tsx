@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
   id: string;
@@ -265,6 +266,7 @@ export default function TicketPage() {
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const autoNextTimerRef = useRef<number | null>(null);
+  const questionCardRef = useRef<HTMLDivElement | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
@@ -366,6 +368,21 @@ export default function TicketPage() {
     resetMutation.mutate();
   }
 
+  const currentAnswered = Boolean(q && answers[q.id] !== undefined);
+  useTestInteractions({
+    enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
+    currentIndex: idx,
+    optionCount: q?.options.length || 0,
+    mode: "function",
+    onSelect: (optionIndex) => {
+      if (!q) return;
+      const nextAnswers = { ...answers, [q.id]: optionIndex };
+      save(nextAnswers);
+      if (idx < total - 1) scheduleAutoNext(idx + 1);
+    },
+    scrollTargetRef: questionCardRef
+  });
+
   if (!ticket) {
     return (
       <section className="view">
@@ -423,7 +440,7 @@ export default function TicketPage() {
         ))}
       </div>
 
-      <div className="card">
+      <div className="card" ref={questionCardRef}>
         <div className="qTitleBar">{q?.text}</div>
         <div className="qLayout">
           <div className="qRight">

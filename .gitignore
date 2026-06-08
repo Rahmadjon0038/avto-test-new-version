@@ -12,3 +12,5 @@ coverage/
 dist/
 build/
 frontend/.next/
+
+avto-test-mobil/

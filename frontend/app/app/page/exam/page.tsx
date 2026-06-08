@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, TimerReset } fro
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useTestInteractions } from "@/lib/test-interactions";
 
 type ExamQuestion = {
   id: string;
@@ -221,6 +222,8 @@ export default function ExamPage() {
   const [timerReady, setTimerReady] = useState(false);
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
   const [examBootstrapping, setExamBootstrapping] = useState(false);
+  const autoNextTimerRef = useRef<number | null>(null);
+  const questionCardRef = useRef<HTMLDivElement | null>(null);
   const autoStartRequestedRef = useRef(false);
   const autoSubmittedRef = useRef(false);
   const activeExamKeyRef = useRef<string | null>(null);
@@ -251,6 +254,21 @@ export default function ExamPage() {
     return total + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
   }, 0);
   const chartPercent = finalResult?.percent ?? 0;
+  const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
+
+  useTestInteractions({
+    enabled: Boolean(currentQuestion) && !currentAnswered && !zoomedImage && !locked,
+    currentIndex: idx,
+    optionCount: currentQuestion?.options.length || 0,
+    mode: "alpha",
+    onSelect: (optionIndex) => {
+      if (!currentQuestion || locked) return;
+      const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
+      save(nextAnswers);
+      if (idx < questions.length - 1) scheduleAutoNext(idx + 1);
+    },
+    scrollTargetRef: questionCardRef
+  });
 
   useEffect(() => {
     if (!exam) return;
@@ -277,6 +295,22 @@ export default function ExamPage() {
       setIdx(0);
     }
   }, [exam?.updatedAt, exam?.startedAt, exam?.examCount, questions.length]);
+
+  function scheduleAutoNext(nextIndex: number) {
+    if (autoNextTimerRef.current) window.clearTimeout(autoNextTimerRef.current);
+    autoNextTimerRef.current = window.setTimeout(() => {
+      setIdx((cur) => {
+        if (cur !== nextIndex - 1) return cur;
+        return nextIndex;
+      });
+    }, 550);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (autoNextTimerRef.current) window.clearTimeout(autoNextTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!questions.length) return;
@@ -519,7 +553,7 @@ export default function ExamPage() {
       </div>
 
       {currentQuestion ? (
-        <div className="card">
+        <div className="card" ref={questionCardRef}>
           <div className="qTitleBar">
             <div>{currentQuestion.text}</div>
           </div>
@@ -546,6 +580,7 @@ export default function ExamPage() {
                         if (hasAnswered) return;
                         const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
                         save(nextAnswers);
+                        if (idx < questions.length - 1) scheduleAutoNext(idx + 1);
                       }}
                     >
                       <span className="optionKey">{String.fromCharCode(65 + optionIndex)}</span>

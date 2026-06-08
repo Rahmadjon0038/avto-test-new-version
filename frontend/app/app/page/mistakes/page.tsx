@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target } f
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useTestInteractions } from "@/lib/test-interactions";
 
 type MistakeQuestion = {
   id: string;
@@ -247,6 +248,7 @@ export default function MistakesPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [finishOpen, setFinishOpen] = useState(false);
   const autoNextTimerRef = useRef<number | null>(null);
+  const questionCardRef = useRef<HTMLDivElement | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
 
   const mistakesQuery = useQuery({
@@ -313,6 +315,16 @@ export default function MistakesPage() {
     setAnswers(nextAnswers);
     if (idx < currentQuestions.length - 1) scheduleAutoNext(idx + 1);
   }
+
+  const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
+  useTestInteractions({
+    enabled: tab === "practice" && Boolean(currentQuestion) && !currentAnswered && !finishOpen,
+    currentIndex: idx,
+    optionCount: currentQuestion?.options.length || 0,
+    mode: "alpha",
+    onSelect: (optionIndex) => answerCurrent(optionIndex),
+    scrollTargetRef: questionCardRef
+  });
 
   const answered = Object.keys(answers).length;
   const correctPlanned = currentQuestions.filter((question) => answers[question.id] !== undefined && Number(answers[question.id]) === question.correctIndex).length;
@@ -478,7 +490,7 @@ export default function MistakesPage() {
               </div>
 
               {currentQuestion ? (
-                <div className="card">
+                <div className="card" ref={questionCardRef}>
                   <div className="qTitleBar">{currentQuestion.text}</div>
                   <div className="qLayout">
                     <div className="qRight">

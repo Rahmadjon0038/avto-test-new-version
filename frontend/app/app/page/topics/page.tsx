@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Check, LayoutGrid } from "lucide-react";
+import { ArrowLeft, Check, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -46,6 +46,12 @@ export default function TopicsPage() {
 
   return (
     <section className="view">
+      <div style={{ marginBottom: 12 }}>
+        <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
+          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+        </button>
+      </div>
+
       <div className="topicsHero card">
         <div className="topicsHeroIcon">
           <LayoutGrid className="lucide" aria-hidden="true" />

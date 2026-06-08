@@ -263,6 +263,201 @@ async function getTopicFromDb(topicId) {
   return row ? normalizeTopicRow(row) : null;
 }
 
+function buildTopicQuestionKey(topicId, questionId) {
+  return `topic:${String(topicId)}:${String(questionId)}`;
+}
+
+function normalizeTopicQuestionSnapshot(topic, question, questionIndex) {
+  const normalized = normalizeQuestions([question])[0];
+  if (!normalized) return null;
+  return {
+    id: String(normalized.id || question?.id || `${questionIndex + 1}`),
+    image: String(normalized.image || ""),
+    text: String(normalized.text || ""),
+    options: Array.isArray(normalized.options) ? normalized.options.map((option) => String(option || "")) : [],
+    correctIndex: Number.isFinite(Number(normalized.correctIndex)) ? Number(normalized.correctIndex) : 0,
+    explanation: String(normalized.explanation || "")
+  };
+}
+
+function normalizeTopicQuestionBankRow(row) {
+  return {
+    questionKey: String(row.question_key || ""),
+    topicId: Number(row.topic_id || 0),
+    topicSlug: String(row.topic_slug || ""),
+    topicTitle: String(row.topic_title || ""),
+    questionId: String(row.question_id || ""),
+    questionIndex: Number(row.question_index || 0),
+    question: parseJsonValue(row.question, {})
+  };
+}
+
+async function syncTopicQuestionBankFromTopics() {
+  const topics = await getTopicsFromDb();
+  const existingRows = await dbApi.all(
+    "SELECT question_key, sort_order FROM topic_question_bank ORDER BY sort_order ASC, question_key ASC"
+  );
+  const sortOrderByKey = new Map(
+    existingRows.map((row) => [String(row.question_key || ""), Number(row.sort_order || 0)])
+  );
+  let maxSortOrder = existingRows.reduce((max, row) => Math.max(max, Number(row.sort_order || 0)), 0);
+
+  for (const topic of topics) {
+    for (const [questionIndex, question] of (Array.isArray(topic.questions) ? topic.questions : []).entries()) {
+      const questionId = String(question?.id || `${questionIndex + 1}`);
+      const questionKey = buildTopicQuestionKey(topic.id, questionId);
+      const snapshot = normalizeTopicQuestionSnapshot(topic, question, questionIndex);
+      if (!snapshot) continue;
+
+      const payload = {
+        topic_id: topic.id,
+        topic_slug: topic.slug,
+        topic_title: topic.title,
+        question_id: questionId,
+        question_index: questionIndex,
+        question: snapshot
+      };
+
+      if (sortOrderByKey.has(questionKey)) {
+        await dbApi.run(
+          `
+            UPDATE topic_question_bank
+            SET topic_id = ?,
+                topic_slug = ?,
+                topic_title = ?,
+                question_id = ?,
+                question_index = ?,
+                question = ?::jsonb,
+                updated_at = NOW()
+            WHERE question_key = ?
+          `,
+          [
+            payload.topic_id,
+            payload.topic_slug,
+            payload.topic_title,
+            payload.question_id,
+            payload.question_index,
+            JSON.stringify(payload.question),
+            questionKey
+          ]
+        );
+      } else {
+        maxSortOrder += 1;
+        sortOrderByKey.set(questionKey, maxSortOrder);
+        await dbApi.run(
+          `
+            INSERT INTO topic_question_bank (
+              question_key,
+              topic_id,
+              topic_slug,
+              topic_title,
+              question_id,
+              question_index,
+              question,
+              sort_order,
+              created_at,
+              updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?, NOW(), NOW())
+            ON CONFLICT (question_key) DO UPDATE SET
+              topic_id = EXCLUDED.topic_id,
+              topic_slug = EXCLUDED.topic_slug,
+              topic_title = EXCLUDED.topic_title,
+              question_id = EXCLUDED.question_id,
+              question_index = EXCLUDED.question_index,
+              question = EXCLUDED.question,
+              updated_at = EXCLUDED.updated_at
+          `,
+          [
+            questionKey,
+            payload.topic_id,
+            payload.topic_slug,
+            payload.topic_title,
+            payload.question_id,
+            payload.question_index,
+            JSON.stringify(payload.question),
+            maxSortOrder
+          ]
+        );
+      }
+    }
+  }
+}
+
+async function getTopicQuestionBankFromDb() {
+  await syncTopicQuestionBankFromTopics();
+  const rows = await dbApi.all(
+    "SELECT question_key, topic_id, topic_slug, topic_title, question_id, question_index, question, sort_order FROM topic_question_bank ORDER BY sort_order ASC, question_key ASC"
+  );
+  return rows.map(normalizeTopicQuestionBankRow);
+}
+
+function chunkArray(items, size) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
+
+function buildGeneratedTicketFromBankChunk(chunk, ticketIndex) {
+  return {
+    id: `ticket-${ticketIndex + 1}`,
+    title: `Bilet ${ticketIndex + 1}`,
+    questions: chunk.map((item) => item.question),
+    questionsCount: chunk.length,
+    locked: false
+  };
+}
+
+function buildGeneratedCustomTestFromBankSize(bank, size) {
+  const questions = bank.slice(0, size).map((item) => item.question);
+  return {
+    id: 1000 + size,
+    title: `${size} ta`,
+    questions,
+    questionsCount: questions.length
+  };
+}
+
+async function getGeneratedTicketsFromDb() {
+  const bank = await getTopicQuestionBankFromDb();
+  return chunkArray(bank, 20).map((chunk, index) => buildGeneratedTicketFromBankChunk(chunk, index));
+}
+
+async function getGeneratedTicketByIdFromDb(ticketId) {
+  const key = String(ticketId || "").trim();
+  const match = /^ticket-(\d+)$/i.exec(key) || /^(\d+)$/.exec(key);
+  if (!match) return null;
+  const index = Number(match[1]) - 1;
+  if (index < 0) return null;
+  const bank = await getTopicQuestionBankFromDb();
+  const chunk = bank.slice(index * 20, index * 20 + 20);
+  if (!chunk.length) return null;
+  return buildGeneratedTicketFromBankChunk(chunk, index);
+}
+
+async function getGeneratedCustomTestsFromDb() {
+  const bank = await getTopicQuestionBankFromDb();
+  const results = [];
+  for (let size = 20; size <= bank.length; size += 20) {
+    results.push(buildGeneratedCustomTestFromBankSize(bank, size));
+  }
+  return results;
+}
+
+async function getGeneratedCustomTestByIdFromDb(testId) {
+  const key = String(testId || "").trim();
+  const match = /^(\d+)$/.exec(key);
+  if (!match) return null;
+  const rawId = Number(match[1]);
+  const size = rawId >= 1000 ? rawId - 1000 : rawId;
+  if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
+  const bank = await getTopicQuestionBankFromDb();
+  if (size > bank.length) return null;
+  return buildGeneratedCustomTestFromBankSize(bank, size);
+}
+
 async function ensureUniqueTopicSlug(baseSlug, ignoreId = null) {
   let slug = slugifyTopic(baseSlug);
   let suffix = 2;
@@ -287,6 +482,7 @@ async function createTopic(input) {
     `,
     [slug, next.title, JSON.stringify(next.questions), next.adminMarked]
   );
+  await syncTopicQuestionBankFromTopics();
   return normalizeTopicRow(result);
 }
 
@@ -304,6 +500,7 @@ async function updateTopic(topicId, input) {
     `,
     [slug, next.title, JSON.stringify(next.questions), next.adminMarked, current.id]
   );
+  await syncTopicQuestionBankFromTopics();
   return normalizeTopicRow(result);
 }
 
@@ -312,6 +509,7 @@ async function deleteTopic(topicId) {
   if (!current) throw new Error("Mavzu topilmadi");
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(current.id)]);
   await dbApi.run("DELETE FROM topics WHERE id = ?", [String(current.id)]);
+  await syncTopicQuestionBankFromTopics();
 }
 
 async function importTopicQuestions(topicId, questionItems, replace = false) {
@@ -331,6 +529,7 @@ async function importTopicQuestions(topicId, questionItems, replace = false) {
     `,
     [JSON.stringify(nextQuestions), current.adminMarked, String(current.id)]
   );
+  await syncTopicQuestionBankFromTopics();
   return normalizeTopicRow(updated);
 }
 
@@ -369,6 +568,7 @@ async function importTopics(topicItems) {
       upserted.push(normalizeTopicRow(created));
     }
   }
+  await syncTopicQuestionBankFromTopics();
   return upserted;
 }
 
@@ -383,6 +583,7 @@ async function seedTopicsIfEmpty() {
       await importTopics(topicItems);
       console.log(`[topics] seeded ${topicItems.length} records from ${TOPICS_SEED_PATH}`);
     }
+    await syncTopicQuestionBankFromTopics();
   } catch (error) {
     console.log(`[topics] seed skipped: ${error?.message || "unknown error"}`);
   }
@@ -1641,41 +1842,15 @@ function buildExamQuestionKey({ kind, sourceId, questionId }) {
 }
 
 async function getExamQuestionPool() {
-  const [tickets, topics, customTests] = await Promise.all([getTicketsFromDb(), getTopicsFromDb(), getCustomTestsFromDb()]);
-  const questions = [
-    ...tickets.flatMap((ticket) =>
-      (Array.isArray(ticket.questions) ? ticket.questions : []).map((question, index) => ({
-        kind: "ticket",
-        sourceId: String(ticket.id),
-        sourceTitle: String(ticket.title || ""),
-        questionIndex: index,
-        question,
-        questionKey: buildExamQuestionKey({ kind: "ticket", sourceId: ticket.id, questionId: question.id || index })
-      }))
-    ),
-    ...topics.flatMap((topic) =>
-      (Array.isArray(topic.questions) ? topic.questions : []).map((question, index) => ({
-        kind: "topic",
-        sourceId: String(topic.id),
-        sourceTitle: String(topic.title || ""),
-        questionIndex: index,
-        question,
-        questionKey: buildExamQuestionKey({ kind: "topic", sourceId: topic.id, questionId: question.id || index })
-      }))
-    ),
-    ...customTests.flatMap((customTest) =>
-      (Array.isArray(customTest.questions) ? customTest.questions : []).map((question, index) => ({
-        kind: "custom",
-        sourceId: String(customTest.id),
-        sourceTitle: String(customTest.title || ""),
-        questionIndex: index,
-        question,
-        questionKey: buildExamQuestionKey({ kind: "custom", sourceId: customTest.id, questionId: question.id || index })
-      }))
-    )
-  ];
-
-  return questions;
+  const bank = await getTopicQuestionBankFromDb();
+  return bank.map((item) => ({
+    kind: "topic",
+    sourceId: String(item.topicId),
+    sourceTitle: String(item.topicTitle || ""),
+    questionIndex: Number(item.questionIndex || 0),
+    questionKey: String(item.questionKey || ""),
+    question: item.question
+  }));
 }
 
 function buildExamQuestionItem(poolItem) {
@@ -1990,12 +2165,18 @@ app.get("/api/topics/:topicId", async (req, res) => {
 });
 
 app.get("/api/custom-tests", async (_req, res) => {
-  const customTests = await getCustomTestsFromDb();
-  res.json({ customTests: customTests.map((test) => ({ id: test.id, title: test.title })) });
+  const customTests = await getGeneratedCustomTestsFromDb();
+  res.json({
+    customTests: customTests.map((test) => ({
+      id: test.id,
+      title: test.title,
+      questionsCount: test.questionsCount
+    }))
+  });
 });
 
 app.get("/api/custom-tests/:testId", async (req, res) => {
-  const customTest = await getCustomTestFromDb(String(req.params.testId));
+  const customTest = await getGeneratedCustomTestByIdFromDb(String(req.params.testId));
   if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
   res.json({ customTest });
 });
@@ -2024,7 +2205,7 @@ app.post("/api/custom-test-progress/:testId", requireUser, async (req, res) => {
   const answers = req.body?.answers;
   if (!answers || typeof answers !== "object") return res.status(400).json({ error: "Javoblar obyekti kerak" });
 
-  const customTest = await getCustomTestFromDb(testId);
+  const customTest = await getGeneratedCustomTestByIdFromDb(testId);
   if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
 
   let correct = 0;
@@ -2085,24 +2266,16 @@ app.post("/api/custom-test-progress/:testId/reset", requireUser, async (req, res
 });
 
 app.get("/api/answers", requireUser, async (_req, res) => {
-  const [tickets, topics, customTests] = await Promise.all([getTicketsFromDb(), getTopicsFromDb(), getCustomTestsFromDb()]);
-  const questions = [
-    ...tickets.flatMap((ticket) =>
-      (Array.isArray(ticket.questions) ? ticket.questions : []).map((question, index) =>
-        buildAnswerQuestion({ kind: "ticket", id: ticket.id, title: ticket.title, question, questionIndex: index })
-      )
-    ),
-    ...topics.flatMap((topic) =>
-      (Array.isArray(topic.questions) ? topic.questions : []).map((question, index) =>
-        buildAnswerQuestion({ kind: "topic", id: topic.id, title: topic.title, question, questionIndex: index })
-      )
-    ),
-    ...customTests.flatMap((customTest) =>
-      (Array.isArray(customTest.questions) ? customTest.questions : []).map((question, index) =>
-        buildAnswerQuestion({ kind: "custom", id: customTest.id, title: customTest.title, question, questionIndex: index })
-      )
-    )
-  ];
+  const bank = await getTopicQuestionBankFromDb();
+  const questions = bank.map((item) =>
+    buildAnswerQuestion({
+      kind: "topic",
+      id: item.topicId,
+      title: item.topicTitle,
+      question: item.question,
+      questionIndex: item.questionIndex
+    })
+  );
 
   res.json({ questions });
 });
@@ -2292,15 +2465,20 @@ app.post("/api/browser-token", requireUser, async (req, res) => {
 });
 
 app.get("/api/tickets", requireUser, async (req, res) => {
-  const tickets = await getTicketsFromDb();
-  const list = tickets.map((t, idx) => {
-    return { id: t.id, title: t.title, locked: false };
+  const tickets = await getGeneratedTicketsFromDb();
+  res.json({
+    tickets: tickets.map((ticket) => ({
+      id: ticket.id,
+      title: ticket.title,
+      locked: false,
+      questionsCount: ticket.questionsCount
+    })),
+    isPro: true
   });
-  res.json({ tickets: list, isPro: true });
 });
 
 app.get("/api/tickets/:ticketId", requireUser, async (req, res) => {
-  const ticket = await getTicketByIdFromDb(String(req.params.ticketId));
+  const ticket = await getGeneratedTicketByIdFromDb(String(req.params.ticketId));
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
   res.json({ ticket, isPro: true });

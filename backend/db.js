@@ -171,6 +171,30 @@ async function initDb(dbApi) {
   await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS topics_slug_unique_idx ON topics (slug);`);
 
   await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS topic_question_bank (
+      question_key TEXT PRIMARY KEY,
+      topic_id BIGINT NOT NULL,
+      topic_slug TEXT NOT NULL DEFAULT '',
+      topic_title TEXT NOT NULL,
+      question_id TEXT NOT NULL,
+      question_index INTEGER NOT NULL DEFAULT 0,
+      question JSONB NOT NULL,
+      sort_order INTEGER NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS topic_id BIGINT NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS topic_slug TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS topic_title TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS question_id TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS question_index INTEGER NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS question JSONB NOT NULL DEFAULT '{}'::jsonb;`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE topic_question_bank ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS topic_question_bank_sort_order_unique_idx ON topic_question_bank (sort_order);`);
+
+  await dbApi.run(`
     CREATE TABLE IF NOT EXISTS custom_tests (
       id BIGSERIAL PRIMARY KEY,
       title TEXT NOT NULL,
@@ -194,6 +218,8 @@ async function initDb(dbApi) {
       UNIQUE(user_id, custom_test_id)
     );
   `);
+  await dbApi.run(`ALTER TABLE custom_test_progress DROP CONSTRAINT IF EXISTS custom_test_progress_custom_test_id_fkey;`);
+  await dbApi.run(`ALTER TABLE custom_test_progress ALTER COLUMN custom_test_id TYPE TEXT USING custom_test_id::TEXT;`);
 
   await dbApi.run(`
     CREATE TABLE IF NOT EXISTS exam_sessions (

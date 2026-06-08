@@ -1221,6 +1221,25 @@ body {
   padding-right: 72px;
 }
 
+.topicNameRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.topicMeta {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--blue-soft) 70%, white 30%);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .topicOnlyCard {
   display: grid;
   place-items: center;

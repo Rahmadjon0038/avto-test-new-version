@@ -1,6 +1,7 @@
 export type CustomTestCard = {
   id: number;
   title: string;
+  questionsCount?: number;
   questions?: Array<{
     id: string;
     text: string;

@@ -40,7 +40,12 @@ export default function CustomTestsPage() {
             <span className="topicIndex" aria-hidden="true">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <div className="topicName">{customTest.title}</div>
+            <div className="topicNameRow">
+              <div className="topicName">{customTest.title}</div>
+              {typeof customTest.questionsCount === "number" ? (
+                <div className="topicMeta">{customTest.questionsCount} savol</div>
+              ) : null}
+            </div>
           </button>
         ))}
       </div>
