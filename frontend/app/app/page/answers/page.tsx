@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BookOpen, Filter, Image, ImageOff, Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, BookOpen, ChevronDown, Check, Filter, Image, ImageOff, Search } from "lucide-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -63,18 +63,41 @@ function questionKeyLabel(index: number) {
 export default function AnswersPage() {
   const { authFetch } = useAuth();
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [filterOpen, setFilterOpen] = useState(false);
   const pageSize = 40;
+  const filterRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    function onPointerDown(event: PointerEvent) {
+      if (!filterRef.current) return;
+      if (!filterRef.current.contains(event.target as Node)) {
+        setFilterOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, []);
 
   const answersQuery = useInfiniteQuery({
-    queryKey: ["answers", search, filter],
+    queryKey: ["answers", debouncedSearch, filter],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams({
         offset: String(pageParam || 0),
         limit: String(pageSize),
         filter,
-        q: search.trim()
+        q: debouncedSearch
       });
       const res = await authFetch(`/api/answers?${params.toString()}`);
       const data = await jsonOrError(res);
@@ -153,14 +176,89 @@ export default function AnswersPage() {
             <Search className="lucide" aria-hidden="true" /> Qidirish
           </div>
         </div>
-        <div className="adminSearchWrap">
-          <Search className="lucide adminSearchIcon" aria-hidden="true" />
-          <input
-            className="input adminSearchInput"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Savol matni, izoh yoki test nomi bo‘yicha qidiring"
-          />
+        <div className="answersSearchRow">
+          <div className="adminSearchWrap answersSearchWrap">
+            <Search className="lucide adminSearchIcon" aria-hidden="true" />
+            <input
+              className="input adminSearchInput answersSearchInput"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Savol, izoh yoki javob bo‘yicha qidiring"
+            />
+            <div className="answersFilterSelect" ref={filterRef}>
+              <button
+                className={`answersFilterToggle ${filterOpen ? "open" : ""}`}
+                type="button"
+                onClick={() => setFilterOpen((open) => !open)}
+                aria-label="Filtr"
+                aria-expanded={filterOpen}
+              >
+                <Filter className="lucide" aria-hidden="true" />
+                <ChevronDown className="lucide answersFilterChevron" aria-hidden="true" />
+              </button>
+
+              {filterOpen ? (
+                <div className="answersFilterDropdown" role="menu" aria-label="Filtrlar">
+                  <button
+                    className={`answersFilterOption ${filter === "all" ? "active" : ""}`}
+                    type="button"
+                    onClick={() => {
+                      setFilter("all");
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {filter === "all" ? <Check className="lucide" aria-hidden="true" /> : null}
+                    <span>Barchasi</span>
+                  </button>
+                  <button
+                    className={`answersFilterOption ${filter === "with-image" ? "active" : ""}`}
+                    type="button"
+                    onClick={() => {
+                      setFilter("with-image");
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {filter === "with-image" ? <Check className="lucide" aria-hidden="true" /> : null}
+                    <span>Rasmli</span>
+                  </button>
+                  <button
+                    className={`answersFilterOption ${filter === "without-image" ? "active" : ""}`}
+                    type="button"
+                    onClick={() => {
+                      setFilter("without-image");
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {filter === "without-image" ? <Check className="lucide" aria-hidden="true" /> : null}
+                    <span>Rasmsiz</span>
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="answersQuickFilters">
+            <button className={`answersQuickFilter ${filter === "all" ? "active" : ""}`} type="button" onClick={() => setFilter("all")}>
+              <Check className="lucide" aria-hidden="true" />
+              <span>Barchasi</span>
+            </button>
+            <button
+              className={`answersQuickFilter ${filter === "with-image" ? "active" : ""}`}
+              type="button"
+              onClick={() => setFilter("with-image")}
+            >
+              <Image className="lucide" aria-hidden="true" />
+              <span>Rasmli</span>
+            </button>
+            <button
+              className={`answersQuickFilter ${filter === "without-image" ? "active" : ""}`}
+              type="button"
+              onClick={() => setFilter("without-image")}
+            >
+              <ImageOff className="lucide" aria-hidden="true" />
+              <span>Rasmsiz</span>
+            </button>
+          </div>
         </div>
       </div>
 

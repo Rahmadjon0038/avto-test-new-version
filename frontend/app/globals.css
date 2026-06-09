@@ -618,6 +618,120 @@ body {
   gap: 12px;
 }
 
+.answersSearchRow {
+  display: grid;
+  gap: 10px;
+}
+
+.answersSearchWrap {
+  position: relative;
+  padding-right: 64px;
+}
+
+.answersSearchInput {
+  font-size: 14px;
+}
+
+.answersSearchInput::placeholder {
+  font-size: 13px;
+  color: var(--textSoft);
+}
+
+.answersFilterSelect {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+.answersFilterToggle {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel2);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.answersFilterToggle.open {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  background: color-mix(in srgb, var(--primary) 10%, var(--panel2));
+}
+
+.answersFilterChevron {
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+}
+
+.answersFilterDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 200px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel2);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+}
+
+.answersFilterOption {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.answersFilterOption.active {
+  background: color-mix(in srgb, var(--primary) 14%, var(--panel2));
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  color: var(--primary);
+}
+
+.answersQuickFilters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.answersQuickFilter {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--muted);
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.answersQuickFilter.active {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: color-mix(in srgb, var(--primary) 15%, var(--panel2));
+  color: var(--primary);
+}
+
 .answersQuestionGrid {
   display: grid;
   gap: 12px;
@@ -649,9 +763,9 @@ body {
 
 .answersQuestionCard {
   position: relative;
-  padding: 16px;
+  padding: 10px;
   display: grid;
-  gap: 14px;
+  gap: 6px;
   align-content: start;
   min-width: 0;
   border-color: var(--border);
@@ -671,7 +785,7 @@ body {
 }
 
 .answersQuestionCardTitle {
-  font-size: 12px;
+  font-size: 9px;
   line-height: 1;
   font-weight: 1000;
   letter-spacing: 0.08em;
@@ -687,9 +801,9 @@ body {
 }
 
 .answersQuestionTextBig {
-  font-size: 18px;
-  font-weight: 1000;
-  line-height: 1.35;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.18;
   white-space: pre-line;
 }
 
@@ -698,13 +812,13 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   background: #111318;
-  max-height: 280px;
+  max-height: 150px;
 }
 
 .answersQuestionImage {
   display: block;
   width: 100%;
-  max-height: 280px;
+  max-height: 150px;
   object-fit: contain;
   object-position: center;
 }
@@ -712,7 +826,7 @@ body {
 .answersOptions {
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .answersQuestionCard .option {
@@ -735,22 +849,22 @@ body {
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: 6px;
 }
 
 .answersAnswer strong {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 1000;
   text-align: right;
 }
 
 .answersExplanation {
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: 6px;
   color: var(--text);
   white-space: pre-line;
-  line-height: 1.5;
-  font-size: 14px;
+  line-height: 1.34;
+  font-size: 10px;
   font-weight: 650;
 }
 
@@ -773,15 +887,17 @@ body {
 }
 
 .answersQuestionCard .muted {
-  font-size: 12px;
+  font-size: 9px;
 }
 
 .answersQuestionCard .optionText {
-  font-size: 14px;
+  font-size: 10px;
+  line-height: 1.18;
 }
 
 .answersQuestionCard .optionKey {
-  flex-basis: 42px;
+  flex-basis: 28px;
+  font-size: 10px;
 }
 
 .answersQuestionCard .option {
@@ -795,6 +911,24 @@ body {
 .answersQuestionCard .answersAnswer,
 .answersQuestionCard .answersExplanation {
   margin-top: 0;
+}
+
+.answersQuestionCard .option {
+  min-height: 34px;
+}
+
+.answersQuestionCard .answersExplanation {
+  padding-top: 6px;
+  font-size: 10px;
+  line-height: 1.34;
+}
+
+.answersQuestionCard .answersAnswer {
+  padding-top: 6px;
+}
+
+.answersQuestionCard .answersAnswer strong {
+  font-size: 10px;
 }
 
 .mistakesQuestionCard {
@@ -874,7 +1008,11 @@ body {
 
 @media (min-width: 860px) {
   .answersQuestionTextBig {
-    font-size: 19px;
+    font-size: 11.5px;
+  }
+
+  .answersQuestionCard .optionText {
+    font-size: 10.5px;
   }
 }
 
