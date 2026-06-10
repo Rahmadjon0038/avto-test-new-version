@@ -6,7 +6,12 @@ const { openDb, initDb } = require("./db");
 const crypto = require("crypto");
 const swaggerUi = require("swagger-ui-express");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
+let nodemailer = null;
+try {
+  nodemailer = require("nodemailer");
+} catch (error) {
+  console.warn("[backend] nodemailer module not installed; password reset emails will fall back to temporary password response.");
+}
 const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
 const PORT = Number(process.env.PORT || 3000);
@@ -1635,6 +1640,7 @@ function generateTemporaryPassword(length = 10) {
 }
 
 function createMailTransport() {
+  if (!nodemailer) return null;
   const host = String(process.env.SMTP_HOST || "").trim();
   const user = String(process.env.SMTP_USER || "").trim();
   const pass = String(process.env.SMTP_PASS || "").trim();
