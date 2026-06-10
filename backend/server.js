@@ -6,6 +6,7 @@ const { openDb, initDb } = require("./db");
 const crypto = require("crypto");
 const swaggerUi = require("swagger-ui-express");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
 const PORT = Number(process.env.PORT || 3000);
@@ -43,6 +44,15 @@ const r2 = new S3Client({
 
 const TOPICS_SEED_PATH = path.join(__dirname, "..", "data", "topics.json");
 const CUSTOM_TESTS_SEED_PATH = path.join(__dirname, "..", "data", "custom-tests.json");
+const GOOGLE_CLIENT_IDS = new Set(
+  String(
+    process.env.GOOGLE_CLIENT_IDS ||
+      "844953821020-2dcgvd7i32rvpj552gkgopat9278tnfe.apps.googleusercontent.com,1020-ctqhbkt1gnfi3jiahg4jmfkjum2e91qk.apps.googleusercontent.com,844953821020-u94ktl35es9aquthb8rh5rmg7etossra.apps.googleusercontent.com"
+  )
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+);
 
 function parseTicketRow(row) {
   return {
@@ -1485,6 +1495,15 @@ function normalizeUzPhone(input) {
   return `+998${local}`;
 }
 
+function normalizeEmail(input) {
+  const email = String(input || "").trim().toLowerCase();
+  if (!email) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Email formati noto‘g‘ri");
+  }
+  return email;
+}
+
 function formatUzPhoneForUi(normalized) {
   const digits = String(normalized || "").replace(/\D/g, "");
   const local = digits.startsWith("998") ? digits.slice(3) : digits;
@@ -1496,7 +1515,7 @@ function formatUzPhoneForUi(normalized) {
   return `+998-${aa}-${bbb}-${cc}-${dd}`;
 }
 
-async function createUserFromPhone({ fullName, phone, password }) {
+async function createUserFromPhone({ fullName, phone, password, email }) {
   const cleanName = String(fullName || "").trim();
   if (!cleanName) throw new Error("Ism kiritilishi kerak");
 
@@ -1504,6 +1523,7 @@ async function createUserFromPhone({ fullName, phone, password }) {
   if (cleanPassword.length < 6) throw new Error("Kamida 6 ta belgidan iborat parol yarating");
 
   const normalizedPhone = normalizeUzPhone(phone);
+  const normalizedEmail = normalizeEmail(email);
   const passwordHash = await bcrypt.hash(cleanPassword, 10);
 
   const existing = await dbApi.get("SELECT id FROM users WHERE phone = ?", [normalizedPhone]);
@@ -1515,13 +1535,146 @@ async function createUserFromPhone({ fullName, phone, password }) {
 
   const row = await dbApi.get(
     `
-      INSERT INTO users (full_name, phone, password_hash)
-      VALUES (?, ?, ?)
+      INSERT INTO users (full_name, phone, email, password_hash)
+      VALUES (?, ?, ?, ?)
       RETURNING *
     `,
-    [cleanName, normalizedPhone, passwordHash]
+    [cleanName, normalizedPhone, normalizedEmail, passwordHash]
   );
   return row;
+}
+
+async function updateUserAuthProfile(userId, fields) {
+  const current = await dbApi.get("SELECT * FROM users WHERE id = ?", [String(userId)]);
+  if (!current) throw new Error("Foydalanuvchi topilmadi");
+
+  const nextFullName = fields.fullName !== undefined ? String(fields.fullName || "").trim() : String(current.full_name || "").trim();
+  const nextEmail =
+    fields.email !== undefined
+      ? normalizeEmail(fields.email)
+      : current.email
+      ? normalizeEmail(current.email)
+      : null;
+  const nextGoogleSub =
+    fields.googleSub !== undefined ? String(fields.googleSub || "").trim() || null : current.google_sub || null;
+
+  const updated = await dbApi.get(
+    `
+      UPDATE users
+      SET full_name = ?,
+          email = ?,
+          google_sub = ?
+      WHERE id = ?
+      RETURNING *
+    `,
+    [nextFullName || null, nextEmail, nextGoogleSub, String(userId)]
+  );
+  return updated;
+}
+
+async function findUserByGoogleIdentity({ email, googleSub }) {
+  if (!email && !googleSub) return null;
+
+  const candidates = [];
+  if (email) candidates.push(await dbApi.get("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email]));
+  if (googleSub) candidates.push(await dbApi.get("SELECT * FROM users WHERE google_sub = ?", [googleSub]));
+
+  return candidates.find(Boolean) || null;
+}
+
+async function upsertGoogleUser({ fullName, email, googleSub }) {
+  const normalizedEmail = normalizeEmail(email);
+  const cleanGoogleSub = String(googleSub || "").trim();
+  if (!cleanGoogleSub) throw new Error("Google akkaunt ma'lumoti topilmadi");
+
+  const existing = await findUserByGoogleIdentity({ email: normalizedEmail, googleSub: cleanGoogleSub });
+  if (existing) {
+    return updateUserAuthProfile(existing.id, {
+      fullName: fullName || existing.full_name || normalizedEmail,
+      email: normalizedEmail || existing.email,
+      googleSub: cleanGoogleSub
+    });
+  }
+
+  const created = await dbApi.get(
+    `
+      INSERT INTO users (full_name, phone, email, google_sub)
+      VALUES (?, NULL, ?, ?)
+      RETURNING *
+    `,
+    [String(fullName || normalizedEmail || "Foydalanuvchi"), normalizedEmail, cleanGoogleSub]
+  );
+  return created;
+}
+
+async function verifyGoogleIdToken(idToken) {
+  const token = String(idToken || "").trim();
+  if (!token) throw new Error("Google token topilmadi");
+
+  const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body.error_description || body.error || "Google login tasdiqlanmadi");
+  }
+
+  const audience = String(body.aud || "");
+  if (!GOOGLE_CLIENT_IDS.has(audience)) {
+    throw new Error("Google client ID mos emas");
+  }
+
+  return {
+    email: String(body.email || "").trim().toLowerCase(),
+    fullName: String(body.name || body.given_name || body.email || "").trim(),
+    googleSub: String(body.sub || "").trim(),
+    picture: String(body.picture || "").trim()
+  };
+}
+
+function generateTemporaryPassword(length = 10) {
+  return crypto.randomBytes(length).toString("base64url").replace(/[^a-zA-Z0-9]/g, "").slice(0, length);
+}
+
+function createMailTransport() {
+  const host = String(process.env.SMTP_HOST || "").trim();
+  const user = String(process.env.SMTP_USER || "").trim();
+  const pass = String(process.env.SMTP_PASS || "").trim();
+  const from = String(process.env.SMTP_FROM || "").trim();
+  if (!host || !user || !pass || !from) return null;
+
+  return {
+    from,
+    transporter: nodemailer.createTransport({
+      host,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: String(process.env.SMTP_SECURE || "").trim() === "true",
+      auth: { user, pass }
+    })
+  };
+}
+
+async function sendTemporaryPasswordEmail({ to, password, fullName }) {
+  const mail = createMailTransport();
+  if (!mail) {
+    return { sent: false };
+  }
+
+  await mail.transporter.sendMail({
+    from: mail.from,
+    to,
+    subject: "Road-test: yangi parol",
+    text: `Salom ${fullName || ""}\n\nSizning yangi parolingiz: ${password}\n\nRoad-test`,
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111">
+        <h2 style="margin:0 0 12px">Road-test</h2>
+        <p>Salom ${fullName || ""},</p>
+        <p>Sizning yangi parolingiz:</p>
+        <div style="display:inline-block;padding:12px 16px;border-radius:10px;background:#eef4ff;font-size:18px;font-weight:700;letter-spacing:1px">${password}</div>
+        <p style="margin-top:18px">Kirish uchun shu paroldan foydalaning.</p>
+      </div>
+    `
+  });
+
+  return { sent: true };
 }
 
 async function verifyPasswordLogin({ phone, password }) {
@@ -2076,7 +2229,8 @@ async function handleRegister(req, res) {
     const user = await createUserFromPhone({
       fullName: req.body?.fullName,
       phone: req.body?.phone,
-      password: req.body?.password
+      password: req.body?.password,
+      email: req.body?.email
     });
     await respondWithAuthUser(req, res, user);
   } catch (e) {
@@ -2093,11 +2247,63 @@ async function handleLogin(req, res) {
   await respondWithAuthUser(req, res, v.user);
 }
 
+async function handleGoogleLogin(req, res) {
+  try {
+    const profile = await verifyGoogleIdToken(req.body?.idToken);
+    const user = await upsertGoogleUser({
+      fullName: profile.fullName,
+      email: profile.email,
+      googleSub: profile.googleSub
+    });
+    await respondWithAuthUser(req, res, user);
+  } catch (e) {
+    res.status(e?.statusCode || 400).json({ error: e?.message || "Google orqali kirish amalga oshmadi" });
+  }
+}
+
+async function handlePasswordResetRequest(req, res) {
+  try {
+    const email = normalizeEmail(req.body?.email);
+    if (!email) return res.status(400).json({ error: "Email kiritilishi kerak" });
+
+    const user = await dbApi.get("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email]);
+    if (!user) return res.status(404).json({ error: "Bu email bo‘yicha foydalanuvchi topilmadi" });
+
+    const temporaryPassword = generateTemporaryPassword(10);
+    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+    await dbApi.run("UPDATE users SET password_hash = ? WHERE id = ?", [passwordHash, String(user.id)]);
+
+    const mailResult = await sendTemporaryPasswordEmail({
+      to: email,
+      password: temporaryPassword,
+      fullName: user.full_name
+    });
+
+    res.json({
+      ok: true,
+      sent: mailResult.sent,
+      message: mailResult.sent
+        ? "Yangi parol emailingizga yuborildi"
+        : "Email sozlanmagan. Yangi parol vaqtincha qaytarildi",
+      temporaryPassword: mailResult.sent ? undefined : temporaryPassword
+    });
+  } catch (e) {
+    res.status(e?.statusCode || 400).json({ error: e?.message || "Parolni tiklash amalga oshmadi" });
+  }
+}
+
 app.post("/api/auth/register", handleRegister);
 app.post("/api/register", handleRegister);
 
 app.post("/api/auth/login", handleLogin);
 app.post("/api/login", handleLogin);
+
+app.post("/api/auth/google", handleGoogleLogin);
+app.post("/api/login/google", handleGoogleLogin);
+
+app.post("/api/auth/password-reset/request", handlePasswordResetRequest);
+app.post("/api/password-reset/request", handlePasswordResetRequest);
 
 app.post("/api/auth/logout", async (req, res) => {
   const token = await readRefreshCookie(req);

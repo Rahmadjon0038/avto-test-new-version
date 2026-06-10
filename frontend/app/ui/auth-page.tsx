@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
@@ -21,6 +21,14 @@ import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
 type Tab = "register" | "login";
+
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+
+const GOOGLE_WEB_CLIENT_ID = "844953821020-2dcgvd7i32rvpj552gkgopat9278tnfe.apps.googleusercontent.com";
 
 function formatUzLocalPhone(value: string) {
   const digits = normalizeUzLocalDigits(value);
@@ -62,12 +70,17 @@ export default function AuthPage() {
   const { setAccessToken, setUser, authReady, accessToken } = useAuth();
   const [tab, setTab] = useState<Tab>("login");
   const [authOpen, setAuthOpen] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [emailRegister, setEmailRegister] = useState("");
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
+  const googleButtonLoadedRef = useRef(false);
 
   useEffect(() => {
     if (authReady && accessToken) router.replace("/app");
@@ -80,18 +93,97 @@ export default function AuthPage() {
     };
   }, [authOpen]);
 
+  useEffect(() => {
+    if (!authOpen || showForgotPassword) return;
+    if (googleButtonLoadedRef.current) {
+      const google = window.google;
+      if (google?.accounts?.id && googleButtonRef.current) {
+        googleButtonRef.current.innerHTML = "";
+        google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: "outline",
+          size: "large",
+          width: googleButtonRef.current.offsetWidth || 360,
+          text: "signin_with",
+          shape: "pill"
+        });
+      }
+      return;
+    }
+
+    const scriptId = "google-gsi-script";
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+    const initGoogle = () => {
+      const google = window.google;
+      if (!google?.accounts?.id || !googleButtonRef.current) return;
+      googleButtonRef.current.innerHTML = "";
+      google.accounts.id.initialize({
+        client_id: GOOGLE_WEB_CLIENT_ID,
+        callback: async (response: { credential?: string }) => {
+          const credential = String(response?.credential || "");
+          if (!credential) {
+            toast.error("Google token topilmadi");
+            return;
+          }
+          try {
+            const data = await fetch("/api/auth/google", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ idToken: credential })
+            }).then(jsonOrError);
+            if (data?.accessToken) setAccessToken(String(data.accessToken));
+            if (data?.user) setUser(data.user);
+            toast.success("Google orqali kirildi");
+            setAuthOpen(false);
+            router.push("/app");
+          } catch (error: any) {
+            toast.error(error?.message || "Google orqali kirish amalga oshmadi");
+          }
+        }
+      });
+      google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        width: googleButtonRef.current.offsetWidth || 360,
+        text: "signin_with",
+        shape: "pill"
+      });
+      googleButtonLoadedRef.current = true;
+    };
+
+    if (window.google?.accounts?.id) {
+      initGoogle();
+      return;
+    }
+
+    const script = existingScript || document.createElement("script");
+    if (!existingScript) {
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogle;
+      document.head.appendChild(script);
+    } else {
+      existingScript.addEventListener("load", initGoogle, { once: true });
+      initGoogle();
+    }
+  }, [authOpen, router, setAccessToken, setUser, showForgotPassword]);
+
   function switchTab(nextTab: Tab) {
     toast.dismiss();
     setTab(nextTab);
+    setShowForgotPassword(false);
   }
 
   function openAuth(nextTab: Tab = "login") {
     setTab(nextTab);
+    setShowForgotPassword(false);
     setAuthOpen(true);
   }
 
   function closeAuth() {
     setAuthOpen(false);
+    setShowForgotPassword(false);
   }
 
   function scrollToVideo() {
@@ -99,7 +191,7 @@ export default function AuthPage() {
   }
 
   const registerMutation = useMutation({
-    mutationFn: (payload: { fullName: string; phone: string; password: string }) =>
+    mutationFn: (payload: { fullName: string; email: string; phone: string; password: string }) =>
       fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,16 +211,19 @@ export default function AuthPage() {
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
     const rawFullName = String(formData.get("fullName") || fullName);
+    const rawEmail = String(formData.get("email") || emailRegister).trim();
     const rawPhone = String(formData.get("phone") || phoneRegisterLocal);
     const rawPassword = String(formData.get("password") || passwordRegister);
     const phoneDigits = uzLocalDigits(rawPhone);
 
     if (!rawFullName.trim()) return toast.error("Ism kiritilishi kerak");
+    if (!rawEmail) return toast.error("Email kiritilishi kerak");
     if (phoneDigits.length !== 9) return toast.error("Telefon raqam formati noto‘g‘ri");
     if (rawPassword.length < 6) return toast.error("Kamida 6 ta belgidan iborat parol yarating");
 
     registerMutation.mutate({
       fullName: rawFullName.trim(),
+      email: rawEmail,
       phone: `+998${phoneDigits}`,
       password: rawPassword
     });
@@ -150,6 +245,26 @@ export default function AuthPage() {
     onError: (e: any) => toast.error(e?.message || "Xatolik")
   });
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: (payload: { email: string }) =>
+      fetch("/api/auth/password-reset/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(jsonOrError),
+    onSuccess: (data: any) => {
+      if (data?.temporaryPassword) {
+        toast.success(`Yangi parol: ${String(data.temporaryPassword)}`);
+      } else {
+        toast.success(String(data?.message || "Yangi parol emailingizga yuborildi"));
+      }
+      setShowForgotPassword(false);
+      setForgotEmail("");
+      setTab("login");
+    },
+    onError: (e: any) => toast.error(e?.message || "Xatolik")
+  });
+
   async function onLogin(e: React.FormEvent) {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
@@ -162,6 +277,14 @@ export default function AuthPage() {
     if (!rawPassword) return toast.error("Parolni kiriting");
 
     loginMutation.mutate({ phone: `+998${phoneDigits}`, password: rawPassword });
+  }
+
+  async function onForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const email = String(new FormData(form).get("email") || forgotEmail).trim();
+    if (!email) return toast.error("Email kiritilishi kerak");
+    resetPasswordMutation.mutate({ email });
   }
 
   return (
@@ -289,27 +412,68 @@ export default function AuthPage() {
             <div className="authModalHeader">
               <div>
                 <div className="authModalTitle" id="auth-modal-title">
-                  Tizimga kirish
+                  {showForgotPassword ? "Parolni tiklash" : tab === "login" ? "Tizimga kirish" : "Ro‘yxatdan o‘tish"}
                 </div>
-                <div className="authModalText">Kirish yoki ro‘yxatdan o‘tish orqali testlar, biletlar va video darslardan foydalanasiz.</div>
+                <div className="authModalText">
+                  {showForgotPassword
+                    ? "Emailingizni kiriting, sizga yangi parol yuboramiz."
+                    : "Kirish yoki ro‘yxatdan o‘tish orqali testlar, biletlar va video darslardan foydalanasiz."}
+                </div>
               </div>
               <button className="btn btn-ghost" type="button" onClick={closeAuth}>
                 ✕
               </button>
             </div>
 
-            <div className="authTabs" role="tablist" aria-label="Auth tabs">
-              <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
-                <ArrowRight className="lucide" aria-hidden="true" />
-                Tizimga kirish
-              </button>
-              <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
-                <UserPlus className="lucide" aria-hidden="true" />
-                Ro‘yxatdan o‘tish
-              </button>
-            </div>
+            {!showForgotPassword ? (
+              <>
+                <div className="authTabs" role="tablist" aria-label="Auth tabs">
+                  <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
+                    <ArrowRight className="lucide" aria-hidden="true" />
+                    Tizimga kirish
+                  </button>
+                  <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
+                    <UserPlus className="lucide" aria-hidden="true" />
+                    Ro‘yxatdan o‘tish
+                  </button>
+                </div>
 
-            {tab === "register" ? (
+                <div className="authGoogleBlock">
+                  <div className="authDivider">
+                    <span>yoki Google bilan</span>
+                  </div>
+                  <div className="googleButtonMount" ref={googleButtonRef} />
+                </div>
+              </>
+            ) : null}
+
+            {showForgotPassword ? (
+              <form className="formGrid authForm" onSubmit={onForgotPassword}>
+                <div>
+                  <div className="fieldLabel">Email</div>
+                  <div className="inputGroup authInputGroup noRight">
+                    <span className="inputAddon">
+                      <Send className="lucide" aria-hidden="true" />
+                    </span>
+                    <input
+                      name="email"
+                      className="input inputField"
+                      type="email"
+                      placeholder="example@mail.com"
+                      autoComplete="email"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <button className="btn btn-primary authSubmitBtn" type="submit" disabled={resetPasswordMutation.isPending}>
+                  Yangi parol yuborish
+                </button>
+                <button className="btn btn-ghost authSecondaryBtn" type="button" onClick={() => setShowForgotPassword(false)}>
+                  Ortga qaytish
+                </button>
+              </form>
+            ) : tab === "register" ? (
               <form className="formGrid authForm" onSubmit={onRegister}>
                 <div>
                   <div className="fieldLabel">F.I.O</div>
@@ -329,6 +493,24 @@ export default function AuthPage() {
                 </div>
 
                 <div>
+                  <div className="fieldLabel">Email</div>
+                  <div className="inputGroup authInputGroup noRight">
+                    <span className="inputAddon">
+                      <Send className="lucide" aria-hidden="true" />
+                    </span>
+                    <input
+                      name="email"
+                      className="input inputField"
+                      type="email"
+                      placeholder="example@mail.com"
+                      autoComplete="email"
+                      value={emailRegister}
+                      onChange={(e) => setEmailRegister(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
                   <div className="fieldLabel">Telefon raqam</div>
                   <div className="inputGroup authInputGroup inputPhone noRight">
                     <span className="inputAddon inputAddonText">+998</span>
@@ -342,6 +524,10 @@ export default function AuthPage() {
                       onChange={(e) => setPhoneRegisterLocal(uzLocalDigits(e.target.value))}
                     />
                   </div>
+                </div>
+
+                <div className="authFormNote">
+                  Email keyin parolni tiklash uchun ishlatiladi.
                 </div>
 
                 <div>
@@ -403,6 +589,15 @@ export default function AuthPage() {
                     />
                     <button className="inputIconBtn" type="button" onClick={() => setShowPass((v) => !v)} aria-label="Show password">
                       {showPass ? <EyeOff className="lucide" aria-hidden="true" /> : <Eye className="lucide" aria-hidden="true" />}
+                    </button>
+                  </div>
+                  <div className="helpRow">
+                    <button
+                      className="linkBtn"
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                    >
+                      Parolni unutdingizmi?
                     </button>
                   </div>
                 </div>

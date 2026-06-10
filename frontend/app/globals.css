@@ -2703,6 +2703,35 @@ body {
   border-color: var(--border);
 }
 
+.authGoogleBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.authDivider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.authDivider::before,
+.authDivider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+}
+
+.googleButtonMount {
+  width: 100%;
+  min-height: 48px;
+}
+
 .inputGroup {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
@@ -2790,6 +2819,17 @@ body {
   height: 48px;
   border-radius: 8px;
   font-weight: 900;
+}
+
+.authSecondaryBtn {
+  height: 46px;
+}
+
+.authFormNote {
+  margin-top: -2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 @media (max-width: 640px) {

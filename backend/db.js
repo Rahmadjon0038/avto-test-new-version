@@ -65,6 +65,8 @@ async function initDb(dbApi) {
       id BIGSERIAL PRIMARY KEY,
       full_name TEXT,
       phone TEXT UNIQUE,
+      email TEXT UNIQUE,
+      google_sub TEXT UNIQUE,
       password_hash TEXT,
       pro_until TIMESTAMPTZ NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -73,7 +75,11 @@ async function initDb(dbApi) {
 
   // Lightweight "migrations" for existing DBs
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;`);
+  await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;`);
+  await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;`);
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique_idx ON users (LOWER(email)) WHERE email IS NOT NULL;`);
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub_unique_idx ON users (google_sub) WHERE google_sub IS NOT NULL;`);
 
   await dbApi.run(`
     CREATE TABLE IF NOT EXISTS promo_requests (
