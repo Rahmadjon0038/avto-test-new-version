@@ -1,16 +1,24 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { BadgeCheck, CreditCard, ShieldCheck, Phone, UserCircle2, Wallet } from "lucide-react";
+import { BadgeCheck, CreditCard, ShieldCheck, Phone, Send, UserCircle2, Wallet } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
 type SubPlan = "1w" | "2w" | "1m";
 type PayProvider = "click" | "payme";
+
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+
+const GOOGLE_WEB_CLIENT_ID = "844953821020-2dcgvd7i32rvpj552gkgopat9278tnfe.apps.googleusercontent.com";
 
 function getInitials(name: string) {
   const s = String(name || "").trim();
@@ -30,8 +38,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const [subOpen, setSubOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
   const [plan, setPlan] = useState<SubPlan>("1m");
   const [provider, setProvider] = useState<PayProvider>("payme");
+  const googleLinkButtonRef = useRef<HTMLDivElement | null>(null);
+  const googleLinkLoadedRef = useRef(false);
 
   const initials = useMemo(() => getInitials(me?.full_name || ""), [me]);
   const displayName = useMemo(() => me?.full_name || "Profil", [me]);
@@ -44,6 +55,90 @@ export default function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", "dark");
   }, []);
+
+  useEffect(() => {
+    if (!profileOpen || me?.google_sub) return;
+
+    if (googleLinkLoadedRef.current) {
+      const google = window.google;
+      if (google?.accounts?.id && googleLinkButtonRef.current) {
+        googleLinkButtonRef.current.innerHTML = "";
+        google.accounts.id.renderButton(googleLinkButtonRef.current, {
+          theme: "outline",
+          size: "large",
+          width: googleLinkButtonRef.current.offsetWidth || 360,
+          text: "signin_with",
+          shape: "pill"
+        });
+      }
+      return;
+    }
+
+    const scriptId = "google-gsi-script-app-shell";
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+    const initGoogle = () => {
+      const google = window.google;
+      if (!google?.accounts?.id || !googleLinkButtonRef.current) return;
+      googleLinkButtonRef.current.innerHTML = "";
+      google.accounts.id.initialize({
+        client_id: GOOGLE_WEB_CLIENT_ID,
+        callback: async (response: { credential?: string }) => {
+          const credential = String(response?.credential || "");
+          if (!credential) {
+            toast.error("Google token topilmadi");
+            return;
+          }
+          try {
+            setGoogleLinkLoading(true);
+            const res = await fetch("/api/auth/google", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`
+              },
+              body: JSON.stringify({ idToken: credential })
+            });
+            const data = await jsonOrError(res);
+            if (data?.user) {
+              setMe(data.user);
+              setUser(data.user);
+            }
+            toast.success("Google akkaunti ulandi");
+          } catch (error: any) {
+            toast.error(error?.message || "Google ulandi");
+          } finally {
+            setGoogleLinkLoading(false);
+          }
+        }
+      });
+      google.accounts.id.renderButton(googleLinkButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        width: googleLinkButtonRef.current.offsetWidth || 360,
+        text: "signin_with",
+        shape: "pill"
+      });
+      googleLinkLoadedRef.current = true;
+    };
+
+    if (window.google?.accounts?.id) {
+      initGoogle();
+      return;
+    }
+
+    const script = existingScript || document.createElement("script");
+    if (!existingScript) {
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogle;
+      document.head.appendChild(script);
+    } else {
+      existingScript.addEventListener("load", initGoogle, { once: true });
+      initGoogle();
+    }
+  }, [accessToken, me?.google_sub, profileOpen, setMe, setUser]);
 
   const meQuery = useQuery({
     queryKey: ["me"],
@@ -219,6 +314,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <div className="profileVal profileValStatus">Faol emas</div>
               </button>
             </div>
+            {!me?.google_sub ? (
+              <div className="profileBlock">
+                <div className="profileRow profileRowCard">
+                  <div className="profileKey">
+                    <Send className="lucide profileKeyIcon" aria-hidden="true" />
+                    Google ulash
+                  </div>
+                  <div className="profileVal profileValStatus">Bitta akkauntga birlashtirish</div>
+                </div>
+                <div className="authGoogleBlock" style={{ padding: 0, marginTop: 10 }}>
+                  <div className="googleButtonMount" ref={googleLinkButtonRef} />
+                </div>
+              </div>
+            ) : null}
             <button className="btn btn-danger" type="button" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
               Chiqish
             </button>

@@ -72,7 +72,6 @@ export default function AuthPage() {
   const [authOpen, setAuthOpen] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [emailRegister, setEmailRegister] = useState("");
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
@@ -191,7 +190,7 @@ export default function AuthPage() {
   }
 
   const registerMutation = useMutation({
-    mutationFn: (payload: { fullName: string; email: string; phone: string; password: string }) =>
+    mutationFn: (payload: { fullName: string; phone: string; password: string }) =>
       fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -211,19 +210,16 @@ export default function AuthPage() {
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
     const rawFullName = String(formData.get("fullName") || fullName);
-    const rawEmail = String(formData.get("email") || emailRegister).trim();
     const rawPhone = String(formData.get("phone") || phoneRegisterLocal);
     const rawPassword = String(formData.get("password") || passwordRegister);
     const phoneDigits = uzLocalDigits(rawPhone);
 
     if (!rawFullName.trim()) return toast.error("Ism kiritilishi kerak");
-    if (!rawEmail) return toast.error("Email kiritilishi kerak");
     if (phoneDigits.length !== 9) return toast.error("Telefon raqam formati noto‘g‘ri");
     if (rawPassword.length < 6) return toast.error("Kamida 6 ta belgidan iborat parol yarating");
 
     registerMutation.mutate({
       fullName: rawFullName.trim(),
-      email: rawEmail,
       phone: `+998${phoneDigits}`,
       password: rawPassword
     });
@@ -253,11 +249,7 @@ export default function AuthPage() {
         body: JSON.stringify(payload)
       }).then(jsonOrError),
     onSuccess: (data: any) => {
-      if (data?.temporaryPassword) {
-        toast.success(`Yangi parol: ${String(data.temporaryPassword)}`);
-      } else {
-        toast.success(String(data?.message || "Yangi parol emailingizga yuborildi"));
-      }
+      toast.success(String(data?.message || "6 xonali kod emailingizga yuborildi"));
       setShowForgotPassword(false);
       setForgotEmail("");
       setTab("login");
@@ -467,7 +459,7 @@ export default function AuthPage() {
                   </div>
                 </div>
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={resetPasswordMutation.isPending}>
-                  Yangi parol yuborish
+                      Kod yuborish
                 </button>
                 <button className="btn btn-ghost authSecondaryBtn" type="button" onClick={() => setShowForgotPassword(false)}>
                   Ortga qaytish
@@ -493,24 +485,6 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <div className="fieldLabel">Email</div>
-                  <div className="inputGroup authInputGroup noRight">
-                    <span className="inputAddon">
-                      <Send className="lucide" aria-hidden="true" />
-                    </span>
-                    <input
-                      name="email"
-                      className="input inputField"
-                      type="email"
-                      placeholder="example@mail.com"
-                      autoComplete="email"
-                      value={emailRegister}
-                      onChange={(e) => setEmailRegister(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
                   <div className="fieldLabel">Telefon raqam</div>
                   <div className="inputGroup authInputGroup inputPhone noRight">
                     <span className="inputAddon inputAddonText">+998</span>
@@ -524,10 +498,6 @@ export default function AuthPage() {
                       onChange={(e) => setPhoneRegisterLocal(uzLocalDigits(e.target.value))}
                     />
                   </div>
-                </div>
-
-                <div className="authFormNote">
-                  Email keyin parolni tiklash uchun ishlatiladi.
                 </div>
 
                 <div>

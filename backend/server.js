@@ -1587,10 +1587,135 @@ async function findUserByGoogleIdentity({ email, googleSub }) {
   return candidates.find(Boolean) || null;
 }
 
-async function upsertGoogleUser({ fullName, email, googleSub }) {
+async function mergeUserAccounts(targetUserId, donorUserId) {
+  const targetId = String(targetUserId);
+  const donorId = String(donorUserId);
+  if (!targetId || !donorId || targetId === donorId) return;
+
+  const client = await dbApi.pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    await client.query("UPDATE promo_requests SET user_id = $1 WHERE user_id = $2", [targetId, donorId]);
+    await client.query("UPDATE promo_codes SET user_id = $1 WHERE user_id = $2", [targetId, donorId]);
+    await client.query("UPDATE refresh_tokens SET user_id = $1 WHERE user_id = $2", [targetId, donorId]);
+
+    await client.query(
+      `
+      INSERT INTO test_progress (user_id, ticket_id, answers, completed, score, updated_at)
+      SELECT $1, ticket_id, answers, completed, score, updated_at
+      FROM test_progress
+      WHERE user_id = $2
+      ON CONFLICT (user_id, ticket_id) DO NOTHING
+    `,
+      [targetId, donorId]
+    );
+    await client.query("DELETE FROM test_progress WHERE user_id = $1", [donorId]);
+
+    await client.query(
+      `
+      INSERT INTO user_mistakes (
+        user_id,
+        question_key,
+        source_kind,
+        source_id,
+        source_title,
+        question_index,
+        question,
+        wrong_answer,
+        created_at,
+        updated_at
+      )
+      SELECT
+        $1,
+        question_key,
+        source_kind,
+        source_id,
+        source_title,
+        question_index,
+        question,
+        wrong_answer,
+        created_at,
+        updated_at
+      FROM user_mistakes
+      WHERE user_id = $2
+      ON CONFLICT (user_id, question_key) DO NOTHING
+    `,
+      [targetId, donorId]
+    );
+    await client.query("DELETE FROM user_mistakes WHERE user_id = $1", [donorId]);
+
+    await client.query(
+      `
+      INSERT INTO custom_test_progress (user_id, custom_test_id, answers, completed, score, updated_at)
+      SELECT $1, custom_test_id, answers, completed, score, updated_at
+      FROM custom_test_progress
+      WHERE user_id = $2
+      ON CONFLICT (user_id, custom_test_id) DO NOTHING
+    `,
+      [targetId, donorId]
+    );
+    await client.query("DELETE FROM custom_test_progress WHERE user_id = $1", [donorId]);
+
+    await client.query(
+      `
+      INSERT INTO exam_sessions (
+        user_id,
+        exam_count,
+        duration_seconds,
+        started_at,
+        completed,
+        score,
+        selection,
+        answers,
+        updated_at
+      )
+      SELECT
+        $1,
+        exam_count,
+        duration_seconds,
+        started_at,
+        completed,
+        score,
+        selection,
+        answers,
+        updated_at
+      FROM exam_sessions
+      WHERE user_id = $2
+      ON CONFLICT (user_id) DO NOTHING
+    `,
+      [targetId, donorId]
+    );
+    await client.query("DELETE FROM exam_sessions WHERE user_id = $1", [donorId]);
+
+    await client.query("DELETE FROM users WHERE id = $1", [donorId]);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function upsertGoogleUser({ fullName, email, googleSub, currentUserId = null }) {
   const normalizedEmail = normalizeEmail(email);
   const cleanGoogleSub = String(googleSub || "").trim();
+  const currentUser = currentUserId ? await dbApi.get("SELECT * FROM users WHERE id = ?", [String(currentUserId)]) : null;
   if (!cleanGoogleSub) throw new Error("Google akkaunt ma'lumoti topilmadi");
+
+  if (currentUser) {
+    const donor = await findUserByGoogleIdentity({ email: normalizedEmail, googleSub: cleanGoogleSub });
+    if (donor && String(donor.id) !== String(currentUser.id)) {
+      await mergeUserAccounts(currentUser.id, donor.id);
+    }
+
+    return updateUserAuthProfile(currentUser.id, {
+      fullName: fullName || currentUser.full_name || normalizedEmail,
+      email: normalizedEmail || currentUser.email,
+      googleSub: cleanGoogleSub
+    });
+  }
 
   const existing = await findUserByGoogleIdentity({ email: normalizedEmail, googleSub: cleanGoogleSub });
   if (existing) {
@@ -1635,8 +1760,9 @@ async function verifyGoogleIdToken(idToken) {
   };
 }
 
-function generateTemporaryPassword(length = 10) {
-  return crypto.randomBytes(length).toString("base64url").replace(/[^a-zA-Z0-9]/g, "").slice(0, length);
+function generateTemporaryPassword(length = 6) {
+  const digits = crypto.randomInt(0, 10 ** length).toString().padStart(length, "0");
+  return digits.slice(0, length);
 }
 
 function createMailTransport() {
@@ -1667,15 +1793,15 @@ async function sendTemporaryPasswordEmail({ to, password, fullName }) {
   await mail.transporter.sendMail({
     from: mail.from,
     to,
-    subject: "Road-test: yangi parol",
-    text: `Salom ${fullName || ""}\n\nSizning yangi parolingiz: ${password}\n\nRoad-test`,
+    subject: "Road-test: 6 xonali kod",
+    text: `Salom ${fullName || ""}\n\nSizning 6 xonali kodingiz: ${password}\n\nRoad-test`,
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111">
         <h2 style="margin:0 0 12px">Road-test</h2>
         <p>Salom ${fullName || ""},</p>
-        <p>Sizning yangi parolingiz:</p>
+        <p>Sizning 6 xonali kodingiz:</p>
         <div style="display:inline-block;padding:12px 16px;border-radius:10px;background:#eef4ff;font-size:18px;font-weight:700;letter-spacing:1px">${password}</div>
-        <p style="margin-top:18px">Kirish uchun shu paroldan foydalaning.</p>
+        <p style="margin-top:18px">Kirish uchun shu koddan foydalaning.</p>
       </div>
     `
   });
@@ -2256,10 +2382,12 @@ async function handleLogin(req, res) {
 async function handleGoogleLogin(req, res) {
   try {
     const profile = await verifyGoogleIdToken(req.body?.idToken);
+    const currentUser = await getUserFromAccess(req).catch(() => null);
     const user = await upsertGoogleUser({
       fullName: profile.fullName,
       email: profile.email,
-      googleSub: profile.googleSub
+      googleSub: profile.googleSub,
+      currentUserId: currentUser?.id || null
     });
     await respondWithAuthUser(req, res, user);
   } catch (e) {
@@ -2275,7 +2403,7 @@ async function handlePasswordResetRequest(req, res) {
     const user = await dbApi.get("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email]);
     if (!user) return res.status(404).json({ error: "Bu email bo‘yicha foydalanuvchi topilmadi" });
 
-    const temporaryPassword = generateTemporaryPassword(10);
+    const temporaryPassword = generateTemporaryPassword(6);
     const passwordHash = await bcrypt.hash(temporaryPassword, 10);
 
     await dbApi.run("UPDATE users SET password_hash = ? WHERE id = ?", [passwordHash, String(user.id)]);
@@ -2290,8 +2418,8 @@ async function handlePasswordResetRequest(req, res) {
       ok: true,
       sent: mailResult.sent,
       message: mailResult.sent
-        ? "Yangi parol emailingizga yuborildi"
-        : "Email sozlanmagan. Yangi parol vaqtincha qaytarildi",
+        ? "6 xonali kod emailingizga yuborildi"
+        : "Email sozlanmagan. 6 xonali kod vaqtincha qaytarildi",
       temporaryPassword: mailResult.sent ? undefined : temporaryPassword
     });
   } catch (e) {
