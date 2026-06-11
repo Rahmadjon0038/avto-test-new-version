@@ -5,6 +5,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 .env
+.env.production
 db.sqlite
 storage/
 .DS_Store

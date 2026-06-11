@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { BadgeCheck, CreditCard, ShieldCheck, Phone, Send, UserCircle2, Wallet } from "lucide-react";
@@ -39,10 +39,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [subOpen, setSubOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
+  const [googleConsentOpen, setGoogleConsentOpen] = useState(false);
   const [plan, setPlan] = useState<SubPlan>("1m");
   const [provider, setProvider] = useState<PayProvider>("payme");
-  const googleLinkButtonRef = useRef<HTMLDivElement | null>(null);
-  const googleLinkLoadedRef = useRef(false);
 
   const initials = useMemo(() => getInitials(me?.full_name || ""), [me]);
   const displayName = useMemo(() => me?.full_name || "Profil", [me]);
@@ -56,40 +55,69 @@ export default function AppShell({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute("data-theme", "dark");
   }, []);
 
-  useEffect(() => {
-    if (!profileOpen || me?.google_sub) return;
-
-    if (googleLinkLoadedRef.current) {
-      const google = window.google;
-      if (google?.accounts?.id && googleLinkButtonRef.current) {
-        googleLinkButtonRef.current.innerHTML = "";
-        google.accounts.id.renderButton(googleLinkButtonRef.current, {
-          theme: "outline",
-          size: "large",
-          width: googleLinkButtonRef.current.offsetWidth || 360,
-          text: "signin_with",
-          shape: "pill"
-        });
-      }
-      return;
+  async function ensureGoogleIdentity() {
+    if (window.google?.accounts?.id) {
+      return window.google.accounts.id;
     }
 
-    const scriptId = "google-gsi-script-app-shell";
-    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
-    const initGoogle = () => {
-      const google = window.google;
-      if (!google?.accounts?.id || !googleLinkButtonRef.current) return;
-      googleLinkButtonRef.current.innerHTML = "";
+    await new Promise<void>((resolve, reject) => {
+      const scriptId = "google-gsi-script-app-shell";
+      const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+      const handleLoad = () => resolve();
+      const handleError = () => reject(new Error("Google script yuklanmadi"));
+
+      if (existingScript) {
+        existingScript.addEventListener("load", handleLoad, { once: true });
+        existingScript.addEventListener("error", handleError, { once: true });
+        if (window.google?.accounts?.id) {
+          resolve();
+        }
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = handleLoad;
+      script.onerror = handleError;
+      document.head.appendChild(script);
+    });
+
+    if (!window.google?.accounts?.id) {
+      throw new Error("Google sign-in tayyor emas");
+    }
+
+    return window.google.accounts.id;
+  }
+
+  async function linkGoogleAccount() {
+    if (googleLinkLoading) return;
+
+    setGoogleConsentOpen(false);
+    setGoogleLinkLoading(true);
+
+    try {
+      const google = await ensureGoogleIdentity();
+      let finished = false;
+      const finish = () => {
+        if (!finished) {
+          finished = true;
+          setGoogleLinkLoading(false);
+        }
+      };
+
       google.accounts.id.initialize({
         client_id: GOOGLE_WEB_CLIENT_ID,
         callback: async (response: { credential?: string }) => {
           const credential = String(response?.credential || "");
           if (!credential) {
             toast.error("Google token topilmadi");
+            finish();
             return;
           }
           try {
-            setGoogleLinkLoading(true);
             const res = await fetch("/api/auth/google", {
               method: "POST",
               headers: {
@@ -105,40 +133,27 @@ export default function AppShell({ children }: { children: ReactNode }) {
             }
             toast.success("Google akkaunti ulandi");
           } catch (error: any) {
-            toast.error(error?.message || "Google ulandi");
+            toast.error(error?.message || "Google orqali ulash amalga oshmadi");
           } finally {
-            setGoogleLinkLoading(false);
+            finish();
           }
         }
       });
-      google.accounts.id.renderButton(googleLinkButtonRef.current, {
-        theme: "outline",
-        size: "large",
-        width: googleLinkButtonRef.current.offsetWidth || 360,
-        text: "signin_with",
-        shape: "pill"
+
+      google.accounts.id.prompt((notification: any) => {
+        if (
+          notification?.isNotDisplayed?.() ||
+          notification?.isSkippedMoment?.() ||
+          notification?.isDismissedMoment?.()
+        ) {
+          window.setTimeout(() => finish(), 0);
+        }
       });
-      googleLinkLoadedRef.current = true;
-    };
-
-    if (window.google?.accounts?.id) {
-      initGoogle();
-      return;
+    } catch (error: any) {
+      toast.error(error?.message || "Google orqali ulash amalga oshmadi");
+      setGoogleLinkLoading(false);
     }
-
-    const script = existingScript || document.createElement("script");
-    if (!existingScript) {
-      script.id = scriptId;
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initGoogle;
-      document.head.appendChild(script);
-    } else {
-      existingScript.addEventListener("load", initGoogle, { once: true });
-      initGoogle();
-    }
-  }, [accessToken, me?.google_sub, profileOpen, setMe, setUser]);
+  }
 
   const meQuery = useQuery({
     queryKey: ["me"],
@@ -231,7 +246,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       <main className="container">{children}</main>
 
-      {(subOpen || profileOpen) && <div className="modalOverlay" onClick={() => (setSubOpen(false), setProfileOpen(false))} />}
+      {(subOpen || profileOpen || googleConsentOpen) && (
+        <div
+          className="modalOverlay"
+          onClick={() => {
+            setSubOpen(false);
+            setProfileOpen(false);
+            setGoogleConsentOpen(false);
+          }}
+        />
+      )}
 
       {subOpen && (
         <div className="modal" role="dialog" aria-modal="true">
@@ -323,14 +347,50 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   </div>
                   <div className="profileVal profileValStatus">Bitta akkauntga birlashtirish</div>
                 </div>
-                <div className="authGoogleBlock" style={{ padding: 0, marginTop: 10 }}>
-                  <div className="googleButtonMount" ref={googleLinkButtonRef} />
-                </div>
+                <button className="btn btn-primary" type="button" onClick={() => setGoogleConsentOpen(true)} disabled={googleLinkLoading}>
+                  Google ulash
+                </button>
               </div>
             ) : null}
             <button className="btn btn-danger" type="button" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
               Chiqish
             </button>
+          </div>
+        </div>
+      )}
+
+      {googleConsentOpen && (
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modalHeader">
+            <div className="modalTitle">Google ulash</div>
+            <button className="btn btn-ghost" type="button" onClick={() => setGoogleConsentOpen(false)}>
+              ✕
+            </button>
+          </div>
+          <div className="modalBody">
+            <div className="profileBlock" style={{ marginTop: 0 }}>
+              <div className="profileRow profileRowCard">
+                <div className="profileKey">
+                  <Send className="lucide profileKeyIcon" aria-hidden="true" />
+                  Nega kerak?
+                </div>
+                <div className="profileVal profileValStatus">Bitta akkauntga birlashtirish</div>
+              </div>
+              <div className="profileRow profileRowCard">
+                <div className="profileVal" style={{ textAlign: "left" }}>
+                  Google’ni telefon orqali kirgan hisobingizga ulasangiz, keyin telefon raqam yoki Google orqali kirganingizda
+                  bir xil akkaunt ochiladi.
+                </div>
+              </div>
+            </div>
+            <div className="payRow" style={{ marginTop: 4 }}>
+              <button className="btn btn-ghost payBtn" type="button" onClick={() => setGoogleConsentOpen(false)}>
+                Bekor qilish
+              </button>
+              <button className="btn btn-primary payBtn" type="button" onClick={linkGoogleAccount} disabled={googleLinkLoading}>
+                Roziman
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2414,13 +2414,17 @@ async function handlePasswordResetRequest(req, res) {
       fullName: user.full_name
     });
 
+    if (!mailResult.sent) {
+      return res.status(503).json({
+        error:
+          "SMTP sozlanmagan. Email yuborish uchun `.env` fayliga SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS va SMTP_FROM qiymatlarini kiriting."
+      });
+    }
+
     res.json({
       ok: true,
       sent: mailResult.sent,
-      message: mailResult.sent
-        ? "6 xonali kod emailingizga yuborildi"
-        : "Email sozlanmagan. 6 xonali kod vaqtincha qaytarildi",
-      temporaryPassword: mailResult.sent ? undefined : temporaryPassword
+      message: "6 xonali kod emailingizga yuborildi"
     });
   } catch (e) {
     res.status(e?.statusCode || 400).json({ error: e?.message || "Parolni tiklash amalga oshmadi" });
