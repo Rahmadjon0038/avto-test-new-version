@@ -46,6 +46,18 @@ maybe_set_default() {
   fi
 }
 
+override_from_alt_env() {
+  local key="$1"
+  local value
+  value=""
+  if [ -f "$ALT_SOURCE_ENV" ]; then
+    value="$(grep -E "^${key}=" "$ALT_SOURCE_ENV" | tail -n1 | cut -d= -f2- || true)"
+  fi
+  if [ -n "$value" ]; then
+    set_env "$key" "$value"
+  fi
+}
+
 generate_secret() {
   if command -v openssl >/dev/null 2>&1; then
     openssl rand -hex 32
@@ -64,6 +76,13 @@ if [ -z "$current_base_url" ] || [ "$current_base_url" = "https://your-domain-or
 fi
 maybe_set_default NEXT_PUBLIC_SITE_URL "https://road-test.uz"
 maybe_set_default CARD_NUMBER "8600 xxxx xxxx xxxx"
+
+override_from_alt_env SMTP_HOST
+override_from_alt_env SMTP_PORT
+override_from_alt_env SMTP_SECURE
+override_from_alt_env SMTP_USER
+override_from_alt_env SMTP_PASS
+override_from_alt_env SMTP_FROM
 
 secret_value="$(get_env AUTH_JWT_SECRET)"
 if [ -z "$secret_value" ] || [ "$secret_value" = "change-this-to-random-string" ]; then
