@@ -25,6 +25,7 @@ services:
       - .env
     environment:
       PORT: 4000
+      DATABASE_URL: postgresql://avtotest:avtotest@db:5432/avtotest
     ports:
       - "4001:4000"
     healthcheck:
