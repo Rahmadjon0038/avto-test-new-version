@@ -22,6 +22,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env.docker
+      - .env
     environment:
       PORT: 4000
     ports:
@@ -47,6 +48,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env.docker
+      - .env
     environment:
       BACKEND_URL: http://backend:4000
       BASE_URL: https://road-test.uz

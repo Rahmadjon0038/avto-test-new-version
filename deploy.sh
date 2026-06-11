@@ -111,7 +111,7 @@ else
   exit 1
 fi
 
-"${compose_cmd[@]}" --env-file "$DEPLOY_ENV" up -d --build --remove-orphans
+"${compose_cmd[@]}" --env-file "$DEPLOY_ENV" up -d --build --force-recreate --remove-orphans
 
 echo "Deploy tayyor."
 echo "Frontend: https://road-test.uz"
