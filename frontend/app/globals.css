@@ -363,6 +363,13 @@ body {
   justify-content: flex-end;
 }
 
+.topicHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
 .mistakesTabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4160,20 +4167,21 @@ body {
 }
 
 .testSettingsTrigger {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--panel2) 88%, #0b1220);
+  background: linear-gradient(180deg, #111827, #0b1220);
   color: #dbeafe;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #1e293b 25%, transparent);
 }
 
 .testSettingsTrigger:hover {
-  background: color-mix(in srgb, #1d4ed8 24%, var(--panel2));
+  background: linear-gradient(180deg, #1d4ed8, #12328d);
 }
 
 .testSettingsTrigger .lucide {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Settings2, Shuffle, Sparkles, X } from "lucide-react";
+import { Cog, Shuffle, Sparkles, X } from "lucide-react";
 
 export type TestPageSettings = {
   shuffleQuestions: boolean;
@@ -111,7 +111,7 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
         aria-label="Sozlamalar"
         onClick={() => setOpen(true)}
       >
-        <Settings2 className="lucide" aria-hidden="true" />
+        <Cog className="lucide" aria-hidden="true" />
       </button>
 
       {open ? (

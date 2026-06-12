@@ -370,6 +370,7 @@ export default function MistakesPage() {
         </div>
 
         <div className="mistakesHeaderMeta">
+          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
           <span className="badge">{questions.length} ta xato</span>
           <span className="badge">{currentQuestions.length} ta mashq</span>
         </div>
@@ -466,10 +467,7 @@ export default function MistakesPage() {
             <>
               {currentQuestion ? (
                 <div className="card" ref={questionCardRef}>
-          <div className="qCardTop">
-            <div className="qTitleBar">{currentQuestion.text}</div>
-            <TestPageSettingsButton settings={settings} onChange={patchSettings} />
-          </div>
+                  <div className="qTitleBar">{currentQuestion.text}</div>
                   <div className="qLayout">
                     <div className="qRight">
                       <div className="options">

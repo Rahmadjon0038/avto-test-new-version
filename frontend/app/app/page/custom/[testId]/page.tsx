@@ -439,16 +439,16 @@ export default function CustomTestPage() {
           </div>
         </div>
 
-        <button className="btn btn-danger btn-sm" type="button" onClick={reset}>
-          <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
-        </button>
+        <div className="topicHeaderActions">
+          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          <button className="btn btn-danger btn-sm" type="button" onClick={reset}>
+            <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
+          </button>
+        </div>
       </div>
 
       <div className="card" ref={questionCardRef}>
-        <div className="qCardTop">
-          <div className="qTitleBar">{q?.text}</div>
-          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
-        </div>
+        <div className="qTitleBar">{q?.text}</div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">

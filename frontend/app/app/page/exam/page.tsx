@@ -521,9 +521,12 @@ export default function ExamPage() {
           </div>
         </div>
 
-        <div className="examTimerChip">
-          <TimerReset className="lucide" aria-hidden="true" />
-          <span>{formatTime(secondsLeft)}</span>
+        <div className="topicHeaderActions">
+          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          <div className="examTimerChip">
+            <TimerReset className="lucide" aria-hidden="true" />
+            <span>{formatTime(secondsLeft)}</span>
+          </div>
         </div>
       </div>
 
@@ -545,11 +548,8 @@ export default function ExamPage() {
 
       {currentQuestion ? (
         <div className="card" ref={questionCardRef}>
-          <div className="qCardTop">
-            <div className="qTitleBar">
-              <div>{currentQuestion.text}</div>
-            </div>
-            <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          <div className="qTitleBar">
+            <div>{currentQuestion.text}</div>
           </div>
 
           <div className="qLayout">
