@@ -2635,7 +2635,7 @@ body {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(0, 0, 0, 0.74);
+  background: rgba(0, 0, 0, 0.84);
 }
 
 .authModal {
@@ -2645,12 +2645,10 @@ body {
   display: grid;
   gap: 16px;
   padding: 20px;
-  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--primary) 28%);
+  border: 1px solid #263452;
   border-radius: 24px;
-  background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--panel2) 90%, transparent) 0%, transparent 42%),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg) 96%, white 4%) 0%, var(--bg) 100%);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  background: #0b1018;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.62);
 }
 
 .authModalHeader {
@@ -2675,6 +2673,7 @@ body {
   font-size: 26px;
   font-weight: 1000;
   letter-spacing: -0.04em;
+  color: #f5f7ff;
 }
 
 .authModalText {
@@ -2703,24 +2702,21 @@ body {
   min-width: 0;
   padding: 14px 16px;
   border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--border) 78%, var(--primary) 22%);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--panel2) 82%, transparent) 0%, color-mix(in srgb, var(--panel) 92%, black 8%) 100%);
-  color: var(--muted);
+  border: 1px solid #25324c;
+  background: #101726;
+  color: #9ca7c2;
   font-size: 15px;
   font-weight: 950;
   cursor: pointer;
   text-align: center;
   letter-spacing: -0.02em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .authTab.active {
-  color: var(--text);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--primary) 20%, var(--panel2) 80%) 0%, color-mix(in srgb, var(--panel2) 95%, black 5%) 100%);
-  border-color: color-mix(in srgb, var(--primary) 48%, var(--border) 52%);
-  box-shadow: 0 8px 26px rgba(56, 112, 255, 0.16);
+  color: #f7fbff;
+  background: linear-gradient(180deg, #153160 0%, #132848 100%);
+  border-color: #2f5fe8;
+  box-shadow: none;
 }
 
 .authGoogleBlock {
@@ -2755,6 +2751,9 @@ body {
   min-height: 48px;
   display: flex;
   justify-content: center;
+  align-items: center;
+  max-width: 420px;
+  margin-inline: auto;
 }
 
 .googleButtonMount > div {
@@ -2771,8 +2770,8 @@ body {
 .inputAddon {
   display: grid;
   place-items: center;
-  border: 1px solid var(--border);
-  background: #0b101a;
+  border: none;
+  background: #101726;
 }
 
 .inputAddonText {
@@ -2787,9 +2786,9 @@ body {
 }
 
 .inputIconBtn {
-  border: 1px solid var(--border);
-  background: #0b101a;
-  color: var(--text);
+  border: none;
+  background: #101726;
+  color: #c8d0e6;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -2828,32 +2827,45 @@ body {
   display: grid;
   gap: 14px;
   margin-top: 0;
-  padding: 16px;
-  border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--border) 82%, var(--primary) 18%);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, white 4%) 0%, color-mix(in srgb, var(--panel2) 92%, black 8%) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .authInputGroup {
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   min-height: 56px;
+  border: 1px solid #263452;
+  background: #101726;
 }
 
 .authInputGroup .inputAddon,
 .authInputGroup .inputIconBtn {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--panel2) 78%, black 22%) 0%, color-mix(in srgb, var(--panel) 96%, black 4%) 100%);
+  background: #101726;
 }
 
 .authInputGroup .inputField {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, white 4%) 0%, color-mix(in srgb, var(--panel2) 92%, black 8%) 100%);
+  background: #101726;
+  color: #eff4ff;
   font-size: 15px;
   font-weight: 750;
   letter-spacing: -0.01em;
+  border: none;
+}
+
+.authInputGroup .inputField::placeholder {
+  color: #7c879f;
+}
+
+.authInputGroup .inputAddonText {
+  color: #f5f7ff;
+}
+
+.authInputGroup .inputIconBtn {
+  color: #9ba7c4;
 }
 
 .authSubmitBtn {
@@ -2861,6 +2873,7 @@ body {
   border-radius: 18px;
   font-weight: 950;
   letter-spacing: -0.01em;
+  box-shadow: none;
 }
 
 .authSubmitBtn.btn-primary {
