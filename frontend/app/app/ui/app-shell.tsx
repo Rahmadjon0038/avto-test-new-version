@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { BadgeCheck, CreditCard, ShieldCheck, Phone, UserCircle2, Wallet } from "lucide-react";
+import { BadgeCheck, CreditCard, Send, ShieldCheck, Phone, UserCircle2, Wallet } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -135,6 +135,39 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="container">{children}</main>
+
+      <footer className="siteFooter">
+        <div className="siteFooterInner">
+          <div className="siteFooterLogo">
+            <span className="textLogoRoad">ROAD</span>
+            <span className="textLogoTest">TEST</span>
+          </div>
+          <div className="siteFooterLinks" aria-label="Social links">
+            <a
+              className="siteSocialLink"
+              href="https://www.instagram.com/reel/DZZ3X7agYDW/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="17.1" cy="6.9" r="1.2" fill="currentColor" />
+              </svg>
+            </a>
+            <a
+              className="siteSocialLink"
+              href="https://t.me/JURABEK_AUTOTEACHER"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Telegram"
+            >
+              <Send className="lucide" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+      </footer>
 
       {(subOpen || profileOpen) && (
         <div

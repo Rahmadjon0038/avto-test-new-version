@@ -1815,7 +1815,7 @@ async function sendTemporaryPasswordEmail({ to, password, fullName }) {
 async function verifyPasswordLogin({ phone, password }) {
   const normalizedPhone = normalizeUzPhone(phone);
   const row = await dbApi.get("SELECT * FROM users WHERE phone = ?", [normalizedPhone]);
-  if (!row?.password_hash) return { ok: false, error: "Telefon yoki parol noto‘g‘ri" };
+  if (!row?.password_hash) return { ok: false, error: "Oldin ro‘yxatdan o‘ting" };
   const ok = await bcrypt.compare(String(password || ""), String(row.password_hash));
   if (!ok) return { ok: false, error: "Telefon yoki parol noto‘g‘ri" };
   return { ok: true, user: row };

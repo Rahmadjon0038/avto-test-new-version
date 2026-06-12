@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     accessTokenRef.current = t;
     setAccessToken(t);
     if (t) {
-      setCookie("accessToken", t, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 30 });
+      setCookie("accessToken", t, { path: "/", sameSite: "lax", maxAge: 60 * 15 });
     } else {
       removeCookie("accessToken", { path: "/" });
     }

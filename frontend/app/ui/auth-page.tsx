@@ -66,7 +66,7 @@ function InstagramMark() {
 export default function AuthPage() {
   const router = useRouter();
   const { setAccessToken, setUser, authReady, accessToken } = useAuth();
-  const [tab, setTab] = useState<Tab>("register");
+  const [tab, setTab] = useState<Tab>("login");
   const [authOpen, setAuthOpen] = useState(false);
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
@@ -168,7 +168,7 @@ export default function AuthPage() {
     setTab(nextTab);
   }
 
-  function openAuth(nextTab: Tab = "register") {
+  function openAuth(nextTab: Tab = "login") {
     setTab(nextTab);
     setAuthOpen(true);
   }
@@ -394,11 +394,11 @@ export default function AuthPage() {
             </div>
 
             <div className="authTabs" role="tablist" aria-label="Auth tabs">
-              <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
-                Ro‘yxatdan o‘tish
-              </button>
               <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
                 Tizimga kirish
+              </button>
+              <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
+                Ro‘yxatdan o‘tish
               </button>
             </div>
 
