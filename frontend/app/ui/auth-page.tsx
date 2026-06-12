@@ -411,7 +411,7 @@ export default function AuthPage() {
                     <input
                       name="phone"
                       className="input inputField"
-                      placeholder="97-212-00-38"
+                      placeholder="90-123-45-67"
                       autoComplete="tel"
                       inputMode="tel"
                       value={formatUzLocalPhone(phoneRegisterLocal)}
@@ -453,7 +453,7 @@ export default function AuthPage() {
                     <input
                       name="phone"
                       className="input inputField"
-                      placeholder="97-212-00-38"
+                      placeholder="91-234-56-78"
                       autoComplete="tel"
                       inputMode="tel"
                       value={formatUzLocalPhone(phoneLoginLocal)}
