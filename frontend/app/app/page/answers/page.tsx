@@ -6,6 +6,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { QuestionAudio } from "@/lib/question-audio";
 
 type AnswerQuestion = {
   id: string;
@@ -15,6 +16,7 @@ type AnswerQuestion = {
   questionIndex: number;
   text: string;
   image: string;
+  audio?: string;
   options: string[];
   correctIndex: number;
   correctAnswer: string;
@@ -300,6 +302,7 @@ export default function AnswersPage() {
             </div>
 
             {question.explanation ? <div className="answersExplanation">{question.explanation}</div> : null}
+            {question.audio ? <QuestionAudio audio={question.audio} /> : null}
           </article>
         ))}
       </div>

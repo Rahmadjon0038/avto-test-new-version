@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target } f
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { QuestionAudio } from "@/lib/question-audio";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type MistakeQuestion = {
@@ -17,6 +18,7 @@ type MistakeQuestion = {
   questionIndex: number;
   text: string;
   image: string;
+  audio?: string;
   options: string[];
   correctIndex: number;
   correctAnswer: string;
@@ -417,6 +419,7 @@ export default function MistakesPage() {
                   </div>
 
                   {question.explanation ? <div className="answersExplanation">{question.explanation}</div> : null}
+                  {question.audio ? <QuestionAudio audio={question.audio} /> : null}
 
                   <div className="mistakesCardActions">
                     <button
@@ -480,6 +483,9 @@ export default function MistakesPage() {
                           <div className="explanationLabel">Izoh</div>
                           <MarkdownText text={currentQuestion.explanation} />
                         </div>
+                      ) : null}
+                      {answers[currentQuestion.id] !== undefined && currentQuestion.audio ? (
+                        <QuestionAudio audio={currentQuestion.audio} />
                       ) : null}
                     </div>
 

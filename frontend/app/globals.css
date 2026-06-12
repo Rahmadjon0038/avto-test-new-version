@@ -4062,6 +4062,91 @@ body {
   min-height: 140px;
 }
 
+.questionAudio {
+  margin-top: 12px;
+  padding: 12px 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0c1220, #090e1a);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #1e293b 40%, transparent);
+}
+
+.questionAudioHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #f8fafc;
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.questionAudioBadge {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #152b59;
+  color: #3b82f6;
+  flex: 0 0 auto;
+}
+
+.questionAudioBadge .lucide {
+  width: 15px;
+  height: 15px;
+}
+
+.questionAudioTitle {
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.questionAudioPlayerWrap {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #24324a 70%, var(--border));
+  border-radius: 12px;
+  background: linear-gradient(180deg, #111827, #0b1220);
+}
+
+.questionAudioPlayer {
+  width: 100%;
+  display: block;
+  min-height: 44px;
+  color-scheme: dark;
+  accent-color: #3b82f6;
+  background: transparent;
+}
+
+.questionAudioPlayer::-webkit-media-controls-panel {
+  background: linear-gradient(180deg, #111c33, #0d1729);
+}
+
+.questionAudioPlayer::-webkit-media-controls-enclosure {
+  background: transparent;
+}
+
+.questionAudioPlayer::-webkit-media-controls-play-button {
+  filter: brightness(1.15) saturate(1.1);
+}
+
+.questionAudioPlayer::-webkit-media-controls-current-time-display,
+.questionAudioPlayer::-webkit-media-controls-time-remaining-display {
+  color: #e2e8f0;
+  text-shadow: none;
+}
+
+.questionAudioPlayer::-webkit-media-controls-timeline {
+  filter: saturate(1.25) brightness(1.05);
+}
+
+.questionAudioPlayer::-webkit-media-controls-mute-button {
+  filter: brightness(1.15);
+}
+
 .explanationLabel {
   margin-bottom: 10px;
   color: var(--muted);

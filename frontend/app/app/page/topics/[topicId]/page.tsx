@@ -8,12 +8,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { QuestionAudio } from "@/lib/question-audio";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
   id: string;
   text: string;
   image?: string;
+  audio?: string;
   options: string[];
   correctIndex: number;
   explanation?: string;
@@ -467,6 +469,7 @@ export default function TopicPage() {
                 <MarkdownText text={q.explanation} />
               </div>
             ) : null}
+            {answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
           </div>
           <div className="qLeft">
             {imageLoading && (
