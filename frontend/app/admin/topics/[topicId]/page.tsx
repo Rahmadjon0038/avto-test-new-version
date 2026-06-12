@@ -839,85 +839,6 @@ export default function AdminTopicDetailPage() {
                 </div>
               </div>
 
-              <div className="adminField adminFieldWide">
-                <div className="adminFieldLabel">Audio izoh</div>
-                <div className="adminAudioRow">
-                  <div className="adminAudioPreview">
-                    {audioDrafts[question.id]?.recording ? (
-                      <div className="adminAudioEmptyState">
-                        <div className="adminAudioEmptyTitle">Yozib olinmoqda</div>
-                        <div className="adminAudioEmptyText">Mikrofon tugmasini bosib turing.</div>
-                      </div>
-                    ) : audioDrafts[question.id]?.previewUrl || question.audio ? (
-                      <audio
-                        className="adminAudioPlayer"
-                        controls
-                        preload="metadata"
-                        src={audioDrafts[question.id]?.previewUrl || question.audio}
-                      />
-                    ) : (
-                      <div className="adminAudioEmptyState">
-                        <div className="adminAudioEmptyTitle">Audio yuklanmagan</div>
-                        <div className="adminAudioEmptyText">Mikrofonga bosib yozing yoki mavjud audioni tinglang.</div>
-                      </div>
-                    )}
-                    {audioDrafts[question.id]?.uploading ? <div className="adminImagePreviewLoading">Yuklanmoqda...</div> : null}
-                  </div>
-
-                  <div className="adminAudioControls">
-                    <div className="adminImageUploadHint">Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi.</div>
-                    <div className="adminOptionsToolbar">
-                      <button
-                        className={`btn btn-sm adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
-                        type="button"
-                        title={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
-                        aria-label={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
-                        onPointerDown={(event) => {
-                          event.preventDefault();
-                          startQuestionRecording(question.id).catch((error: any) => toast.error(error?.message || "Audio yozib bo‘lmadi"));
-                        }}
-                        onPointerUp={() => {
-                          stopQuestionRecording().catch(() => {});
-                        }}
-                        onPointerCancel={() => {
-                          stopQuestionRecording().catch(() => {});
-                        }}
-                        onPointerLeave={() => {
-                          if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
-                        }}
-                      >
-                        <Mic className="lucide" aria-hidden="true" />
-                        <span>{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
-                      </button>
-                      <button
-                        className="btn btn-sm adminIconBtn adminIconBtnEdit"
-                        type="button"
-                        title="Audio yuklash"
-                        aria-label="Audio yuklash"
-                        disabled={!audioDrafts[question.id]?.blob || audioDrafts[question.id]?.uploading}
-                        onClick={() =>
-                          uploadQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"))
-                        }
-                      >
-                        <Upload className="lucide" aria-hidden="true" />
-                        <span>Yuklash</span>
-                      </button>
-                      <button
-                        className="btn btn-sm adminIconBtn adminIconBtnDelete"
-                        type="button"
-                        title="Audio o‘chirish"
-                        aria-label="Audio o‘chirish"
-                        disabled={!audioDrafts[question.id]?.blob && !question.audio && !audioDrafts[question.id]?.previewUrl}
-                        onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
-                      >
-                        <Trash2 className="lucide" aria-hidden="true" />
-                        <span>Trash</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
                 <label className="adminField adminFieldWide">
                   <span className="adminFieldLabel">Savol matni</span>
                   <input
@@ -956,8 +877,87 @@ export default function AdminTopicDetailPage() {
                       )
                     }
                     placeholder="Markdown yozing: **qalin**, *qiya*, - ro‘yxat"
-                  />
+                    />
                 </label>
+
+                <div className="adminField adminFieldWide">
+                  <div className="adminFieldLabel">Audio izoh</div>
+                  <div className="adminAudioStack">
+                    <div className="adminAudioPreview">
+                      {audioDrafts[question.id]?.recording ? (
+                        <div className="adminAudioEmptyState">
+                          <div className="adminAudioEmptyTitle">Yozib olinmoqda</div>
+                          <div className="adminAudioEmptyText">Mikrofon tugmasini bosib turing.</div>
+                        </div>
+                      ) : audioDrafts[question.id]?.previewUrl || question.audio ? (
+                        <audio
+                          className="adminAudioPlayer"
+                          controls
+                          preload="metadata"
+                          src={audioDrafts[question.id]?.previewUrl || question.audio}
+                        />
+                      ) : (
+                        <div className="adminAudioEmptyState">
+                          <div className="adminAudioEmptyTitle">Audio yuklanmagan</div>
+                          <div className="adminAudioEmptyText">Mikrofonga bosib yozing yoki mavjud audioni tinglang.</div>
+                        </div>
+                      )}
+                      {audioDrafts[question.id]?.uploading ? <div className="adminImagePreviewLoading">Yuklanmoqda...</div> : null}
+                    </div>
+
+                    <div className="adminAudioFooter">
+                      <div className="adminAudioHint">Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi.</div>
+                      <div className="adminOptionsToolbar adminAudioButtons">
+                        <button
+                          className={`btn btn-sm adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
+                          type="button"
+                          title={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
+                          aria-label={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
+                          onPointerDown={(event) => {
+                            event.preventDefault();
+                            startQuestionRecording(question.id).catch((error: any) => toast.error(error?.message || "Audio yozib bo‘lmadi"));
+                          }}
+                          onPointerUp={() => {
+                            stopQuestionRecording().catch(() => {});
+                          }}
+                          onPointerCancel={() => {
+                            stopQuestionRecording().catch(() => {});
+                          }}
+                          onPointerLeave={() => {
+                            if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
+                          }}
+                        >
+                          <Mic className="lucide" aria-hidden="true" />
+                          <span>{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
+                        </button>
+                        <button
+                          className="btn btn-sm adminIconBtn adminIconBtnEdit"
+                          type="button"
+                          title="Audio yuklash"
+                          aria-label="Audio yuklash"
+                          disabled={!audioDrafts[question.id]?.blob || audioDrafts[question.id]?.uploading}
+                          onClick={() =>
+                            uploadQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"))
+                          }
+                        >
+                          <Upload className="lucide" aria-hidden="true" />
+                          <span>Yuklash</span>
+                        </button>
+                        <button
+                          className="btn btn-sm adminIconBtn adminIconBtnDelete"
+                          type="button"
+                          title="Audio o‘chirish"
+                          aria-label="Audio o‘chirish"
+                          disabled={!audioDrafts[question.id]?.blob && !question.audio && !audioDrafts[question.id]?.previewUrl}
+                          onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
+                        >
+                          <Trash2 className="lucide" aria-hidden="true" />
+                          <span>Trash</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="adminOptionsGrid">

@@ -3141,13 +3141,6 @@ body {
   align-items: start;
 }
 
-.adminAudioRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 14px;
-  align-items: start;
-}
-
 .adminImageUploadHint {
   color: var(--muted);
   font-size: 12px;
@@ -3208,7 +3201,7 @@ body {
   border-radius: var(--radius);
   background: var(--panel2);
   overflow: hidden;
-  min-height: 92px;
+  min-height: 64px;
 }
 
 .adminImageEmptyState {
@@ -3245,7 +3238,7 @@ body {
 }
 
 .adminAudioEmptyState {
-  min-height: 92px;
+  min-height: 64px;
   display: grid;
   place-items: center;
   text-align: center;
@@ -3269,6 +3262,26 @@ body {
   display: grid;
   gap: 10px;
   align-content: start;
+}
+
+.adminAudioStack {
+  display: grid;
+  gap: 10px;
+}
+
+.adminAudioFooter {
+  display: grid;
+  gap: 8px;
+}
+
+.adminAudioHint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.adminAudioButtons {
+  flex-wrap: wrap;
 }
 
 .adminAudioMicBtn {
@@ -3313,10 +3326,6 @@ body {
 
 @media (max-width: 720px) {
   .adminImageRow {
-    grid-template-columns: 1fr;
-  }
-
-  .adminAudioRow {
     grid-template-columns: 1fr;
   }
 
