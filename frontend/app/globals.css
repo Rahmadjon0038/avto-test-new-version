@@ -3141,6 +3141,13 @@ body {
   align-items: start;
 }
 
+.adminAudioRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+}
+
 .adminImageUploadHint {
   color: var(--muted);
   font-size: 12px;
@@ -3195,6 +3202,15 @@ body {
   align-content: start;
 }
 
+.adminAudioPreview {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel2);
+  overflow: hidden;
+  min-height: 92px;
+}
+
 .adminImageEmptyState {
   width: 100%;
   height: 100%;
@@ -3217,6 +3233,53 @@ body {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.45;
+}
+
+.adminAudioPlayer {
+  width: 100%;
+  display: block;
+}
+
+.adminAudioPlayer::-webkit-media-controls-panel {
+  background: var(--panel2);
+}
+
+.adminAudioEmptyState {
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 14px;
+  color: var(--muted);
+}
+
+.adminAudioEmptyTitle {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.adminAudioEmptyText {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.adminAudioControls {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.adminAudioMicBtn {
+  background: color-mix(in srgb, var(--primary) 15%, var(--panel));
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
+}
+
+.adminAudioMicBtn.isRecording {
+  background: color-mix(in srgb, #ef4444 30%, var(--panel));
+  border-color: color-mix(in srgb, #ef4444 72%, var(--border));
+  color: #fff1f2;
 }
 
 .adminImagePreviewImg {
@@ -3250,6 +3313,10 @@ body {
 
 @media (max-width: 720px) {
   .adminImageRow {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAudioRow {
     grid-template-columns: 1fr;
   }
 

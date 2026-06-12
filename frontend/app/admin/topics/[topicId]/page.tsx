@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Plus, Save, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Mic, Pencil, Plus, Save, Trash2, Upload } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -11,6 +11,7 @@ import { jsonOrError } from "@/lib/api-authed";
 type Question = {
   id: string;
   image: string;
+  audio: string;
   text: string;
   options: string[];
   correctIndex: number;
@@ -28,10 +29,19 @@ type ImageDraft = {
   uploading: boolean;
 };
 
+type AudioDraft = {
+  previewUrl: string;
+  recording: boolean;
+  uploading: boolean;
+  blob: Blob | null;
+  mimeType: string;
+};
+
 function createEmptyQuestion(seed: number): Question {
   return {
     id: `q-${Date.now()}-${seed}`,
     image: "",
+    audio: "",
     text: "",
     options: ["", ""],
     correctIndex: 0,
@@ -43,6 +53,7 @@ function cloneQuestion(question: Question): Question {
   return {
     id: String(question.id || `q-${Date.now()}`),
     image: String(question.image || ""),
+    audio: String(question.audio || ""),
     text: String(question.text || ""),
     options: Array.isArray(question.options) ? question.options.map((option) => String(option || "")) : ["", "", "", ""],
     correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
@@ -54,6 +65,7 @@ function normalizeQuestionForSave(question: Question): Question {
   return {
     ...question,
     image: String(question.image || "").trim(),
+    audio: String(question.audio || "").trim(),
     text: String(question.text || "").trim(),
     explanation: String(question.explanation || "").trim(),
     options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : []
@@ -103,6 +115,31 @@ async function fileToDataUrl(file: File) {
   });
 }
 
+async function blobToDataUrl(blob: Blob) {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Audio o‘qib bo‘lmadi"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function getAudioFileExtension(mimeType: string) {
+  const value = String(mimeType || "").toLowerCase();
+  if (value.startsWith("audio/webm")) return "webm";
+  if (value.startsWith("audio/ogg")) return "ogg";
+  if (value.startsWith("audio/mp4")) return "m4a";
+  if (value.startsWith("audio/mpeg")) return "mp3";
+  if (value.startsWith("audio/wav")) return "wav";
+  return "webm";
+}
+
+function pickAudioMimeType() {
+  const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus", "audio/ogg"];
+  if (typeof MediaRecorder === "undefined") return "";
+  return candidates.find((value) => MediaRecorder.isTypeSupported(value)) || "";
+}
+
 export default function AdminTopicDetailPage() {
   const router = useRouter();
   const params = useParams<{ topicId: string }>();
@@ -112,7 +149,13 @@ export default function AdminTopicDetailPage() {
   const [topic, setTopic] = useState<AdminTopic | null>(null);
   const [importText, setImportText] = useState("[]");
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
+  const [audioDrafts, setAudioDrafts] = useState<Record<string, AudioDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
+  const audioObjectUrlsRef = useRef<Record<string, string>>({});
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaChunksRef = useRef<Blob[]>([]);
+  const recordingQuestionIdRef = useRef<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   const topicQuery = useQuery({
@@ -139,6 +182,13 @@ export default function AdminTopicDetailPage() {
     return () => {
       Object.values(objectUrlsRef.current).forEach((url) => URL.revokeObjectURL(url));
       objectUrlsRef.current = {};
+      Object.values(audioObjectUrlsRef.current).forEach((url) => URL.revokeObjectURL(url));
+      audioObjectUrlsRef.current = {};
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+      mediaRecorderRef.current = null;
+      mediaChunksRef.current = [];
+      recordingQuestionIdRef.current = null;
     };
   }, []);
 
@@ -359,6 +409,249 @@ export default function AdminTopicDetailPage() {
     });
   }
 
+  function cleanupAudioPreview(questionId: string) {
+    const previousUrl = audioObjectUrlsRef.current[questionId];
+    if (previousUrl) {
+      URL.revokeObjectURL(previousUrl);
+      delete audioObjectUrlsRef.current[questionId];
+    }
+  }
+
+  function cleanupQuestionDrafts(questionId: string) {
+    cleanupAudioPreview(questionId);
+    const previousImageUrl = objectUrlsRef.current[questionId];
+    if (previousImageUrl) {
+      URL.revokeObjectURL(previousImageUrl);
+      delete objectUrlsRef.current[questionId];
+    }
+    setImageDrafts((prev) => {
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
+    setAudioDrafts((prev) => {
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
+  }
+
+  async function stopQuestionRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state === "inactive") return;
+    recorder.stop();
+  }
+
+  async function startQuestionRecording(questionId: string) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error("Brauzer mikrofonni qo‘llab-quvvatlamaydi");
+    }
+    if (typeof MediaRecorder === "undefined") {
+      throw new Error("Brauzer audio yozishni qo‘llab-quvvatlamaydi");
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      await stopQuestionRecording();
+    }
+
+    cleanupAudioPreview(questionId);
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl: prev[questionId]?.previewUrl || "",
+        recording: true,
+        uploading: false,
+        blob: null,
+        mimeType: prev[questionId]?.mimeType || ""
+      }
+    }));
+
+    let stream: MediaStream | null = null;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = pickAudioMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+      mediaRecorderRef.current = recorder;
+      mediaStreamRef.current = stream;
+      mediaChunksRef.current = [];
+      recordingQuestionIdRef.current = questionId;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) mediaChunksRef.current.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const activeQuestionId = recordingQuestionIdRef.current;
+        const chunks = mediaChunksRef.current.slice();
+        mediaChunksRef.current = [];
+        recordingQuestionIdRef.current = null;
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        if (mediaRecorderRef.current === recorder) mediaRecorderRef.current = null;
+        if (!activeQuestionId || !chunks.length) {
+          setAudioDrafts((prev) => ({
+            ...prev,
+            [questionId]: {
+              previewUrl: prev[questionId]?.previewUrl || "",
+              recording: false,
+              uploading: false,
+              blob: prev[questionId]?.blob || null,
+              mimeType: prev[questionId]?.mimeType || ""
+            }
+          }));
+          return;
+        }
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || "audio/webm" });
+        const previewUrl = URL.createObjectURL(blob);
+        audioObjectUrlsRef.current[activeQuestionId] = previewUrl;
+        setAudioDrafts((prev) => ({
+          ...prev,
+          [activeQuestionId]: {
+            previewUrl,
+            recording: false,
+            uploading: false,
+            blob,
+            mimeType: blob.type || mimeType || "audio/webm"
+          }
+        }));
+      };
+
+      recorder.onerror = () => {
+        setAudioDrafts((prev) => ({
+          ...prev,
+          [questionId]: {
+            previewUrl: prev[questionId]?.previewUrl || "",
+            recording: false,
+            uploading: false,
+            blob: prev[questionId]?.blob || null,
+            mimeType: prev[questionId]?.mimeType || ""
+          }
+        }));
+      };
+
+      recorder.start();
+      toast.success("Yozishni boshladingiz");
+    } catch (error) {
+      stream?.getTracks().forEach((track) => track.stop());
+      setAudioDrafts((prev) => ({
+        ...prev,
+        [questionId]: {
+          previewUrl: prev[questionId]?.previewUrl || "",
+          recording: false,
+          uploading: false,
+          blob: prev[questionId]?.blob || null,
+          mimeType: prev[questionId]?.mimeType || ""
+        }
+      }));
+      throw error;
+    }
+  }
+
+  async function uploadQuestionAudio(questionId: string) {
+    if (!topic) throw new Error("Mavzu topilmadi");
+    const draft = audioDrafts[questionId];
+    if (!draft?.blob) throw new Error("Avval audio yozib oling");
+
+    const currentAudio = topic.questions.find((question) => question.id === questionId)?.audio || "";
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: { ...draft, uploading: true }
+    }));
+
+    const audioBase64 = await blobToDataUrl(draft.blob);
+    const audioType = draft.blob.type || draft.mimeType || "audio/webm";
+    const audioName = `question-${questionId}.${getAudioFileExtension(audioType)}`;
+
+    const res = await authFetch("/api/upload-audio", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        audioBase64,
+        audioName,
+        audioType,
+        topicId,
+        questionId,
+        oldAudioUrl: currentAudio
+      })
+    });
+    const data = await jsonOrError(res);
+    const audioUrl = String(data?.audioUrl || "").trim();
+    if (!audioUrl) throw new Error("Audio yuklanmadi");
+
+    cleanupAudioPreview(questionId);
+    setTopic((prev) =>
+      prev
+        ? {
+            ...prev,
+            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+          }
+        : prev
+    );
+
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl: audioUrl,
+        recording: false,
+        uploading: false,
+        blob: null,
+        mimeType: audioType
+      }
+    }));
+
+    toast.success("Audio yuklandi");
+  }
+
+  async function deleteQuestionAudio(questionId: string) {
+    const currentAudio = topic?.questions.find((question) => question.id === questionId)?.audio || "";
+    const draft = audioDrafts[questionId];
+
+    if (draft?.previewUrl?.startsWith("blob:")) {
+      cleanupAudioPreview(questionId);
+    }
+
+    if (!currentAudio) {
+      setAudioDrafts((prev) => {
+        const next = { ...prev };
+        delete next[questionId];
+        return next;
+      });
+      toast.success("Audio o‘chirildi");
+      return;
+    }
+
+    const res = await authFetch("/api/upload-audio", {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        topicId,
+        questionId,
+        audioUrl: currentAudio
+      })
+    });
+    const data = await jsonOrError(res);
+    const audioUrl = String(data?.audioUrl || "").trim();
+
+    setTopic((prev) =>
+      prev
+        ? {
+            ...prev,
+            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+          }
+        : prev
+    );
+
+    setAudioDrafts((prev) => {
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
+
+    toast.success("Audio o‘chirildi");
+  }
+
   if (!topic && !topicQuery.isLoading) {
     return (
       <section className="adminEmpty card">
@@ -411,7 +704,7 @@ export default function AdminTopicDetailPage() {
 
         <div className="adminFieldGroup">
           <div className="adminFieldLabel">
-            JSON ichiga savollar massivi yuboring. Har bir savolda text, options, correctIndex, explanation va image bo‘lishi mumkin.
+            JSON ichiga savollar massivi yuboring. Har bir savolda text, options, correctIndex, explanation, image va audio bo‘lishi mumkin.
             id yubormang, backend uni avtomatik yaratadi.
           </div>
           <textarea
@@ -419,7 +712,7 @@ export default function AdminTopicDetailPage() {
             rows={9}
             value={importText}
             onChange={(event) => setImportText(event.target.value)}
-            placeholder={`[\n  {\n    "correctIndex": 1,\n    "explanation": "",\n    "image": "",\n    "options": ["Variant 1", "Variant 2"],\n    "text": "Savol matni"\n  }\n]`}
+            placeholder={`[\n  {\n    "correctIndex": 1,\n    "explanation": "",\n    "image": "",\n    "audio": "",\n    "options": ["Variant 1", "Variant 2"],\n    "text": "Savol matni"\n  }\n]`}
           />
         </div>
 
@@ -465,6 +758,7 @@ export default function AdminTopicDetailPage() {
                     if (!topic) return;
                     const nextQuestions = topic.questions.filter((item) => item.id !== question.id);
                     if (!window.confirm("Bu savolni bazadan o‘chirishni tasdiqlaysizmi?")) return;
+                    cleanupQuestionDrafts(question.id);
                     deleteQuestionMutation.mutate({
                       ...topic,
                       questions: nextQuestions
@@ -542,8 +836,87 @@ export default function AdminTopicDetailPage() {
                         }}
                       />
                     </div>
+                </div>
+              </div>
+
+              <div className="adminField adminFieldWide">
+                <div className="adminFieldLabel">Audio izoh</div>
+                <div className="adminAudioRow">
+                  <div className="adminAudioPreview">
+                    {audioDrafts[question.id]?.recording ? (
+                      <div className="adminAudioEmptyState">
+                        <div className="adminAudioEmptyTitle">Yozib olinmoqda</div>
+                        <div className="adminAudioEmptyText">Mikrofon tugmasini bosib turing.</div>
+                      </div>
+                    ) : audioDrafts[question.id]?.previewUrl || question.audio ? (
+                      <audio
+                        className="adminAudioPlayer"
+                        controls
+                        preload="metadata"
+                        src={audioDrafts[question.id]?.previewUrl || question.audio}
+                      />
+                    ) : (
+                      <div className="adminAudioEmptyState">
+                        <div className="adminAudioEmptyTitle">Audio yuklanmagan</div>
+                        <div className="adminAudioEmptyText">Mikrofonga bosib yozing yoki mavjud audioni tinglang.</div>
+                      </div>
+                    )}
+                    {audioDrafts[question.id]?.uploading ? <div className="adminImagePreviewLoading">Yuklanmoqda...</div> : null}
+                  </div>
+
+                  <div className="adminAudioControls">
+                    <div className="adminImageUploadHint">Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi.</div>
+                    <div className="adminOptionsToolbar">
+                      <button
+                        className={`btn btn-sm adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
+                        type="button"
+                        title={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
+                        aria-label={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
+                        onPointerDown={(event) => {
+                          event.preventDefault();
+                          startQuestionRecording(question.id).catch((error: any) => toast.error(error?.message || "Audio yozib bo‘lmadi"));
+                        }}
+                        onPointerUp={() => {
+                          stopQuestionRecording().catch(() => {});
+                        }}
+                        onPointerCancel={() => {
+                          stopQuestionRecording().catch(() => {});
+                        }}
+                        onPointerLeave={() => {
+                          if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
+                        }}
+                      >
+                        <Mic className="lucide" aria-hidden="true" />
+                        <span>{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
+                      </button>
+                      <button
+                        className="btn btn-sm adminIconBtn adminIconBtnEdit"
+                        type="button"
+                        title="Audio yuklash"
+                        aria-label="Audio yuklash"
+                        disabled={!audioDrafts[question.id]?.blob || audioDrafts[question.id]?.uploading}
+                        onClick={() =>
+                          uploadQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"))
+                        }
+                      >
+                        <Upload className="lucide" aria-hidden="true" />
+                        <span>Yuklash</span>
+                      </button>
+                      <button
+                        className="btn btn-sm adminIconBtn adminIconBtnDelete"
+                        type="button"
+                        title="Audio o‘chirish"
+                        aria-label="Audio o‘chirish"
+                        disabled={!audioDrafts[question.id]?.blob && !question.audio && !audioDrafts[question.id]?.previewUrl}
+                        onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
+                      >
+                        <Trash2 className="lucide" aria-hidden="true" />
+                        <span>Trash</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
+              </div>
 
                 <label className="adminField adminFieldWide">
                   <span className="adminFieldLabel">Savol matni</span>

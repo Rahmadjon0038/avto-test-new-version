@@ -108,6 +108,7 @@ function normalizeQuestions(value) {
     .map((question, index) => ({
       id: String(question?.id || `${index + 1}`),
       image: String(question?.image || ""),
+      audio: String(question?.audio || ""),
       text: String(question?.text || ""),
       options: Array.isArray(question?.options) ? question.options.map((option) => String(option || "").trim()) : [],
       correctIndex: Number.isFinite(Number(question?.correctIndex)) ? Number(question.correctIndex) : 0,
@@ -246,6 +247,7 @@ function normalizeImportedTopicQuestion(input = {}, index = 0) {
   if (!text) throw new Error(`Savol ${index + 1}: matn kiritilishi kerak`);
 
   const image = String(source.image || "").trim();
+  const audio = String(source.audio || "").trim();
   const explanation = String(source.explanation || "").trim();
   const options = Array.isArray(source.options) ? source.options.map((option) => String(option || "").trim()) : [];
   const correctIndex = Number.isFinite(Number(source.correctIndex)) ? Number(source.correctIndex) : 0;
@@ -259,6 +261,7 @@ function normalizeImportedTopicQuestion(input = {}, index = 0) {
   return {
     id: crypto.randomUUID(),
     image,
+    audio,
     text,
     options,
     correctIndex,
@@ -288,6 +291,7 @@ function normalizeTopicQuestionSnapshot(topic, question, questionIndex) {
   return {
     id: String(normalized.id || question?.id || `${questionIndex + 1}`),
     image: String(normalized.image || ""),
+    audio: String(normalized.audio || ""),
     text: String(normalized.text || ""),
     options: Array.isArray(normalized.options) ? normalized.options.map((option) => String(option || "")) : [],
     correctIndex: Number.isFinite(Number(normalized.correctIndex)) ? Number(normalized.correctIndex) : 0,
@@ -1983,6 +1987,8 @@ async function getAdminFromAccess(req) {
 
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_AUDIO_TYPES = new Set(["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav"]);
+const MAX_AUDIO_SIZE = 10 * 1024 * 1024;
 const ADMIN_ACCESS_DENIED_MESSAGE = "Bu bo‘limga kirish uchun admin akkaunt kerak.";
 
 function getR2PublicBaseUrl() {
@@ -1997,6 +2003,16 @@ function buildR2PublicUrl(key) {
   return `${getR2PublicBaseUrl()}/${String(key).replace(/^\/+/, "")}`;
 }
 
+function isAllowedAudioType(mimeType) {
+  const value = String(mimeType || "").toLowerCase();
+  return Array.from(ALLOWED_AUDIO_TYPES).some((allowed) => value === allowed || value.startsWith(`${allowed};`));
+}
+
+function createMediaFileKey(folder, extension) {
+  const random = Math.random().toString(36).slice(2, 10);
+  return `${String(folder || "media").replace(/\/+$/, "")}/${Date.now()}-${random}.${extension}`;
+}
+
 function normalizeAnswerQuestion(question) {
   const options = Array.isArray(question?.options) ? question.options.map((option) => String(option || "").trim()) : [];
   const correctIndex = Number.isFinite(Number(question?.correctIndex)) ? Number(question.correctIndex) : 0;
@@ -2004,6 +2020,7 @@ function normalizeAnswerQuestion(question) {
     id: String(question?.id || ""),
     text: String(question?.text || ""),
     image: String(question?.image || ""),
+    audio: String(question?.audio || ""),
     options,
     correctIndex,
     correctAnswer: options[correctIndex] || "",
@@ -2344,8 +2361,21 @@ function getExtensionFromFile(file) {
 }
 
 function createFileKey(extension) {
-  const random = Math.random().toString(36).slice(2, 10);
-  return `images/${Date.now()}-${random}.${extension}`;
+  return createMediaFileKey("images", extension);
+}
+
+function getAudioExtensionFromFile(file) {
+  const filename = file.name || "";
+  const fromName = filename.includes(".") ? filename.split(".").pop() : "";
+  const ext = String(fromName || "").toLowerCase();
+  if (["webm", "ogg", "mp4", "m4a", "mp3", "wav"].includes(ext)) return ext === "mp4" ? "m4a" : ext;
+  const mimeType = String(file.type || "").toLowerCase();
+  if (mimeType.startsWith("audio/webm")) return "webm";
+  if (mimeType.startsWith("audio/ogg")) return "ogg";
+  if (mimeType.startsWith("audio/mp4")) return "m4a";
+  if (mimeType.startsWith("audio/mpeg")) return "mp3";
+  if (mimeType.startsWith("audio/wav")) return "wav";
+  return "";
 }
 
 async function respondWithAuthUser(req, res, user) {
@@ -3608,6 +3638,138 @@ app.delete("/api/upload-image", async (req, res) => {
     res.json({ success: true, imageUrl: "" });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Rasm o‘chirish amalga oshmadi" });
+  }
+});
+
+app.post("/api/upload-audio", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const body = req.body || {};
+    const audioBase64 = String(body.audioBase64 || "");
+    const audioName = String(body.audioName || "");
+    const audioType = String(body.audioType || "");
+    const oldAudioUrl = String(body.oldAudioUrl || "").trim();
+    const ticketId = String(body.ticketId || "").trim();
+    const topicId = String(body.topicId || "").trim();
+    const customTestId = String(body.customTestId || "").trim();
+    const questionId = String(body.questionId || "").trim();
+
+    if (!audioBase64) return res.status(400).json({ error: "Audio fayli topilmadi" });
+    if (!isAllowedAudioType(audioType)) {
+      return res.status(400).json({ error: "Faqat webm, ogg, mp4, m4a, mp3 va wav formatlar qabul qilinadi" });
+    }
+
+    const buffer = Buffer.from(audioBase64.replace(/^data:audio\/[^;]+(?:;[^,]+)?;base64,/, ""), "base64");
+    if (buffer.length > MAX_AUDIO_SIZE) {
+      return res.status(400).json({ error: "Audio hajmi 10MB dan oshmasligi kerak" });
+    }
+
+    const extension = getAudioExtensionFromFile({ name: audioName, type: audioType });
+    if (!extension) return res.status(400).json({ error: "Audio fayl kengaytmasi aniqlanmadi" });
+
+    const bucket = getR2BucketName();
+    if (!bucket) return res.status(500).json({ error: "R2 bucket sozlanmagan" });
+
+    const fileKey = createMediaFileKey("audios", extension);
+    await r2.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: fileKey,
+        Body: buffer,
+        ContentType: audioType
+      })
+    );
+
+    const audioUrl = buildR2PublicUrl(fileKey);
+    const oldKey = deriveR2KeyFromPublicUrl(oldAudioUrl);
+    if (oldKey && oldKey !== fileKey) {
+      await r2.send(new DeleteObjectCommand({ Bucket: bucket, Key: oldKey })).catch(() => {});
+    }
+
+    if (ticketId && questionId) {
+      const ticket = await getTicketById(ticketId);
+      if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
+      const updatedQuestions = ticket.questions.map((question) =>
+        String(question.id) === questionId ? { ...question, audio: audioUrl } : question
+      );
+      await updateTicket(ticketId, { title: ticket.title, questions: updatedQuestions });
+    }
+
+    if (topicId && questionId) {
+      const topic = await getTopicFromDb(topicId);
+      if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
+      const updatedQuestions = topic.questions.map((question) =>
+        String(question.id) === questionId ? { ...question, audio: audioUrl } : question
+      );
+      await updateTopic(topicId, { title: topic.title, questions: updatedQuestions });
+    }
+
+    if (customTestId && questionId) {
+      const customTest = await getCustomTestFromDb(customTestId);
+      if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
+      const updatedQuestions = customTest.questions.map((question) =>
+        String(question.id) === questionId ? { ...question, audio: audioUrl } : question
+      );
+      await updateCustomTest(customTestId, { title: customTest.title, questions: updatedQuestions });
+    }
+
+    res.json({ success: true, audioUrl, key: fileKey });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Audio yuklash amalga oshmadi" });
+  }
+});
+
+app.delete("/api/upload-audio", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const body = req.body || {};
+    const ticketId = String(body.ticketId || "").trim();
+    const topicId = String(body.topicId || "").trim();
+    const customTestId = String(body.customTestId || "").trim();
+    const questionId = String(body.questionId || "").trim();
+    const audioUrl = String(body.audioUrl || "").trim();
+    if ((!ticketId && !topicId && !customTestId) || !questionId) return res.status(400).json({ error: "Ticket yoki mavzu topilmadi" });
+
+    const bucket = getR2BucketName();
+    if (!bucket) return res.status(500).json({ error: "R2 bucket sozlanmagan" });
+
+    const oldKey = deriveR2KeyFromPublicUrl(audioUrl);
+    if (oldKey) {
+      await r2.send(new DeleteObjectCommand({ Bucket: bucket, Key: oldKey })).catch(() => {});
+    }
+
+    if (ticketId) {
+      const ticket = await getTicketById(ticketId);
+      if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
+      const updatedQuestions = ticket.questions.map((question) =>
+        String(question.id) === questionId ? { ...question, audio: "" } : question
+      );
+      await updateTicket(ticketId, { title: ticket.title, questions: updatedQuestions });
+    }
+
+    if (topicId) {
+      const topic = await getTopicFromDb(topicId);
+      if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
+      const updatedQuestions = topic.questions.map((question) =>
+        String(question.id) === questionId ? { ...question, audio: "" } : question
+      );
+      await updateTopic(topicId, { title: topic.title, questions: updatedQuestions });
+    }
+
+    if (customTestId) {
+      const customTest = await getCustomTestFromDb(customTestId);
+      if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
+      const updatedQuestions = customTest.questions.map((question) =>
+        String(question.id) === questionId ? { ...question, audio: "" } : question
+      );
+      await updateCustomTest(customTestId, { title: customTest.title, questions: updatedQuestions });
+    }
+
+    res.json({ success: true, audioUrl: "" });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Audio o‘chirish amalga oshmadi" });
   }
 });
 
