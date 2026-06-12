@@ -10,7 +10,7 @@ let nodemailer = null;
 try {
   nodemailer = require("nodemailer");
 } catch (error) {
-  console.warn("[backend] nodemailer module not installed; password reset emails will fall back to temporary password response.");
+  console.warn("[backend] nodemailer module not installed; phone-based temporary password reset is active.");
 }
 const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
@@ -2355,7 +2355,8 @@ async function respondWithAuthUser(req, res, user) {
     ok: true,
     accessToken: tokens.accessToken,
     user: { ...user, phone: phoneUi },
-    isPro: isUserPro(user)
+    isPro: isUserPro(user),
+    mustChangePassword: Boolean(user.password_reset_required)
   });
 }
 
@@ -2400,37 +2401,58 @@ async function handleGoogleLogin(req, res) {
 
 async function handlePasswordResetRequest(req, res) {
   try {
-    const email = normalizeEmail(req.body?.email);
-    if (!email) return res.status(400).json({ error: "Email kiritilishi kerak" });
+    const phone = req.body?.phone;
+    const normalizedPhone = normalizeUzPhone(phone);
+    if (!normalizedPhone) return res.status(400).json({ error: "Telefon raqam kiritilishi kerak" });
 
-    const user = await dbApi.get("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email]);
-    if (!user) return res.status(404).json({ error: "Bu email bo‘yicha foydalanuvchi topilmadi" });
+    const user = await dbApi.get("SELECT * FROM users WHERE phone = ?", [normalizedPhone]);
+    if (!user) return res.status(404).json({ error: "Bu telefon raqam bo‘yicha foydalanuvchi topilmadi" });
 
     const temporaryPassword = generateTemporaryPassword(6);
     const passwordHash = await bcrypt.hash(temporaryPassword, 10);
 
-    await dbApi.run("UPDATE users SET password_hash = ? WHERE id = ?", [passwordHash, String(user.id)]);
-
-    const mailResult = await sendTemporaryPasswordEmail({
-      to: email,
-      password: temporaryPassword,
-      fullName: user.full_name
-    });
-
-    if (!mailResult.sent) {
-      return res.status(503).json({
-        error:
-          "SMTP sozlanmagan. Email yuborish uchun `.env` fayliga SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS va SMTP_FROM qiymatlarini kiriting."
-      });
-    }
+    await dbApi.run(
+      "UPDATE users SET password_hash = ?, password_reset_required = TRUE WHERE id = ?",
+      [passwordHash, String(user.id)]
+    );
 
     res.json({
       ok: true,
-      sent: mailResult.sent,
-      message: "6 xonali kod emailingizga yuborildi"
+      sent: true,
+      temporaryPassword,
+      message:
+        "Bir martalik parol yaratildi. Tizimga kirgandan keyin parolni albatta almashtiring."
     });
   } catch (e) {
     res.status(e?.statusCode || 400).json({ error: e?.message || "Parolni tiklash amalga oshmadi" });
+  }
+}
+
+async function handlePasswordChange(req, res) {
+  try {
+    const user = await getUserFromAccess(req);
+    if (!user) return res.status(401).json({ error: "Kirish talab qilinadi" });
+
+    const currentPassword = String(req.body?.currentPassword || "").trim();
+    const nextPassword = String(req.body?.newPassword || "").trim();
+    if (!currentPassword) return res.status(400).json({ error: "Eski parolni kiriting" });
+    if (nextPassword.length < 6) return res.status(400).json({ error: "Kamida 6 ta belgidan iborat yangi parol kiriting" });
+
+    const row = await dbApi.get("SELECT * FROM users WHERE id = ?", [String(user.id)]);
+    if (!row?.password_hash) return res.status(400).json({ error: "Parol topilmadi" });
+
+    const ok = await bcrypt.compare(currentPassword, String(row.password_hash));
+    if (!ok) return res.status(401).json({ error: "Eski parol noto‘g‘ri" });
+
+    const passwordHash = await bcrypt.hash(nextPassword, 10);
+    await dbApi.run(
+      "UPDATE users SET password_hash = ?, password_reset_required = FALSE WHERE id = ?",
+      [passwordHash, String(user.id)]
+    );
+
+    res.json({ ok: true, message: "Parol muvaffaqiyatli almashtirildi" });
+  } catch (e) {
+    res.status(e?.statusCode || 400).json({ error: e?.message || "Parol almashtirilmadi" });
   }
 }
 
@@ -2445,6 +2467,8 @@ app.post("/api/login/google", handleGoogleLogin);
 
 app.post("/api/auth/password-reset/request", handlePasswordResetRequest);
 app.post("/api/password-reset/request", handlePasswordResetRequest);
+app.post("/api/auth/password-change", handlePasswordChange);
+app.post("/api/password-change", handlePasswordChange);
 
 app.post("/api/auth/logout", async (req, res) => {
   const token = await readRefreshCookie(req);

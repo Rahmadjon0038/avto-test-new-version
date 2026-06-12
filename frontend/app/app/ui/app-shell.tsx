@@ -4,7 +4,18 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { BadgeCheck, CreditCard, Send, ShieldCheck, Phone, UserCircle2, Wallet } from "lucide-react";
+import {
+  BadgeCheck,
+  CreditCard,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Send,
+  ShieldCheck,
+  Phone,
+  UserCircle2,
+  Wallet
+} from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -32,6 +43,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [plan, setPlan] = useState<SubPlan>("1m");
   const [provider, setProvider] = useState<PayProvider>("payme");
+  const [passwordChangeOpen, setPasswordChangeOpen] = useState(false);
+  const [passwordCurrent, setPasswordCurrent] = useState("");
+  const [passwordNext, setPasswordNext] = useState("");
+  const [passwordNextConfirm, setPasswordNextConfirm] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const initials = useMemo(() => getInitials(me?.full_name || ""), [me]);
   const displayName = useMemo(() => me?.full_name || "Profil", [me]);
@@ -55,6 +71,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
     enabled: authReady && !!accessToken
   });
   const isAdmin = Boolean(me?.is_admin || user?.is_admin || meQuery.data?.user?.is_admin);
+  const mustChangePassword = Boolean(
+    me?.password_reset_required || user?.password_reset_required || meQuery.data?.user?.password_reset_required
+  );
+
+  useEffect(() => {
+    if (mustChangePassword) {
+      setPasswordChangeOpen(true);
+    }
+  }, [mustChangePassword]);
 
   useEffect(() => {
     if (meQuery.isSuccess && meQuery.data?.user) {
@@ -84,6 +109,57 @@ export default function AppShell({ children }: { children: ReactNode }) {
   function openProfile() {
     setSubOpen(false);
     setProfileOpen(true);
+  }
+
+  function openPasswordChange() {
+    setProfileOpen(false);
+    setPasswordChangeOpen(true);
+    setPasswordCurrent("");
+    setPasswordNext("");
+    setPasswordNextConfirm("");
+    setPasswordVisible(false);
+  }
+
+  const passwordChangeMutation = useMutation({
+    mutationFn: async (payload: { currentPassword: string; newPassword: string }) => {
+      const res = await authFetch("/api/auth/password-change", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      return jsonOrError(res);
+    },
+    onSuccess: () => {
+      const nextMe = me ? { ...me, password_reset_required: false } : me;
+      if (nextMe) {
+        setMe(nextMe);
+        setUser(nextMe);
+      }
+      setPasswordChangeOpen(false);
+      toast.success("Parol muvaffaqiyatli almashtirildi");
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Parol almashtirilmadi");
+    }
+  });
+
+  function submitPasswordChange() {
+    if (!passwordCurrent.trim()) {
+      toast.error("Eski parolni kiriting");
+      return;
+    }
+    if (passwordNext.length < 6) {
+      toast.error("Yangi parol kamida 6 ta belgidan iborat bo‘lsin");
+      return;
+    }
+    if (passwordNext !== passwordNextConfirm) {
+      toast.error("Yangi parollar mos emas");
+      return;
+    }
+    passwordChangeMutation.mutate({
+      currentPassword: passwordCurrent.trim(),
+      newPassword: passwordNext.trim()
+    });
   }
 
   const logoutMutation = useMutation({
@@ -169,12 +245,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      {(subOpen || profileOpen) && (
+      {(subOpen || profileOpen || passwordChangeOpen) && (
         <div
           className="modalOverlay"
           onClick={() => {
             setSubOpen(false);
             setProfileOpen(false);
+            setPasswordChangeOpen(false);
           }}
         />
       )}
@@ -252,10 +329,94 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </div>
                 <div className="profileVal">{displayPhone}</div>
               </div>
+              <button className="btn btn-primary" type="button" onClick={openPasswordChange}>
+                Parolni almashtirish
+              </button>
             </div>
             <button className="btn btn-danger" type="button" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
               Chiqish
             </button>
+          </div>
+        </div>
+      )}
+
+      {passwordChangeOpen && (
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modalHeader">
+            <div className="modalTitle">Parolni almashtirish</div>
+            <button className="btn btn-ghost" type="button" onClick={() => setPasswordChangeOpen(false)}>
+              ✕
+            </button>
+          </div>
+          <div className="modalBody">
+            <div className="profileBlock" style={{ marginTop: 0 }}>
+              <div className="profileRow profileRowCard">
+                <div className="profileKey">
+                  <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
+                  Eski parol
+                </div>
+                <div className="profileVal" style={{ width: "100%" }}>
+                  <input
+                    className="input"
+                    type={passwordVisible ? "text" : "password"}
+                    value={passwordCurrent}
+                    onChange={(e) => setPasswordCurrent(e.target.value)}
+                    placeholder="Eski parol"
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+              <div className="profileRow profileRowCard">
+                <div className="profileKey">
+                  <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
+                  Yangi parol
+                </div>
+                <div className="profileVal" style={{ width: "100%" }}>
+                  <input
+                    className="input"
+                    type={passwordVisible ? "text" : "password"}
+                    value={passwordNext}
+                    onChange={(e) => setPasswordNext(e.target.value)}
+                    placeholder="Kamida 6 ta belgi"
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+              <div className="profileRow profileRowCard">
+                <div className="profileKey">
+                  <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
+                  Takrorlang
+                </div>
+                <div className="profileVal" style={{ width: "100%" }}>
+                  <input
+                    className="input"
+                    type={passwordVisible ? "text" : "password"}
+                    value={passwordNextConfirm}
+                    onChange={(e) => setPasswordNextConfirm(e.target.value)}
+                    placeholder="Yangi parolni tasdiqlang"
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="payRow" style={{ marginTop: 4 }}>
+              <button className="btn btn-ghost payBtn" type="button" onClick={() => setPasswordVisible((v) => !v)}>
+                {passwordVisible ? <EyeOff className="lucide" aria-hidden="true" /> : <Eye className="lucide" aria-hidden="true" />}
+                {passwordVisible ? "Yashirish" : "Ko‘rsatish"}
+              </button>
+              <button className="btn btn-primary payBtn" type="button" onClick={submitPasswordChange} disabled={passwordChangeMutation.isPending}>
+                Saqlash
+              </button>
+            </div>
+            {mustChangePassword ? (
+              <div className="authResetNotice" style={{ marginTop: 12 }}>
+                <div className="authResetTitle">Diqqat</div>
+                <div className="authResetText">
+                  Siz bir martalik parol bilan kirgansiz. Parolni almashtirmaguningizcha tizimdan to‘liq foydalanish uchun
+                  shu oynadan yangi parol qo‘ying.
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       )}

@@ -2891,6 +2891,52 @@ body {
   line-height: 1.45;
 }
 
+.authForgotBtn {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 2px 0 0;
+  cursor: pointer;
+  justify-self: end;
+}
+
+.authResetNotice {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border) 76%);
+  background: color-mix(in srgb, var(--panel) 84%, var(--primary) 16%);
+}
+
+.authResetTitle {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.authResetText {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.authCopyBtn {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0;
+  cursor: pointer;
+  justify-self: start;
+}
+
 @media (max-width: 640px) {
   .heroGrid {
     display: block;

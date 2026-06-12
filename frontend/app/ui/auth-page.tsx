@@ -73,6 +73,8 @@ export default function AuthPage() {
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [resetInfo, setResetInfo] = useState<string | null>(null);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const googleButtonLoadedRef = useRef(false);
 
@@ -171,6 +173,8 @@ export default function AuthPage() {
   function openAuth(nextTab: Tab = "login") {
     setTab(nextTab);
     setAuthOpen(true);
+    setResetInfo(null);
+    setTemporaryPassword(null);
   }
 
   function closeAuth() {
@@ -245,6 +249,49 @@ export default function AuthPage() {
     },
     onError: (e: any) => toast.error(e?.message || "Xatolik")
   });
+
+  const resetMutation = useMutation({
+    mutationFn: (payload: { phone: string }) =>
+      fetch("/api/auth/password-reset/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(jsonOrError),
+    onSuccess: (data: any) => {
+      const tempPassword = String(data?.temporaryPassword || "");
+      if (tempPassword) {
+        setPasswordLogin(tempPassword);
+        setTemporaryPassword(tempPassword);
+      }
+      setResetInfo(
+        tempPassword
+          ? `Bir martalik parol: ${tempPassword}. Tizimga kirgandan keyin darhol parolni almashtiring.`
+          : String(data?.message || "Bir martalik parol yaratildi. Tizimga kirgandan keyin parolni almashtiring.")
+      );
+      toast.success("Bir martalik parol yaratildi");
+      setTab("login");
+    },
+    onError: (e: any) => toast.error(e?.message || "Parolni tiklash amalga oshmadi")
+  });
+
+  function requestTempPassword() {
+    const phoneDigits = uzLocalDigits(phoneLoginLocal);
+    if (phoneDigits.length !== 9) {
+      toast.error("Telefon raqam formati noto‘g‘ri");
+      return;
+    }
+    resetMutation.mutate({ phone: `+998${phoneDigits}` });
+  }
+
+  async function copyTemporaryPassword() {
+    if (!temporaryPassword) return;
+    try {
+      await navigator.clipboard.writeText(temporaryPassword);
+      toast.success("Parol nusxalandi");
+    } catch {
+      toast.error("Parol nusxalanmadi");
+    }
+  }
 
   async function onLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -485,6 +532,29 @@ export default function AuthPage() {
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={loginMutation.isPending}>
                   Kirish
                 </button>
+                <button
+                  className="authForgotBtn"
+                  type="button"
+                  onClick={requestTempPassword}
+                  disabled={resetMutation.isPending}
+                >
+                  {resetMutation.isPending ? "Kutilmoqda..." : "Parolni unutdingizmi?"}
+                </button>
+                {resetInfo ? (
+                  <div className="authResetNotice">
+                    <div className="authResetTitle">Diqqat</div>
+                    <div className="authResetText">{resetInfo}</div>
+                    {temporaryPassword ? (
+                      <button
+                        className="authCopyBtn"
+                        type="button"
+                        onClick={copyTemporaryPassword}
+                      >
+                        Parolni nusxalash
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </form>
             )}
 

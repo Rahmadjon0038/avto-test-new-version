@@ -68,6 +68,7 @@ async function initDb(dbApi) {
       email TEXT UNIQUE,
       google_sub TEXT UNIQUE,
       password_hash TEXT,
+      password_reset_required BOOLEAN NOT NULL DEFAULT FALSE,
       pro_until TIMESTAMPTZ NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -75,6 +76,7 @@ async function initDb(dbApi) {
 
   // Lightweight "migrations" for existing DBs
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;`);
+  await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_required BOOLEAN NOT NULL DEFAULT FALSE;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;`);
