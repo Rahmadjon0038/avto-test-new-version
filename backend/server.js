@@ -766,8 +766,12 @@ const openapi = {
       },
       RegisterBody: {
         type: "object",
-        required: ["fullName", "phone", "password"],
-        properties: { fullName: { type: "string" }, phone: { type: "string" }, password: { type: "string" } }
+        required: ["phone", "password"],
+        properties: {
+          fullName: { type: "string" },
+          phone: { type: "string" },
+          password: { type: "string" }
+        }
       },
       LoginBody: {
         type: "object",
@@ -1521,8 +1525,7 @@ function formatUzPhoneForUi(normalized) {
 }
 
 async function createUserFromPhone({ fullName, phone, password, email }) {
-  const cleanName = String(fullName || "").trim();
-  if (!cleanName) throw new Error("Ism kiritilishi kerak");
+  const cleanName = String(fullName || "").trim() || null;
 
   const cleanPassword = String(password || "");
   if (cleanPassword.length < 6) throw new Error("Kamida 6 ta belgidan iborat parol yarating");
