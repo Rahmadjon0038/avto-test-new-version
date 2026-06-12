@@ -330,13 +330,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </div>
                 <div className="profileVal">{displayPhone}</div>
               </div>
-              <button className="profileRow profileRowCard profileRowButton" type="button" onClick={openSubscription}>
-                <div className="profileKey">
-                  <BadgeCheck className="lucide profileKeyIcon" aria-hidden="true" />
-                  Obuna
-                </div>
-                <div className="profileVal profileValStatus">Faol emas</div>
-              </button>
             </div>
             {!me?.google_sub ? (
               <div className="profileBlock">
