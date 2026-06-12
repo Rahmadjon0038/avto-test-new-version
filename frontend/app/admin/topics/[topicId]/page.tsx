@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Mic, Pencil, Plus, Save, Trash2, Upload, UploadCloud } from "lucide-react";
+import { ArrowLeft, ChevronRight, Mic, Pencil, Plus, Save, Trash2, Upload, UploadCloud } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -990,7 +990,7 @@ export default function AdminTopicDetailPage() {
                       </div>
                       <div className="adminOptionsToolbar adminAudioButtons">
                         <button
-                          className={`btn btn-sm adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
+                          className={`btn btn-sm adminAudioActionCard adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
                           type="button"
                           title={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
                           aria-label={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
@@ -1007,28 +1007,47 @@ export default function AdminTopicDetailPage() {
                           onPointerLeave={() => {
                             if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
                           }}
-                          >
-                          <Mic className="lucide" aria-hidden="true" />
-                          <span>{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
+                        >
+                          <span className="adminAudioActionIcon adminAudioActionIconMic">
+                            <Mic className="lucide" aria-hidden="true" />
+                          </span>
+                          <span className="adminAudioActionText">
+                            <span className="adminAudioActionTitle">{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
+                            <span className="adminAudioActionSub">Bosib turing, yozish uchun</span>
+                          </span>
+                          <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
                         </button>
                         <label
-                          className={`btn btn-sm adminAudioUploadBtn ${audioDrafts[question.id]?.uploading ? "isUploading" : ""}`}
+                          className={`btn btn-sm adminAudioActionCard adminAudioUploadBtn ${audioDrafts[question.id]?.uploading ? "isUploading" : ""}`}
                           htmlFor={`audio-input-${question.id}`}
                           title="Tayyor audio faylni yuklash"
                           aria-label="Tayyor audio faylni yuklash"
                         >
-                          <UploadCloud className="lucide" aria-hidden="true" />
-                          <span>{audioDrafts[question.id]?.blob ? "Faylni almashtirish" : "Audio fayl yuklash"}</span>
+                          <span className="adminAudioActionIcon adminAudioActionIconUpload">
+                            <UploadCloud className="lucide" aria-hidden="true" />
+                          </span>
+                          <span className="adminAudioActionText">
+                            <span className="adminAudioActionTitle">{audioDrafts[question.id]?.blob ? "Faylni almashtirish" : "Audio fayl yuklash"}</span>
+                            <span className="adminAudioActionSub">Tayyor audio faylni tanlang</span>
+                          </span>
+                          <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
                         </label>
                         <button
-                          className="btn btn-sm adminAudioDeleteBtn"
+                          className="btn btn-sm adminAudioActionCard adminAudioDeleteBtn"
                           type="button"
                           title="Audio o‘chirish"
                           aria-label="Audio o‘chirish"
                           disabled={!audioDrafts[question.id]?.blob && !question.audio && !audioDrafts[question.id]?.previewUrl}
                           onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
                         >
-                          <Trash2 className="lucide" aria-hidden="true" />
+                          <span className="adminAudioActionIcon adminAudioActionIconDelete">
+                            <Trash2 className="lucide" aria-hidden="true" />
+                          </span>
+                          <span className="adminAudioActionText">
+                            <span className="adminAudioActionTitle">O‘chirish</span>
+                            <span className="adminAudioActionSub">Audioni tozalash</span>
+                          </span>
+                          <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
                         </button>
                       </div>
                       <input

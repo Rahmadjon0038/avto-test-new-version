@@ -3198,10 +3198,11 @@ body {
 .adminAudioPreview {
   position: relative;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel2);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #0d1324, #090f1d);
   overflow: hidden;
-  min-height: 64px;
+  min-height: 72px;
+  padding: 12px;
 }
 
 .adminImageEmptyState {
@@ -3232,16 +3233,16 @@ body {
   width: 100%;
   display: block;
   min-height: 52px;
-  background: linear-gradient(180deg, #111827, #0b1220);
-  border-radius: 0;
+  background: transparent;
+  border-radius: 14px;
   accent-color: #3b82f6;
   color-scheme: dark;
-  filter: invert(1) hue-rotate(180deg) brightness(1.05) contrast(1.08);
-  opacity: 0.98;
+  filter: none;
+  opacity: 1;
 }
 
 .adminAudioPlayer::-webkit-media-controls-panel {
-  background: linear-gradient(180deg, color-mix(in srgb, #111827 92%, #000), color-mix(in srgb, #0f172a 92%, #000));
+  background: linear-gradient(180deg, #111c33, #0d1729);
 }
 
 .adminAudioPlayer::-webkit-media-controls-enclosure {
@@ -3255,13 +3256,8 @@ body {
 
 .adminAudioPlayer::-webkit-media-controls-current-time-display,
 .adminAudioPlayer::-webkit-media-controls-time-remaining-display {
-  color: #dbeafe;
+  color: #e2e8f0;
   text-shadow: none;
-}
-
-.adminAudioPlayer::-webkit-media-controls-timeline,
-.adminAudioPlayer::-webkit-media-controls-volume-slider {
-  filter: hue-rotate(190deg) saturate(1.2);
 }
 
 .adminAudioEmptyState {
@@ -3302,20 +3298,76 @@ body {
 }
 
 .adminAudioButtons {
-  display: grid;
-  grid-template-columns: minmax(120px, 0.9fr) minmax(170px, 1.15fr) 42px;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
   align-items: stretch;
 }
 
-.adminAudioMicBtn {
-  min-height: 38px;
+.adminAudioActionCard {
+  width: min(100%, 290px);
+  min-height: 74px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  text-align: left;
+  white-space: normal;
+}
+
+.adminAudioActionText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.adminAudioActionTitle {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.adminAudioActionSub {
+  font-size: 11px;
+  line-height: 1.35;
+  color: color-mix(in srgb, currentColor 72%, #94a3b8);
+  font-weight: 650;
+}
+
+.adminAudioActionIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  padding-inline: 12px;
-  background: color-mix(in srgb, #16a34a 82%, #08111a);
-  border-color: color-mix(in srgb, #22c55e 80%, var(--border));
+  flex: 0 0 auto;
+}
+
+.adminAudioActionIcon .lucide {
+  width: 18px;
+  height: 18px;
+}
+
+.adminAudioActionArrow {
+  width: 16px;
+  height: 16px;
+  opacity: 0.9;
+  flex: 0 0 auto;
+}
+
+.adminAudioMicBtn {
+  background: linear-gradient(180deg, #134e2e, #0c2f1b);
+  border-color: #1f8f4a;
   color: #ecfdf5;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #86efac 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #86efac 20%, transparent);
+}
+
+.adminAudioMicBtn .adminAudioActionIconMic {
+  background: #1f9d55;
 }
 
 .adminAudioMicBtn.isRecording {
@@ -3325,17 +3377,15 @@ body {
 }
 
 .adminAudioUploadBtn {
-  min-height: 38px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding-inline: 14px;
-  background: color-mix(in srgb, #2563eb 84%, #08111a);
-  border-color: color-mix(in srgb, #3b82f6 80%, var(--border));
+  background: linear-gradient(180deg, #1640a8, #0f2e7a);
+  border-color: #2457c8;
   color: #eff6ff;
   font-weight: 800;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #bfdbfe 16%, transparent);
+}
+
+.adminAudioUploadBtn .adminAudioActionIconUpload {
+  background: #2f6ff0;
 }
 
 .adminAudioUploadBtn .lucide,
@@ -3352,22 +3402,22 @@ body {
 }
 
 .adminAudioDeleteBtn {
-  min-height: 38px;
-  min-width: 38px;
-  padding-inline: 0;
-  justify-content: center;
-  background: color-mix(in srgb, #ef4444 82%, #111827);
-  border-color: color-mix(in srgb, #f87171 78%, var(--border));
+  background: linear-gradient(180deg, #7f1d1d, #4c1111);
+  border-color: #ef4444;
   color: #fff1f2;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #fda4af 16%, transparent);
 }
 
+.adminAudioDeleteBtn .adminAudioActionIconDelete {
+  background: #ef4444;
+}
+
 .adminAudioDeleteBtn:hover {
-  background: color-mix(in srgb, #ef4444 90%, #1f2937);
+  background: linear-gradient(180deg, #991b1b, #5f1717);
 }
 
 .adminAudioUploadBtn:hover {
-  background: color-mix(in srgb, #3b82f6 90%, #1f2937);
+  background: linear-gradient(180deg, #1d4ed8, #12368c);
 }
 
 .adminImagePreviewImg {
@@ -3405,12 +3455,16 @@ body {
   }
 
   .adminAudioButtons {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .adminAudioMicBtn,
   .adminAudioUploadBtn,
   .adminAudioDeleteBtn {
+    width: 100%;
+  }
+
+  .adminAudioActionCard {
     width: 100%;
   }
 
