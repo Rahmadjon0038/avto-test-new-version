@@ -3258,20 +3258,14 @@ body {
   line-height: 1.45;
 }
 
-.adminAudioControls {
-  display: grid;
-  gap: 10px;
-  align-content: start;
-}
-
 .adminAudioStack {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .adminAudioFooter {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .adminAudioHint {
@@ -3281,18 +3275,71 @@ body {
 }
 
 .adminAudioButtons {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(210px, 1.3fr) auto;
+  gap: 10px;
+  align-items: stretch;
 }
 
 .adminAudioMicBtn {
-  background: color-mix(in srgb, var(--primary) 15%, var(--panel));
-  border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
+  min-height: 46px;
+  justify-content: center;
+  background: color-mix(in srgb, #16a34a 28%, #08111a);
+  border-color: color-mix(in srgb, #22c55e 65%, var(--border));
+  color: #ecfdf5;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #86efac 18%, transparent);
 }
 
 .adminAudioMicBtn.isRecording {
-  background: color-mix(in srgb, #ef4444 30%, var(--panel));
-  border-color: color-mix(in srgb, #ef4444 72%, var(--border));
+  background: color-mix(in srgb, #dc2626 34%, #111827);
+  border-color: color-mix(in srgb, #f87171 72%, var(--border));
   color: #fff1f2;
+}
+
+.adminAudioUploadBtn {
+  min-height: 46px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 18px;
+  background: color-mix(in srgb, #3b82f6 22%, var(--panel));
+  border-color: color-mix(in srgb, #60a5fa 70%, var(--border));
+  color: #eff6ff;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #bfdbfe 16%, transparent);
+}
+
+.adminAudioUploadBtn .lucide,
+.adminAudioDeleteBtn .lucide,
+.adminAudioMicBtn .lucide {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.adminAudioUploadBtn.isUploading {
+  opacity: 0.9;
+  cursor: progress;
+}
+
+.adminAudioDeleteBtn {
+  min-height: 46px;
+  min-width: 46px;
+  padding-inline: 0;
+  justify-content: center;
+  background: color-mix(in srgb, #ef4444 18%, var(--panel));
+  border-color: color-mix(in srgb, #ef4444 70%, var(--border));
+  color: #fff1f2;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fda4af 16%, transparent);
+}
+
+.adminAudioDeleteBtn:hover {
+  background: color-mix(in srgb, #ef4444 28%, var(--panel2));
+}
+
+.adminAudioUploadBtn:hover {
+  background: color-mix(in srgb, #3b82f6 30%, var(--panel2));
 }
 
 .adminImagePreviewImg {
@@ -3327,6 +3374,16 @@ body {
 @media (max-width: 720px) {
   .adminImageRow {
     grid-template-columns: 1fr;
+  }
+
+  .adminAudioButtons {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAudioMicBtn,
+  .adminAudioUploadBtn,
+  .adminAudioDeleteBtn {
+    width: 100%;
   }
 
   .adminTicketCard {

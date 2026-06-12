@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Mic, Pencil, Plus, Save, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Mic, Pencil, Plus, Save, Trash2, Upload, UploadCloud } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -604,6 +604,85 @@ export default function AdminTopicDetailPage() {
     toast.success("Audio yuklandi");
   }
 
+  async function uploadQuestionAudioFile(questionId: string, file: File) {
+    if (!topic) throw new Error("Mavzu topilmadi");
+    if (!file) throw new Error("Audio fayl tanlanmadi");
+
+    const audioType = file.type || "audio/webm";
+    const currentAudio = topic.questions.find((question) => question.id === questionId)?.audio || "";
+
+    cleanupAudioPreview(questionId);
+    const previewUrl = URL.createObjectURL(file);
+    audioObjectUrlsRef.current[questionId] = previewUrl;
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl,
+        recording: false,
+        uploading: true,
+        blob: file,
+        mimeType: audioType
+      }
+    }));
+
+    try {
+      const audioBase64 = await blobToDataUrl(file);
+      const audioName = `question-${questionId}.${getAudioFileExtension(audioType)}`;
+
+      const res = await authFetch("/api/upload-audio", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          audioBase64,
+          audioName,
+          audioType,
+          topicId,
+          questionId,
+          oldAudioUrl: currentAudio
+        })
+      });
+      const data = await jsonOrError(res);
+      const audioUrl = String(data?.audioUrl || "").trim();
+      if (!audioUrl) throw new Error("Audio yuklanmadi");
+
+      cleanupAudioPreview(questionId);
+      setTopic((prev) =>
+        prev
+          ? {
+              ...prev,
+              questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+            }
+          : prev
+      );
+
+      setAudioDrafts((prev) => ({
+        ...prev,
+        [questionId]: {
+          previewUrl: audioUrl,
+          recording: false,
+          uploading: false,
+          blob: null,
+          mimeType: audioType
+        }
+      }));
+
+      toast.success("Audio yuklandi");
+    } catch (error) {
+      const message = (error as any)?.message || "Audio yuklanmadi";
+      setAudioDrafts((prev) => ({
+        ...prev,
+        [questionId]: {
+          previewUrl,
+          recording: false,
+          uploading: false,
+          blob: file,
+          mimeType: audioType
+        }
+      }));
+      throw new Error(message);
+    }
+  }
+
   async function deleteQuestionAudio(questionId: string) {
     const currentAudio = topic?.questions.find((question) => question.id === questionId)?.audio || "";
     const draft = audioDrafts[questionId];
@@ -905,8 +984,10 @@ export default function AdminTopicDetailPage() {
                       {audioDrafts[question.id]?.uploading ? <div className="adminImagePreviewLoading">Yuklanmoqda...</div> : null}
                     </div>
 
-                    <div className="adminAudioFooter">
-                      <div className="adminAudioHint">Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi.</div>
+                  <div className="adminAudioFooter">
+                      <div className="adminAudioHint">
+                        Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi. Yoki tayyor audio faylni yuklang.
+                      </div>
                       <div className="adminOptionsToolbar adminAudioButtons">
                         <button
                           className={`btn btn-sm adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
@@ -926,25 +1007,21 @@ export default function AdminTopicDetailPage() {
                           onPointerLeave={() => {
                             if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
                           }}
-                        >
+                          >
                           <Mic className="lucide" aria-hidden="true" />
                           <span>{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
                         </button>
-                        <button
-                          className="btn btn-sm adminIconBtn adminIconBtnEdit"
-                          type="button"
-                          title="Audio yuklash"
-                          aria-label="Audio yuklash"
-                          disabled={!audioDrafts[question.id]?.blob || audioDrafts[question.id]?.uploading}
-                          onClick={() =>
-                            uploadQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"))
-                          }
+                        <label
+                          className={`btn btn-sm adminAudioUploadBtn ${audioDrafts[question.id]?.uploading ? "isUploading" : ""}`}
+                          htmlFor={`audio-input-${question.id}`}
+                          title="Tayyor audio faylni yuklash"
+                          aria-label="Tayyor audio faylni yuklash"
                         >
-                          <Upload className="lucide" aria-hidden="true" />
-                          <span>Yuklash</span>
-                        </button>
+                          <UploadCloud className="lucide" aria-hidden="true" />
+                          <span>{audioDrafts[question.id]?.blob ? "Faylni almashtirish" : "Audio fayl yuklash"}</span>
+                        </label>
                         <button
-                          className="btn btn-sm adminIconBtn adminIconBtnDelete"
+                          className="btn btn-sm adminAudioDeleteBtn"
                           type="button"
                           title="Audio o‘chirish"
                           aria-label="Audio o‘chirish"
@@ -952,9 +1029,20 @@ export default function AdminTopicDetailPage() {
                           onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
                         >
                           <Trash2 className="lucide" aria-hidden="true" />
-                          <span>Trash</span>
                         </button>
                       </div>
+                      <input
+                        id={`audio-input-${question.id}`}
+                        className="input adminHiddenFileInput"
+                        type="file"
+                        accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          uploadQuestionAudioFile(question.id, file).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"));
+                          event.currentTarget.value = "";
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
