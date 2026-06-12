@@ -12,8 +12,6 @@ import {
   PlayCircle,
   ShieldCheck,
   Send,
-  UserPlus,
-  UserRound,
   Video
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -68,15 +66,12 @@ function InstagramMark() {
 export default function AuthPage() {
   const router = useRouter();
   const { setAccessToken, setUser, authReady, accessToken } = useAuth();
-  const [tab, setTab] = useState<Tab>("login");
+  const [tab, setTab] = useState<Tab>("register");
   const [authOpen, setAuthOpen] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [fullName, setFullName] = useState("");
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
-  const [forgotEmail, setForgotEmail] = useState("");
   const [showPass, setShowPass] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const googleButtonLoadedRef = useRef(false);
@@ -93,7 +88,7 @@ export default function AuthPage() {
   }, [authOpen]);
 
   useEffect(() => {
-    if (!authOpen || showForgotPassword) return;
+    if (!authOpen) return;
     if (googleButtonLoadedRef.current) {
       const google = window.google;
       if (google?.accounts?.id && googleButtonRef.current) {
@@ -166,23 +161,20 @@ export default function AuthPage() {
       existingScript.addEventListener("load", initGoogle, { once: true });
       initGoogle();
     }
-  }, [authOpen, router, setAccessToken, setUser, showForgotPassword]);
+  }, [authOpen, router, setAccessToken, setUser]);
 
   function switchTab(nextTab: Tab) {
     toast.dismiss();
     setTab(nextTab);
-    setShowForgotPassword(false);
   }
 
-  function openAuth(nextTab: Tab = "login") {
+  function openAuth(nextTab: Tab = "register") {
     setTab(nextTab);
-    setShowForgotPassword(false);
     setAuthOpen(true);
   }
 
   function closeAuth() {
     setAuthOpen(false);
-    setShowForgotPassword(false);
   }
 
   function scrollToVideo() {
@@ -190,36 +182,49 @@ export default function AuthPage() {
   }
 
   const registerMutation = useMutation({
-    mutationFn: (payload: { fullName: string; phone: string; password: string }) =>
+    mutationFn: (payload: { phone: string; password: string }) =>
       fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       }).then(jsonOrError),
-    onSuccess: (data: any) => {
-      if (data?.accessToken) setAccessToken(String(data.accessToken));
-      if (data?.user) setUser(data.user);
-      toast.success("Ro‘yxatdan o‘tildi");
-      router.push("/app");
+    onSuccess: (_data: any, variables) => {
+      const localPhone = String(variables.phone || "").replace(/\D/g, "").slice(-9);
+      setPhoneRegisterLocal(localPhone);
+      setPhoneLoginLocal(localPhone);
+      setPasswordRegister("");
+      setPasswordLogin("");
+      setTab("login");
+      toast.success("Ro‘yxatdan o‘tildi. Endi tizimga kiring.");
     },
-    onError: (e: any) => toast.error(e?.message || "Xatolik")
+    onError: (e: any, variables) => {
+      const message = String(e?.message || "Xatolik");
+      if (message.toLowerCase().includes("allaqachon")) {
+        const localPhone = String(variables.phone || "").replace(/\D/g, "").slice(-9);
+        setPhoneRegisterLocal(localPhone);
+        setPhoneLoginLocal(localPhone);
+        setPasswordRegister("");
+        setPasswordLogin("");
+        setTab("login");
+        toast.error("Bu raqam allaqachon ro‘yxatdan o‘tgan, iltimos tizimga kiring");
+        return;
+      }
+      toast.error(message);
+    }
   });
 
   async function onRegister(e: React.FormEvent) {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
-    const rawFullName = String(formData.get("fullName") || fullName);
     const rawPhone = String(formData.get("phone") || phoneRegisterLocal);
     const rawPassword = String(formData.get("password") || passwordRegister);
     const phoneDigits = uzLocalDigits(rawPhone);
 
-    if (!rawFullName.trim()) return toast.error("Ism kiritilishi kerak");
     if (phoneDigits.length !== 9) return toast.error("Telefon raqam formati noto‘g‘ri");
     if (rawPassword.length < 6) return toast.error("Kamida 6 ta belgidan iborat parol yarating");
 
     registerMutation.mutate({
-      fullName: rawFullName.trim(),
       phone: `+998${phoneDigits}`,
       password: rawPassword
     });
@@ -241,22 +246,6 @@ export default function AuthPage() {
     onError: (e: any) => toast.error(e?.message || "Xatolik")
   });
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: (payload: { email: string }) =>
-      fetch("/api/auth/password-reset/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }).then(jsonOrError),
-    onSuccess: (data: any) => {
-      toast.success(String(data?.message || "6 xonali kod emailingizga yuborildi"));
-      setShowForgotPassword(false);
-      setForgotEmail("");
-      setTab("login");
-    },
-    onError: (e: any) => toast.error(e?.message || "Xatolik")
-  });
-
   async function onLogin(e: React.FormEvent) {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
@@ -271,14 +260,6 @@ export default function AuthPage() {
     loginMutation.mutate({ phone: `+998${phoneDigits}`, password: rawPassword });
   }
 
-  async function onForgotPassword(e: React.FormEvent) {
-    e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    const email = String(new FormData(form).get("email") || forgotEmail).trim();
-    if (!email) return toast.error("Email kiritilishi kerak");
-    resetPasswordMutation.mutate({ email });
-  }
-
   return (
     <>
       <header className="navbar">
@@ -290,7 +271,7 @@ export default function AuthPage() {
             </div>
           </div>
           <div className="navRight">
-            <button className="btn btn-ghost headerActionBtn" type="button" onClick={() => openAuth("login")}>
+            <button className="btn btn-ghost headerActionBtn" type="button" onClick={() => openAuth()}>
               <ArrowRight className="lucide" aria-hidden="true" />
               Tizimga kirish
             </button>
@@ -315,10 +296,10 @@ export default function AuthPage() {
                 </p>
 
                 <div className="landingCtaRow">
-                  <button className="btn btn-primary landingStartBtn" type="button" onClick={() => openAuth("login")}>
+                  <button className="btn btn-primary landingStartBtn" type="button" onClick={() => openAuth()}>
                     Boshlash
                   </button>
-                  <button className="btn btn-ghost landingVideoBtn" type="button" onClick={() => openAuth("login")}>
+                  <button className="btn btn-ghost landingVideoBtn" type="button" onClick={() => openAuth()}>
                     <PlayCircle className="lucide" aria-hidden="true" />
                     Video darslar
                   </button>
@@ -361,7 +342,7 @@ export default function AuthPage() {
                 <div>
                   <h2 className="sectionTitle">Mavzulashtirilgan video darslar</h2>
                 </div>
-                <button className="btn btn-ghost sectionAction" type="button" onClick={() => openAuth("login")}>Barchasini ko‘rish <ArrowRight className="lucide" aria-hidden="true" /></button>
+                <button className="btn btn-ghost sectionAction" type="button" onClick={() => openAuth()}>Barchasini ko‘rish <ArrowRight className="lucide" aria-hidden="true" /></button>
               </div>
               <div className="videoCard">
                 <div className="videoCardIcon">
@@ -402,14 +383,9 @@ export default function AuthPage() {
         <div className="authModalOverlay" role="presentation" onClick={closeAuth}>
           <div className="authModal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" onClick={(event) => event.stopPropagation()}>
             <div className="authModalHeader">
-              <div>
+              <div className="authModalTitleWrap">
                 <div className="authModalTitle" id="auth-modal-title">
-                  {showForgotPassword ? "Parolni tiklash" : tab === "login" ? "Tizimga kirish" : "Ro‘yxatdan o‘tish"}
-                </div>
-                <div className="authModalText">
-                  {showForgotPassword
-                    ? "Emailingizni kiriting, sizga yangi parol yuboramiz."
-                    : "Kirish yoki ro‘yxatdan o‘tish orqali testlar, biletlar va video darslardan foydalanasiz."}
+                  {tab === "login" ? "Tizimga kirish" : "Ro‘yxatdan o‘tish"}
                 </div>
               </div>
               <button className="btn btn-ghost" type="button" onClick={closeAuth}>
@@ -417,73 +393,17 @@ export default function AuthPage() {
               </button>
             </div>
 
-            {!showForgotPassword ? (
-              <>
-                <div className="authTabs" role="tablist" aria-label="Auth tabs">
-                  <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
-                    <ArrowRight className="lucide" aria-hidden="true" />
-                    Tizimga kirish
-                  </button>
-                  <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
-                    <UserPlus className="lucide" aria-hidden="true" />
-                    Ro‘yxatdan o‘tish
-                  </button>
-                </div>
+            <div className="authTabs" role="tablist" aria-label="Auth tabs">
+              <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
+                Ro‘yxatdan o‘tish
+              </button>
+              <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
+                Tizimga kirish
+              </button>
+            </div>
 
-                <div className="authGoogleBlock">
-                  <div className="authDivider">
-                    <span>yoki Google bilan</span>
-                  </div>
-                  <div className="googleButtonMount" ref={googleButtonRef} />
-                </div>
-              </>
-            ) : null}
-
-            {showForgotPassword ? (
-              <form className="formGrid authForm" onSubmit={onForgotPassword}>
-                <div>
-                  <div className="fieldLabel">Email</div>
-                  <div className="inputGroup authInputGroup noRight">
-                    <span className="inputAddon">
-                      <Send className="lucide" aria-hidden="true" />
-                    </span>
-                    <input
-                      name="email"
-                      className="input inputField"
-                      type="email"
-                      placeholder="example@mail.com"
-                      autoComplete="email"
-                      value={forgotEmail}
-                      onChange={(e) => setForgotEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <button className="btn btn-primary authSubmitBtn" type="submit" disabled={resetPasswordMutation.isPending}>
-                      Kod yuborish
-                </button>
-                <button className="btn btn-ghost authSecondaryBtn" type="button" onClick={() => setShowForgotPassword(false)}>
-                  Ortga qaytish
-                </button>
-              </form>
-            ) : tab === "register" ? (
+            {tab === "register" ? (
               <form className="formGrid authForm" onSubmit={onRegister}>
-                <div>
-                  <div className="fieldLabel">F.I.O</div>
-                  <div className="inputGroup authInputGroup noRight">
-                    <span className="inputAddon">
-                      <UserRound className="lucide" aria-hidden="true" />
-                    </span>
-                    <input
-                      name="fullName"
-                      className="input inputField"
-                      placeholder="To‘liq ism"
-                      autoComplete="name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <div className="fieldLabel">Telefon raqam</div>
                   <div className="inputGroup authInputGroup inputPhone noRight">
@@ -561,21 +481,19 @@ export default function AuthPage() {
                       {showPass ? <EyeOff className="lucide" aria-hidden="true" /> : <Eye className="lucide" aria-hidden="true" />}
                     </button>
                   </div>
-                  <div className="helpRow">
-                    <button
-                      className="linkBtn"
-                      type="button"
-                      onClick={() => setShowForgotPassword(true)}
-                    >
-                      Parolni unutdingizmi?
-                    </button>
-                  </div>
                 </div>
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={loginMutation.isPending}>
                   Kirish
                 </button>
               </form>
             )}
+
+            <div className="authGoogleBlock">
+              <div className="authDivider">
+                <span>yoki Google bilan</span>
+              </div>
+              <div className="googleButtonMount" ref={googleButtonRef} />
+            </div>
           </div>
         </div>
       ) : null}

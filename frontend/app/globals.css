@@ -2651,10 +2651,21 @@ body {
 }
 
 .authModalHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  position: relative;
+  display: grid;
   gap: 12px;
+  padding-right: 42px;
+}
+
+.authModalHeader .btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.authModalTitleWrap {
+  width: 100%;
+  text-align: center;
 }
 
 .authModalTitle {
@@ -2695,6 +2706,7 @@ body {
   font-size: 15px;
   font-weight: 900;
   cursor: pointer;
+  text-align: center;
 }
 
 .authTab.active {
@@ -2706,6 +2718,7 @@ body {
 .authGoogleBlock {
   display: grid;
   gap: 10px;
+  margin-top: 8px;
 }
 
 .authDivider {
@@ -2876,6 +2889,10 @@ body {
   .authModal {
     width: 100%;
     padding: 16px;
+  }
+
+  .authModalHeader {
+    padding-right: 40px;
   }
 
   .authTabs {
