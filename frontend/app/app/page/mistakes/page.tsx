@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
+import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type MistakeQuestion = {
@@ -244,6 +245,7 @@ export default function MistakesPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { settings, patchSettings } = useTestPageSettings();
 
   const [tab, setTab] = useState<TabKey>("list");
   const [idx, setIdx] = useState(0);
@@ -252,6 +254,7 @@ export default function MistakesPage() {
   const autoNextTimerRef = useRef<number | null>(null);
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
+  const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const mistakesQuery = useQuery({
     queryKey: ["mistakes"],
@@ -267,12 +270,21 @@ export default function MistakesPage() {
   }, [mistakesQuery.error]);
 
   const questions = mistakesQuery.data || [];
-  const currentQuestions = useMemo(() => questions, [questions]);
+  const currentQuestions = useMemo(
+    () => (settings.shuffleQuestions ? shuffleQuestions(questions) : questions),
+    [questions, settings.shuffleQuestions]
+  );
   const currentQuestion = useMemo(() => currentQuestions[idx] ?? null, [currentQuestions, idx]);
 
   useEffect(() => {
     if (idx >= currentQuestions.length) setIdx(Math.max(0, currentQuestions.length - 1));
   }, [currentQuestions.length, idx]);
+
+  useEffect(() => {
+    if (shuffleSettingRef.current === settings.shuffleQuestions) return;
+    shuffleSettingRef.current = settings.shuffleQuestions;
+    setIdx(0);
+  }, [settings.shuffleQuestions]);
 
   useEffect(() => {
     setImageLoading(Boolean(currentQuestion?.image));
@@ -315,7 +327,7 @@ export default function MistakesPage() {
     if (!currentQuestion) return;
     const nextAnswers = { ...answers, [currentQuestion.id]: nextAnswer };
     setAnswers(nextAnswers);
-    if (idx < currentQuestions.length - 1) scheduleAutoNext(idx + 1);
+    if (settings.autoNext && idx < currentQuestions.length - 1) scheduleAutoNext(idx + 1);
   }
 
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
@@ -454,7 +466,10 @@ export default function MistakesPage() {
             <>
               {currentQuestion ? (
                 <div className="card" ref={questionCardRef}>
-                  <div className="qTitleBar">{currentQuestion.text}</div>
+          <div className="qCardTop">
+            <div className="qTitleBar">{currentQuestion.text}</div>
+            <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          </div>
                   <div className="qLayout">
                     <div className="qRight">
                       <div className="options">

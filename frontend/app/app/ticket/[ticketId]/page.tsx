@@ -9,6 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
+import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
@@ -263,6 +264,7 @@ export default function TicketPage() {
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { settings, patchSettings } = useTestPageSettings();
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [idx, setIdx] = useState(0);
@@ -272,8 +274,13 @@ export default function TicketPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
-  const q = useMemo(() => (ticket ? ticket.questions[idx] : null), [ticket, idx]);
+  const ticketQuestions = useMemo(
+    () => (ticket && Array.isArray(ticket.questions) ? (settings.shuffleQuestions ? shuffleQuestions(ticket.questions) : ticket.questions) : []),
+    [settings.shuffleQuestions, ticket]
+  );
+  const q = useMemo(() => ticketQuestions[idx] ?? null, [ticketQuestions, idx]);
 
   const ticketQuery = useQuery({
     queryKey: ["ticket", ticketId],
@@ -302,6 +309,12 @@ export default function TicketPage() {
   useEffect(() => {
     // progress error is not critical
   }, [progressQuery.error]);
+
+  useEffect(() => {
+    if (shuffleSettingRef.current === settings.shuffleQuestions) return;
+    shuffleSettingRef.current = settings.shuffleQuestions;
+    setIdx(0);
+  }, [settings.shuffleQuestions]);
 
   useEffect(() => {
     setImageLoading(Boolean(q?.image));
@@ -349,9 +362,9 @@ export default function TicketPage() {
     };
   }, []);
 
-  const total = ticket?.questions.length || 0;
+  const total = ticketQuestions.length;
   const answered = Object.keys(answers).length;
-  const correctCount = ticket?.questions.filter(
+  const correctCount = ticketQuestions.filter(
     (question) => answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
   ).length || 0;
   const correctPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
@@ -383,7 +396,7 @@ export default function TicketPage() {
       if (!q) return;
       const nextAnswers = { ...answers, [q.id]: optionIndex };
       save(nextAnswers);
-      if (idx < total - 1) scheduleAutoNext(idx + 1);
+      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
     },
     scrollTargetRef: questionCardRef
   });
@@ -425,7 +438,10 @@ export default function TicketPage() {
       </div>
 
       <div className="card" ref={questionCardRef}>
-        <div className="qTitleBar">{q?.text}</div>
+        <div className="qCardTop">
+          <div className="qTitleBar">{q?.text}</div>
+          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+        </div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
@@ -443,7 +459,7 @@ export default function TicketPage() {
                     onClick={() => {
                       const nextAnswers = { ...answers, [q.id]: oi };
                       save(nextAnswers);
-                      if (idx < total - 1) scheduleAutoNext(idx + 1);
+                      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
                     }}
                   >
                     <span className="optionKey">F{oi + 1}</span>

@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, TimerReset } fro
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type ExamQuestion = {
@@ -211,6 +212,7 @@ export default function ExamPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch, authReady } = useAuth();
+  const { settings, patchSettings } = useTestPageSettings();
 
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -229,6 +231,7 @@ export default function ExamPage() {
   const activeExamKeyRef = useRef<string | null>(null);
   const latestAnswersRef = useRef<Record<string, number>>({});
   const hasSeenPositiveTimerRef = useRef(false);
+  const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const examQuery = useQuery({
     queryKey: ["exam"],
@@ -244,7 +247,10 @@ export default function ExamPage() {
   }, [examQuery.error]);
 
   const exam = examQuery.data || null;
-  const questions = exam?.questions || [];
+  const questions = useMemo(
+    () => (exam?.questions ? (settings.shuffleQuestions ? shuffleQuestions(exam.questions) : exam.questions) : []),
+    [exam?.questions, settings.shuffleQuestions]
+  );
   const currentQuestion = questions[idx] || null;
   const completed = Boolean(exam?.completed);
   const expired = Boolean(exam?.expired);
@@ -265,7 +271,7 @@ export default function ExamPage() {
       if (!currentQuestion || locked) return;
       const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
       save(nextAnswers);
-      if (idx < questions.length - 1) scheduleAutoNext(idx + 1);
+      if (settings.autoNext && idx < questions.length - 1) scheduleAutoNext(idx + 1);
     },
     scrollTargetRef: questionCardRef
   });
@@ -316,6 +322,12 @@ export default function ExamPage() {
     if (!questions.length) return;
     setIdx((current) => Math.min(current, questions.length - 1));
   }, [questions.length]);
+
+  useEffect(() => {
+    if (shuffleSettingRef.current === settings.shuffleQuestions) return;
+    shuffleSettingRef.current = settings.shuffleQuestions;
+    setIdx(0);
+  }, [settings.shuffleQuestions]);
 
   useEffect(() => {
     if (!exam?.expiresAt || locked) return;
@@ -533,8 +545,11 @@ export default function ExamPage() {
 
       {currentQuestion ? (
         <div className="card" ref={questionCardRef}>
-          <div className="qTitleBar">
-            <div>{currentQuestion.text}</div>
+          <div className="qCardTop">
+            <div className="qTitleBar">
+              <div>{currentQuestion.text}</div>
+            </div>
+            <TestPageSettingsButton settings={settings} onChange={patchSettings} />
           </div>
 
           <div className="qLayout">
@@ -559,7 +574,7 @@ export default function ExamPage() {
                         if (hasAnswered) return;
                         const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
                         save(nextAnswers);
-                        if (idx < questions.length - 1) scheduleAutoNext(idx + 1);
+                        if (settings.autoNext && idx < questions.length - 1) scheduleAutoNext(idx + 1);
                       }}
                     >
                       <span className="optionKey">{String.fromCharCode(65 + optionIndex)}</span>

@@ -9,6 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
+import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
@@ -263,6 +264,7 @@ export default function CustomTestPage() {
   const testId = String(params.testId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { settings, patchSettings } = useTestPageSettings();
 
   const [customTest, setCustomTest] = useState<Topic | null>(null);
   const [idx, setIdx] = useState(0);
@@ -272,10 +274,11 @@ export default function CustomTestPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const customTestQuestions = useMemo(
-    () => (customTest && Array.isArray(customTest.questions) ? customTest.questions : []),
-    [customTest]
+    () => (customTest && Array.isArray(customTest.questions) ? (settings.shuffleQuestions ? shuffleQuestions(customTest.questions) : customTest.questions) : []),
+    [settings.shuffleQuestions, customTest]
   );
   const q = useMemo(() => customTestQuestions[idx] ?? null, [customTestQuestions, idx]);
 
@@ -306,6 +309,12 @@ export default function CustomTestPage() {
   useEffect(() => {
     // progress error is not critical
   }, [progressQuery.error]);
+
+  useEffect(() => {
+    if (shuffleSettingRef.current === settings.shuffleQuestions) return;
+    shuffleSettingRef.current = settings.shuffleQuestions;
+    setIdx(0);
+  }, [settings.shuffleQuestions]);
 
   useEffect(() => {
     setImageLoading(Boolean(q?.image));
@@ -387,7 +396,7 @@ export default function CustomTestPage() {
       if (!q) return;
       const nextAnswers = { ...answers, [q.id]: optionIndex };
       save(nextAnswers);
-      if (idx < total - 1) scheduleAutoNext(idx + 1);
+      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
     },
     scrollTargetRef: questionCardRef
   });
@@ -436,7 +445,10 @@ export default function CustomTestPage() {
       </div>
 
       <div className="card" ref={questionCardRef}>
-        <div className="qTitleBar">{q?.text}</div>
+        <div className="qCardTop">
+          <div className="qTitleBar">{q?.text}</div>
+          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+        </div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
@@ -454,7 +466,7 @@ export default function CustomTestPage() {
                     onClick={() => {
                       const nextAnswers = { ...answers, [q.id]: oi };
                       save(nextAnswers);
-                      if (idx < total - 1) scheduleAutoNext(idx + 1);
+                      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
                     }}
                   >
                     <span className="optionKey">F{oi + 1}</span>

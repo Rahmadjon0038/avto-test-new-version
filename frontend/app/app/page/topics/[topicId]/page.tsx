@@ -9,6 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
+import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
@@ -263,6 +264,7 @@ export default function TopicPage() {
   const topicId = String(params.topicId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { settings, patchSettings } = useTestPageSettings();
 
   const [topic, setTopic] = useState<Topic | null>(null);
   const [idx, setIdx] = useState(0);
@@ -272,8 +274,12 @@ export default function TopicPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
-  const topicQuestions = useMemo(() => (topic && Array.isArray(topic.questions) ? topic.questions : []), [topic]);
+  const topicQuestions = useMemo(
+    () => (topic && Array.isArray(topic.questions) ? (settings.shuffleQuestions ? shuffleQuestions(topic.questions) : topic.questions) : []),
+    [settings.shuffleQuestions, topic]
+  );
   const q = useMemo(() => topicQuestions[idx] ?? null, [topicQuestions, idx]);
 
   const topicQuery = useQuery({
@@ -303,6 +309,12 @@ export default function TopicPage() {
   useEffect(() => {
     // progress error is not critical
   }, [progressQuery.error]);
+
+  useEffect(() => {
+    if (shuffleSettingRef.current === settings.shuffleQuestions) return;
+    shuffleSettingRef.current = settings.shuffleQuestions;
+    setIdx(0);
+  }, [settings.shuffleQuestions]);
 
   useEffect(() => {
     setImageLoading(Boolean(q?.image));
@@ -386,7 +398,7 @@ export default function TopicPage() {
       if (!q) return;
       const nextAnswers = { ...answers, [q.id]: optionIndex };
       save(nextAnswers);
-      if (idx < total - 1) scheduleAutoNext(idx + 1);
+      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
     },
     scrollTargetRef: questionCardRef
   });
@@ -435,7 +447,10 @@ export default function TopicPage() {
       </div>
 
       <div className="card" ref={questionCardRef}>
-        <div className="qTitleBar">{q?.text}</div>
+        <div className="qCardTop">
+          <div className="qTitleBar">{q?.text}</div>
+          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+        </div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
