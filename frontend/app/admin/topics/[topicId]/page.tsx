@@ -516,6 +516,9 @@ export default function AdminTopicDetailPage() {
             mimeType: blob.type || mimeType || "audio/webm"
           }
         }));
+        persistQuestionAudio(activeQuestionId, blob, previewUrl).catch((error: any) => {
+          toast.error(error?.message || "Audio avtomatik yuklanmadi");
+        });
       };
 
       recorder.onerror = () => {
@@ -549,19 +552,26 @@ export default function AdminTopicDetailPage() {
     }
   }
 
-  async function uploadQuestionAudio(questionId: string) {
+  async function persistQuestionAudio(questionId: string, blob: Blob, previewUrlOverride?: string) {
     if (!topic) throw new Error("Mavzu topilmadi");
-    const draft = audioDrafts[questionId];
-    if (!draft?.blob) throw new Error("Avval audio yozib oling");
+    if (!blob) throw new Error("Avval audio yozib oling");
 
     const currentAudio = topic.questions.find((question) => question.id === questionId)?.audio || "";
+    const audioType = blob.type || "audio/webm";
+    const previewUrl = previewUrlOverride || audioDrafts[questionId]?.previewUrl || "";
+
     setAudioDrafts((prev) => ({
       ...prev,
-      [questionId]: { ...draft, uploading: true }
+      [questionId]: {
+        previewUrl,
+        recording: false,
+        uploading: true,
+        blob,
+        mimeType: audioType
+      }
     }));
 
-    const audioBase64 = await blobToDataUrl(draft.blob);
-    const audioType = draft.blob.type || draft.mimeType || "audio/webm";
+    const audioBase64 = await blobToDataUrl(blob);
     const audioName = `question-${questionId}.${getAudioFileExtension(audioType)}`;
 
     const res = await authFetch("/api/upload-audio", {
@@ -604,13 +614,17 @@ export default function AdminTopicDetailPage() {
     toast.success("Audio yuklandi");
   }
 
+  async function uploadQuestionAudio(questionId: string) {
+    const draft = audioDrafts[questionId];
+    if (!draft?.blob) throw new Error("Avval audio yozib oling");
+    return await persistQuestionAudio(questionId, draft.blob, draft.previewUrl || undefined);
+  }
+
   async function uploadQuestionAudioFile(questionId: string, file: File) {
     if (!topic) throw new Error("Mavzu topilmadi");
     if (!file) throw new Error("Audio fayl tanlanmadi");
 
     const audioType = file.type || "audio/webm";
-    const currentAudio = topic.questions.find((question) => question.id === questionId)?.audio || "";
-
     cleanupAudioPreview(questionId);
     const previewUrl = URL.createObjectURL(file);
     audioObjectUrlsRef.current[questionId] = previewUrl;
@@ -626,47 +640,7 @@ export default function AdminTopicDetailPage() {
     }));
 
     try {
-      const audioBase64 = await blobToDataUrl(file);
-      const audioName = `question-${questionId}.${getAudioFileExtension(audioType)}`;
-
-      const res = await authFetch("/api/upload-audio", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          audioBase64,
-          audioName,
-          audioType,
-          topicId,
-          questionId,
-          oldAudioUrl: currentAudio
-        })
-      });
-      const data = await jsonOrError(res);
-      const audioUrl = String(data?.audioUrl || "").trim();
-      if (!audioUrl) throw new Error("Audio yuklanmadi");
-
-      cleanupAudioPreview(questionId);
-      setTopic((prev) =>
-        prev
-          ? {
-              ...prev,
-              questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
-            }
-          : prev
-      );
-
-      setAudioDrafts((prev) => ({
-        ...prev,
-        [questionId]: {
-          previewUrl: audioUrl,
-          recording: false,
-          uploading: false,
-          blob: null,
-          mimeType: audioType
-        }
-      }));
-
-      toast.success("Audio yuklandi");
+      await persistQuestionAudio(questionId, file, previewUrl);
     } catch (error) {
       const message = (error as any)?.message || "Audio yuklanmadi";
       setAudioDrafts((prev) => ({
