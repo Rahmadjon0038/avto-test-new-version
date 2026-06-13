@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ArrowLeft, ChevronRight, Play, Video } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -16,6 +16,10 @@ type VideoLesson = {
   youtubeId: string;
   thumbnailUrl: string;
 };
+
+function buildEmbedUrl(youtubeId: string) {
+  return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?rel=0&modestbranding=1`;
+}
 
 export default function VideosPage() {
   const router = useRouter();
@@ -51,11 +55,8 @@ export default function VideosPage() {
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>
-        <div>
-          <div className="h2" style={{ margin: 0 }}>
-            Video darsliklar
-          </div>
-          <div className="muted">Video darsni ochish uchun rasmga bosing, mavzu nomi esa test sahifasiga olib boradi.</div>
+        <div className="h2" style={{ margin: 0 }}>
+          Video darsliklar
         </div>
       </div>
 
@@ -67,28 +68,21 @@ export default function VideosPage() {
             <article
               key={video.id}
               className="videoLessonCard"
-              role="button"
-              tabIndex={0}
-              onClick={() => window.open(video.youtubeUrl, "_blank", "noopener,noreferrer")}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  window.open(video.youtubeUrl, "_blank", "noopener,noreferrer");
-                }
-              }}
             >
-              <div className="videoLessonThumb">
-                <img src={video.thumbnailUrl} alt={video.topicTitle} className="videoLessonImage" />
-                <div className="videoLessonPlay">
-                  <Play className="lucide" aria-hidden="true" />
-                </div>
+              <div className="videoLessonFrameWrap">
+                <iframe
+                  className="videoLessonFrame"
+                  src={buildEmbedUrl(video.youtubeId)}
+                  title={video.topicTitle}
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
               </div>
               <button
                 className="videoLessonTopic"
                 type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  router.push(`/app/page/topics/${video.topicId}`);
-                }}
+                onClick={() => router.push(`/app/page/topics/${video.topicId}`)}
               >
                 <span className="videoLessonTopicText">{video.topicTitle}</span>
                 <ChevronRight className="lucide" aria-hidden="true" />
@@ -98,21 +92,9 @@ export default function VideosPage() {
         </div>
       ) : videosQuery.isLoading ? null : (
         <div className="card" style={{ padding: 16 }}>
-          <div className="muted">Hozircha video darslar yo‘q.</div>
+          <div className="muted">Hozircha videodarslar mavjud emas</div>
         </div>
       )}
-
-      <div className="videoLessonsInfo card">
-        <div className="videoLessonsInfoIcon">
-          <Video className="lucide" aria-hidden="true" />
-        </div>
-        <div>
-          <div className="videoLessonsInfoTitle">Mavzuga bog‘langan video darslar</div>
-          <div className="videoLessonsInfoText">
-            Har bir video dars admin paneldan qo‘shiladi. Video ustiga bosilganda YouTube ochiladi, mavzu nomi esa shu mavzuning test sahifasiga olib boradi.
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

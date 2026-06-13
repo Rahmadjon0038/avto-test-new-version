@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Link2, RefreshCw, Save, Trash2, Video } from "lucide-react";
+import { ArrowLeft, ChevronRight, RefreshCw, Save, Trash2, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -33,6 +33,10 @@ const emptyForm = (): VideoForm => ({
   topicId: "",
   youtubeUrl: ""
 });
+
+function buildEmbedUrl(youtubeId: string) {
+  return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?rel=0&modestbranding=1`;
+}
 
 export default function AdminVideosPage() {
   const qc = useQueryClient();
@@ -194,13 +198,23 @@ export default function AdminVideosPage() {
               }
             }}
           >
+            <div className="adminVideoPreview">
+              <iframe
+                className="adminVideoFrame"
+                src={buildEmbedUrl(video.youtubeId)}
+                title={video.topicTitle}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
             <div className="adminTopicBody">
-              <div className="adminTopicCheck active" aria-hidden="true">
-                <Link2 className="lucide" aria-hidden="true" />
+              <div className={`adminTopicCheck ${form.id === video.id ? "active" : ""}`} aria-hidden="true">
+                <Video className="lucide" aria-hidden="true" />
               </div>
               <div className="adminTopicMeta">
                 <div className="adminTopicTitle">{video.topicTitle}</div>
-                <div className="adminPanelCardDesc">{video.youtubeUrl}</div>
+                <div className="adminPanelCardDesc">YouTube iframe orqali ko‘rish</div>
               </div>
             </div>
             <div className="adminTopicActions">
@@ -213,6 +227,7 @@ export default function AdminVideosPage() {
                 }}
               >
                 Ko‘rish
+                <ChevronRight className="lucide" aria-hidden="true" />
               </button>
               <button
                 className="btn btn-danger btn-sm"
