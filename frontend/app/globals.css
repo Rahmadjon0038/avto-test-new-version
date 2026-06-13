@@ -2733,6 +2733,11 @@ body {
   flex: 0 0 auto;
 }
 
+.videoLessonTopicBtn {
+  width: 100%;
+  justify-content: center;
+}
+
 .videoLessonsInfo {
   margin-top: 16px;
   display: grid;

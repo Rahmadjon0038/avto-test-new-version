@@ -87,6 +87,13 @@ export default function VideosPage() {
                 <span className="videoLessonTopicText">{video.topicTitle}</span>
                 <ChevronRight className="lucide" aria-hidden="true" />
               </button>
+              <button
+                className="btn btn-primary btn-sm videoLessonTopicBtn"
+                type="button"
+                onClick={() => router.push(`/app/page/topics/${video.topicId}`)}
+              >
+                Mavzuga doir testlarni ishlash
+              </button>
             </article>
           ))}
         </div>
