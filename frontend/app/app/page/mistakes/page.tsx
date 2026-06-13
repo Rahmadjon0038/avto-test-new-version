@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target } from "lucide-react";
@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
-import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type MistakeQuestion = {
@@ -246,6 +246,14 @@ export default function MistakesPage() {
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const { settings, patchSettings } = useTestPageSettings();
+  const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("mistakes");
+  const handleSettingsChange = useCallback(
+    (next: typeof settings) => {
+      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
+      patchSettings(next);
+    },
+    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
+  );
 
   const [tab, setTab] = useState<TabKey>("list");
   const [idx, setIdx] = useState(0);
@@ -271,8 +279,8 @@ export default function MistakesPage() {
 
   const questions = mistakesQuery.data || [];
   const currentQuestions = useMemo(
-    () => (settings.shuffleQuestions ? shuffleQuestions(questions) : questions),
-    [questions, settings.shuffleQuestions]
+    () => (settings.shuffleQuestions ? shuffleQuestionsWithSeed(questions, shuffleSeed) : questions),
+    [questions, settings.shuffleQuestions, shuffleSeed]
   );
   const currentQuestion = useMemo(() => currentQuestions[idx] ?? null, [currentQuestions, idx]);
 
@@ -285,6 +293,14 @@ export default function MistakesPage() {
     shuffleSettingRef.current = settings.shuffleQuestions;
     setIdx(0);
   }, [settings.shuffleQuestions]);
+
+  useEffect(() => {
+    if (settings.autoNext) return;
+    if (autoNextTimerRef.current) {
+      window.clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  }, [settings.autoNext]);
 
   useEffect(() => {
     setImageLoading(Boolean(currentQuestion?.image));
@@ -306,6 +322,7 @@ export default function MistakesPage() {
     onError: (error: any) => toast.error(error?.message || "Xatolik"),
     onSuccess: async (data: any) => {
       await qc.invalidateQueries({ queryKey: ["mistakes"] });
+      if (settings.shuffleQuestions) refreshShuffleSeed();
       setAnswers({});
       setIdx(0);
       setFinishOpen(false);
@@ -370,7 +387,7 @@ export default function MistakesPage() {
         </div>
 
         <div className="mistakesHeaderMeta">
-          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          <TestPageSettingsButton settings={settings} onChange={handleSettingsChange} />
           <span className="badge">{questions.length} ta xato</span>
           <span className="badge">{currentQuestions.length} ta mashq</span>
         </div>

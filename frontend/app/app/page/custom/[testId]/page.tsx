@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-react";
@@ -9,7 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
-import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
@@ -265,6 +265,14 @@ export default function CustomTestPage() {
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const { settings, patchSettings } = useTestPageSettings();
+  const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`custom:${testId}`);
+  const handleSettingsChange = useCallback(
+    (next: typeof settings) => {
+      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
+      patchSettings(next);
+    },
+    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
+  );
 
   const [customTest, setCustomTest] = useState<Topic | null>(null);
   const [idx, setIdx] = useState(0);
@@ -277,8 +285,13 @@ export default function CustomTestPage() {
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const customTestQuestions = useMemo(
-    () => (customTest && Array.isArray(customTest.questions) ? (settings.shuffleQuestions ? shuffleQuestions(customTest.questions) : customTest.questions) : []),
-    [settings.shuffleQuestions, customTest]
+    () =>
+      customTest && Array.isArray(customTest.questions)
+        ? settings.shuffleQuestions
+          ? shuffleQuestionsWithSeed(customTest.questions, shuffleSeed)
+          : customTest.questions
+        : [],
+    [settings.shuffleQuestions, shuffleSeed, customTest]
   );
   const q = useMemo(() => customTestQuestions[idx] ?? null, [customTestQuestions, idx]);
 
@@ -315,6 +328,14 @@ export default function CustomTestPage() {
     shuffleSettingRef.current = settings.shuffleQuestions;
     setIdx(0);
   }, [settings.shuffleQuestions]);
+
+  useEffect(() => {
+    if (settings.autoNext) return;
+    if (autoNextTimerRef.current) {
+      window.clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  }, [settings.autoNext]);
 
   useEffect(() => {
     setImageLoading(Boolean(q?.image));
@@ -383,6 +404,7 @@ export default function CustomTestPage() {
   });
 
   function reset() {
+    if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
   }
 
@@ -440,7 +462,7 @@ export default function CustomTestPage() {
         </div>
 
         <div className="topicHeaderActions">
-          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          <TestPageSettingsButton settings={settings} onChange={handleSettingsChange} />
           <button className="btn btn-danger btn-sm" type="button" onClick={reset}>
             <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
           </button>

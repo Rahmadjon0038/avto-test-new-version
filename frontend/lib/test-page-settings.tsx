@@ -9,6 +9,7 @@ export type TestPageSettings = {
 };
 
 const STORAGE_KEY = "road-test:test-page-settings";
+const SHUFFLE_SEED_PREFIX = "road-test:test-page-shuffle-seed";
 
 const DEFAULT_SETTINGS: TestPageSettings = {
   shuffleQuestions: false,
@@ -33,6 +34,41 @@ function readStoredSettings() {
 function writeStoredSettings(settings: TestPageSettings) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+function makeShuffleSeed() {
+  const cryptoObject = typeof window !== "undefined" ? window.crypto : undefined;
+  if (cryptoObject?.getRandomValues) {
+    const buffer = new Uint32Array(1);
+    cryptoObject.getRandomValues(buffer);
+    return buffer[0] || 1;
+  }
+  return Math.floor(Math.random() * 0xffffffff) || 1;
+}
+
+export function useShuffleSeed(storageKey: string) {
+  const seedStorageKey = `${SHUFFLE_SEED_PREFIX}:${storageKey}`;
+  const [seed, setSeedState] = useState<number>(1);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.sessionStorage.getItem(seedStorageKey);
+    const initialSeed = raw ? Number(raw) : 0;
+    const nextSeed = Number.isFinite(initialSeed) && initialSeed > 0 ? initialSeed : makeShuffleSeed();
+    window.sessionStorage.setItem(seedStorageKey, String(nextSeed));
+    setSeedState(nextSeed);
+  }, [seedStorageKey]);
+
+  const refreshSeed = useCallback(() => {
+    const nextSeed = makeShuffleSeed();
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(seedStorageKey, String(nextSeed));
+    }
+    setSeedState(nextSeed);
+    return nextSeed;
+  }, [seedStorageKey]);
+
+  return { seed, refreshSeed };
 }
 
 export function useTestPageSettings() {
@@ -159,13 +195,12 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
 }
 
 export function shuffleQuestions<T extends { id: string }>(questions: T[]) {
+  return shuffleQuestionsWithSeed(questions, makeShuffleSeed());
+}
+
+export function shuffleQuestionsWithSeed<T extends { id: string }>(questions: T[], seedValue: number) {
   const items = [...questions];
-  const seedSource = items.map((item) => String(item.id || "")).join("|");
-  let seed = 0;
-  for (let index = 0; index < seedSource.length; index += 1) {
-    seed = (seed * 31 + seedSource.charCodeAt(index)) >>> 0;
-  }
-  if (!seed) seed = 1;
+  let seed = Number.isFinite(seedValue) && seedValue > 0 ? seedValue >>> 0 : 1;
   const random = () => {
     seed = (seed + 0x6d2b79f5) >>> 0;
     let value = seed;

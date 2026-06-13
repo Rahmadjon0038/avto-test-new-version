@@ -1,13 +1,13 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, TimerReset } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
-import { TestPageSettingsButton, shuffleQuestions, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type ExamQuestion = {
@@ -213,6 +213,14 @@ export default function ExamPage() {
   const qc = useQueryClient();
   const { authFetch, authReady } = useAuth();
   const { settings, patchSettings } = useTestPageSettings();
+  const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("exam");
+  const handleSettingsChange = useCallback(
+    (next: typeof settings) => {
+      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
+      patchSettings(next);
+    },
+    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
+  );
 
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -248,8 +256,8 @@ export default function ExamPage() {
 
   const exam = examQuery.data || null;
   const questions = useMemo(
-    () => (exam?.questions ? (settings.shuffleQuestions ? shuffleQuestions(exam.questions) : exam.questions) : []),
-    [exam?.questions, settings.shuffleQuestions]
+    () => (exam?.questions ? (settings.shuffleQuestions ? shuffleQuestionsWithSeed(exam.questions, shuffleSeed) : exam.questions) : []),
+    [exam?.questions, settings.shuffleQuestions, shuffleSeed]
   );
   const currentQuestion = questions[idx] || null;
   const completed = Boolean(exam?.completed);
@@ -330,6 +338,14 @@ export default function ExamPage() {
   }, [settings.shuffleQuestions]);
 
   useEffect(() => {
+    if (settings.autoNext) return;
+    if (autoNextTimerRef.current) {
+      window.clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  }, [settings.autoNext]);
+
+  useEffect(() => {
     if (!exam?.expiresAt || locked) return;
     setTimerReady(false);
     const updateRemaining = () => {
@@ -393,6 +409,7 @@ export default function ExamPage() {
       setFinishOpen(false);
       setExamBootstrapping(false);
       hasSeenPositiveTimerRef.current = false;
+      if (settings.shuffleQuestions) refreshShuffleSeed();
       toast.success("Imtihon boshlandi");
     }
   });
@@ -522,7 +539,7 @@ export default function ExamPage() {
         </div>
 
         <div className="topicHeaderActions">
-          <TestPageSettingsButton settings={settings} onChange={patchSettings} />
+          <TestPageSettingsButton settings={settings} onChange={handleSettingsChange} />
           <div className="examTimerChip">
             <TimerReset className="lucide" aria-hidden="true" />
             <span>{formatTime(secondsLeft)}</span>
