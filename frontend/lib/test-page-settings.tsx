@@ -9,8 +9,6 @@ export type TestPageSettings = {
 };
 
 const STORAGE_KEY = "road-test:test-page-settings";
-const SHUFFLE_SEED_PREFIX = "road-test:test-page-shuffle-seed";
-
 const DEFAULT_SETTINGS: TestPageSettings = {
   shuffleQuestions: false,
   autoNext: true
@@ -46,27 +44,14 @@ function makeShuffleSeed() {
   return Math.floor(Math.random() * 0xffffffff) || 1;
 }
 
-export function useShuffleSeed(storageKey: string) {
-  const seedStorageKey = `${SHUFFLE_SEED_PREFIX}:${storageKey}`;
-  const [seed, setSeedState] = useState<number>(1);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = window.sessionStorage.getItem(seedStorageKey);
-    const initialSeed = raw ? Number(raw) : 0;
-    const nextSeed = Number.isFinite(initialSeed) && initialSeed > 0 ? initialSeed : makeShuffleSeed();
-    window.sessionStorage.setItem(seedStorageKey, String(nextSeed));
-    setSeedState(nextSeed);
-  }, [seedStorageKey]);
+export function useShuffleSeed(_storageKey: string) {
+  const [seed, setSeedState] = useState<number>(() => makeShuffleSeed());
 
   const refreshSeed = useCallback(() => {
     const nextSeed = makeShuffleSeed();
-    if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(seedStorageKey, String(nextSeed));
-    }
     setSeedState(nextSeed);
     return nextSeed;
-  }, [seedStorageKey]);
+  }, []);
 
   return { seed, refreshSeed };
 }

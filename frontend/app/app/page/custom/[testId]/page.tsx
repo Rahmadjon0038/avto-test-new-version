@@ -282,6 +282,7 @@ export default function CustomTestPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const autoResetRef = useRef(false);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const customTestQuestions = useMemo(
@@ -309,9 +310,7 @@ export default function CustomTestPage() {
     queryKey: ["custom-test-progress", testId],
     queryFn: async () => {
       const res = await authFetch(`/api/custom-test-progress/${encodeURIComponent(testId)}`);
-      const data = await jsonOrError(res);
-      if (data?.progress?.answers) setAnswers(data.progress.answers);
-      return data;
+      return jsonOrError(res);
     }
   });
 
@@ -407,6 +406,16 @@ export default function CustomTestPage() {
     if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
   }
+
+  useEffect(() => {
+    if (!customTest || autoResetRef.current) return;
+    autoResetRef.current = true;
+    setAnswers({});
+    setIdx(0);
+    setFinishOpen(false);
+    if (settings.shuffleQuestions) refreshShuffleSeed();
+    resetMutation.mutate();
+  }, [customTest, refreshShuffleSeed, resetMutation, settings.shuffleQuestions]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
   useTestInteractions({

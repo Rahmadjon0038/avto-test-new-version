@@ -282,6 +282,7 @@ export default function TopicPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const autoResetRef = useRef(false);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const topicQuestions = useMemo(
@@ -309,9 +310,7 @@ export default function TopicPage() {
     queryKey: ["topic-progress", topicId],
     queryFn: async () => {
       const res = await authFetch(`/api/topic-progress/${encodeURIComponent(topicId)}`);
-      const data = await jsonOrError(res);
-      if (data?.progress?.answers) setAnswers(data.progress.answers);
-      return data;
+      return jsonOrError(res);
     }
   });
 
@@ -409,6 +408,16 @@ export default function TopicPage() {
     if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
   }
+
+  useEffect(() => {
+    if (!topic || autoResetRef.current) return;
+    autoResetRef.current = true;
+    setAnswers({});
+    setIdx(0);
+    setFinishOpen(false);
+    if (settings.shuffleQuestions) refreshShuffleSeed();
+    resetMutation.mutate();
+  }, [refreshShuffleSeed, settings.shuffleQuestions, topic, resetMutation]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
   useTestInteractions({

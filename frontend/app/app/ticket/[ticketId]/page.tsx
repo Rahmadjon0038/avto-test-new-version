@@ -282,6 +282,7 @@ export default function TicketPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const autoResetRef = useRef(false);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const ticketQuestions = useMemo(
@@ -309,9 +310,7 @@ export default function TicketPage() {
     queryKey: ["progress", ticketId],
     queryFn: async () => {
       const res = await authFetch(`/api/progress/${encodeURIComponent(ticketId)}`);
-      const data = await jsonOrError(res);
-      if (data?.progress?.answers) setAnswers(data.progress.answers);
-      return data;
+      return jsonOrError(res);
     }
   });
 
@@ -407,6 +406,16 @@ export default function TicketPage() {
     if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
   }
+
+  useEffect(() => {
+    if (!ticket || autoResetRef.current) return;
+    autoResetRef.current = true;
+    setAnswers({});
+    setIdx(0);
+    setFinishOpen(false);
+    if (settings.shuffleQuestions) refreshShuffleSeed();
+    resetMutation.mutate();
+  }, [refreshShuffleSeed, settings.shuffleQuestions, ticket, resetMutation]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
   useTestInteractions({
