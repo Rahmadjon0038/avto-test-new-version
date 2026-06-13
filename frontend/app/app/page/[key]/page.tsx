@@ -14,7 +14,7 @@ const titleMap: Record<string, string> = {
   exam: "Imtihon topshirish"
 };
 
-const comingSoonKeys = new Set(["videos"]);
+const comingSoonKeys = new Set<string>();
 
 export default function StubPage() {
   const router = useRouter();

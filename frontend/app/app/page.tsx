@@ -68,8 +68,7 @@ export default function AppHome() {
             title="Video darsliklar"
             desc="Mavzulashtirilgan video darsliklar."
             href="/app/page/videos"
-            badge="Tez kunda"
-            comingSoon
+            comingSoon={false}
           />
         </div>
       </div>

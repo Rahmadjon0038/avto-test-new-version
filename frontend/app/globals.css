@@ -2626,6 +2626,119 @@ body {
   line-height: 1.6;
 }
 
+.videoLessonsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.videoLessonCard {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 10px 24px rgba(20, 32, 64, 0.06);
+  cursor: pointer;
+}
+
+.videoLessonThumb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  aspect-ratio: 16 / 9;
+}
+
+.videoLessonImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.videoLessonPlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+  color: #fff;
+}
+
+.videoLessonPlay .lucide {
+  width: 58px;
+  height: 58px;
+  padding: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.videoLessonTopic {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.videoLessonTopicText {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.videoLessonTopic .lucide {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.videoLessonsInfo {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+}
+
+.videoLessonsInfoIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #eef4ff;
+  color: var(--blue);
+}
+
+.videoLessonsInfoIcon .lucide {
+  width: 24px;
+  height: 24px;
+}
+
+.videoLessonsInfoTitle {
+  font-size: 16px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.videoLessonsInfoText {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
 .authCardSimple {
   padding: 0;
   display: grid;

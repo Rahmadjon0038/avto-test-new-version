@@ -215,6 +215,22 @@ async function initDb(dbApi) {
   await dbApi.run(`ALTER TABLE custom_tests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
 
   await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS video_lessons (
+      id BIGSERIAL PRIMARY KEY,
+      topic_id BIGINT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+      youtube_url TEXT NOT NULL,
+      youtube_id TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS topic_id BIGINT NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS youtube_url TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS youtube_id TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
+  await dbApi.run(`CREATE INDEX IF NOT EXISTS video_lessons_topic_id_idx ON video_lessons (topic_id);`);
+
+  await dbApi.run(`
     CREATE TABLE IF NOT EXISTS custom_test_progress (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -281,6 +281,142 @@ async function getTopicFromDb(topicId) {
   return row ? normalizeTopicRow(row) : null;
 }
 
+function parseYoutubeId(input) {
+  const value = String(input || "").trim();
+  if (!value) return "";
+  try {
+    const url = new URL(value);
+    if (url.hostname === "youtu.be") {
+      const id = url.pathname.replace(/^\//, "").split("/")[0];
+      return id ? id.split("?")[0].split("&")[0] : "";
+    }
+    if (url.hostname.includes("youtube.com")) {
+      const v = url.searchParams.get("v");
+      if (v) return v;
+      const embedMatch = /\/embed\/([^/?]+)/i.exec(url.pathname);
+      if (embedMatch) return embedMatch[1];
+      const shortsMatch = /\/shorts\/([^/?]+)/i.exec(url.pathname);
+      if (shortsMatch) return shortsMatch[1];
+    }
+  } catch {
+    const directMatch = /(?:v=|youtu\.be\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,})/i.exec(value);
+    if (directMatch) return directMatch[1];
+  }
+  return "";
+}
+
+function buildYoutubeThumbnailUrl(youtubeId) {
+  return youtubeId ? `https://img.youtube.com/vi/${encodeURIComponent(youtubeId)}/hqdefault.jpg` : "";
+}
+
+function normalizeVideoLessonRow(row) {
+  return {
+    id: Number(row.id),
+    topicId: Number(row.topic_id || 0),
+    topicSlug: String(row.topic_slug || ""),
+    topicTitle: String(row.topic_title || ""),
+    youtubeUrl: String(row.youtube_url || ""),
+    youtubeId: String(row.youtube_id || ""),
+    thumbnailUrl: buildYoutubeThumbnailUrl(String(row.youtube_id || "")),
+    createdAt: row.created_at ? String(row.created_at) : undefined,
+    updatedAt: row.updated_at ? String(row.updated_at) : undefined
+  };
+}
+
+function normalizeVideoLessonInput(input = {}, current = null) {
+  const source = typeof input === "string" ? { youtubeUrl: input } : input || {};
+  const youtubeUrl = String(source.youtubeUrl || source.url || current?.youtubeUrl || "").trim();
+  const topicId = Number(source.topicId ?? current?.topicId ?? 0);
+  if (!Number.isFinite(topicId) || topicId <= 0) throw new Error("Dars mavzusi tanlanishi kerak");
+  if (!youtubeUrl) throw new Error("YouTube link kiritilishi kerak");
+  const youtubeId = parseYoutubeId(youtubeUrl);
+  if (!youtubeId) throw new Error("YouTube link noto‘g‘ri");
+  return { topicId, youtubeUrl, youtubeId };
+}
+
+async function getVideoLessonsFromDb() {
+  const rows = await dbApi.all(
+    `
+      SELECT
+        v.id,
+        v.topic_id,
+        v.youtube_url,
+        v.youtube_id,
+        v.created_at,
+        v.updated_at,
+        t.slug AS topic_slug,
+        t.title AS topic_title
+      FROM video_lessons v
+      LEFT JOIN topics t ON t.id = v.topic_id
+      ORDER BY v.created_at ASC, v.id ASC
+    `
+  );
+  return rows
+    .filter((row) => row.topic_title !== null && row.topic_title !== undefined)
+    .map(normalizeVideoLessonRow);
+}
+
+async function getVideoLessonByIdFromDb(videoId) {
+  const key = String(videoId || "").trim();
+  if (!key) return null;
+  const row = await dbApi.get(
+    `
+      SELECT
+        v.id,
+        v.topic_id,
+        v.youtube_url,
+        v.youtube_id,
+        v.created_at,
+        v.updated_at,
+        t.slug AS topic_slug,
+        t.title AS topic_title
+      FROM video_lessons v
+      LEFT JOIN topics t ON t.id = v.topic_id
+      WHERE CAST(v.id AS TEXT) = ?
+      LIMIT 1
+    `,
+    [key]
+  );
+  return row ? normalizeVideoLessonRow(row) : null;
+}
+
+async function createVideoLesson(input) {
+  const next = normalizeVideoLessonInput(input);
+  const topic = await getTopicFromDb(next.topicId);
+  if (!topic) throw new Error("Mavzu topilmadi");
+  const result = await dbApi.get(
+    `
+      INSERT INTO video_lessons (topic_id, youtube_url, youtube_id, created_at, updated_at)
+      VALUES (?, ?, ?, NOW(), NOW())
+      RETURNING *
+    `,
+    [next.topicId, next.youtubeUrl, next.youtubeId]
+  );
+  return normalizeVideoLessonRow({ ...result, topic_slug: topic.slug, topic_title: topic.title });
+}
+
+async function updateVideoLesson(videoId, input) {
+  const current = await getVideoLessonByIdFromDb(videoId);
+  if (!current) throw new Error("Video topilmadi");
+  const next = normalizeVideoLessonInput(input, current);
+  const topic = await getTopicFromDb(next.topicId);
+  if (!topic) throw new Error("Mavzu topilmadi");
+  const result = await dbApi.get(
+    `
+      UPDATE video_lessons
+      SET topic_id = ?, youtube_url = ?, youtube_id = ?, updated_at = NOW()
+      WHERE id = ?
+      RETURNING *
+    `,
+    [next.topicId, next.youtubeUrl, next.youtubeId, String(videoId)]
+  );
+  return normalizeVideoLessonRow({ ...result, topic_slug: topic.slug, topic_title: topic.title });
+}
+
+async function deleteVideoLesson(videoId) {
+  await dbApi.run("DELETE FROM video_lessons WHERE id = ?", [String(videoId)]);
+}
+
 function buildTopicQuestionKey(topicId, questionId) {
   return `topic:${String(topicId)}:${String(questionId)}`;
 }
@@ -2571,6 +2707,21 @@ app.get("/api/topics/:topicId", async (req, res) => {
   res.json({ topic });
 });
 
+app.get("/api/videos", requireUser, async (_req, res) => {
+  const videos = await getVideoLessonsFromDb();
+  res.json({
+    videos: videos.map((video) => ({
+      id: video.id,
+      topicId: video.topicId,
+      topicSlug: video.topicSlug,
+      topicTitle: video.topicTitle,
+      youtubeUrl: video.youtubeUrl,
+      youtubeId: video.youtubeId,
+      thumbnailUrl: video.thumbnailUrl
+    }))
+  });
+});
+
 app.get("/api/custom-tests", async (_req, res) => {
   const customTests = await getGeneratedCustomTestsFromDb();
   res.json({
@@ -3386,6 +3537,64 @@ app.post("/api/admin/custom-tests/import", async (req, res) => {
     if (!customTestItems.length) return res.status(400).json({ error: "customTests massivi kerak" });
     const customTests = await importCustomTests(customTestItems);
     res.json({ ok: true, customTests: customTests.map((test) => ({ id: test.id, title: test.title })) });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.get("/api/admin/videos", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const videos = await getVideoLessonsFromDb();
+  res.json({
+    videos: videos.map((video) => ({
+      id: video.id,
+      topicId: video.topicId,
+      topicSlug: video.topicSlug,
+      topicTitle: video.topicTitle,
+      youtubeUrl: video.youtubeUrl,
+      youtubeId: video.youtubeId,
+      thumbnailUrl: video.thumbnailUrl
+    }))
+  });
+});
+
+app.get("/api/admin/videos/:videoId", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const video = await getVideoLessonByIdFromDb(String(req.params.videoId));
+  if (!video) return res.status(404).json({ error: "Video topilmadi" });
+  res.json({ video });
+});
+
+app.post("/api/admin/videos", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const video = await createVideoLesson(req.body || {});
+    res.status(201).json({ ok: true, video });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.patch("/api/admin/videos/:videoId", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const video = await updateVideoLesson(String(req.params.videoId), req.body || {});
+    res.json({ ok: true, video });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.delete("/api/admin/videos/:videoId", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    await deleteVideoLesson(String(req.params.videoId));
+    res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
   }
