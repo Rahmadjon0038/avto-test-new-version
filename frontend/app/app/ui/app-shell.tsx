@@ -13,6 +13,7 @@ import {
   Send,
   ShieldCheck,
   Phone,
+  Trash2,
   UserCircle2,
   Wallet
 } from "lucide-react";
@@ -48,6 +49,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [passwordNext, setPasswordNext] = useState("");
   const [passwordNextConfirm, setPasswordNextConfirm] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const initials = useMemo(() => getInitials(me?.full_name || ""), [me]);
   const displayName = useMemo(() => me?.full_name || "Profil", [me]);
@@ -168,6 +170,25 @@ export default function AppShell({ children }: { children: ReactNode }) {
       setAccessToken(null);
     },
     onSettled: () => router.replace("/")
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const res = await authFetch("/api/auth/account", { method: "DELETE" });
+      return jsonOrError(res);
+    },
+    onSuccess: () => {
+      setDeleteAccountOpen(false);
+      setProfileOpen(false);
+      setPasswordChangeOpen(false);
+      setAccessToken(null);
+      setUser(null);
+      toast.success("Account o‘chirildi");
+      router.replace("/");
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Account o‘chirilmadi");
+    }
   });
 
   function confirmPurchase() {
@@ -336,6 +357,47 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <button className="btn btn-danger" type="button" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
               Chiqish
             </button>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setDeleteAccountOpen(true)}
+              style={{ marginTop: 10, color: "var(--danger)", borderColor: "rgba(185, 38, 38, 0.35)" }}
+            >
+              <Trash2 className="lucide" aria-hidden="true" /> Delete account
+            </button>
+          </div>
+        </div>
+      )}
+
+      {deleteAccountOpen && (
+        <div className="modal" role="dialog" aria-modal="true">
+          <div className="modalHeader">
+            <div className="modalTitle">Accountni o‘chirish</div>
+            <button className="btn btn-ghost" type="button" onClick={() => setDeleteAccountOpen(false)}>
+              ✕
+            </button>
+          </div>
+          <div className="modalBody">
+            <div className="authResetNotice" style={{ marginTop: 0 }}>
+              <div className="authResetTitle">Diqqat</div>
+              <div className="authResetText">
+                Siz accountni butunlay o‘chirmoqchimisiz? Agar bunday qilsangiz, barcha ma’lumotlaringizni qayta tiklab
+                bo‘lmaydi.
+              </div>
+            </div>
+            <div className="payRow" style={{ marginTop: 14 }}>
+              <button className="btn btn-ghost payBtn" type="button" onClick={() => setDeleteAccountOpen(false)}>
+                Bekor qilish
+              </button>
+              <button
+                className="btn btn-danger payBtn"
+                type="button"
+                onClick={() => deleteAccountMutation.mutate()}
+                disabled={deleteAccountMutation.isPending}
+              >
+                Roziman
+              </button>
+            </div>
           </div>
         </div>
       )}

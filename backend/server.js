@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs/promises");
+const { spawnSync } = require("child_process");
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const { openDb, initDb } = require("./db");
 const crypto = require("crypto");
@@ -12,7 +13,7 @@ try {
 } catch (error) {
   console.warn("[backend] nodemailer module not installed; phone-based temporary password reset is active.");
 }
-const { DeleteObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
 const PORT = Number(process.env.PORT || 3000);
 const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || "15mb";
@@ -2139,6 +2140,106 @@ function buildR2PublicUrl(key) {
   return `${getR2PublicBaseUrl()}/${String(key).replace(/^\/+/, "")}`;
 }
 
+async function streamToBuffer(stream) {
+  const chunks = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
+async function convertAudioToM4a(buffer, inputName = "audio") {
+  const inputDir = await fs.mkdtemp(path.join(require("os").tmpdir(), "road-test-audio-"));
+  const inputPath = path.join(inputDir, `${inputName}.input`);
+  const outputPath = path.join(inputDir, `${inputName}.m4a`);
+
+  try {
+    await fs.writeFile(inputPath, buffer);
+    const result = spawnSync(
+      "ffmpeg",
+      [
+        "-y",
+        "-i",
+        inputPath,
+        "-vn",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart",
+        outputPath
+      ],
+      { stdio: "pipe" }
+    );
+
+    if (result.status !== 0) {
+      throw new Error(
+        `Audio konvertatsiyasi muvaffaqiyatsiz: ${String(result.stderr || result.stdout || "").trim() || "ffmpeg xatosi"}`
+      );
+    }
+
+    return await fs.readFile(outputPath);
+  } finally {
+    await fs.rm(inputDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+function isSupportedPlaybackAudio(contentType, url = "") {
+  const type = String(contentType || "").toLowerCase();
+  const source = String(url || "").toLowerCase();
+  return (
+    type.startsWith("audio/mpeg") ||
+    type.startsWith("audio/mp4") ||
+    type.startsWith("audio/wav") ||
+    source.endsWith(".mp3") ||
+    source.endsWith(".m4a") ||
+    source.endsWith(".wav")
+  );
+}
+
+async function fetchAudioAsM4a(sourceUrl) {
+  const response = await fetch(sourceUrl);
+  if (!response.ok) {
+    throw new Error(`Audio yuklab bo‘lmadi: ${response.status}`);
+  }
+
+  const contentType = String(response.headers.get("content-type") || "");
+  const buffer = Buffer.from(await response.arrayBuffer());
+  if (isSupportedPlaybackAudio(contentType, sourceUrl)) {
+    return { buffer, contentType: contentType || "audio/mp4" };
+  }
+
+  const convertedBuffer = await convertAudioToM4a(buffer, "proxy-audio");
+  return { buffer: convertedBuffer, contentType: "audio/mp4" };
+}
+
+async function getAudioProxyPayload(sourceUrl) {
+  const bucket = getR2BucketName();
+  if (!bucket) throw new Error("R2 bucket sozlanmagan");
+
+  const key = deriveR2KeyFromPublicUrl(sourceUrl);
+  if (!key) throw new Error("Audio manzili noto‘g‘ri");
+
+  const object = await r2.send(
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key
+    })
+  );
+
+  const contentType = String(object.ContentType || "").trim();
+  const sourceBuffer = object.Body ? await streamToBuffer(object.Body) : Buffer.alloc(0);
+  if (!sourceBuffer.length) throw new Error("Audio fayli bo‘sh");
+
+  if (isSupportedPlaybackAudio(contentType, sourceUrl)) {
+    return { buffer: sourceBuffer, contentType: contentType || "audio/mp4" };
+  }
+
+  const convertedBuffer = await convertAudioToM4a(sourceBuffer, path.basename(key).replace(/\.[^.]+$/, "") || "audio");
+  return { buffer: convertedBuffer, contentType: "audio/mp4" };
+}
+
 function isAllowedAudioType(mimeType) {
   const value = String(mimeType || "").toLowerCase();
   return Array.from(ALLOWED_AUDIO_TYPES).some((allowed) => value === allowed || value.startsWith(`${allowed};`));
@@ -2622,6 +2723,33 @@ async function handlePasswordChange(req, res) {
   }
 }
 
+async function handleDeleteAccount(req, res) {
+  try {
+    const user = await getUserFromAccess(req);
+    if (!user) return res.status(401).json({ error: "Kirish talab qilinadi" });
+
+    const client = await dbApi.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM users WHERE id = $1", [String(user.id)]);
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+
+    res.setHeader("Set-Cookie", [clearRefreshCookie(req)]);
+    res.json({
+      ok: true,
+      message: "Account butunlay o‘chirildi"
+    });
+  } catch (e) {
+    res.status(e?.statusCode || 400).json({ error: e?.message || "Account o‘chirilmadi" });
+  }
+}
+
 app.post("/api/auth/register", handleRegister);
 app.post("/api/register", handleRegister);
 
@@ -2635,6 +2763,9 @@ app.post("/api/auth/password-reset/request", handlePasswordResetRequest);
 app.post("/api/password-reset/request", handlePasswordResetRequest);
 app.post("/api/auth/password-change", handlePasswordChange);
 app.post("/api/password-change", handlePasswordChange);
+
+app.delete("/api/auth/account", handleDeleteAccount);
+app.delete("/api/account", handleDeleteAccount);
 
 app.post("/api/auth/logout", async (req, res) => {
   const token = await readRefreshCookie(req);
@@ -3874,8 +4005,8 @@ app.post("/api/upload-audio", async (req, res) => {
       return res.status(400).json({ error: "Audio hajmi 10MB dan oshmasligi kerak" });
     }
 
-    const extension = getAudioExtensionFromFile({ name: audioName, type: audioType });
-    if (!extension) return res.status(400).json({ error: "Audio fayl kengaytmasi aniqlanmadi" });
+    const convertedBuffer = await convertAudioToM4a(buffer, audioName || "audio");
+    const extension = "m4a";
 
     const bucket = getR2BucketName();
     if (!bucket) return res.status(500).json({ error: "R2 bucket sozlanmagan" });
@@ -3885,8 +4016,8 @@ app.post("/api/upload-audio", async (req, res) => {
       new PutObjectCommand({
         Bucket: bucket,
         Key: fileKey,
-        Body: buffer,
-        ContentType: audioType
+        Body: convertedBuffer,
+        ContentType: "audio/mp4"
       })
     );
 
@@ -3979,6 +4110,20 @@ app.delete("/api/upload-audio", async (req, res) => {
     res.json({ success: true, audioUrl: "" });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Audio o‘chirish amalga oshmadi" });
+  }
+});
+
+app.get("/api/audio-proxy", async (req, res) => {
+  try {
+    const sourceUrl = String(req.query.url || "").trim();
+    if (!sourceUrl) return res.status(400).json({ error: "Audio manzili topilmadi" });
+
+    const payload = await getAudioProxyPayload(sourceUrl);
+    res.setHeader("Content-Type", payload.contentType || "audio/mp4");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.send(payload.buffer);
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Audio yuklab bo‘lmadi" });
   }
 });
 

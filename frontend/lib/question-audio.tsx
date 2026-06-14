@@ -8,7 +8,8 @@ type QuestionAudioProps = {
 export function resolveQuestionAudio(audio?: string) {
   const value = String(audio || "").trim();
   if (!value) return "";
-  return value;
+  if (value.startsWith("/api/audio-proxy?url=")) return value;
+  return `/api/audio-proxy?url=${encodeURIComponent(value)}`;
 }
 
 export function QuestionAudio({ audio, className }: QuestionAudioProps) {

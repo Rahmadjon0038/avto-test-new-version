@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { resolveQuestionAudio } from "@/lib/question-audio";
 
 type Question = {
   id: string;
@@ -157,6 +158,15 @@ export default function AdminTopicDetailPage() {
   const mediaChunksRef = useRef<Blob[]>([]);
   const recordingQuestionIdRef = useRef<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const meQuery = useQuery({
+    queryKey: ["admin-me"],
+    queryFn: async () => {
+      const res = await authFetch("/api/auth/me");
+      return jsonOrError(res);
+    },
+    retry: false
+  });
+  const isAdmin = Boolean(meQuery.data?.user?.is_admin);
 
   const topicQuery = useQuery({
     queryKey: ["admin-topic", topicId],
@@ -889,7 +899,7 @@ export default function AdminTopicDetailPage() {
                         }}
                       />
                     </div>
-                </div>
+                  </div>
               </div>
 
                 <label className="adminField adminFieldWide">
@@ -933,112 +943,114 @@ export default function AdminTopicDetailPage() {
                     />
                 </label>
 
-                <div className="adminField adminFieldWide">
-                  <div className="adminFieldLabel">Audio izoh</div>
-                  <div className="adminAudioStack">
-                    <div className="adminAudioPreview">
-                      {audioDrafts[question.id]?.recording ? (
-                        <div className="adminAudioEmptyState">
-                          <div className="adminAudioEmptyTitle">Yozib olinmoqda</div>
-                          <div className="adminAudioEmptyText">Mikrofon tugmasini bosib turing.</div>
-                        </div>
-                      ) : audioDrafts[question.id]?.previewUrl || question.audio ? (
-                        <audio
-                          className="adminAudioPlayer"
-                          controls
-                          preload="metadata"
-                          src={audioDrafts[question.id]?.previewUrl || question.audio}
-                        />
-                      ) : (
-                        <div className="adminAudioEmptyState">
-                          <div className="adminAudioEmptyTitle">Audio yuklanmagan</div>
-                          <div className="adminAudioEmptyText">Mikrofonga bosib yozing yoki mavjud audioni tinglang.</div>
-                        </div>
-                      )}
-                      {audioDrafts[question.id]?.uploading ? <div className="adminImagePreviewLoading">Yuklanmoqda...</div> : null}
-                    </div>
+                {isAdmin ? (
+                  <div className="adminField adminFieldWide">
+                    <div className="adminFieldLabel">Audio izoh</div>
+                    <div className="adminAudioStack">
+                      <div className="adminAudioPreview">
+                        {audioDrafts[question.id]?.recording ? (
+                          <div className="adminAudioEmptyState">
+                            <div className="adminAudioEmptyTitle">Yozib olinmoqda</div>
+                            <div className="adminAudioEmptyText">Mikrofon tugmasini bosib turing.</div>
+                          </div>
+                        ) : audioDrafts[question.id]?.previewUrl || question.audio ? (
+                          <audio
+                            className="adminAudioPlayer"
+                            controls
+                            preload="metadata"
+                            src={audioDrafts[question.id]?.previewUrl || resolveQuestionAudio(question.audio)}
+                          />
+                        ) : (
+                          <div className="adminAudioEmptyState">
+                            <div className="adminAudioEmptyTitle">Audio yuklanmagan</div>
+                            <div className="adminAudioEmptyText">Mikrofonga bosib yozing yoki mavjud audioni tinglang.</div>
+                          </div>
+                        )}
+                        {audioDrafts[question.id]?.uploading ? <div className="adminImagePreviewLoading">Yuklanmoqda...</div> : null}
+                      </div>
 
-                  <div className="adminAudioFooter">
-                      <div className="adminAudioHint">
-                        Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi. Yoki tayyor audio faylni yuklang.
+                      <div className="adminAudioFooter">
+                        <div className="adminAudioHint">
+                          Bosib turing — yozish boshlanadi. Qo‘yib yuborsangiz audio tayyor bo‘ladi. Yoki tayyor audio faylni yuklang.
+                        </div>
+                        <div className="adminOptionsToolbar adminAudioButtons">
+                          <button
+                            className={`btn btn-sm adminAudioActionCard adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
+                            type="button"
+                            title={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
+                            aria-label={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
+                            onPointerDown={(event) => {
+                              event.preventDefault();
+                              startQuestionRecording(question.id).catch((error: any) => toast.error(error?.message || "Audio yozib bo‘lmadi"));
+                            }}
+                            onPointerUp={() => {
+                              stopQuestionRecording().catch(() => {});
+                            }}
+                            onPointerCancel={() => {
+                              stopQuestionRecording().catch(() => {});
+                            }}
+                            onPointerLeave={() => {
+                              if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
+                            }}
+                          >
+                            <span className="adminAudioActionIcon adminAudioActionIconMic">
+                              <Mic className="lucide" aria-hidden="true" />
+                            </span>
+                            <span className="adminAudioActionText">
+                              <span className="adminAudioActionTitle">{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
+                              <span className="adminAudioActionSub">Bosib turing, yozish uchun</span>
+                            </span>
+                            <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
+                          </button>
+                          <label
+                            className={`btn btn-sm adminAudioActionCard adminAudioUploadBtn ${audioDrafts[question.id]?.uploading ? "isUploading" : ""}`}
+                            htmlFor={`audio-input-${question.id}`}
+                            title="Tayyor audio faylni yuklash"
+                            aria-label="Tayyor audio faylni yuklash"
+                          >
+                            <span className="adminAudioActionIcon adminAudioActionIconUpload">
+                              <UploadCloud className="lucide" aria-hidden="true" />
+                            </span>
+                            <span className="adminAudioActionText">
+                              <span className="adminAudioActionTitle">{audioDrafts[question.id]?.blob ? "Faylni almashtirish" : "Audio fayl yuklash"}</span>
+                              <span className="adminAudioActionSub">Tayyor audio faylni tanlang</span>
+                            </span>
+                            <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
+                          </label>
+                          <button
+                            className="btn btn-sm adminAudioActionCard adminAudioDeleteBtn"
+                            type="button"
+                            title="Audio o‘chirish"
+                            aria-label="Audio o‘chirish"
+                            disabled={!audioDrafts[question.id]?.blob && !question.audio && !audioDrafts[question.id]?.previewUrl}
+                            onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
+                          >
+                            <span className="adminAudioActionIcon adminAudioActionIconDelete">
+                              <Trash2 className="lucide" aria-hidden="true" />
+                            </span>
+                            <span className="adminAudioActionText">
+                              <span className="adminAudioActionTitle">O‘chirish</span>
+                              <span className="adminAudioActionSub">Audioni tozalash</span>
+                            </span>
+                            <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
+                          </button>
+                        </div>
+                        <input
+                          id={`audio-input-${question.id}`}
+                          className="input adminHiddenFileInput"
+                          type="file"
+                          accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (!file) return;
+                            uploadQuestionAudioFile(question.id, file).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"));
+                            event.currentTarget.value = "";
+                          }}
+                        />
                       </div>
-                      <div className="adminOptionsToolbar adminAudioButtons">
-                        <button
-                          className={`btn btn-sm adminAudioActionCard adminAudioMicBtn ${audioDrafts[question.id]?.recording ? "isRecording" : ""}`}
-                          type="button"
-                          title={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
-                          aria-label={audioDrafts[question.id]?.recording ? "Yozish davom etmoqda" : "Bosib turib yozing"}
-                          onPointerDown={(event) => {
-                            event.preventDefault();
-                            startQuestionRecording(question.id).catch((error: any) => toast.error(error?.message || "Audio yozib bo‘lmadi"));
-                          }}
-                          onPointerUp={() => {
-                            stopQuestionRecording().catch(() => {});
-                          }}
-                          onPointerCancel={() => {
-                            stopQuestionRecording().catch(() => {});
-                          }}
-                          onPointerLeave={() => {
-                            if (audioDrafts[question.id]?.recording) stopQuestionRecording().catch(() => {});
-                          }}
-                        >
-                          <span className="adminAudioActionIcon adminAudioActionIconMic">
-                            <Mic className="lucide" aria-hidden="true" />
-                          </span>
-                          <span className="adminAudioActionText">
-                            <span className="adminAudioActionTitle">{audioDrafts[question.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
-                            <span className="adminAudioActionSub">Bosib turing, yozish uchun</span>
-                          </span>
-                          <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
-                        </button>
-                        <label
-                          className={`btn btn-sm adminAudioActionCard adminAudioUploadBtn ${audioDrafts[question.id]?.uploading ? "isUploading" : ""}`}
-                          htmlFor={`audio-input-${question.id}`}
-                          title="Tayyor audio faylni yuklash"
-                          aria-label="Tayyor audio faylni yuklash"
-                        >
-                          <span className="adminAudioActionIcon adminAudioActionIconUpload">
-                            <UploadCloud className="lucide" aria-hidden="true" />
-                          </span>
-                          <span className="adminAudioActionText">
-                            <span className="adminAudioActionTitle">{audioDrafts[question.id]?.blob ? "Faylni almashtirish" : "Audio fayl yuklash"}</span>
-                            <span className="adminAudioActionSub">Tayyor audio faylni tanlang</span>
-                          </span>
-                          <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
-                        </label>
-                        <button
-                          className="btn btn-sm adminAudioActionCard adminAudioDeleteBtn"
-                          type="button"
-                          title="Audio o‘chirish"
-                          aria-label="Audio o‘chirish"
-                          disabled={!audioDrafts[question.id]?.blob && !question.audio && !audioDrafts[question.id]?.previewUrl}
-                          onClick={() => deleteQuestionAudio(question.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
-                        >
-                          <span className="adminAudioActionIcon adminAudioActionIconDelete">
-                            <Trash2 className="lucide" aria-hidden="true" />
-                          </span>
-                          <span className="adminAudioActionText">
-                            <span className="adminAudioActionTitle">O‘chirish</span>
-                            <span className="adminAudioActionSub">Audioni tozalash</span>
-                          </span>
-                          <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
-                        </button>
-                      </div>
-                      <input
-                        id={`audio-input-${question.id}`}
-                        className="input adminHiddenFileInput"
-                        type="file"
-                        accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm"
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (!file) return;
-                          uploadQuestionAudioFile(question.id, file).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"));
-                          event.currentTarget.value = "";
-                        }}
-                      />
                     </div>
                   </div>
-                </div>
+                ) : null}
               </div>
 
               <div className="adminOptionsGrid">
