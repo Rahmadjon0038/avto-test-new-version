@@ -1835,13 +1835,111 @@ body {
   border: 1px solid var(--border);
   background: #050816;
   aspect-ratio: 16 / 9;
+  position: relative;
 }
 
+.adminVideoThumb,
 .adminVideoFrame {
   width: 100%;
   height: 100%;
   border: 0;
   display: block;
+  object-fit: cover;
+}
+
+.adminVideoThumbFallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  color: #fff;
+}
+
+.adminVideoStatus {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  background: rgba(5, 8, 22, 0.82);
+  color: #fff;
+}
+
+.adminVideoStatus-success {
+  border: 1px solid color-mix(in srgb, var(--ok) 55%, var(--border));
+}
+
+.adminVideoStatus-warning {
+  border: 1px solid color-mix(in srgb, #f59e0b 55%, var(--border));
+}
+
+.adminVideoStatus-danger {
+  border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--border));
+}
+
+.adminVideoMetaLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.adminTopicFormRow,
+.adminUploadRow {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.adminSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel2);
+  font-weight: 800;
+  color: var(--text);
+}
+
+.adminSwitch input {
+  width: 18px;
+  height: 18px;
+}
+
+.adminUploadProgress {
+  position: relative;
+  min-width: 180px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.adminUploadProgressBar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.adminUploadProgress span {
+  position: relative;
+  z-index: 1;
 }
 
 .adminTopicCheck {
@@ -2647,6 +2745,180 @@ body {
   gap: 14px;
 }
 
+.videoPlayerCard {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+.videoPlayerPlaceholder {
+  min-height: 280px;
+  place-items: center;
+  text-align: center;
+}
+
+.videoPlayerPlaceholderIcon {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--primary) 14%, var(--panel2));
+  color: var(--primary);
+}
+
+.videoPlayerPlaceholderIcon .lucide {
+  width: 34px;
+  height: 34px;
+}
+
+.videoPlayerPlaceholderText {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.videoPlayerHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.videoPlayerTitleRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.videoPlayerTitle {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.videoPlayerDescription {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.videoPlayerMeta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.videoPlayerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.videoPlayerBadgePremium {
+  background: color-mix(in srgb, var(--danger) 16%, var(--panel2));
+  color: #ffd6d6;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border));
+}
+
+.videoPlayerBadgeFree {
+  background: color-mix(in srgb, var(--primary) 16%, var(--panel2));
+  color: #dbe7ff;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.videoPlayerWrap {
+  display: grid;
+  gap: 12px;
+}
+
+.videoPlayerSurface {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.videoPlayerElement {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+}
+
+.videoPlayerOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(5, 8, 22, 0.72);
+  color: #fff;
+  text-align: center;
+}
+
+.videoPlayerOverlayError {
+  gap: 8px;
+}
+
+.videoPlayerSpinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top-color: #fff;
+  animation: qspin 0.9s linear infinite;
+}
+
+.videoPlayerControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.videoPlayerControlGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.videoPlayerSpeedLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.videoPlayerSpeedSelect {
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--text);
+  padding: 0 10px;
+}
+
+.videoPlayerPlaybackState {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .videoLessonCard {
   display: grid;
   gap: 12px;
@@ -2666,26 +2938,20 @@ body {
   border: 1px solid var(--border);
 }
 
+.videoLessonThumb,
 .videoLessonFrame {
   width: 100%;
   height: 100%;
   border: 0;
   display: block;
-}
-
-.videoLessonThumb {
-  position: relative;
-  overflow: hidden;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
-  aspect-ratio: 16 / 9;
-}
-
-.videoLessonImage {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-  display: block;
+}
+
+.videoLessonThumbFallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  color: #fff;
 }
 
 .videoLessonPlay {
@@ -2704,6 +2970,67 @@ body {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(8px);
+}
+
+.videoLessonPremium {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.92);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.videoLessonBody {
+  display: grid;
+  gap: 8px;
+}
+
+.videoLessonTopRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.videoLessonDuration,
+.videoLessonStatus {
+  padding: 5px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+}
+
+.videoLessonStatus-ready {
+  color: #d4fbe6;
+}
+
+.videoLessonStatus-processing {
+  color: #fff4d6;
+}
+
+.videoLessonStatus-failed {
+  color: #ffd7d7;
+}
+
+.videoLessonTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 1000;
+  line-height: 1.35;
+}
+
+.videoLessonDescription {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
 }
 
 .videoLessonTopic {

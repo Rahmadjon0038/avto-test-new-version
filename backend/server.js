@@ -282,57 +282,224 @@ async function getTopicFromDb(topicId) {
   return row ? normalizeTopicRow(row) : null;
 }
 
-function parseYoutubeId(input) {
-  const value = String(input || "").trim();
-  if (!value) return "";
-  try {
-    const url = new URL(value);
-    if (url.hostname === "youtu.be") {
-      const id = url.pathname.replace(/^\//, "").split("/")[0];
-      return id ? id.split("?")[0].split("&")[0] : "";
-    }
-    if (url.hostname.includes("youtube.com")) {
-      const v = url.searchParams.get("v");
-      if (v) return v;
-      const embedMatch = /\/embed\/([^/?]+)/i.exec(url.pathname);
-      if (embedMatch) return embedMatch[1];
-      const shortsMatch = /\/shorts\/([^/?]+)/i.exec(url.pathname);
-      if (shortsMatch) return shortsMatch[1];
-    }
-  } catch {
-    const directMatch = /(?:v=|youtu\.be\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,})/i.exec(value);
-    if (directMatch) return directMatch[1];
-  }
-  return "";
+const BUNNY_LIBRARY_ID = String(process.env.BUNNY_LIBRARY_ID || "").trim();
+const BUNNY_CDN_HOSTNAME = String(process.env.BUNNY_CDN_HOSTNAME || "").trim();
+const BUNNY_API_KEY = String(process.env.BUNNY_API_KEY || "").trim();
+const BUNNY_API_BASE_URL = String(process.env.BUNNY_API_BASE_URL || "https://video.bunnycdn.com").replace(/\/+$/, "");
+
+function normalizeVideoStatus(value, fallback = "processing") {
+  const raw = String(value || fallback || "").trim().toLowerCase();
+  if (raw === "ready" || raw === "processing" || raw === "failed") return raw;
+  if (raw.includes("ready") || raw.includes("finished") || raw.includes("done") || raw.includes("active")) return "ready";
+  if (raw.includes("fail") || raw.includes("error")) return "failed";
+  return fallback;
 }
 
-function buildYoutubeThumbnailUrl(youtubeId) {
-  return youtubeId ? `https://img.youtube.com/vi/${encodeURIComponent(youtubeId)}/hqdefault.jpg` : "";
+function buildBunnyPlaybackUrl(videoId) {
+  if (!videoId || !BUNNY_CDN_HOSTNAME) return "";
+  return `https://${BUNNY_CDN_HOSTNAME}/${encodeURIComponent(String(videoId))}/playlist.m3u8`;
+}
+
+function buildBunnyThumbnailUrl(videoId) {
+  if (!videoId || !BUNNY_CDN_HOSTNAME) return "";
+  return `https://${BUNNY_CDN_HOSTNAME}/${encodeURIComponent(String(videoId))}/thumbnail.jpg`;
+}
+
+function parseBooleanValue(value, fallback = false) {
+  if (value === true || value === false) return value;
+  if (value == null) return fallback;
+  const raw = String(value).trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(raw)) return true;
+  if (["0", "false", "no", "off"].includes(raw)) return false;
+  return fallback;
+}
+
+function parseIntegerValue(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : fallback;
 }
 
 function normalizeVideoLessonRow(row) {
+  const bunnyVideoId = String(row.bunny_video_id || "").trim();
+  const bunnyLibraryId = String(row.bunny_library_id || BUNNY_LIBRARY_ID || "").trim();
+  const title = String(row.title || row.topic_title || "").trim();
+  const playbackUrl = String(row.playback_url || buildBunnyPlaybackUrl(bunnyVideoId) || "").trim();
+  const thumbnailUrl = String(row.video_thumbnail || buildBunnyThumbnailUrl(bunnyVideoId) || "").trim();
+  const status = normalizeVideoStatus(
+    row.video_status || (bunnyVideoId ? "processing" : "failed"),
+    bunnyVideoId ? "processing" : "failed"
+  );
+
   return {
     id: Number(row.id),
     topicId: Number(row.topic_id || 0),
     topicSlug: String(row.topic_slug || ""),
-    topicTitle: String(row.topic_title || ""),
-    youtubeUrl: String(row.youtube_url || ""),
-    youtubeId: String(row.youtube_id || ""),
-    thumbnailUrl: buildYoutubeThumbnailUrl(String(row.youtube_id || "")),
+    topicTitle: String(row.topic_title || title),
+    title,
+    description: String(row.description || ""),
+    category: String(row.category || ""),
+    premiumOnly: row.premium_only === true || row.premium_only === 1 || row.premium_only === "1",
+    bunnyVideoId,
+    bunnyLibraryId,
+    videoStatus: status,
+    videoDuration: parseIntegerValue(row.video_duration, 0),
+    videoThumbnail: thumbnailUrl,
+    playbackUrl,
     createdAt: row.created_at ? String(row.created_at) : undefined,
     updatedAt: row.updated_at ? String(row.updated_at) : undefined
   };
 }
 
 function normalizeVideoLessonInput(input = {}, current = null) {
-  const source = typeof input === "string" ? { youtubeUrl: input } : input || {};
-  const youtubeUrl = String(source.youtubeUrl || source.url || current?.youtubeUrl || "").trim();
+  const source = typeof input === "string" ? { title: input } : input || {};
   const topicId = Number(source.topicId ?? current?.topicId ?? 0);
   if (!Number.isFinite(topicId) || topicId <= 0) throw new Error("Dars mavzusi tanlanishi kerak");
-  if (!youtubeUrl) throw new Error("YouTube link kiritilishi kerak");
-  const youtubeId = parseYoutubeId(youtubeUrl);
-  if (!youtubeId) throw new Error("YouTube link noto‘g‘ri");
-  return { topicId, youtubeUrl, youtubeId };
+  const title = String(source.title || current?.title || "").trim();
+  const description = String(source.description || current?.description || "").trim();
+  const category = String(source.category || current?.category || "").trim();
+  const premiumOnly = parseBooleanValue(source.premiumOnly ?? source.premium_only ?? current?.premiumOnly ?? false);
+  return { topicId, title, description, category, premiumOnly };
+}
+
+function getBunnyHeaders(extra = {}) {
+  if (!BUNNY_API_KEY) throw new Error("BUNNY_API_KEY sozlanmagan");
+  return {
+    AccessKey: BUNNY_API_KEY,
+    ...extra
+  };
+}
+
+function getBunnyVideoIdFromResponse(body) {
+  return String(
+    body?.videoId ||
+      body?.guid ||
+      body?.id ||
+      body?.videoID ||
+      body?.video_id ||
+      ""
+  ).trim();
+}
+
+function normalizeBunnyInfo(body, videoId) {
+  const status = normalizeVideoStatus(
+    body?.status || body?.state || body?.processingStatus || body?.encodingStatus || "",
+    "processing"
+  );
+  const duration = parseIntegerValue(
+    body?.duration ??
+      body?.length ??
+      body?.videoLength ??
+      body?.video_length ??
+      body?.metadata?.duration,
+    0
+  );
+  const thumbnail = String(
+    body?.thumbnailUrl ||
+      body?.thumbnailURL ||
+      body?.thumbnail ||
+      body?.thumbnailFileName ||
+      buildBunnyThumbnailUrl(videoId)
+  ).trim();
+  return { status, duration, thumbnail };
+}
+
+async function bunnyRequest(pathname, init = {}) {
+  const response = await fetch(`${BUNNY_API_BASE_URL}${pathname}`, {
+    ...init,
+    headers: {
+      ...getBunnyHeaders(),
+      ...(init.headers || {})
+    }
+  });
+  const text = await response.text();
+  let body = null;
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {
+    body = text;
+  }
+  return { response, body };
+}
+
+async function createBunnyVideo({ title, description, category }) {
+  if (!BUNNY_LIBRARY_ID) throw new Error("BUNNY_LIBRARY_ID sozlanmagan");
+  const { response, body } = await bunnyRequest(`/library/${encodeURIComponent(BUNNY_LIBRARY_ID)}/videos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title,
+      description
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(body?.message || body?.error || "Bunny video yaratilmadi");
+  }
+
+  const bunnyVideoId = getBunnyVideoIdFromResponse(body);
+  if (!bunnyVideoId) throw new Error("Bunny video_id qaytmadi");
+  return { bunnyVideoId, body };
+}
+
+async function uploadBunnyVideo({ bunnyVideoId, buffer, contentType = "application/octet-stream" }) {
+  if (!BUNNY_LIBRARY_ID) throw new Error("BUNNY_LIBRARY_ID sozlanmagan");
+  const { response, body } = await bunnyRequest(
+    `/library/${encodeURIComponent(BUNNY_LIBRARY_ID)}/videos/${encodeURIComponent(bunnyVideoId)}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": contentType,
+        "Content-Length": String(buffer.length)
+      },
+      body: buffer
+    }
+  );
+  if (!response.ok) {
+    throw new Error(body?.message || body?.error || "Bunny video yuklanmadi");
+  }
+  return body;
+}
+
+async function getBunnyVideoInfo(bunnyVideoId) {
+  if (!BUNNY_LIBRARY_ID) throw new Error("BUNNY_LIBRARY_ID sozlanmagan");
+  const { response, body } = await bunnyRequest(
+    `/library/${encodeURIComponent(BUNNY_LIBRARY_ID)}/videos/${encodeURIComponent(bunnyVideoId)}`,
+    { method: "GET" }
+  );
+  if (!response.ok) {
+    throw new Error(body?.message || body?.error || "Bunny video ma’lumoti olinmadi");
+  }
+  return body;
+}
+
+async function deleteBunnyVideo(bunnyVideoId) {
+  if (!BUNNY_LIBRARY_ID || !bunnyVideoId) return;
+  await bunnyRequest(
+    `/library/${encodeURIComponent(BUNNY_LIBRARY_ID)}/videos/${encodeURIComponent(bunnyVideoId)}`,
+    { method: "DELETE" }
+  ).catch(() => {});
+}
+
+async function syncBunnyVideoRow(videoId, bunnyInfo) {
+  const video = await getVideoLessonByIdFromDb(videoId);
+  if (!video) return null;
+  const next = bunnyInfo || (video.bunnyVideoId ? normalizeBunnyInfo(await getBunnyVideoInfo(video.bunnyVideoId), video.bunnyVideoId) : null);
+  const status = normalizeVideoStatus(next?.status, video.videoStatus);
+  const duration = parseIntegerValue(next?.duration, video.videoDuration);
+  const thumbnail = String(next?.thumbnail || video.videoThumbnail || buildBunnyThumbnailUrl(video.bunnyVideoId)).trim();
+  const playbackUrl = String(buildBunnyPlaybackUrl(video.bunnyVideoId)).trim();
+  const updated = await dbApi.get(
+    `
+      UPDATE video_lessons
+      SET video_status = ?, video_duration = ?, video_thumbnail = ?, playback_url = ?, updated_at = NOW()
+      WHERE CAST(id AS TEXT) = ?
+      RETURNING *
+    `,
+    [status, duration, thumbnail, playbackUrl, String(videoId)]
+  );
+  return updated ? normalizeVideoLessonRow(updated) : null;
 }
 
 async function getVideoLessonsFromDb() {
@@ -341,6 +508,16 @@ async function getVideoLessonsFromDb() {
       SELECT
         v.id,
         v.topic_id,
+        v.title,
+        v.description,
+        v.category,
+        v.premium_only,
+        v.bunny_video_id,
+        v.bunny_library_id,
+        v.video_status,
+        v.video_duration,
+        v.video_thumbnail,
+        v.playback_url,
         v.youtube_url,
         v.youtube_id,
         v.created_at,
@@ -365,6 +542,16 @@ async function getVideoLessonByIdFromDb(videoId) {
       SELECT
         v.id,
         v.topic_id,
+        v.title,
+        v.description,
+        v.category,
+        v.premium_only,
+        v.bunny_video_id,
+        v.bunny_library_id,
+        v.video_status,
+        v.video_duration,
+        v.video_thumbnail,
+        v.playback_url,
         v.youtube_url,
         v.youtube_id,
         v.created_at,
@@ -381,41 +568,181 @@ async function getVideoLessonByIdFromDb(videoId) {
   return row ? normalizeVideoLessonRow(row) : null;
 }
 
-async function createVideoLesson(input) {
+async function getVideoLessonByBunnyVideoIdFromDb(bunnyVideoId) {
+  const key = String(bunnyVideoId || "").trim();
+  if (!key) return null;
+  const row = await dbApi.get(
+    `
+      SELECT
+        v.id,
+        v.topic_id,
+        v.title,
+        v.description,
+        v.category,
+        v.premium_only,
+        v.bunny_video_id,
+        v.bunny_library_id,
+        v.video_status,
+        v.video_duration,
+        v.video_thumbnail,
+        v.playback_url,
+        v.youtube_url,
+        v.youtube_id,
+        v.created_at,
+        v.updated_at,
+        t.slug AS topic_slug,
+        t.title AS topic_title
+      FROM video_lessons v
+      LEFT JOIN topics t ON t.id = v.topic_id
+      WHERE v.bunny_video_id = ?
+      LIMIT 1
+    `,
+    [key]
+  );
+  return row ? normalizeVideoLessonRow(row) : null;
+}
+
+async function createVideoLesson(input, fileBuffer = null, contentType = "application/octet-stream") {
   const next = normalizeVideoLessonInput(input);
   const topic = await getTopicFromDb(next.topicId);
   if (!topic) throw new Error("Mavzu topilmadi");
+
+  const description = next.description || String(topic.description || "").trim();
+  const title = next.title || String(topic.title || "").trim();
+  const category = next.category || String(topic.slug || "").trim();
+
+  let bunnyVideoId = String(input?.bunnyVideoId || "").trim();
+  let bunnyVideoInfo = null;
+  if (!bunnyVideoId) {
+    if (!fileBuffer || !Buffer.isBuffer(fileBuffer) || !fileBuffer.length) {
+      throw new Error("Video fayl yuborilishi kerak");
+    }
+    const created = await createBunnyVideo({ title, description, category });
+    bunnyVideoId = created.bunnyVideoId;
+    try {
+      await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
+      bunnyVideoInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+    } catch (error) {
+      await deleteBunnyVideo(bunnyVideoId);
+      throw error;
+    }
+  }
+
+  const status = normalizeVideoStatus(bunnyVideoInfo?.status || "processing", "processing");
+  const duration = parseIntegerValue(bunnyVideoInfo?.duration, 0);
+  const thumbnail = String(bunnyVideoInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
+  const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
+
   const result = await dbApi.get(
     `
-      INSERT INTO video_lessons (topic_id, youtube_url, youtube_id, created_at, updated_at)
-      VALUES (?, ?, ?, NOW(), NOW())
+      INSERT INTO video_lessons (
+        topic_id,
+        title,
+        description,
+        category,
+        premium_only,
+        bunny_video_id,
+        bunny_library_id,
+        video_status,
+        video_duration,
+        video_thumbnail,
+        playback_url,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
       RETURNING *
     `,
-    [next.topicId, next.youtubeUrl, next.youtubeId]
+    [
+      next.topicId,
+      title,
+      description,
+      category,
+      next.premiumOnly,
+      bunnyVideoId,
+      BUNNY_LIBRARY_ID,
+      status,
+      duration,
+      thumbnail,
+      playbackUrl
+    ]
   );
   return normalizeVideoLessonRow({ ...result, topic_slug: topic.slug, topic_title: topic.title });
 }
 
-async function updateVideoLesson(videoId, input) {
+async function updateVideoLesson(videoId, input = {}, fileBuffer = null, contentType = "application/octet-stream") {
   const current = await getVideoLessonByIdFromDb(videoId);
   if (!current) throw new Error("Video topilmadi");
   const next = normalizeVideoLessonInput(input, current);
   const topic = await getTopicFromDb(next.topicId);
   if (!topic) throw new Error("Mavzu topilmadi");
+
+  let bunnyVideoId = current.bunnyVideoId;
+  let bunnyInfo = null;
+  if (fileBuffer && Buffer.isBuffer(fileBuffer) && fileBuffer.length) {
+    if (!bunnyVideoId) {
+      const created = await createBunnyVideo({
+        title: next.title || current.title,
+        description: next.description || current.description,
+        category: next.category || current.category
+      });
+      bunnyVideoId = created.bunnyVideoId;
+    }
+    await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
+    bunnyInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+  }
+
+  const title = next.title || current.title || topic.title;
+  const description = next.description || current.description || topic.description || "";
+  const category = next.category || current.category || topic.slug || "";
+  const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
+  const thumbnail = String(bunnyInfo?.thumbnail || current.videoThumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
+  const status = normalizeVideoStatus(bunnyInfo?.status || current.videoStatus || (bunnyVideoId ? "processing" : "failed"));
+  const duration = parseIntegerValue(bunnyInfo?.duration, current.videoDuration);
+
   const result = await dbApi.get(
     `
       UPDATE video_lessons
-      SET topic_id = ?, youtube_url = ?, youtube_id = ?, updated_at = NOW()
-      WHERE id = ?
+      SET topic_id = ?,
+          title = ?,
+          description = ?,
+          category = ?,
+          premium_only = ?,
+          bunny_video_id = ?,
+          bunny_library_id = ?,
+          video_status = ?,
+          video_duration = ?,
+          video_thumbnail = ?,
+          playback_url = ?,
+          updated_at = NOW()
+      WHERE CAST(id AS TEXT) = ?
       RETURNING *
     `,
-    [next.topicId, next.youtubeUrl, next.youtubeId, String(videoId)]
+    [
+      next.topicId,
+      title,
+      description,
+      category,
+      next.premiumOnly,
+      bunnyVideoId,
+      BUNNY_LIBRARY_ID,
+      status,
+      duration,
+      thumbnail,
+      playbackUrl,
+      String(videoId)
+    ]
   );
+
   return normalizeVideoLessonRow({ ...result, topic_slug: topic.slug, topic_title: topic.title });
 }
 
 async function deleteVideoLesson(videoId) {
-  await dbApi.run("DELETE FROM video_lessons WHERE id = ?", [String(videoId)]);
+  const current = await getVideoLessonByIdFromDb(videoId);
+  if (current?.bunnyVideoId) {
+    await deleteBunnyVideo(current.bunnyVideoId);
+  }
+  await dbApi.run("DELETE FROM video_lessons WHERE CAST(id AS TEXT) = ?", [String(videoId)]);
 }
 
 function buildTopicQuestionKey(topicId, questionId) {
@@ -2004,7 +2331,7 @@ function isSecureRequest(req) {
   return xfProto === "https";
 }
 
-const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 15;
+const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 15;
 const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 function getSecret() {
@@ -2838,18 +3165,91 @@ app.get("/api/topics/:topicId", async (req, res) => {
   res.json({ topic });
 });
 
-app.get("/api/videos", requireUser, async (_req, res) => {
+function maybeRawUpload(req, res, next) {
+  const contentType = String(req.headers["content-type"] || "").toLowerCase();
+  if (contentType.startsWith("application/json")) return next();
+  return express.raw({ type: () => true, limit: "1024mb" })(req, res, next);
+}
+
+function serializeVideoLesson(video, user = null, adminView = false) {
+  const canPlay = adminView || !video.premiumOnly || isUserPro(user) || Boolean(user?.is_admin);
+  return {
+    id: video.id,
+    topicId: video.topicId,
+    topicSlug: video.topicSlug,
+    topicTitle: video.topicTitle,
+    title: video.title || video.topicTitle,
+    description: video.description,
+    category: video.category,
+    premiumOnly: video.premiumOnly,
+    bunnyVideoId: video.bunnyVideoId,
+    bunnyLibraryId: video.bunnyLibraryId,
+    videoStatus: video.videoStatus,
+    videoDuration: video.videoDuration,
+    videoThumbnail: video.videoThumbnail,
+    thumbnailUrl: video.videoThumbnail,
+    playbackUrl: canPlay ? video.playbackUrl : "",
+    createdAt: video.createdAt,
+    updatedAt: video.updatedAt
+  };
+}
+
+async function handleListVideoLessons(req, res, user, adminView = false) {
   const videos = await getVideoLessonsFromDb();
   res.json({
-    videos: videos.map((video) => ({
-      id: video.id,
-      topicId: video.topicId,
-      topicSlug: video.topicSlug,
-      topicTitle: video.topicTitle,
-      youtubeUrl: video.youtubeUrl,
-      youtubeId: video.youtubeId,
-      thumbnailUrl: video.thumbnailUrl
-    }))
+    videos: videos.map((video) => serializeVideoLesson(video, user, adminView))
+  });
+}
+
+async function readVideoLessonPayload(req) {
+  const body = Buffer.isBuffer(req.body) ? null : (req.body && typeof req.body === "object" ? req.body : {});
+  const headers = req.headers || {};
+  return {
+    topicId: body?.topicId ?? body?.topic_id ?? headers["x-topic-id"],
+    title: body?.title ?? headers["x-video-title"] ?? headers["x-title"],
+    description: body?.description ?? headers["x-video-description"] ?? "",
+    category: body?.category ?? headers["x-video-category"] ?? "",
+    premiumOnly: body?.premiumOnly ?? body?.premium_only ?? headers["x-premium-only"],
+    fileName: String(headers["x-file-name"] || headers["x-video-file-name"] || "video.mp4"),
+    contentType: String(headers["content-type"] || "application/octet-stream")
+  };
+}
+
+app.get("/api/video-lessons", requireUser, async (req, res) => {
+  await handleListVideoLessons(req, res, req.user, false);
+});
+
+app.get("/api/videos", requireUser, async (req, res) => {
+  await handleListVideoLessons(req, res, req.user, false);
+});
+
+app.get("/api/video-lessons/:lessonId", requireUser, async (req, res) => {
+  const video = await getVideoLessonByIdFromDb(String(req.params.lessonId));
+  if (!video) return res.status(404).json({ error: "Video topilmadi" });
+  res.json({ video: serializeVideoLesson(video, req.user, false) });
+});
+
+app.get("/api/video-lessons/:lessonId/playback", requireUser, async (req, res) => {
+  const video = await getVideoLessonByIdFromDb(String(req.params.lessonId));
+  if (!video) return res.status(404).json({ error: "Video topilmadi" });
+  const allowed = !video.premiumOnly || isUserPro(req.user) || Boolean(req.user?.is_admin);
+  if (!allowed) return res.status(403).json({ error: "Premium video" });
+  if (!video.playbackUrl) return res.status(404).json({ error: "Playback URL topilmadi" });
+  res.json({
+    playbackUrl: video.playbackUrl,
+    video: serializeVideoLesson(video, req.user, false)
+  });
+});
+
+app.get("/api/videos/:lessonId/playback", requireUser, async (req, res) => {
+  const video = await getVideoLessonByIdFromDb(String(req.params.lessonId));
+  if (!video) return res.status(404).json({ error: "Video topilmadi" });
+  const allowed = !video.premiumOnly || isUserPro(req.user) || Boolean(req.user?.is_admin);
+  if (!allowed) return res.status(403).json({ error: "Premium video" });
+  if (!video.playbackUrl) return res.status(404).json({ error: "Playback URL topilmadi" });
+  res.json({
+    playbackUrl: video.playbackUrl,
+    video: serializeVideoLesson(video, req.user, false)
   });
 });
 
@@ -3673,21 +4073,24 @@ app.post("/api/admin/custom-tests/import", async (req, res) => {
   }
 });
 
+app.get("/api/admin/video-lessons", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  await handleListVideoLessons(req, res, user, true);
+});
+
 app.get("/api/admin/videos", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
-  const videos = await getVideoLessonsFromDb();
-  res.json({
-    videos: videos.map((video) => ({
-      id: video.id,
-      topicId: video.topicId,
-      topicSlug: video.topicSlug,
-      topicTitle: video.topicTitle,
-      youtubeUrl: video.youtubeUrl,
-      youtubeId: video.youtubeId,
-      thumbnailUrl: video.thumbnailUrl
-    }))
-  });
+  await handleListVideoLessons(req, res, user, true);
+});
+
+app.get("/api/admin/video-lessons/:lessonId", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const video = await getVideoLessonByIdFromDb(String(req.params.lessonId));
+  if (!video) return res.status(404).json({ error: "Video topilmadi" });
+  res.json({ video: serializeVideoLesson(video, user, true) });
 });
 
 app.get("/api/admin/videos/:videoId", async (req, res) => {
@@ -3695,26 +4098,67 @@ app.get("/api/admin/videos/:videoId", async (req, res) => {
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const video = await getVideoLessonByIdFromDb(String(req.params.videoId));
   if (!video) return res.status(404).json({ error: "Video topilmadi" });
-  res.json({ video });
+  res.json({ video: serializeVideoLesson(video, user, true) });
 });
 
-app.post("/api/admin/videos", async (req, res) => {
+app.post("/api/admin/video-lessons", maybeRawUpload, async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
-    const video = await createVideoLesson(req.body || {});
-    res.status(201).json({ ok: true, video });
+    const payload = await readVideoLessonPayload(req);
+    const fileBuffer = Buffer.isBuffer(req.body) ? req.body : null;
+    const video = await createVideoLesson(payload, fileBuffer, payload.contentType);
+    res.status(201).json({ ok: true, video: serializeVideoLesson(video, user, true) });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
   }
 });
 
-app.patch("/api/admin/videos/:videoId", async (req, res) => {
+app.post("/api/admin/videos", maybeRawUpload, async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
-    const video = await updateVideoLesson(String(req.params.videoId), req.body || {});
-    res.json({ ok: true, video });
+    const payload = await readVideoLessonPayload(req);
+    const fileBuffer = Buffer.isBuffer(req.body) ? req.body : null;
+    const video = await createVideoLesson(payload, fileBuffer, payload.contentType);
+    res.status(201).json({ ok: true, video: serializeVideoLesson(video, user, true) });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.put("/api/video-lessons/:lessonId", maybeRawUpload, async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const payload = await readVideoLessonPayload(req);
+    const fileBuffer = Buffer.isBuffer(req.body) ? req.body : null;
+    const video = await updateVideoLesson(String(req.params.lessonId), payload, fileBuffer, payload.contentType);
+    res.json({ ok: true, video: serializeVideoLesson(video, user, true) });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.patch("/api/admin/videos/:videoId", maybeRawUpload, async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const payload = await readVideoLessonPayload(req);
+    const fileBuffer = Buffer.isBuffer(req.body) ? req.body : null;
+    const video = await updateVideoLesson(String(req.params.videoId), payload, fileBuffer, payload.contentType);
+    res.json({ ok: true, video: serializeVideoLesson(video, user, true) });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.delete("/api/video-lessons/:lessonId", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    await deleteVideoLesson(String(req.params.lessonId));
+    res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
   }
@@ -3728,6 +4172,54 @@ app.delete("/api/admin/videos/:videoId", async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+function extractBunnyWebhookVideoId(payload) {
+  const candidates = [
+    payload?.videoId,
+    payload?.videoID,
+    payload?.guid,
+    payload?.video?.videoId,
+    payload?.video?.guid,
+    payload?.data?.videoId,
+    payload?.data?.guid,
+    payload?.object?.videoId,
+    payload?.object?.guid
+  ];
+  for (const candidate of candidates) {
+    const value = String(candidate || "").trim();
+    if (value) return value;
+  }
+  return "";
+}
+
+app.post("/api/webhooks/bunny-stream", async (req, res) => {
+  try {
+    const payload = req.body && typeof req.body === "object" ? req.body : {};
+    const bunnyVideoId = extractBunnyWebhookVideoId(payload);
+    if (!bunnyVideoId) return res.status(400).json({ error: "Video id topilmadi" });
+
+    const video = await getVideoLessonByBunnyVideoIdFromDb(bunnyVideoId);
+    if (!video) return res.status(404).json({ error: "Video topilmadi" });
+
+    const event = String(payload.event || payload.eventType || payload.type || payload.status || "").toLowerCase();
+    let bunnyInfo = normalizeBunnyInfo(payload, bunnyVideoId);
+
+    if (event.includes("fail")) {
+      bunnyInfo = { status: "failed", duration: bunnyInfo.duration, thumbnail: bunnyInfo.thumbnail };
+    } else if (event.includes("upload")) {
+      bunnyInfo = { status: "processing", duration: bunnyInfo.duration, thumbnail: bunnyInfo.thumbnail };
+    } else if (!bunnyInfo.duration || !bunnyInfo.thumbnail) {
+      try {
+        bunnyInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+      } catch {}
+    }
+
+    const updated = await syncBunnyVideoRow(video.id, bunnyInfo);
+    res.json({ ok: true, video: updated });
+  } catch (e) {
+    res.status(500).json({ error: e?.message || "Webhook qabul qilinmadi" });
   }
 });
 

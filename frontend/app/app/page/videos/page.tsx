@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Hls from "hls.js";
+import { ArrowLeft, CircleAlert, Play, RefreshCw, Shield, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -12,24 +13,46 @@ type VideoLesson = {
   id: number;
   topicId: number;
   topicTitle: string;
-  youtubeUrl: string;
-  youtubeId: string;
+  title: string;
+  description: string;
+  category: string;
+  premiumOnly: boolean;
+  videoStatus: string;
+  videoDuration: number;
+  videoThumbnail: string;
   thumbnailUrl: string;
+  playbackUrl: string;
 };
 
-function buildEmbedUrl(youtubeId: string) {
-  return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?rel=0&modestbranding=1`;
+function formatDuration(totalSeconds: number) {
+  const value = Number(totalSeconds || 0);
+  if (!value) return "—";
+  const minutes = Math.floor(value / 60);
+  const seconds = value % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function statusLabel(status: string) {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized === "ready") return "Tayyor";
+  if (normalized === "failed") return "Xatolik";
+  return "Yuklanmoqda";
 }
 
 export default function VideosPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
+  const [selectedVideo, setSelectedVideo] = useState<VideoLesson | null>(null);
+  const [playbackUrl, setPlaybackUrl] = useState("");
+  const [loadingPlayback, setLoadingPlayback] = useState(false);
+  const [playerError, setPlayerError] = useState("");
+  const [retrySeed, setRetrySeed] = useState(0);
 
   const videosQuery = useQuery({
-    queryKey: ["videos"],
+    queryKey: ["video-lessons"],
     enabled: authReady,
     queryFn: async () => {
-      const res = await authFetch("/api/videos");
+      const res = await authFetch("/api/video-lessons");
       const data = await jsonOrError(res);
       return Array.isArray(data.videos) ? (data.videos as VideoLesson[]) : [];
     }
@@ -40,6 +63,34 @@ export default function VideosPage() {
       toast.error((videosQuery.error as any)?.message || "Xatolik");
     }
   }, [videosQuery.error]);
+
+  const videos = useMemo(() => videosQuery.data || [], [videosQuery.data]);
+
+  const loadPlayback = async (video: VideoLesson) => {
+    setSelectedVideo(video);
+    setPlaybackUrl("");
+    setPlayerError("");
+    setLoadingPlayback(true);
+    try {
+      const res = await authFetch(`/api/video-lessons/${encodeURIComponent(String(video.id))}/playback`);
+      const data = await jsonOrError(res);
+      if (!res.ok) {
+        throw new Error(data?.error || "Playback yuklanmadi");
+      }
+      const nextPlaybackUrl = data?.playbackUrl ? String(data.playbackUrl) : "";
+      if (!nextPlaybackUrl) {
+        throw new Error("Playback URL topilmadi");
+      }
+      setPlaybackUrl(nextPlaybackUrl);
+      setRetrySeed((current) => current + 1);
+    } catch (error: any) {
+      const message = error?.message || "Video ochilmadi";
+      setPlayerError(message);
+      toast.error(message);
+    } finally {
+      setLoadingPlayback(false);
+    }
+  };
 
   if (!authReady) {
     return (
@@ -60,40 +111,110 @@ export default function VideosPage() {
         </div>
       </div>
 
+      {selectedVideo ? (
+        <article className="card videoPlayerCard">
+          <div className="videoPlayerHead">
+            <div>
+              <div className="videoPlayerTitleRow">
+                <h1 className="videoPlayerTitle">{selectedVideo.title || selectedVideo.topicTitle}</h1>
+                {selectedVideo.premiumOnly ? (
+                  <span className="videoPlayerBadge videoPlayerBadgePremium">
+                    <Shield className="lucide" aria-hidden="true" /> Premium
+                  </span>
+                ) : (
+                  <span className="videoPlayerBadge videoPlayerBadgeFree">
+                    <Video className="lucide" aria-hidden="true" /> Free
+                  </span>
+                )}
+              </div>
+              <p className="videoPlayerDescription">{selectedVideo.description || selectedVideo.topicTitle}</p>
+              <div className="videoPlayerMeta">
+                <span>{selectedVideo.topicTitle}</span>
+                <span>{formatDuration(selectedVideo.videoDuration)}</span>
+                <span>{statusLabel(selectedVideo.videoStatus)}</span>
+              </div>
+            </div>
+            <button
+              className="btn btn-ghost btn-sm"
+              type="button"
+              onClick={() => {
+                setSelectedVideo(null);
+                setPlaybackUrl("");
+                setPlayerError("");
+              }}
+            >
+              Yopish
+            </button>
+          </div>
+
+          <BunnyHlsPlayer
+            key={`${selectedVideo.id}-${retrySeed}`}
+            src={playbackUrl}
+            loading={loadingPlayback}
+            error={playerError}
+            onRetry={() => void loadPlayback(selectedVideo)}
+          />
+        </article>
+      ) : (
+        <div className="card videoPlayerCard videoPlayerPlaceholder">
+          <div className="videoPlayerPlaceholderIcon">
+            <Play className="lucide" aria-hidden="true" />
+          </div>
+          <div className="videoPlayerPlaceholderText">Videoni tanlang — player shu yerda ochiladi</div>
+        </div>
+      )}
+
       {videosQuery.isLoading ? <div className="muted">Video darslar yuklanmoqda...</div> : null}
 
-      {videosQuery.data?.length ? (
+      {videos.length ? (
         <div className="videoLessonsGrid">
-          {videosQuery.data.map((video) => (
+          {videos.map((video) => (
             <article
               key={video.id}
-              className="videoLessonCard"
+              className={`videoLessonCard ${selectedVideo?.id === video.id ? "active" : ""}`}
+              onClick={() => void loadPlayback(video)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  void loadPlayback(video);
+                }
+              }}
             >
               <div className="videoLessonFrameWrap">
-                <iframe
-                  className="videoLessonFrame"
-                  src={buildEmbedUrl(video.youtubeId)}
-                  title={video.topicTitle}
-                  loading="lazy"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+                {video.videoThumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="videoLessonThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
+                ) : (
+                  <div className="videoLessonThumb videoLessonThumbFallback">
+                    <Video className="lucide" aria-hidden="true" />
+                  </div>
+                )}
+                <div className="videoLessonPlay">
+                  <Play className="lucide" aria-hidden="true" />
+                </div>
+                {video.premiumOnly ? <span className="videoLessonPremium">Premium</span> : null}
               </div>
-              <button
-                className="videoLessonTopic"
-                type="button"
-                onClick={() => router.push(`/app/page/topics/${video.topicId}`)}
-              >
-                <span className="videoLessonTopicText">{video.topicTitle}</span>
-                <ChevronRight className="lucide" aria-hidden="true" />
-              </button>
-              <button
-                className="btn btn-primary btn-sm videoLessonTopicBtn"
-                type="button"
-                onClick={() => router.push(`/app/page/topics/${video.topicId}`)}
-              >
-                Mavzuga doir testlarni ishlash
-              </button>
+              <div className="videoLessonBody">
+                <div className="videoLessonTopRow">
+                  <span className="videoLessonDuration">{formatDuration(video.videoDuration)}</span>
+                  <span className={`videoLessonStatus videoLessonStatus-${String(video.videoStatus || "").toLowerCase()}`}>
+                    {statusLabel(video.videoStatus)}
+                  </span>
+                </div>
+                <h3 className="videoLessonTitle">{video.title || video.topicTitle}</h3>
+                <p className="videoLessonDescription">{video.description || video.topicTitle}</p>
+                <button
+                  className="btn btn-primary btn-sm videoLessonTopicBtn"
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    router.push(`/app/page/topics/${video.topicId}`);
+                  }}
+                >
+                  Mavzuga doir testlarni ishlash
+                </button>
+              </div>
             </article>
           ))}
         </div>
@@ -103,5 +224,151 @@ export default function VideosPage() {
         </div>
       )}
     </section>
+  );
+}
+
+function BunnyHlsPlayer({
+  src,
+  loading,
+  error,
+  onRetry
+}: {
+  src: string;
+  loading: boolean;
+  error: string;
+  onRetry: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const pauseHandlerRef = useRef<(() => void) | null>(null);
+  const [speed, setSpeed] = useState(1);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    let destroyed = false;
+    const cleanup = () => {
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    };
+
+    setPlaying(false);
+    video.playbackRate = speed;
+
+    const onLoaded = () => {
+      if (!destroyed) {
+        setPlaying(true);
+      }
+    };
+
+    const onError = () => {
+      if (!destroyed) {
+        setPlaying(false);
+      }
+    };
+
+    const pauseHandler = () => setPlaying(false);
+    pauseHandlerRef.current = pauseHandler;
+    video.addEventListener("canplay", onLoaded);
+    video.addEventListener("playing", onLoaded);
+    video.addEventListener("pause", pauseHandler);
+    video.addEventListener("error", onError);
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        backBufferLength: 90
+      });
+      hlsRef.current = hls;
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        if (!destroyed) {
+          void video.play().catch(() => {});
+        }
+      });
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal && !destroyed) {
+          setPlaying(false);
+        }
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+      void video.play().catch(() => {});
+    }
+
+    return () => {
+      destroyed = true;
+      video.removeEventListener("canplay", onLoaded);
+      video.removeEventListener("playing", onLoaded);
+      if (pauseHandlerRef.current) {
+        video.removeEventListener("pause", pauseHandlerRef.current);
+      }
+      video.removeEventListener("error", onError);
+      cleanup();
+    };
+  }, [src, speed]);
+
+  return (
+    <div className="videoPlayerWrap">
+      <div className="videoPlayerSurface">
+        {loading ? (
+          <div className="videoPlayerOverlay">
+            <div className="videoPlayerSpinner" />
+            <span>Video yuklanmoqda...</span>
+          </div>
+        ) : null}
+        {error ? (
+          <div className="videoPlayerOverlay videoPlayerOverlayError">
+            <CircleAlert className="lucide" aria-hidden="true" />
+            <span>{error}</span>
+            <button className="btn btn-primary btn-sm" type="button" onClick={onRetry}>
+              <RefreshCw className="lucide" aria-hidden="true" /> Qayta urinish
+            </button>
+          </div>
+        ) : null}
+        <video ref={videoRef} className="videoPlayerElement" controls playsInline />
+      </div>
+      <div className="videoPlayerControls">
+        <div className="videoPlayerControlGroup">
+          <label className="videoPlayerSpeedLabel">
+            Tezlik
+            <select
+              value={speed}
+              onChange={(event) => setSpeed(Number(event.target.value))}
+              className="videoPlayerSpeedSelect"
+            >
+              <option value={0.75}>0.75x</option>
+              <option value={1}>1x</option>
+              <option value={1.25}>1.25x</option>
+              <option value={1.5}>1.5x</option>
+              <option value={2}>2x</option>
+            </select>
+          </label>
+        </div>
+        <button
+          className="btn btn-ghost btn-sm"
+          type="button"
+          onClick={() => {
+            const video = videoRef.current;
+            if (!video) return;
+            if (document.fullscreenElement) {
+              void document.exitFullscreen();
+            } else {
+              void video.parentElement?.requestFullscreen?.();
+            }
+          }}
+        >
+          Fullscreen
+        </button>
+        <div className="videoPlayerPlaybackState">{playing ? "O‘ynayapti" : "To‘xtagan"}</div>
+      </div>
+    </div>
   );
 }

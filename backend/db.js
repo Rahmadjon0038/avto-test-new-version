@@ -218,13 +218,33 @@ async function initDb(dbApi) {
     CREATE TABLE IF NOT EXISTS video_lessons (
       id BIGSERIAL PRIMARY KEY,
       topic_id BIGINT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
-      youtube_url TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      description TEXT NOT NULL DEFAULT '',
+      category TEXT NOT NULL DEFAULT '',
+      premium_only BOOLEAN NOT NULL DEFAULT FALSE,
+      bunny_video_id TEXT NOT NULL DEFAULT '',
+      bunny_library_id TEXT NOT NULL DEFAULT '',
+      video_status TEXT NOT NULL DEFAULT 'processing',
+      video_duration INTEGER NOT NULL DEFAULT 0,
+      video_thumbnail TEXT NOT NULL DEFAULT '',
+      playback_url TEXT NOT NULL DEFAULT '',
+      youtube_url TEXT NOT NULL DEFAULT '',
       youtube_id TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS topic_id BIGINT NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS premium_only BOOLEAN NOT NULL DEFAULT FALSE;`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS bunny_video_id TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS bunny_library_id TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS video_status TEXT NOT NULL DEFAULT 'processing';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS video_duration INTEGER NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS video_thumbnail TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS playback_url TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS youtube_url TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS youtube_id TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);

@@ -2,8 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ChevronRight, RefreshCw, Save, Trash2, Video } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  RefreshCw,
+  Save,
+  Trash2,
+  Video,
+  XCircle
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -11,42 +21,87 @@ import { jsonOrError } from "@/lib/api-authed";
 type TopicChoice = {
   id: number;
   title: string;
+  slug?: string;
 };
 
 type VideoLesson = {
   id: number;
   topicId: number;
   topicTitle: string;
-  youtubeUrl: string;
-  youtubeId: string;
-  thumbnailUrl: string;
+  title: string;
+  description: string;
+  category: string;
+  premiumOnly: boolean;
+  bunnyVideoId: string;
+  bunnyLibraryId: string;
+  videoStatus: "processing" | "ready" | "failed" | string;
+  videoDuration: number;
+  videoThumbnail: string;
+  playbackUrl: string;
 };
 
 type VideoForm = {
   id: number | null;
   topicId: string;
-  youtubeUrl: string;
+  title: string;
+  description: string;
+  category: string;
+  premiumOnly: boolean;
+  file: File | null;
 };
 
 const emptyForm = (): VideoForm => ({
   id: null,
   topicId: "",
-  youtubeUrl: ""
+  title: "",
+  description: "",
+  category: "",
+  premiumOnly: false,
+  file: null
 });
 
-function buildEmbedUrl(youtubeId: string) {
-  return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeId)}?rel=0&modestbranding=1`;
+function formatDuration(totalSeconds: number) {
+  const value = Number(totalSeconds || 0);
+  if (!value) return "—";
+  const minutes = Math.floor(value / 60);
+  const seconds = value % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function statusMeta(status: string) {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized === "ready") {
+    return {
+      label: "Ready",
+      className: "success",
+      icon: CheckCircle2
+    };
+  }
+  if (normalized === "failed") {
+    return {
+      label: "Failed",
+      className: "danger",
+      icon: XCircle
+    };
+  }
+  return {
+    label: "Processing",
+    className: "warning",
+    icon: Clock3
+  };
 }
 
 export default function AdminVideosPage() {
   const qc = useQueryClient();
   const router = useRouter();
-  const { authFetch } = useAuth();
-  const linkInputRef = useRef<HTMLInputElement | null>(null);
+  const { authFetch, accessToken } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<VideoForm>(() => emptyForm());
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   const topicsQuery = useQuery({
-    queryKey: ["admin-videos-topics"],
+    queryKey: ["admin-video-topics"],
     queryFn: async () => {
       const res = await authFetch("/api/admin/topics");
       const data = await jsonOrError(res);
@@ -55,12 +110,13 @@ export default function AdminVideosPage() {
   });
 
   const videosQuery = useQuery({
-    queryKey: ["admin-videos"],
+    queryKey: ["admin-video-lessons"],
     queryFn: async () => {
-      const res = await authFetch("/api/admin/videos");
+      const res = await authFetch("/api/admin/video-lessons");
       const data = await jsonOrError(res);
       return Array.isArray(data.videos) ? (data.videos as VideoLesson[]) : [];
-    }
+    },
+    refetchInterval: 15000
   });
 
   const selectedVideo = useMemo(
@@ -81,51 +137,113 @@ export default function AdminVideosPage() {
     setForm({
       id: selectedVideo.id,
       topicId: String(selectedVideo.topicId || ""),
-      youtubeUrl: selectedVideo.youtubeUrl || ""
+      title: selectedVideo.title || "",
+      description: selectedVideo.description || "",
+      category: selectedVideo.category || "",
+      premiumOnly: Boolean(selectedVideo.premiumOnly),
+      file: null
     });
   }, [selectedVideo]);
 
-  useEffect(() => {
-    if (!form.id) return;
-    linkInputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    linkInputRef.current?.focus();
-  }, [form.id]);
+  const uploadRawVideo = (endpoint: string, file: File, meta: VideoForm) => {
+    return new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(meta.id ? "PUT" : "POST", endpoint, true);
+      if (accessToken) xhr.setRequestHeader("authorization", `Bearer ${accessToken}`);
+      xhr.setRequestHeader("x-topic-id", meta.topicId);
+      xhr.setRequestHeader("x-video-title", meta.title);
+      xhr.setRequestHeader("x-video-description", meta.description);
+      xhr.setRequestHeader("x-video-category", meta.category);
+      xhr.setRequestHeader("x-premium-only", meta.premiumOnly ? "1" : "0");
+      xhr.setRequestHeader("x-file-name", file.name || "video.mp4");
+      xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
+      xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable) return;
+        setUploadProgress(Math.round((event.loaded / event.total) * 100));
+      };
+      xhr.onerror = () => reject(new Error("Video yuklashda tarmoq xatosi"));
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+          return;
+        }
+        try {
+          const body = JSON.parse(xhr.responseText || "{}");
+          reject(new Error(body.error || "Video yuklanmadi"));
+        } catch {
+          reject(new Error("Video yuklanmadi"));
+        }
+      };
+      xhr.send(file);
+    });
+  };
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const topicId = Number(form.topicId);
-      const res = await authFetch(form.id ? `/api/admin/videos/${encodeURIComponent(String(form.id))}` : "/api/admin/videos", {
-        method: form.id ? "PATCH" : "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          topicId,
-          youtubeUrl: form.youtubeUrl
-        })
-      });
-      return jsonOrError(res);
-    },
-    onSuccess: async () => {
-      toast.success(form.id ? "Video yangilandi" : "Video qo‘shildi");
+  const saveVideo = async () => {
+    const topicId = Number(form.topicId);
+    if (!topicId) {
+      toast.error("Dars mavzusi tanlang");
+      return;
+    }
+    if (!form.title.trim()) {
+      toast.error("Video sarlavhasini kiriting");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setUploadProgress(0);
+      const payload = {
+        topicId,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category.trim(),
+        premiumOnly: form.premiumOnly
+      };
+
+      if (form.id && !form.file) {
+        const res = await authFetch(`/api/video-lessons/${encodeURIComponent(String(form.id))}`, {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await jsonOrError(res);
+        if (!res.ok) throw new Error(data?.error || "Video yangilanmadi");
+      } else {
+        if (!form.file) {
+          throw new Error("Video fayl tanlang");
+        }
+        await uploadRawVideo("/api/video-lessons", form.file, form);
+      }
+
+      toast.success(form.id ? "Video yangilandi" : "Video yuklandi");
       setForm(emptyForm());
-      await qc.invalidateQueries({ queryKey: ["admin-videos"] });
-    },
-    onError: (error: any) => toast.error(error?.message || "Xatolik")
-  });
+      fileInputRef.current && (fileInputRef.current.value = "");
+      await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
+    } catch (error: any) {
+      toast.error(error?.message || "Xatolik");
+    } finally {
+      setSaving(false);
+      setUploadProgress(0);
+    }
+  };
 
-  const deleteMutation = useMutation({
-    mutationFn: async (videoId: number) => {
-      const res = await authFetch(`/api/admin/videos/${encodeURIComponent(String(videoId))}`, {
+  const deleteVideo = async (videoId: number) => {
+    if (!window.confirm("Ushbu videoni o‘chirasizmi?")) return;
+    try {
+      const res = await authFetch(`/api/video-lessons/${encodeURIComponent(String(videoId))}`, {
         method: "DELETE"
       });
-      return jsonOrError(res);
-    },
-    onSuccess: async () => {
+      const data = await jsonOrError(res);
+      if (!res.ok) throw new Error(data?.error || "Video o‘chirilmadi");
       toast.success("Video o‘chirildi");
-      setForm(emptyForm());
-      await qc.invalidateQueries({ queryKey: ["admin-videos"] });
-    },
-    onError: (error: any) => toast.error(error?.message || "Xatolik")
-  });
+      if (form.id === videoId) setForm(emptyForm());
+      await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
+    } catch (error: any) {
+      toast.error(error?.message || "Xatolik");
+    }
+  };
+
+  const videos = videosQuery.data || [];
 
   return (
     <section className="adminSectionPage">
@@ -133,7 +251,7 @@ export default function AdminVideosPage() {
         <button className="btn btn-ghost" type="button" onClick={() => router.push("/admin")}>
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>
-        <button className="btn btn-ghost" type="button" onClick={() => qc.invalidateQueries({ queryKey: ["admin-videos"] })}>
+        <button className="btn btn-ghost" type="button" onClick={() => qc.invalidateQueries({ queryKey: ["admin-video-lessons"] })}>
           <RefreshCw className="lucide" aria-hidden="true" /> Yangilash
         </button>
       </div>
@@ -141,7 +259,10 @@ export default function AdminVideosPage() {
       <div className="card adminPanelCard">
         <div className="adminPanelCardHead">
           <div className="adminPanelCardTitle">
-            <Video className="lucide" aria-hidden="true" /> Video joylash
+            <Video className="lucide" aria-hidden="true" /> Bunny Stream video yuklash
+          </div>
+          <div className="adminPanelCardDesc">
+            Video faylni tanlaysiz, backend Bunny Stream’ga yuboradi va statusni yangilab boradi.
           </div>
         </div>
 
@@ -149,7 +270,7 @@ export default function AdminVideosPage() {
           className="adminTopicForm"
           onSubmit={(event) => {
             event.preventDefault();
-            saveMutation.mutate();
+            void saveVideo();
           }}
         >
           <select
@@ -166,87 +287,176 @@ export default function AdminVideosPage() {
           </select>
 
           <input
-            ref={linkInputRef}
             className="input"
-            placeholder="YouTube link"
-            value={form.youtubeUrl}
-            onChange={(event) => setForm((current) => ({ ...current, youtubeUrl: event.target.value }))}
+            placeholder="Video sarlavhasi"
+            value={form.title}
+            onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
           />
 
-          <div className="adminOptionsToolbar">
-            <button className="btn btn-primary" type="submit" disabled={saveMutation.isPending || !form.topicId || !form.youtubeUrl.trim()}>
-              <Save className="lucide" aria-hidden="true" /> {form.id ? "Yangilash" : "Saqlash"}
-            </button>
-            <button className="btn btn-ghost" type="button" onClick={() => setForm(emptyForm())}>
+          <textarea
+            className="input"
+            placeholder="Video tavsifi"
+            rows={4}
+            value={form.description}
+            onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+          />
+
+          <div className="adminTopicFormRow">
+            <input
+              className="input"
+              placeholder="Kategoriya"
+              value={form.category}
+              onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+            />
+
+            <label className="adminSwitch">
+              <input
+                type="checkbox"
+                checked={form.premiumOnly}
+                onChange={(event) => setForm((current) => ({ ...current, premiumOnly: event.target.checked }))}
+              />
+              <span>Premium</span>
+            </label>
+          </div>
+
+          <div className="adminUploadRow">
+            <input
+              ref={fileInputRef}
+              className="input"
+              type="file"
+              accept="video/mp4,video/*"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  file: event.target.files?.[0] || null
+                }))
+              }
+            />
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => {
+                setForm(emptyForm());
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+            >
               Yangi video
             </button>
+          </div>
+
+          <div className="adminOptionsToolbar">
+            <button className="btn btn-primary" type="submit" disabled={saving || !form.topicId || !form.title.trim()}>
+              <Save className="lucide" aria-hidden="true" /> {form.id ? "Yangilash" : "Saqlash"}
+            </button>
+            {uploadProgress > 0 ? (
+              <div className="adminUploadProgress">
+                <div className="adminUploadProgressBar" style={{ width: `${uploadProgress}%` }} />
+                <span>{uploadProgress}%</span>
+              </div>
+            ) : null}
           </div>
         </form>
       </div>
 
       <div className="adminTopicsGrid">
-        {(videosQuery.data || []).map((video) => (
-          <article
-            key={video.id}
-            className={`card adminTopicCard ${form.id === video.id ? "active" : ""}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => setForm({ id: video.id, topicId: String(video.topicId), youtubeUrl: video.youtubeUrl })}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                setForm({ id: video.id, topicId: String(video.topicId), youtubeUrl: video.youtubeUrl });
+        {videos.map((video) => {
+          const meta = statusMeta(video.videoStatus);
+          const StatusIcon = meta.icon;
+          return (
+            <article
+              key={video.id}
+              className={`card adminTopicCard ${form.id === video.id ? "active" : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={() =>
+                setForm({
+                  id: video.id,
+                  topicId: String(video.topicId),
+                  title: video.title || "",
+                  description: video.description || "",
+                  category: video.category || "",
+                  premiumOnly: Boolean(video.premiumOnly),
+                  file: null
+                })
               }
-            }}
-          >
-            <div className="adminVideoPreview">
-              <iframe
-                className="adminVideoFrame"
-                src={buildEmbedUrl(video.youtubeId)}
-                title={video.topicTitle}
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
-            <div className="adminTopicBody">
-              <div className={`adminTopicCheck ${form.id === video.id ? "active" : ""}`} aria-hidden="true">
-                <Video className="lucide" aria-hidden="true" />
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  setForm({
+                    id: video.id,
+                    topicId: String(video.topicId),
+                    title: video.title || "",
+                    description: video.description || "",
+                    category: video.category || "",
+                    premiumOnly: Boolean(video.premiumOnly),
+                    file: null
+                  });
+                }
+              }}
+            >
+              <div className="adminVideoPreview">
+                {video.videoThumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="adminVideoThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
+                ) : (
+                  <div className="adminVideoThumbFallback">
+                    <Video className="lucide" aria-hidden="true" />
+                  </div>
+                )}
+                <div className={`adminVideoStatus adminVideoStatus-${meta.className}`}>
+                  <StatusIcon className="lucide" aria-hidden="true" />
+                  <span>{meta.label}</span>
+                </div>
               </div>
-              <div className="adminTopicMeta">
-                <div className="adminTopicTitle">{video.topicTitle}</div>
-                <div className="adminPanelCardDesc">YouTube iframe orqali ko‘rish</div>
+
+              <div className="adminTopicBody">
+                <div className={`adminTopicCheck ${form.id === video.id ? "active" : ""}`} aria-hidden="true">
+                  <Video className="lucide" aria-hidden="true" />
+                </div>
+                <div className="adminTopicMeta">
+                  <div className="adminTopicTitle">{video.title || video.topicTitle}</div>
+                  <div className="adminPanelCardDesc">{video.description || video.topicTitle}</div>
+                  <div className="adminVideoMetaLine">
+                    <span>{video.topicTitle}</span>
+                    <span>{formatDuration(video.videoDuration)}</span>
+                    <span>{video.premiumOnly ? "Premium" : "Free"}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="adminTopicActions">
-              <button
-                className="btn btn-ghost btn-sm"
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  window.open(video.youtubeUrl, "_blank", "noopener,noreferrer");
-                }}
-              >
-                Ko‘rish
-                <ChevronRight className="lucide" aria-hidden="true" />
-              </button>
-              <button
-                className="btn btn-danger btn-sm"
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!window.confirm("Ushbu videoni o‘chirasizmi?")) return;
-                  deleteMutation.mutate(video.id);
-                }}
-                disabled={deleteMutation.isPending}
-              >
-                <Trash2 className="lucide" aria-hidden="true" /> O‘chirish
-              </button>
-            </div>
-          </article>
-        ))}
+
+              <div className="adminTopicActions">
+                <button
+                  className="btn btn-ghost btn-sm"
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (video.playbackUrl) {
+                      window.open(video.playbackUrl, "_blank", "noopener,noreferrer");
+                    } else {
+                      toast.error("Playback URL tayyor emas");
+                    }
+                  }}
+                >
+                  Ko‘rish
+                  <ChevronRight className="lucide" aria-hidden="true" />
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void deleteVideo(video.id);
+                  }}
+                  disabled={saving}
+                >
+                  <Trash2 className="lucide" aria-hidden="true" /> O‘chirish
+                </button>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
-      {!videosQuery.isLoading && !(videosQuery.data || []).length ? (
+      {!videosQuery.isLoading && !videos.length ? (
         <div className="adminEmpty card">
           <div className="adminEmptyTitle">Hozircha video darslar yo‘q</div>
         </div>
