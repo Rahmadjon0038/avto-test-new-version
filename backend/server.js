@@ -4124,7 +4124,13 @@ app.post("/api/admin/video-lessons", maybeRawUpload, async (req, res) => {
     const video = await createVideoLesson(payload, fileBuffer, payload.contentType);
     res.status(201).json({ ok: true, video: serializeVideoLesson(video, user, true) });
   } catch (e) {
-    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+    const message = e?.message || "Noto‘g‘ri so‘rov";
+    console.error("[admin-video-upload]", message, e?.stack || "");
+    const statusCode = /sozlanmagan|yuborilishi kerak|tanlanishi kerak|topilmadi/i.test(message) ? 400 : 500;
+    res.status(statusCode).json({
+      error: message,
+      details: process.env.NODE_ENV === "production" ? undefined : e?.stack
+    });
   }
 });
 
@@ -4137,7 +4143,13 @@ app.post("/api/admin/videos", maybeRawUpload, async (req, res) => {
     const video = await createVideoLesson(payload, fileBuffer, payload.contentType);
     res.status(201).json({ ok: true, video: serializeVideoLesson(video, user, true) });
   } catch (e) {
-    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+    const message = e?.message || "Noto‘g‘ri so‘rov";
+    console.error("[admin-video-upload]", message, e?.stack || "");
+    const statusCode = /sozlanmagan|yuborilishi kerak|tanlanishi kerak|topilmadi/i.test(message) ? 400 : 500;
+    res.status(statusCode).json({
+      error: message,
+      details: process.env.NODE_ENV === "production" ? undefined : e?.stack
+    });
   }
 });
 
