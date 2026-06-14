@@ -859,7 +859,7 @@ export default function TopicPage() {
                 <MarkdownText text={q.explanation} />
               </div>
             ) : null}
-            {q.audio ? <QuestionAudio audio={q.audio} /> : null}
+            {q.audio && (isAdmin || answers[q.id] !== undefined) ? <QuestionAudio audio={q.audio} /> : null}
 
             {isAdmin ? (
               <div className="adminAudioBlock topicAdminAudioBlock">

@@ -3443,58 +3443,58 @@ body {
 
 .adminAudioFooter {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .adminAudioHint {
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .adminAudioButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
   align-items: stretch;
 }
 
 .adminAudioActionCard {
-  width: min(100%, 290px);
-  min-height: 74px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  width: 100%;
+  min-height: 54px;
+  padding: 8px 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 8px;
   text-align: left;
   white-space: normal;
 }
 
 .adminAudioActionText {
   display: grid;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
   flex: 1 1 auto;
 }
 
 .adminAudioActionTitle {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 900;
   line-height: 1.2;
 }
 
 .adminAudioActionSub {
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: 9px;
+  line-height: 1.3;
   color: color-mix(in srgb, currentColor 72%, #94a3b8);
   font-weight: 650;
 }
 
 .adminAudioActionIcon {
-  width: 42px;
-  height: 42px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -3503,13 +3503,13 @@ body {
 }
 
 .adminAudioActionIcon .lucide {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .adminAudioActionArrow {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   opacity: 0.9;
   flex: 0 0 auto;
 }
@@ -3610,7 +3610,8 @@ body {
   }
 
   .adminAudioButtons {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 7px;
   }
 
   .adminAudioMicBtn,
@@ -3621,6 +3622,28 @@ body {
 
   .adminAudioActionCard {
     width: 100%;
+    min-height: 50px;
+    padding: 7px 9px;
+    border-radius: 11px;
+    gap: 7px;
+  }
+
+  .adminAudioActionIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .adminAudioActionIcon .lucide {
+    width: 13px;
+    height: 13px;
+  }
+
+  .adminAudioActionTitle {
+    font-size: 11.5px;
+  }
+
+  .adminAudioActionSub {
+    font-size: 9px;
   }
 
   .adminTicketCard {
