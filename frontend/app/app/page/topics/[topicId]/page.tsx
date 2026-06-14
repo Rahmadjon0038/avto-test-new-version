@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Flag, Mic, RotateCcw, Trash2, UploadCloud } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
@@ -258,12 +258,45 @@ function MarkdownText({ text }: { text: string }) {
   return <div className="markdownContent">{blocks}</div>;
 }
 
+type AudioDraft = {
+  previewUrl: string;
+  recording: boolean;
+  uploading: boolean;
+  blob: Blob | null;
+  mimeType: string;
+};
+
+async function blobToDataUrl(blob: Blob) {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Audio o‘qib bo‘lmadi"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function getAudioFileExtension(mimeType: string) {
+  const value = String(mimeType || "").toLowerCase();
+  if (value.startsWith("audio/webm")) return "webm";
+  if (value.startsWith("audio/ogg")) return "ogg";
+  if (value.startsWith("audio/mp4")) return "m4a";
+  if (value.startsWith("audio/mpeg")) return "mp3";
+  if (value.startsWith("audio/wav")) return "wav";
+  return "webm";
+}
+
+function pickAudioMimeType() {
+  const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus", "audio/ogg"];
+  if (typeof MediaRecorder === "undefined") return "";
+  return candidates.find((value) => MediaRecorder.isTypeSupported(value)) || "";
+}
+
 export default function TopicPage() {
   const router = useRouter();
   const params = useParams<{ topicId: string }>();
   const topicId = String(params.topicId || "");
   const qc = useQueryClient();
-  const { authFetch } = useAuth();
+  const { authFetch, authReady, accessToken } = useAuth();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`topic:${topicId}`);
   const handleSettingsChange = useCallback(
@@ -284,6 +317,22 @@ export default function TopicPage() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const autoResetRef = useRef(false);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
+  const [audioDrafts, setAudioDrafts] = useState<Record<string, AudioDraft>>({});
+  const audioObjectUrlsRef = useRef<Record<string, string>>({});
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaChunksRef = useRef<Blob[]>([]);
+  const recordingQuestionIdRef = useRef<string | null>(null);
+  const meQuery = useQuery({
+    queryKey: ["topic-me"],
+    queryFn: async () => {
+      const res = await authFetch("/api/auth/me");
+      return jsonOrError(res);
+    },
+    retry: false,
+    enabled: authReady && Boolean(accessToken)
+  });
+  const isAdmin = Boolean(meQuery.data?.user?.is_admin);
 
   const topicQuestions = useMemo(
     () =>
@@ -348,6 +397,301 @@ export default function TopicPage() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [zoomedImage]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(audioObjectUrlsRef.current).forEach((url) => URL.revokeObjectURL(url));
+      audioObjectUrlsRef.current = {};
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+      mediaRecorderRef.current = null;
+    };
+  }, []);
+
+  function cleanupAudioPreview(questionId: string) {
+    const previousUrl = audioObjectUrlsRef.current[questionId];
+    if (previousUrl) {
+      URL.revokeObjectURL(previousUrl);
+      delete audioObjectUrlsRef.current[questionId];
+    }
+  }
+
+  async function stopQuestionRecording() {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state === "inactive") return;
+    recorder.stop();
+  }
+
+  async function startQuestionRecording(questionId: string) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error("Brauzer mikrofonni qo‘llab-quvvatlamaydi");
+    }
+    if (typeof MediaRecorder === "undefined") {
+      throw new Error("Brauzer audio yozishni qo‘llab-quvvatlamaydi");
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      await stopQuestionRecording();
+    }
+
+    cleanupAudioPreview(questionId);
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl: prev[questionId]?.previewUrl || "",
+        recording: true,
+        uploading: false,
+        blob: null,
+        mimeType: prev[questionId]?.mimeType || ""
+      }
+    }));
+
+    let stream: MediaStream | null = null;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = pickAudioMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+      mediaRecorderRef.current = recorder;
+      mediaStreamRef.current = stream;
+      mediaChunksRef.current = [];
+      recordingQuestionIdRef.current = questionId;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) mediaChunksRef.current.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const activeQuestionId = recordingQuestionIdRef.current;
+        const chunks = mediaChunksRef.current.slice();
+        mediaChunksRef.current = [];
+        recordingQuestionIdRef.current = null;
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        if (mediaRecorderRef.current === recorder) mediaRecorderRef.current = null;
+        if (!activeQuestionId || !chunks.length) {
+          setAudioDrafts((prev) => ({
+            ...prev,
+            [questionId]: {
+              previewUrl: prev[questionId]?.previewUrl || "",
+              recording: false,
+              uploading: false,
+              blob: prev[questionId]?.blob || null,
+              mimeType: prev[questionId]?.mimeType || ""
+            }
+          }));
+          return;
+        }
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || "audio/webm" });
+        const previewUrl = URL.createObjectURL(blob);
+        audioObjectUrlsRef.current[activeQuestionId] = previewUrl;
+        setAudioDrafts((prev) => ({
+          ...prev,
+          [activeQuestionId]: {
+            previewUrl,
+            recording: false,
+            uploading: false,
+            blob,
+            mimeType: blob.type || mimeType || "audio/webm"
+          }
+        }));
+        persistQuestionAudio(activeQuestionId, blob, previewUrl).catch((error: any) => {
+          toast.error(error?.message || "Audio avtomatik yuklanmadi");
+        });
+      };
+
+      recorder.onerror = () => {
+        setAudioDrafts((prev) => ({
+          ...prev,
+          [questionId]: {
+            previewUrl: prev[questionId]?.previewUrl || "",
+            recording: false,
+            uploading: false,
+            blob: prev[questionId]?.blob || null,
+            mimeType: prev[questionId]?.mimeType || ""
+          }
+        }));
+      };
+
+      recorder.start();
+      toast.success("Yozishni boshladingiz");
+    } catch (error) {
+      stream?.getTracks().forEach((track) => track.stop());
+      setAudioDrafts((prev) => ({
+        ...prev,
+        [questionId]: {
+          previewUrl: prev[questionId]?.previewUrl || "",
+          recording: false,
+          uploading: false,
+          blob: prev[questionId]?.blob || null,
+          mimeType: prev[questionId]?.mimeType || ""
+        }
+      }));
+      throw error;
+    }
+  }
+
+  async function persistQuestionAudio(questionId: string, blob: Blob, previewUrlOverride?: string) {
+    if (!topic) throw new Error("Mavzu topilmadi");
+    if (!blob) throw new Error("Avval audio yozib oling");
+
+    const currentAudio = topic.questions.find((question) => question.id === questionId)?.audio || "";
+    const audioType = blob.type || "audio/webm";
+    const previewUrl = previewUrlOverride || audioDrafts[questionId]?.previewUrl || "";
+
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl,
+        recording: false,
+        uploading: true,
+        blob,
+        mimeType: audioType
+      }
+    }));
+
+    const audioBase64 = await blobToDataUrl(blob);
+    const audioName = `question-${questionId}.${getAudioFileExtension(audioType)}`;
+
+    const res = await authFetch("/api/upload-audio", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        audioBase64,
+        audioName,
+        audioType,
+        topicId,
+        questionId,
+        oldAudioUrl: currentAudio
+      })
+    });
+    const data = await jsonOrError(res);
+    const audioUrl = String(data?.audioUrl || "").trim();
+    if (!audioUrl) throw new Error("Audio yuklanmadi");
+
+    cleanupAudioPreview(questionId);
+    setTopic((prev) =>
+      prev
+        ? {
+            ...prev,
+            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+          }
+        : prev
+    );
+
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl: audioUrl,
+        recording: false,
+        uploading: false,
+        blob: null,
+        mimeType: audioType
+      }
+    }));
+
+    toast.success("Audio yuklandi");
+  }
+
+  async function uploadQuestionAudio(questionId: string) {
+    const draft = audioDrafts[questionId];
+    if (!draft?.blob) throw new Error("Avval audio yozib oling");
+    return await persistQuestionAudio(questionId, draft.blob, draft.previewUrl || undefined);
+  }
+
+  async function uploadQuestionAudioFile(questionId: string, file: File) {
+    if (!topic) throw new Error("Mavzu topilmadi");
+    if (!file) throw new Error("Audio fayl tanlanmadi");
+
+    const audioType = file.type || "audio/webm";
+    cleanupAudioPreview(questionId);
+    const previewUrl = URL.createObjectURL(file);
+    audioObjectUrlsRef.current[questionId] = previewUrl;
+    setAudioDrafts((prev) => ({
+      ...prev,
+      [questionId]: {
+        previewUrl,
+        recording: false,
+        uploading: true,
+        blob: file,
+        mimeType: audioType
+      }
+    }));
+
+    try {
+      await persistQuestionAudio(questionId, file, previewUrl);
+    } catch (error) {
+      const message = (error as any)?.message || "Audio yuklanmadi";
+      setAudioDrafts((prev) => ({
+        ...prev,
+        [questionId]: {
+          previewUrl,
+          recording: false,
+          uploading: false,
+          blob: file,
+          mimeType: audioType
+        }
+      }));
+      throw new Error(message);
+    }
+  }
+
+  async function deleteQuestionAudio(questionId: string) {
+    const currentAudio = topic?.questions.find((question) => question.id === questionId)?.audio || "";
+    const draft = audioDrafts[questionId];
+
+    if (draft?.previewUrl?.startsWith("blob:")) {
+      cleanupAudioPreview(questionId);
+    }
+
+    if (!currentAudio) {
+      setAudioDrafts((prev) => {
+        const next = { ...prev };
+        delete next[questionId];
+        return next;
+      });
+      setTopic((prev) =>
+        prev
+          ? {
+              ...prev,
+              questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: "" } : question))
+            }
+          : prev
+      );
+      toast.success("Audio o‘chirildi");
+      return;
+    }
+
+    const res = await authFetch("/api/upload-audio", {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        topicId,
+        questionId,
+        audioUrl: currentAudio
+      })
+    });
+    const data = await jsonOrError(res);
+    const audioUrl = String(data?.audioUrl || "").trim();
+
+    setTopic((prev) =>
+      prev
+        ? {
+            ...prev,
+            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+          }
+        : prev
+    );
+
+    setAudioDrafts((prev) => {
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
+
+    toast.success("Audio o‘chirildi");
+  }
 
   const saveMutation = useMutation({
     mutationFn: (nextAnswers: Record<string, number>) =>
@@ -516,6 +860,80 @@ export default function TopicPage() {
               </div>
             ) : null}
             {answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
+
+            {isAdmin ? (
+              <div className="adminAudioBlock topicAdminAudioBlock">
+                <div className="adminAudioHint">Admin uchun audio boshqaruvi</div>
+                <div className="adminAudioButtons">
+                  <button
+                    className={`btn btn-sm adminAudioActionCard adminAudioMicBtn ${audioDrafts[q.id]?.recording ? "isRecording" : ""}`}
+                    type="button"
+                    title={audioDrafts[q.id]?.recording ? "Yozishni to‘xtatish" : "Mikrofon orqali yozish"}
+                    aria-label={audioDrafts[q.id]?.recording ? "Yozishni to‘xtatish" : "Mikrofon orqali yozish"}
+                    onClick={() => {
+                      if (audioDrafts[q.id]?.recording) {
+                        stopQuestionRecording().catch(() => {});
+                        return;
+                      }
+                      startQuestionRecording(q.id).catch((error: any) => toast.error(error?.message || "Audio yozib bo‘lmadi"));
+                    }}
+                  >
+                    <span className="adminAudioActionIcon adminAudioActionIconMic">
+                      <Mic className="lucide" aria-hidden="true" />
+                    </span>
+                    <span className="adminAudioActionText">
+                      <span className="adminAudioActionTitle">{audioDrafts[q.id]?.recording ? "Yozilmoqda..." : "Mikrofon"}</span>
+                      <span className="adminAudioActionSub">Bosib yozish</span>
+                    </span>
+                    <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
+                  </button>
+                  <label
+                    className={`btn btn-sm adminAudioActionCard adminAudioUploadBtn ${audioDrafts[q.id]?.uploading ? "isUploading" : ""}`}
+                    htmlFor={`topic-audio-input-${q.id}`}
+                    title="Audio fayl yuklash"
+                    aria-label="Audio fayl yuklash"
+                  >
+                    <span className="adminAudioActionIcon adminAudioActionIconUpload">
+                      <UploadCloud className="lucide" aria-hidden="true" />
+                    </span>
+                    <span className="adminAudioActionText">
+                      <span className="adminAudioActionTitle">{audioDrafts[q.id]?.blob ? "Faylni almashtirish" : "Audio fayl yuklash"}</span>
+                      <span className="adminAudioActionSub">Tayyor faylni tanlang</span>
+                    </span>
+                    <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
+                  </label>
+                  <button
+                    className="btn btn-sm adminAudioActionCard adminAudioDeleteBtn"
+                    type="button"
+                    title="Audio o‘chirish"
+                    aria-label="Audio o‘chirish"
+                    disabled={!audioDrafts[q.id]?.blob && !q.audio && !audioDrafts[q.id]?.previewUrl}
+                    onClick={() => deleteQuestionAudio(q.id).catch((error: any) => toast.error(error?.message || "Audio o‘chirilmadi"))}
+                  >
+                    <span className="adminAudioActionIcon adminAudioActionIconDelete">
+                      <Trash2 className="lucide" aria-hidden="true" />
+                    </span>
+                    <span className="adminAudioActionText">
+                      <span className="adminAudioActionTitle">O‘chirish</span>
+                      <span className="adminAudioActionSub">Audioni tozalash</span>
+                    </span>
+                    <ChevronRight className="lucide adminAudioActionArrow" aria-hidden="true" />
+                  </button>
+                </div>
+                <input
+                  id={`topic-audio-input-${q.id}`}
+                  className="input adminHiddenFileInput"
+                  type="file"
+                  accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    uploadQuestionAudioFile(q.id, file).catch((error: any) => toast.error(error?.message || "Audio yuklanmadi"));
+                    event.currentTarget.value = "";
+                  }}
+                />
+              </div>
+            ) : null}
           </div>
           <div className="qLeft">
             {imageLoading && (
