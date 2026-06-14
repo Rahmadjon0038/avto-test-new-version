@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   CheckCircle2,
-  ChevronRight,
   Clock3,
+  ChevronRight,
   RefreshCw,
   Save,
   Trash2,
@@ -41,22 +41,12 @@ type VideoLesson = {
 };
 
 type VideoForm = {
-  id: number | null;
   topicId: string;
-  title: string;
-  description: string;
-  category: string;
-  premiumOnly: boolean;
   file: File | null;
 };
 
 const emptyForm = (): VideoForm => ({
-  id: null,
   topicId: "",
-  title: "",
-  description: "",
-  category: "",
-  premiumOnly: false,
   file: null
 });
 
@@ -119,11 +109,6 @@ export default function AdminVideosPage() {
     refetchInterval: 15000
   });
 
-  const selectedVideo = useMemo(
-    () => (videosQuery.data || []).find((video) => Number(video.id) === Number(form.id)) || null,
-    [videosQuery.data, form.id]
-  );
-
   useEffect(() => {
     if (topicsQuery.error) toast.error((topicsQuery.error as any)?.message || "Xatolik");
   }, [topicsQuery.error]);
@@ -133,28 +118,15 @@ export default function AdminVideosPage() {
   }, [videosQuery.error]);
 
   useEffect(() => {
-    if (!selectedVideo) return;
-    setForm({
-      id: selectedVideo.id,
-      topicId: String(selectedVideo.topicId || ""),
-      title: selectedVideo.title || "",
-      description: selectedVideo.description || "",
-      category: selectedVideo.category || "",
-      premiumOnly: Boolean(selectedVideo.premiumOnly),
-      file: null
-    });
-  }, [selectedVideo]);
+    return undefined;
+  }, []);
 
   const uploadRawVideo = (endpoint: string, file: File, meta: VideoForm) => {
     return new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open(meta.id ? "PUT" : "POST", endpoint, true);
+      xhr.open("POST", endpoint, true);
       if (accessToken) xhr.setRequestHeader("authorization", `Bearer ${accessToken}`);
       xhr.setRequestHeader("x-topic-id", meta.topicId);
-      xhr.setRequestHeader("x-video-title", meta.title);
-      xhr.setRequestHeader("x-video-description", meta.description);
-      xhr.setRequestHeader("x-video-category", meta.category);
-      xhr.setRequestHeader("x-premium-only", meta.premiumOnly ? "1" : "0");
       xhr.setRequestHeader("x-file-name", file.name || "video.mp4");
       xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
       xhr.upload.onprogress = (event) => {
@@ -184,38 +156,16 @@ export default function AdminVideosPage() {
       toast.error("Dars mavzusi tanlang");
       return;
     }
-    if (!form.title.trim()) {
-      toast.error("Video sarlavhasini kiriting");
-      return;
-    }
 
     try {
       setSaving(true);
       setUploadProgress(0);
-      const payload = {
-        topicId,
-        title: form.title.trim(),
-        description: form.description.trim(),
-        category: form.category.trim(),
-        premiumOnly: form.premiumOnly
-      };
-
-      if (form.id && !form.file) {
-        const res = await authFetch(`/api/video-lessons/${encodeURIComponent(String(form.id))}`, {
-          method: "PUT",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        const data = await jsonOrError(res);
-        if (!res.ok) throw new Error(data?.error || "Video yangilanmadi");
-      } else {
-        if (!form.file) {
-          throw new Error("Video fayl tanlang");
-        }
-        await uploadRawVideo("/api/video-lessons", form.file, form);
+      if (!form.file) {
+        throw new Error("Video fayl tanlang");
       }
+      await uploadRawVideo("/api/video-lessons", form.file, form);
 
-      toast.success(form.id ? "Video yangilandi" : "Video yuklandi");
+      toast.success("Video yuklandi");
       setForm(emptyForm());
       fileInputRef.current && (fileInputRef.current.value = "");
       await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
@@ -236,7 +186,7 @@ export default function AdminVideosPage() {
       const data = await jsonOrError(res);
       if (!res.ok) throw new Error(data?.error || "Video o‘chirilmadi");
       toast.success("Video o‘chirildi");
-      if (form.id === videoId) setForm(emptyForm());
+      setForm(emptyForm());
       await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
     } catch (error: any) {
       toast.error(error?.message || "Xatolik");
@@ -262,7 +212,7 @@ export default function AdminVideosPage() {
             <Video className="lucide" aria-hidden="true" /> Bunny Stream video yuklash
           </div>
           <div className="adminPanelCardDesc">
-            Video faylni tanlaysiz, backend Bunny Stream’ga yuboradi va statusni yangilab boradi.
+            Faqat mavzuni tanlaysiz va video faylni yuklaysiz. Sarlavha va boshqa ma’lumotlar mavzudan avtomatik olinadi.
           </div>
         </div>
 
@@ -285,39 +235,6 @@ export default function AdminVideosPage() {
               </option>
             ))}
           </select>
-
-          <input
-            className="input"
-            placeholder="Video sarlavhasi"
-            value={form.title}
-            onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-          />
-
-          <textarea
-            className="input"
-            placeholder="Video tavsifi"
-            rows={4}
-            value={form.description}
-            onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-          />
-
-          <div className="adminTopicFormRow">
-            <input
-              className="input"
-              placeholder="Kategoriya"
-              value={form.category}
-              onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
-            />
-
-            <label className="adminSwitch">
-              <input
-                type="checkbox"
-                checked={form.premiumOnly}
-                onChange={(event) => setForm((current) => ({ ...current, premiumOnly: event.target.checked }))}
-              />
-              <span>Premium</span>
-            </label>
-          </div>
 
           <div className="adminUploadRow">
             <input
@@ -345,8 +262,8 @@ export default function AdminVideosPage() {
           </div>
 
           <div className="adminOptionsToolbar">
-            <button className="btn btn-primary" type="submit" disabled={saving || !form.topicId || !form.title.trim()}>
-              <Save className="lucide" aria-hidden="true" /> {form.id ? "Yangilash" : "Saqlash"}
+            <button className="btn btn-primary" type="submit" disabled={saving || !form.topicId || !form.file}>
+              <Save className="lucide" aria-hidden="true" /> Saqlash
             </button>
             {uploadProgress > 0 ? (
               <div className="adminUploadProgress">
@@ -363,36 +280,7 @@ export default function AdminVideosPage() {
           const meta = statusMeta(video.videoStatus);
           const StatusIcon = meta.icon;
           return (
-            <article
-              key={video.id}
-              className={`card adminTopicCard ${form.id === video.id ? "active" : ""}`}
-              role="button"
-              tabIndex={0}
-              onClick={() =>
-                setForm({
-                  id: video.id,
-                  topicId: String(video.topicId),
-                  title: video.title || "",
-                  description: video.description || "",
-                  category: video.category || "",
-                  premiumOnly: Boolean(video.premiumOnly),
-                  file: null
-                })
-              }
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  setForm({
-                    id: video.id,
-                    topicId: String(video.topicId),
-                    title: video.title || "",
-                    description: video.description || "",
-                    category: video.category || "",
-                    premiumOnly: Boolean(video.premiumOnly),
-                    file: null
-                  });
-                }
-              }}
-            >
+            <article key={video.id} className="card adminTopicCard">
               <div className="adminVideoPreview">
                 {video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -409,7 +297,7 @@ export default function AdminVideosPage() {
               </div>
 
               <div className="adminTopicBody">
-                <div className={`adminTopicCheck ${form.id === video.id ? "active" : ""}`} aria-hidden="true">
+                <div className="adminTopicCheck active" aria-hidden="true">
                   <Video className="lucide" aria-hidden="true" />
                 </div>
                 <div className="adminTopicMeta">
@@ -418,7 +306,7 @@ export default function AdminVideosPage() {
                   <div className="adminVideoMetaLine">
                     <span>{video.topicTitle}</span>
                     <span>{formatDuration(video.videoDuration)}</span>
-                    <span>{video.premiumOnly ? "Premium" : "Free"}</span>
+                    <span>Ochiq</span>
                   </div>
                 </div>
               </div>

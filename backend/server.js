@@ -357,8 +357,7 @@ function normalizeVideoLessonInput(input = {}, current = null) {
   const title = String(source.title || current?.title || "").trim();
   const description = String(source.description || current?.description || "").trim();
   const category = String(source.category || current?.category || "").trim();
-  const premiumOnly = parseBooleanValue(source.premiumOnly ?? source.premium_only ?? current?.premiumOnly ?? false);
-  return { topicId, title, description, category, premiumOnly };
+  return { topicId, title, description, category, premiumOnly: false };
 }
 
 function getBunnyHeaders(extra = {}) {
