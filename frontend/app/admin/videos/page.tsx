@@ -5,13 +5,10 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  CheckCircle2,
-  Clock3,
   RefreshCw,
   Save,
   Trash2,
   Video,
-  XCircle
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -62,29 +59,6 @@ function formatDuration(totalSeconds: number) {
   const minutes = Math.floor(value / 60);
   const seconds = value % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function statusMeta(status: string, playbackUrl: string) {
-  const normalized = String(status || "").toLowerCase();
-  if (normalized === "ready" || (playbackUrl && normalized !== "failed")) {
-    return {
-      label: "Tayyor",
-      className: "success",
-      icon: CheckCircle2
-    };
-  }
-  if (normalized === "failed") {
-    return {
-      label: "Failed",
-      className: "danger",
-      icon: XCircle
-    };
-  }
-  return {
-    label: "Processing",
-    className: "warning",
-    icon: Clock3
-  };
 }
 
 export default function AdminVideosPage() {
@@ -217,65 +191,6 @@ export default function AdminVideosPage() {
     }
   };
 
-  const InlinePlayer = ({ video }: { video: VideoLesson }) => {
-    const videoRef = useRef<HTMLVideoElement | null>(null);
-    useEffect(() => {
-      const element = videoRef.current;
-      if (!element || !video.playbackUrl) return;
-
-      let hls: Hls | null = null;
-      if (Hls.isSupported()) {
-        hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: false
-        });
-        hls.loadSource(video.playbackUrl);
-        hls.attachMedia(element);
-      } else if (element.canPlayType("application/vnd.apple.mpegurl")) {
-        element.src = video.playbackUrl;
-      } else {
-        setPlayerErrors((current) => ({
-          ...current,
-          [video.id]: "Bu brauzer video formatni qo‘llamaydi"
-        }));
-      }
-
-      return () => {
-        hls?.destroy();
-      };
-    }, [video.id, video.playbackUrl]);
-
-    return (
-      <div className="videoPlayerSurface adminInlinePlayerSurface">
-        <video
-          ref={videoRef}
-          className="videoPlayerElement"
-          controls
-          playsInline
-          preload="metadata"
-          poster={video.videoThumbnail || undefined}
-          onLoadedData={() => setPlayerErrors((current) => ({ ...current, [video.id]: "" }))}
-          onError={() =>
-            setPlayerErrors((current) => ({
-              ...current,
-              [video.id]: "Video yuklanmadi"
-            }))
-          }
-        />
-        {!video.playbackUrl ? (
-          <div className="videoPlayerOverlay">
-            <div className="videoPlayerPlaceholderText">Playback URL tayyor emas</div>
-          </div>
-        ) : null}
-        {playerErrors[video.id] ? (
-          <div className="videoPlayerOverlay videoPlayerOverlayError">
-            <div className="videoPlayerPlaceholderText">{playerErrors[video.id]}</div>
-          </div>
-        ) : null}
-      </div>
-    );
-  };
-
   const videos = videosQuery.data || [];
 
   return (
@@ -372,12 +287,26 @@ export default function AdminVideosPage() {
 
       <div className="adminTopicsGrid">
         {videos.map((video) => {
-          const meta = statusMeta(video.videoStatus, video.playbackUrl);
           return (
             <article key={video.id} className="card adminTopicCard">
               <div className="adminVideoPreview">
                 {video.playbackUrl ? (
-                  <InlinePlayer video={video} />
+                  <AdminInlinePlayer
+                    video={video}
+                    playerError={playerErrors[video.id] || ""}
+                    onPlayerError={(message) =>
+                      setPlayerErrors((current) => ({
+                        ...current,
+                        [video.id]: message
+                      }))
+                    }
+                    onPlayerReady={() =>
+                      setPlayerErrors((current) => ({
+                        ...current,
+                        [video.id]: ""
+                      }))
+                    }
+                  />
                 ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img className="adminVideoThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
@@ -386,9 +315,6 @@ export default function AdminVideosPage() {
                     <Video className="lucide" aria-hidden="true" />
                   </div>
                 )}
-                <div className={`adminVideoStatus adminVideoStatus-${meta.className}`}>
-                  <span>{meta.label}</span>
-                </div>
               </div>
 
               <div className="adminTopicBody">
@@ -398,7 +324,6 @@ export default function AdminVideosPage() {
                   <div className="adminVideoMetaLine">
                     <span>{formatDuration(video.videoDuration)}</span>
                     <span>Ochiq</span>
-                    <span>{meta.label}</span>
                   </div>
                 </div>
               </div>
@@ -426,5 +351,86 @@ export default function AdminVideosPage() {
         </div>
       ) : null}
     </section>
+  );
+}
+
+function AdminInlinePlayer({
+  video,
+  playerError,
+  onPlayerError,
+  onPlayerReady
+}: {
+  video: VideoLesson;
+  playerError: string;
+  onPlayerError: (message: string) => void;
+  onPlayerReady: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const element = videoRef.current;
+    if (!element || !video.playbackUrl) return undefined;
+
+    let hls: Hls | null = null;
+    let destroyed = false;
+
+    const handleReady = () => {
+      if (!destroyed) onPlayerReady();
+    };
+
+    const handleError = () => {
+      if (!destroyed) onPlayerError("Video yuklanmadi");
+    };
+
+    element.addEventListener("loadeddata", handleReady);
+    element.addEventListener("canplay", handleReady);
+    element.addEventListener("error", handleError);
+
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false
+      });
+      hls.loadSource(video.playbackUrl);
+      hls.attachMedia(element);
+    } else if (element.canPlayType("application/vnd.apple.mpegurl")) {
+      element.src = video.playbackUrl;
+    } else {
+      onPlayerError("Bu brauzer video formatni qo‘llamaydi");
+    }
+
+    return () => {
+      destroyed = true;
+      element.removeEventListener("loadeddata", handleReady);
+      element.removeEventListener("canplay", handleReady);
+      element.removeEventListener("error", handleError);
+      hls?.destroy();
+      element.pause();
+      element.removeAttribute("src");
+      element.load();
+    };
+  }, [video.playbackUrl, onPlayerError, onPlayerReady]);
+
+  return (
+    <div className="videoPlayerSurface adminInlinePlayerSurface">
+      <video
+        ref={videoRef}
+        className="videoPlayerElement"
+        controls
+        playsInline
+        preload="metadata"
+        poster={video.videoThumbnail || undefined}
+      />
+      {!video.playbackUrl ? (
+        <div className="videoPlayerOverlay">
+          <div className="videoPlayerPlaceholderText">Playback URL tayyor emas</div>
+        </div>
+      ) : null}
+      {playerError ? (
+        <div className="videoPlayerOverlay videoPlayerOverlayError">
+          <div className="videoPlayerPlaceholderText">{playerError}</div>
+        </div>
+      ) : null}
+    </div>
   );
 }

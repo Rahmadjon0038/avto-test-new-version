@@ -24,21 +24,6 @@ type VideoLesson = {
   playbackUrl: string;
 };
 
-function formatDuration(totalSeconds: number) {
-  const value = Number(totalSeconds || 0);
-  if (!value) return "—";
-  const minutes = Math.floor(value / 60);
-  const seconds = value % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function statusLabel(status: string) {
-  const normalized = String(status || "").toLowerCase();
-  if (normalized === "ready") return "Tayyor";
-  if (normalized === "failed") return "Xatolik";
-  return "Yuklanmoqda";
-}
-
 export default function VideosPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
@@ -136,7 +121,6 @@ export default function VideosPage() {
                     loading={loadingPlayback}
                     error={playerError}
                     onRetry={() => void loadPlayback(video)}
-                    compact
                     poster={video.videoThumbnail || ""}
                   />
                 ) : video.videoThumbnail ? (
@@ -157,37 +141,7 @@ export default function VideosPage() {
                 ) : null}
               </div>
               <div className="videoLessonBody">
-                <div className="videoLessonTopRow">
-                  <span className="videoLessonDuration">{formatDuration(video.videoDuration)}</span>
-                  <span className={`videoLessonStatus videoLessonStatus-${String(video.videoStatus || "").toLowerCase()}`}>
-                    {statusLabel(video.videoStatus)}
-                  </span>
-                </div>
                 <h3 className="videoLessonTitle">{video.title || video.topicTitle}</h3>
-                <p className="videoLessonDescription">{video.description || video.topicTitle}</p>
-                <div className="videoLessonActions">
-                  <button
-                    className="btn btn-primary btn-sm videoLessonTopicBtn"
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void loadPlayback(video);
-                    }}
-                    disabled={selectedVideoId === video.id && loadingPlayback}
-                  >
-                    {selectedVideoId === video.id ? "Player ochildi" : "Videoni ochish"}
-                  </button>
-                  <button
-                    className="btn btn-ghost btn-sm videoLessonTopicBtn"
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      router.push(`/app/page/topics/${video.topicId}`);
-                    }}
-                  >
-                    Mavzuga doir testlar
-                  </button>
-                </div>
               </div>
             </article>
           ))}
@@ -206,27 +160,21 @@ function BunnyHlsPlayer({
   loading,
   error,
   onRetry,
-  compact = false,
   poster = ""
 }: {
   src: string;
   loading: boolean;
   error: string;
   onRetry: () => void;
-  compact?: boolean;
   poster?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
-  const pauseHandlerRef = useRef<(() => void) | null>(null);
-  const [speed, setSpeed] = useState(1);
-  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
 
-    let destroyed = false;
     const cleanup = () => {
       hlsRef.current?.destroy();
       hlsRef.current = null;
@@ -234,28 +182,6 @@ function BunnyHlsPlayer({
       video.removeAttribute("src");
       video.load();
     };
-
-    setPlaying(false);
-    video.playbackRate = speed;
-
-    const onLoaded = () => {
-      if (!destroyed) {
-        setPlaying(true);
-      }
-    };
-
-    const onError = () => {
-      if (!destroyed) {
-        setPlaying(false);
-      }
-    };
-
-    const pauseHandler = () => setPlaying(false);
-    pauseHandlerRef.current = pauseHandler;
-    video.addEventListener("canplay", onLoaded);
-    video.addEventListener("playing", onLoaded);
-    video.addEventListener("pause", pauseHandler);
-    video.addEventListener("error", onError);
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -266,35 +192,17 @@ function BunnyHlsPlayer({
       hlsRef.current = hls;
       hls.loadSource(src);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (!destroyed) {
-          void video.play().catch(() => {});
-        }
-      });
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal && !destroyed) {
-          setPlaying(false);
-        }
-      });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
-      void video.play().catch(() => {});
     }
 
     return () => {
-      destroyed = true;
-      video.removeEventListener("canplay", onLoaded);
-      video.removeEventListener("playing", onLoaded);
-      if (pauseHandlerRef.current) {
-        video.removeEventListener("pause", pauseHandlerRef.current);
-      }
-      video.removeEventListener("error", onError);
       cleanup();
     };
-  }, [src, speed]);
+  }, [src]);
 
   return (
-    <div className={`videoPlayerWrap${compact ? " videoPlayerWrapCompact" : ""}`}>
+    <div className="videoPlayerWrap">
       <div className="videoPlayerSurface">
         {loading ? (
           <div className="videoPlayerOverlay">
@@ -319,40 +227,6 @@ function BunnyHlsPlayer({
           preload="metadata"
           poster={poster || undefined}
         />
-      </div>
-      <div className="videoPlayerControls">
-        <div className="videoPlayerControlGroup">
-          <label className="videoPlayerSpeedLabel">
-            Tezlik
-            <select
-              value={speed}
-              onChange={(event) => setSpeed(Number(event.target.value))}
-              className="videoPlayerSpeedSelect"
-            >
-              <option value={0.75}>0.75x</option>
-              <option value={1}>1x</option>
-              <option value={1.25}>1.25x</option>
-              <option value={1.5}>1.5x</option>
-              <option value={2}>2x</option>
-            </select>
-          </label>
-        </div>
-        <button
-          className="btn btn-ghost btn-sm"
-          type="button"
-          onClick={() => {
-            const video = videoRef.current;
-            if (!video) return;
-            if (document.fullscreenElement) {
-              void document.exitFullscreen();
-            } else {
-              void video.parentElement?.requestFullscreen?.();
-            }
-          }}
-        >
-          Fullscreen
-        </button>
-        <div className="videoPlayerPlaybackState">{playing ? "O‘ynayapti" : "To‘xtagan"}</div>
       </div>
     </div>
   );
