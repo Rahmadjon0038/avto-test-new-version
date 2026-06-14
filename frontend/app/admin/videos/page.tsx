@@ -64,11 +64,11 @@ function formatDuration(totalSeconds: number) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function statusMeta(status: string) {
+function statusMeta(status: string, playbackUrl: string) {
   const normalized = String(status || "").toLowerCase();
-  if (normalized === "ready") {
+  if (normalized === "ready" || (playbackUrl && normalized !== "failed")) {
     return {
-      label: "Ready",
+      label: "Tayyor",
       className: "success",
       icon: CheckCircle2
     };
@@ -253,6 +253,7 @@ export default function AdminVideosPage() {
           controls
           playsInline
           preload="metadata"
+          poster={video.videoThumbnail || undefined}
           onLoadedData={() => setPlayerErrors((current) => ({ ...current, [video.id]: "" }))}
           onError={() =>
             setPlayerErrors((current) => ({
@@ -371,11 +372,11 @@ export default function AdminVideosPage() {
 
       <div className="adminTopicsGrid">
         {videos.map((video) => {
-          const meta = statusMeta(video.videoStatus);
+          const meta = statusMeta(video.videoStatus, video.playbackUrl);
           return (
             <article key={video.id} className="card adminTopicCard">
               <div className="adminVideoPreview">
-                {video.videoStatus === "ready" && video.playbackUrl ? (
+                {video.playbackUrl ? (
                   <InlinePlayer video={video} />
                 ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -393,11 +394,11 @@ export default function AdminVideosPage() {
               <div className="adminTopicBody">
                 <div className="adminTopicMeta">
                   <div className="adminTopicTitle adminTopicTitleOneLine">{video.title || video.topicTitle}</div>
-                  <div className="adminPanelCardDesc">{video.description || video.topicTitle}</div>
+                  <div className="adminPanelCardDesc">{video.description || "Video darsi"}</div>
                   <div className="adminVideoMetaLine">
-                    <span>{video.topicTitle}</span>
                     <span>{formatDuration(video.videoDuration)}</span>
                     <span>Ochiq</span>
+                    <span>{meta.label}</span>
                   </div>
                 </div>
               </div>

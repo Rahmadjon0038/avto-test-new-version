@@ -137,6 +137,7 @@ export default function VideosPage() {
                     error={playerError}
                     onRetry={() => void loadPlayback(video)}
                     compact
+                    poster={video.videoThumbnail || ""}
                   />
                 ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -205,13 +206,15 @@ function BunnyHlsPlayer({
   loading,
   error,
   onRetry,
-  compact = false
+  compact = false,
+  poster = ""
 }: {
   src: string;
   loading: boolean;
   error: string;
   onRetry: () => void;
   compact?: boolean;
+  poster?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -308,7 +311,14 @@ function BunnyHlsPlayer({
             </button>
           </div>
         ) : null}
-        <video ref={videoRef} className="videoPlayerElement" controls playsInline />
+        <video
+          ref={videoRef}
+          className="videoPlayerElement"
+          controls
+          playsInline
+          preload="metadata"
+          poster={poster || undefined}
+        />
       </div>
       <div className="videoPlayerControls">
         <div className="videoPlayerControlGroup">
