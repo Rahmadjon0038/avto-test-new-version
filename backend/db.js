@@ -248,6 +248,12 @@ async function initDb(dbApi) {
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS youtube_url TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS youtube_id TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
+  await dbApi.run(`UPDATE video_lessons SET youtube_url = '' WHERE youtube_url IS NULL;`);
+  await dbApi.run(`UPDATE video_lessons SET youtube_id = '' WHERE youtube_id IS NULL;`);
+  await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_url SET DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_id SET DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_url SET NOT NULL;`);
+  await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_id SET NOT NULL;`);
   await dbApi.run(`CREATE INDEX IF NOT EXISTS video_lessons_topic_id_idx ON video_lessons (topic_id);`);
 
   await dbApi.run(`
