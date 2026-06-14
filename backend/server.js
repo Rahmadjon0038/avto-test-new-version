@@ -620,7 +620,11 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
     bunnyVideoId = created.bunnyVideoId;
     try {
       await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
-      bunnyVideoInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+      try {
+        bunnyVideoInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+      } catch (_infoError) {
+        bunnyVideoInfo = null;
+      }
     } catch (error) {
       await deleteBunnyVideo(bunnyVideoId);
       throw error;
@@ -687,8 +691,19 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
       });
       bunnyVideoId = created.bunnyVideoId;
     }
-    await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
-    bunnyInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+    try {
+      await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
+      try {
+        bunnyInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+      } catch (_infoError) {
+        bunnyInfo = null;
+      }
+    } catch (error) {
+      if (bunnyVideoId && bunnyVideoId !== current.bunnyVideoId) {
+        await deleteBunnyVideo(bunnyVideoId);
+      }
+      throw error;
+    }
   }
 
   const title = next.title || current.title || topic.title;
