@@ -71,7 +71,6 @@ export default function AdminVideosPage() {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [playerErrors, setPlayerErrors] = useState<Record<number, string>>({});
 
   const topicsQuery = useQuery({
     queryKey: ["admin-video-topics"],
@@ -291,22 +290,7 @@ export default function AdminVideosPage() {
             <article key={video.id} className="card adminTopicCard">
               <div className="adminVideoPreview">
                 {video.playbackUrl ? (
-                  <AdminInlinePlayer
-                    video={video}
-                    playerError={playerErrors[video.id] || ""}
-                    onPlayerError={(message) =>
-                      setPlayerErrors((current) => ({
-                        ...current,
-                        [video.id]: message
-                      }))
-                    }
-                    onPlayerReady={() =>
-                      setPlayerErrors((current) => ({
-                        ...current,
-                        [video.id]: ""
-                      }))
-                    }
-                  />
+                  <AdminInlinePlayer video={video} />
                 ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img className="adminVideoThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
@@ -355,15 +339,9 @@ export default function AdminVideosPage() {
 }
 
 function AdminInlinePlayer({
-  video,
-  playerError,
-  onPlayerError,
-  onPlayerReady
+  video
 }: {
   video: VideoLesson;
-  playerError: string;
-  onPlayerError: (message: string) => void;
-  onPlayerReady: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -372,19 +350,6 @@ function AdminInlinePlayer({
     if (!element || !video.playbackUrl) return undefined;
 
     let hls: Hls | null = null;
-    let destroyed = false;
-
-    const handleReady = () => {
-      if (!destroyed) onPlayerReady();
-    };
-
-    const handleError = () => {
-      if (!destroyed) onPlayerError("Video yuklanmadi");
-    };
-
-    element.addEventListener("loadeddata", handleReady);
-    element.addEventListener("canplay", handleReady);
-    element.addEventListener("error", handleError);
 
     if (Hls.isSupported()) {
       hls = new Hls({
@@ -395,21 +360,15 @@ function AdminInlinePlayer({
       hls.attachMedia(element);
     } else if (element.canPlayType("application/vnd.apple.mpegurl")) {
       element.src = video.playbackUrl;
-    } else {
-      onPlayerError("Bu brauzer video formatni qo‘llamaydi");
     }
 
     return () => {
-      destroyed = true;
-      element.removeEventListener("loadeddata", handleReady);
-      element.removeEventListener("canplay", handleReady);
-      element.removeEventListener("error", handleError);
       hls?.destroy();
       element.pause();
       element.removeAttribute("src");
       element.load();
     };
-  }, [video.playbackUrl, onPlayerError, onPlayerReady]);
+  }, [video.playbackUrl]);
 
   return (
     <div className="videoPlayerSurface adminInlinePlayerSurface">
@@ -424,11 +383,6 @@ function AdminInlinePlayer({
       {!video.playbackUrl ? (
         <div className="videoPlayerOverlay">
           <div className="videoPlayerPlaceholderText">Playback URL tayyor emas</div>
-        </div>
-      ) : null}
-      {playerError ? (
-        <div className="videoPlayerOverlay videoPlayerOverlayError">
-          <div className="videoPlayerPlaceholderText">{playerError}</div>
         </div>
       ) : null}
     </div>
