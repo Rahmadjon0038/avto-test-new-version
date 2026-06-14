@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock3,
-  ChevronRight,
   RefreshCw,
   Save,
   Trash2,
@@ -17,6 +16,7 @@ import {
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import Hls from "hls.js";
 
 type TopicChoice = {
   id: number;
@@ -97,6 +97,7 @@ export default function AdminVideosPage() {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [playerErrors, setPlayerErrors] = useState<Record<number, string>>({});
 
   const topicsQuery = useQuery({
     queryKey: ["admin-video-topics"],
@@ -216,6 +217,64 @@ export default function AdminVideosPage() {
     }
   };
 
+  const InlinePlayer = ({ video }: { video: VideoLesson }) => {
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    useEffect(() => {
+      const element = videoRef.current;
+      if (!element || !video.playbackUrl) return;
+
+      let hls: Hls | null = null;
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false
+        });
+        hls.loadSource(video.playbackUrl);
+        hls.attachMedia(element);
+      } else if (element.canPlayType("application/vnd.apple.mpegurl")) {
+        element.src = video.playbackUrl;
+      } else {
+        setPlayerErrors((current) => ({
+          ...current,
+          [video.id]: "Bu brauzer video formatni qo‘llamaydi"
+        }));
+      }
+
+      return () => {
+        hls?.destroy();
+      };
+    }, [video.id, video.playbackUrl]);
+
+    return (
+      <div className="videoPlayerSurface adminInlinePlayerSurface">
+        <video
+          ref={videoRef}
+          className="videoPlayerElement"
+          controls
+          playsInline
+          preload="metadata"
+          onLoadedData={() => setPlayerErrors((current) => ({ ...current, [video.id]: "" }))}
+          onError={() =>
+            setPlayerErrors((current) => ({
+              ...current,
+              [video.id]: "Video yuklanmadi"
+            }))
+          }
+        />
+        {!video.playbackUrl ? (
+          <div className="videoPlayerOverlay">
+            <div className="videoPlayerPlaceholderText">Playback URL tayyor emas</div>
+          </div>
+        ) : null}
+        {playerErrors[video.id] ? (
+          <div className="videoPlayerOverlay videoPlayerOverlayError">
+            <div className="videoPlayerPlaceholderText">{playerErrors[video.id]}</div>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
   const videos = videosQuery.data || [];
 
   return (
@@ -313,11 +372,12 @@ export default function AdminVideosPage() {
       <div className="adminTopicsGrid">
         {videos.map((video) => {
           const meta = statusMeta(video.videoStatus);
-          const StatusIcon = meta.icon;
           return (
             <article key={video.id} className="card adminTopicCard">
               <div className="adminVideoPreview">
-                {video.videoThumbnail ? (
+                {video.videoStatus === "ready" && video.playbackUrl ? (
+                  <InlinePlayer video={video} />
+                ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img className="adminVideoThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
                 ) : (
@@ -326,17 +386,13 @@ export default function AdminVideosPage() {
                   </div>
                 )}
                 <div className={`adminVideoStatus adminVideoStatus-${meta.className}`}>
-                  <StatusIcon className="lucide" aria-hidden="true" />
                   <span>{meta.label}</span>
                 </div>
               </div>
 
               <div className="adminTopicBody">
-                <div className="adminTopicCheck active" aria-hidden="true">
-                  <Video className="lucide" aria-hidden="true" />
-                </div>
                 <div className="adminTopicMeta">
-                  <div className="adminTopicTitle">{video.title || video.topicTitle}</div>
+                  <div className="adminTopicTitle adminTopicTitleOneLine">{video.title || video.topicTitle}</div>
                   <div className="adminPanelCardDesc">{video.description || video.topicTitle}</div>
                   <div className="adminVideoMetaLine">
                     <span>{video.topicTitle}</span>
@@ -345,23 +401,7 @@ export default function AdminVideosPage() {
                   </div>
                 </div>
               </div>
-
               <div className="adminTopicActions">
-                <button
-                  className="btn btn-ghost btn-sm"
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (video.playbackUrl) {
-                      window.open(video.playbackUrl, "_blank", "noopener,noreferrer");
-                    } else {
-                      toast.error("Playback URL tayyor emas");
-                    }
-                  }}
-                >
-                  Ko‘rish
-                  <ChevronRight className="lucide" aria-hidden="true" />
-                </button>
                 <button
                   className="btn btn-danger btn-sm"
                   type="button"

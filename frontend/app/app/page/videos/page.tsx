@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { ArrowLeft, CircleAlert, Play, RefreshCw, Shield, Video } from "lucide-react";
+import { ArrowLeft, CircleAlert, Play, RefreshCw, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -42,7 +42,7 @@ function statusLabel(status: string) {
 export default function VideosPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
-  const [selectedVideo, setSelectedVideo] = useState<VideoLesson | null>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<number | null>(null);
   const [playbackUrl, setPlaybackUrl] = useState("");
   const [loadingPlayback, setLoadingPlayback] = useState(false);
   const [playerError, setPlayerError] = useState("");
@@ -64,10 +64,10 @@ export default function VideosPage() {
     }
   }, [videosQuery.error]);
 
-  const videos = useMemo(() => videosQuery.data || [], [videosQuery.data]);
+  const videos = videosQuery.data || [];
 
   const loadPlayback = async (video: VideoLesson) => {
-    setSelectedVideo(video);
+    setSelectedVideoId(video.id);
     setPlaybackUrl("");
     setPlayerError("");
     setLoadingPlayback(true);
@@ -111,59 +111,6 @@ export default function VideosPage() {
         </div>
       </div>
 
-      {selectedVideo ? (
-        <article className="card videoPlayerCard">
-          <div className="videoPlayerHead">
-            <div>
-              <div className="videoPlayerTitleRow">
-                <h1 className="videoPlayerTitle">{selectedVideo.title || selectedVideo.topicTitle}</h1>
-                {selectedVideo.premiumOnly ? (
-                  <span className="videoPlayerBadge videoPlayerBadgePremium">
-                    <Shield className="lucide" aria-hidden="true" /> Premium
-                  </span>
-                ) : (
-                  <span className="videoPlayerBadge videoPlayerBadgeFree">
-                    <Video className="lucide" aria-hidden="true" /> Free
-                  </span>
-                )}
-              </div>
-              <p className="videoPlayerDescription">{selectedVideo.description || selectedVideo.topicTitle}</p>
-              <div className="videoPlayerMeta">
-                <span>{selectedVideo.topicTitle}</span>
-                <span>{formatDuration(selectedVideo.videoDuration)}</span>
-                <span>{statusLabel(selectedVideo.videoStatus)}</span>
-              </div>
-            </div>
-            <button
-              className="btn btn-ghost btn-sm"
-              type="button"
-              onClick={() => {
-                setSelectedVideo(null);
-                setPlaybackUrl("");
-                setPlayerError("");
-              }}
-            >
-              Yopish
-            </button>
-          </div>
-
-          <BunnyHlsPlayer
-            key={`${selectedVideo.id}-${retrySeed}`}
-            src={playbackUrl}
-            loading={loadingPlayback}
-            error={playerError}
-            onRetry={() => void loadPlayback(selectedVideo)}
-          />
-        </article>
-      ) : (
-        <div className="card videoPlayerCard videoPlayerPlaceholder">
-          <div className="videoPlayerPlaceholderIcon">
-            <Play className="lucide" aria-hidden="true" />
-          </div>
-          <div className="videoPlayerPlaceholderText">Videoni tanlang — player shu yerda ochiladi</div>
-        </div>
-      )}
-
       {videosQuery.isLoading ? <div className="muted">Video darslar yuklanmoqda...</div> : null}
 
       {videos.length ? (
@@ -171,7 +118,7 @@ export default function VideosPage() {
           {videos.map((video) => (
             <article
               key={video.id}
-              className={`videoLessonCard ${selectedVideo?.id === video.id ? "active" : ""}`}
+              className={`videoLessonCard ${selectedVideoId === video.id ? "active" : ""}`}
               onClick={() => void loadPlayback(video)}
               role="button"
               tabIndex={0}
@@ -182,7 +129,16 @@ export default function VideosPage() {
               }}
             >
               <div className="videoLessonFrameWrap">
-                {video.videoThumbnail ? (
+                {selectedVideoId === video.id ? (
+                  <BunnyHlsPlayer
+                    key={`${video.id}-${retrySeed}`}
+                    src={playbackUrl}
+                    loading={loadingPlayback}
+                    error={playerError}
+                    onRetry={() => void loadPlayback(video)}
+                    compact
+                  />
+                ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img className="videoLessonThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
                 ) : (
@@ -190,10 +146,14 @@ export default function VideosPage() {
                     <Video className="lucide" aria-hidden="true" />
                   </div>
                 )}
-                <div className="videoLessonPlay">
-                  <Play className="lucide" aria-hidden="true" />
-                </div>
-                {video.premiumOnly ? <span className="videoLessonPremium">Premium</span> : null}
+                {selectedVideoId !== video.id ? (
+                  <>
+                    <div className="videoLessonPlay">
+                      <Play className="lucide" aria-hidden="true" />
+                    </div>
+                    {video.premiumOnly ? <span className="videoLessonPremium">Premium</span> : null}
+                  </>
+                ) : null}
               </div>
               <div className="videoLessonBody">
                 <div className="videoLessonTopRow">
@@ -204,16 +164,29 @@ export default function VideosPage() {
                 </div>
                 <h3 className="videoLessonTitle">{video.title || video.topicTitle}</h3>
                 <p className="videoLessonDescription">{video.description || video.topicTitle}</p>
-                <button
-                  className="btn btn-primary btn-sm videoLessonTopicBtn"
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    router.push(`/app/page/topics/${video.topicId}`);
-                  }}
-                >
-                  Mavzuga doir testlarni ishlash
-                </button>
+                <div className="videoLessonActions">
+                  <button
+                    className="btn btn-primary btn-sm videoLessonTopicBtn"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void loadPlayback(video);
+                    }}
+                    disabled={selectedVideoId === video.id && loadingPlayback}
+                  >
+                    {selectedVideoId === video.id ? "Player ochildi" : "Videoni ochish"}
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-sm videoLessonTopicBtn"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      router.push(`/app/page/topics/${video.topicId}`);
+                    }}
+                  >
+                    Mavzuga doir testlar
+                  </button>
+                </div>
               </div>
             </article>
           ))}
@@ -231,12 +204,14 @@ function BunnyHlsPlayer({
   src,
   loading,
   error,
-  onRetry
+  onRetry,
+  compact = false
 }: {
   src: string;
   loading: boolean;
   error: string;
   onRetry: () => void;
+  compact?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -316,7 +291,7 @@ function BunnyHlsPlayer({
   }, [src, speed]);
 
   return (
-    <div className="videoPlayerWrap">
+    <div className={`videoPlayerWrap${compact ? " videoPlayerWrapCompact" : ""}`}>
       <div className="videoPlayerSurface">
         {loading ? (
           <div className="videoPlayerOverlay">

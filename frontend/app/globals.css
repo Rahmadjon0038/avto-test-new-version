@@ -1861,7 +1861,6 @@ body {
   z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 11px;
@@ -2013,6 +2012,12 @@ body {
   font-size: 16px;
   font-weight: 950;
   line-height: 1.3;
+}
+
+.adminTopicTitleOneLine {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .adminTopicTitleLink {
@@ -2873,6 +2878,15 @@ body {
   aspect-ratio: 16 / 9;
 }
 
+.videoPlayerWrapCompact .videoPlayerSurface {
+  border-radius: 14px;
+  aspect-ratio: 16 / 10;
+}
+
+.adminInlinePlayerSurface {
+  min-height: 220px;
+}
+
 .videoPlayerElement {
   width: 100%;
   height: 100%;
@@ -3057,6 +3071,12 @@ body {
   font-size: 14px;
 }
 
+.videoLessonActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .videoLessonTopic {
   display: flex;
   align-items: center;
@@ -3085,7 +3105,7 @@ body {
 }
 
 .videoLessonTopicBtn {
-  width: 100%;
+  width: auto;
   justify-content: center;
 }
 
