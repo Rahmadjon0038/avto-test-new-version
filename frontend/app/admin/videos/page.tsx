@@ -180,7 +180,7 @@ export default function AdminVideosPage() {
       if (!form.file) {
         throw new Error("Video fayl tanlang");
       }
-      const uploadedVideo = await uploadRawVideo("/api/video-lessons", form.file, form);
+      const uploadedVideo = await uploadRawVideo("/api/admin/video-lessons", form.file, form);
       qc.setQueryData<VideoLesson[]>(["admin-video-lessons"], (current = []) => {
         const next = current.filter((video) => video.id !== uploadedVideo.id);
         return [uploadedVideo, ...next];
