@@ -45,6 +45,12 @@ type VideoForm = {
   file: File | null;
 };
 
+type UploadResponse = {
+  video?: VideoLesson;
+  ok?: boolean;
+  error?: string;
+};
+
 const emptyForm = (): VideoForm => ({
   topicId: "",
   file: null
@@ -87,6 +93,7 @@ export default function AdminVideosPage() {
   const { authFetch, accessToken } = useAuth();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<VideoForm>(() => emptyForm());
+  const [selectedFileName, setSelectedFileName] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -122,7 +129,7 @@ export default function AdminVideosPage() {
   }, []);
 
   const uploadRawVideo = (endpoint: string, file: File, meta: VideoForm) => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<VideoLesson>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", endpoint, true);
       if (accessToken) xhr.setRequestHeader("authorization", `Bearer ${accessToken}`);
@@ -136,7 +143,16 @@ export default function AdminVideosPage() {
       xhr.onerror = () => reject(new Error("Video yuklashda tarmoq xatosi"));
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          resolve();
+          try {
+            const body = JSON.parse(xhr.responseText || "{}") as UploadResponse;
+            if (body.video) {
+              resolve(body.video);
+              return;
+            }
+            reject(new Error("Server javobi topilmadi"));
+          } catch {
+            reject(new Error("Server javobi topilmadi"));
+          }
           return;
         }
         try {
@@ -160,13 +176,19 @@ export default function AdminVideosPage() {
     try {
       setSaving(true);
       setUploadProgress(0);
+      setSelectedFileName(form.file?.name || "");
       if (!form.file) {
         throw new Error("Video fayl tanlang");
       }
-      await uploadRawVideo("/api/video-lessons", form.file, form);
+      const uploadedVideo = await uploadRawVideo("/api/video-lessons", form.file, form);
+      qc.setQueryData<VideoLesson[]>(["admin-video-lessons"], (current = []) => {
+        const next = current.filter((video) => video.id !== uploadedVideo.id);
+        return [uploadedVideo, ...next];
+      });
 
       toast.success("Video yuklandi");
       setForm(emptyForm());
+      setSelectedFileName("");
       fileInputRef.current && (fileInputRef.current.value = "");
       await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
     } catch (error: any) {
@@ -243,10 +265,14 @@ export default function AdminVideosPage() {
               type="file"
               accept="video/mp4,video/*"
               onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  file: event.target.files?.[0] || null
-                }))
+                {
+                  const file = event.target.files?.[0] || null;
+                  setSelectedFileName(file?.name || "");
+                  setForm((current) => ({
+                    ...current,
+                    file
+                  }));
+                }
               }
             />
             <button
@@ -254,6 +280,7 @@ export default function AdminVideosPage() {
               type="button"
               onClick={() => {
                 setForm(emptyForm());
+                setSelectedFileName("");
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
             >
@@ -261,14 +288,21 @@ export default function AdminVideosPage() {
             </button>
           </div>
 
+          {selectedFileName ? <div className="adminSelectedFile">Tanlangan fayl: {selectedFileName}</div> : null}
+
           <div className="adminOptionsToolbar">
             <button className="btn btn-primary" type="submit" disabled={saving || !form.topicId || !form.file}>
-              <Save className="lucide" aria-hidden="true" /> Saqlash
+              <Save className="lucide" aria-hidden="true" /> {saving ? "Yuklanmoqda..." : "Saqlash"}
             </button>
             {uploadProgress > 0 ? (
               <div className="adminUploadProgress">
                 <div className="adminUploadProgressBar" style={{ width: `${uploadProgress}%` }} />
                 <span>{uploadProgress}%</span>
+              </div>
+            ) : saving ? (
+              <div className="adminUploadProgress">
+                <div className="adminUploadProgressBar indeterminate" />
+                <span>Yuklanmoqda...</span>
               </div>
             ) : null}
           </div>
