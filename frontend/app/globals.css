@@ -2985,6 +2985,12 @@ body {
   object-fit: cover;
 }
 
+.videoLessonThumbImage {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .videoLessonThumbFallback {
   display: grid;
   place-items: center;

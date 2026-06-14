@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { ArrowLeft, CircleAlert, Play, RefreshCw, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,6 +32,9 @@ export default function VideosPage() {
   const [loadingPlayback, setLoadingPlayback] = useState(false);
   const [playerError, setPlayerError] = useState("");
   const [retrySeed, setRetrySeed] = useState(0);
+  const handlePlayerStarted = useCallback(() => {
+    setLoadingPlayback(false);
+  }, []);
 
   const videosQuery = useQuery({
     queryKey: ["video-lessons"],
@@ -72,8 +75,9 @@ export default function VideosPage() {
       const message = error?.message || "Video ochilmadi";
       setPlayerError(message);
       toast.error(message);
-    } finally {
       setLoadingPlayback(false);
+    } finally {
+      // loadingPlayback faqat player ishga tushganda o'chadi
     }
   };
 
@@ -121,14 +125,16 @@ export default function VideosPage() {
                     loading={loadingPlayback}
                     error={playerError}
                     onRetry={() => void loadPlayback(video)}
+                    onStarted={handlePlayerStarted}
                     poster={video.videoThumbnail || ""}
                   />
-                ) : video.videoThumbnail ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img className="videoLessonThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
                 ) : (
-                  <div className="videoLessonThumb videoLessonThumbFallback">
-                    <Video className="lucide" aria-hidden="true" />
+                  <div
+                    className={`videoLessonThumb ${video.videoThumbnail ? "videoLessonThumbImage" : "videoLessonThumbFallback"}`}
+                    style={video.videoThumbnail ? { backgroundImage: `url(${video.videoThumbnail})` } : undefined}
+                    aria-hidden="true"
+                  >
+                    {!video.videoThumbnail ? <Video className="lucide" aria-hidden="true" /> : null}
                   </div>
                 )}
                 {selectedVideoId !== video.id ? (
@@ -160,12 +166,14 @@ function BunnyHlsPlayer({
   loading,
   error,
   onRetry,
+  onStarted,
   poster = ""
 }: {
   src: string;
   loading: boolean;
   error: string;
   onRetry: () => void;
+  onStarted: () => void;
   poster?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -192,14 +200,22 @@ function BunnyHlsPlayer({
       hlsRef.current = hls;
       hls.loadSource(src);
       hls.attachMedia(video);
+      hls.once(Hls.Events.MANIFEST_PARSED, () => {
+        void video.play().then(onStarted).catch(onStarted);
+      });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+      const handleCanPlay = () => {
+        void video.play().then(onStarted).catch(onStarted);
+        video.removeEventListener("canplay", handleCanPlay);
+      };
+      video.addEventListener("canplay", handleCanPlay, { once: true });
     }
 
     return () => {
       cleanup();
     };
-  }, [src]);
+  }, [src, onStarted]);
 
   return (
     <div className="videoPlayerWrap">

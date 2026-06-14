@@ -290,6 +290,7 @@ const BUNNY_LIBRARY_ID = String(process.env.BUNNY_LIBRARY_ID || "").trim();
 const BUNNY_CDN_HOSTNAME = String(process.env.BUNNY_CDN_HOSTNAME || "").trim();
 const BUNNY_API_KEY = String(process.env.BUNNY_API_KEY || "").trim();
 const BUNNY_API_BASE_URL = String(process.env.BUNNY_API_BASE_URL || "https://video.bunnycdn.com").replace(/\/+$/, "");
+const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || "https://api.road-test.uz").replace(/\/+$/, "");
 
 function normalizeVideoStatus(value, fallback = "processing") {
   const raw = String(value || fallback || "").trim().toLowerCase();
@@ -307,6 +308,14 @@ function buildBunnyPlaybackUrl(videoId) {
 function buildBunnyThumbnailUrl(videoId) {
   if (!videoId || !BUNNY_CDN_HOSTNAME) return "";
   return `https://${BUNNY_CDN_HOSTNAME}/${encodeURIComponent(String(videoId))}/thumbnail.jpg`;
+}
+
+function buildProxiedMediaUrl(sourceUrl, proxyPath = "video-stream") {
+  const raw = String(sourceUrl || "").trim();
+  if (!raw) return "";
+  const proxyUrl = new URL(`/api/${proxyPath}`, PUBLIC_API_BASE_URL);
+  proxyUrl.searchParams.set("u", raw);
+  return proxyUrl.toString();
 }
 
 function parseBooleanValue(value, fallback = false) {
@@ -347,8 +356,9 @@ function normalizeVideoLessonRow(row) {
     bunnyLibraryId,
     videoStatus: status,
     videoDuration: parseIntegerValue(row.video_duration, 0),
-    videoThumbnail: thumbnailUrl,
-    playbackUrl,
+    videoThumbnail: thumbnailUrl ? buildProxiedMediaUrl(thumbnailUrl, "image") : "",
+    thumbnailUrl: thumbnailUrl ? buildProxiedMediaUrl(thumbnailUrl, "image") : "",
+    playbackUrl: playbackUrl ? buildProxiedMediaUrl(playbackUrl, "video-stream") : "",
     createdAt: row.created_at ? String(row.created_at) : undefined,
     updatedAt: row.updated_at ? String(row.updated_at) : undefined
   };
@@ -491,7 +501,7 @@ async function syncBunnyVideoRow(videoId, bunnyInfo) {
   const next = bunnyInfo || (video.bunnyVideoId ? normalizeBunnyInfo(await getBunnyVideoInfo(video.bunnyVideoId), video.bunnyVideoId) : null);
   const status = normalizeVideoStatus(next?.status, video.videoStatus);
   const duration = parseIntegerValue(next?.duration, video.videoDuration);
-  const thumbnail = String(next?.thumbnail || video.videoThumbnail || buildBunnyThumbnailUrl(video.bunnyVideoId)).trim();
+  const thumbnail = String(video.videoThumbnail || next?.thumbnail || buildBunnyThumbnailUrl(video.bunnyVideoId)).trim();
   const playbackUrl = String(buildBunnyPlaybackUrl(video.bunnyVideoId)).trim();
   const updated = await dbApi.get(
     `
@@ -616,10 +626,30 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
 
   let bunnyVideoId = String(input?.bunnyVideoId || "").trim();
   let bunnyVideoInfo = null;
+  let localThumbnailUrl = "";
   if (!bunnyVideoId) {
     if (!fileBuffer || !Buffer.isBuffer(fileBuffer) || !fileBuffer.length) {
       throw new Error("Video fayl yuborilishi kerak");
     }
+    try {
+      const thumbnailBuffer = await generateVideoThumbnail(fileBuffer, String(input?.fileName || "video.mp4"), contentType);
+      const bucket = getR2BucketName();
+      if (thumbnailBuffer && bucket) {
+        const thumbnailKey = createMediaFileKey("video-thumbnails", "jpg");
+        await r2.send(
+          new PutObjectCommand({
+            Bucket: bucket,
+            Key: thumbnailKey,
+            Body: thumbnailBuffer,
+            ContentType: "image/jpeg"
+          })
+        );
+        localThumbnailUrl = buildR2PublicUrl(thumbnailKey);
+      }
+    } catch (thumbnailError) {
+      console.warn("[video-thumbnail]", thumbnailError?.message || thumbnailError);
+    }
+
     const created = await createBunnyVideo({ title, description, category });
     bunnyVideoId = created.bunnyVideoId;
     try {
@@ -637,7 +667,7 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
 
   const status = normalizeVideoStatus(bunnyVideoInfo?.status || "processing", "processing");
   const duration = parseIntegerValue(bunnyVideoInfo?.duration, 0);
-  const thumbnail = String(bunnyVideoInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
+  const thumbnail = String(localThumbnailUrl || bunnyVideoInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
   const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
 
   const result = await dbApi.get(
@@ -686,7 +716,27 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
 
   let bunnyVideoId = current.bunnyVideoId;
   let bunnyInfo = null;
+  let localThumbnailUrl = "";
   if (fileBuffer && Buffer.isBuffer(fileBuffer) && fileBuffer.length) {
+    try {
+      const thumbnailBuffer = await generateVideoThumbnail(fileBuffer, String(input?.fileName || next.fileName || "video.mp4"), contentType);
+      const bucket = getR2BucketName();
+      if (thumbnailBuffer && bucket) {
+        const thumbnailKey = createMediaFileKey("video-thumbnails", "jpg");
+        await r2.send(
+          new PutObjectCommand({
+            Bucket: bucket,
+            Key: thumbnailKey,
+            Body: thumbnailBuffer,
+            ContentType: "image/jpeg"
+          })
+        );
+        localThumbnailUrl = buildR2PublicUrl(thumbnailKey);
+      }
+    } catch (thumbnailError) {
+      console.warn("[video-thumbnail]", thumbnailError?.message || thumbnailError);
+    }
+
     if (!bunnyVideoId) {
       const created = await createBunnyVideo({
         title: next.title || current.title,
@@ -714,7 +764,7 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
   const description = next.description || current.description || topic.description || "";
   const category = next.category || current.category || topic.slug || "";
   const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
-  const thumbnail = String(bunnyInfo?.thumbnail || current.videoThumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
+  const thumbnail = String(localThumbnailUrl || current.videoThumbnail || bunnyInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
   const status = normalizeVideoStatus(bunnyInfo?.status || current.videoStatus || (bunnyVideoId ? "processing" : "failed"));
   const duration = parseIntegerValue(bunnyInfo?.duration, current.videoDuration);
 
@@ -2527,6 +2577,60 @@ async function convertAudioToM4a(buffer, inputName = "audio") {
     return await fs.readFile(outputPath);
   } finally {
     await fs.rm(inputDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+function getVideoExtensionFromFile(fileName = "", contentType = "") {
+  const fromName = String(fileName || "").split(".").pop().toLowerCase();
+  if (["mp4", "mov", "mkv", "webm", "m4v", "avi", "wmv"].includes(fromName)) return fromName;
+  const type = String(contentType || "").toLowerCase();
+  if (type.includes("mp4")) return "mp4";
+  if (type.includes("quicktime")) return "mov";
+  if (type.includes("webm")) return "webm";
+  if (type.includes("x-matroska") || type.includes("mkv")) return "mkv";
+  if (type.includes("x-msvideo") || type.includes("avi")) return "avi";
+  return "mp4";
+}
+
+async function generateVideoThumbnail(buffer, fileName = "video.mp4", contentType = "video/mp4") {
+  if (!Buffer.isBuffer(buffer) || !buffer.length) return null;
+  const tempDir = await fs.mkdtemp(path.join(require("os").tmpdir(), "road-test-thumb-"));
+  const extension = getVideoExtensionFromFile(fileName, contentType);
+  const inputPath = path.join(tempDir, `input.${extension}`);
+  const outputPath = path.join(tempDir, "thumbnail.jpg");
+
+  try {
+    await fs.writeFile(inputPath, buffer);
+    const result = spawnSync(
+      "ffmpeg",
+      [
+        "-y",
+        "-ss",
+        "00:00:02",
+        "-i",
+        inputPath,
+        "-frames:v",
+        "1",
+        "-vf",
+        "scale=1280:-1:force_original_aspect_ratio=decrease",
+        "-q:v",
+        "3",
+        outputPath
+      ],
+      { stdio: "pipe" }
+    );
+
+    if (result.status !== 0) {
+      throw new Error(
+        `Video preview yaratilmadi: ${String(result.stderr || result.stdout || "").trim() || "ffmpeg xatosi"}`
+      );
+    }
+
+    const thumbnailBuffer = await fs.readFile(outputPath);
+    if (!thumbnailBuffer.length) throw new Error("Video preview bo‘sh qaytdi");
+    return thumbnailBuffer;
+  } finally {
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   }
 }
 
@@ -4646,6 +4750,83 @@ app.get("/api/audio-proxy", async (req, res) => {
     res.send(payload.buffer);
   } catch (e) {
     res.status(400).json({ error: e?.message || "Audio yuklab bo‘lmadi" });
+  }
+});
+
+function rewriteHlsPlaylist(playlistText, sourceUrl) {
+  const source = String(sourceUrl || "").trim();
+  const baseUrl = new URL(source);
+  return String(playlistText || "")
+    .split(/\r?\n/)
+    .map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return line;
+      if (trimmed.startsWith("#")) {
+        return line.replace(/URI="([^"]+)"/g, (_match, uri) => {
+          try {
+            const absolute = new URL(String(uri), baseUrl).toString();
+            return `URI="${buildProxiedMediaUrl(absolute, "video-stream")}"`;
+          } catch {
+            return _match;
+          }
+        });
+      }
+      try {
+        const absolute = new URL(trimmed, baseUrl).toString();
+        return buildProxiedMediaUrl(absolute, "video-stream");
+      } catch {
+        return line;
+      }
+    })
+    .join("\n");
+}
+
+app.get("/api/video-stream", async (req, res) => {
+  try {
+    const sourceUrl = String(req.query.u || req.query.url || "").trim();
+    if (!sourceUrl) return res.status(400).json({ error: "Video manzili topilmadi" });
+
+    const parsed = new URL(sourceUrl);
+    if (!["https:", "http:"].includes(parsed.protocol)) {
+      return res.status(400).json({ error: "Bad protocol" });
+    }
+
+    const upstream = await fetch(parsed.toString(), {
+      redirect: "follow",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; RoadTest/1.0)",
+        Referer: "https://road-test.uz/",
+        Origin: "https://road-test.uz",
+        Accept: "*/*"
+      }
+    });
+
+    if (!upstream.ok) {
+      return res.status(upstream.status).json({
+        error: `Video yuklab bo‘lmadi: ${upstream.status}`
+      });
+    }
+
+    const contentType = String(upstream.headers.get("content-type") || "");
+    const isPlaylist =
+      contentType.includes("mpegurl") ||
+      contentType.includes("vnd.apple.mpegurl") ||
+      parsed.pathname.endsWith(".m3u8");
+
+    if (isPlaylist) {
+      const playlistText = await upstream.text();
+      const rewritten = rewriteHlsPlaylist(playlistText, parsed.toString());
+      res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
+      res.setHeader("Cache-Control", "public, max-age=60");
+      return res.send(rewritten);
+    }
+
+    const body = Buffer.from(await upstream.arrayBuffer());
+    res.setHeader("Content-Type", contentType || "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    return res.send(body);
+  } catch (e) {
+    return res.status(400).json({ error: e?.message || "Video yuklab bo‘lmadi" });
   }
 });
 
