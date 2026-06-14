@@ -91,6 +91,7 @@ export default function AdminVideosPage() {
   const qc = useQueryClient();
   const router = useRouter();
   const { authFetch, accessToken } = useAuth();
+  const backendUploadBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.road-test.uz";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<VideoForm>(() => emptyForm());
   const [selectedFileName, setSelectedFileName] = useState("");
@@ -180,7 +181,7 @@ export default function AdminVideosPage() {
       if (!form.file) {
         throw new Error("Video fayl tanlang");
       }
-      const uploadedVideo = await uploadRawVideo("/api/admin/video-lessons", form.file, form);
+      const uploadedVideo = await uploadRawVideo(`${backendUploadBaseUrl}/api/admin/video-lessons`, form.file, form);
       qc.setQueryData<VideoLesson[]>(["admin-video-lessons"], (current = []) => {
         const next = current.filter((video) => video.id !== uploadedVideo.id);
         return [uploadedVideo, ...next];
