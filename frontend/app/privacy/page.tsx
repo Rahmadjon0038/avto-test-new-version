@@ -16,11 +16,12 @@ import { getSiteUrl, siteName } from "@/lib/site";
 import styles from "./page.module.css";
 
 const siteUrl = getSiteUrl();
+const siteDescription =
+  "Road Test maxfiylik siyosati: qaysi ma'lumotlar to'planishi, ulardan foydalanish, ulashish va foydalanuvchi huquqlari.";
 
 export const metadata: Metadata = {
   title: `${privacyPolicy.title} | ${siteName}`,
-  description:
-    "Road Test maxfiylik siyosati: qaysi ma'lumotlar to'planishi, ulardan foydalanish, ulashish va foydalanuvchi huquqlari.",
+  description: siteDescription,
   alternates: {
     canonical: "/privacy"
   },
@@ -30,14 +31,12 @@ export const metadata: Metadata = {
     url: "/privacy",
     siteName,
     title: `${privacyPolicy.title} | ${siteName}`,
-    description:
-      "Road Test maxfiylik siyosati: qaysi ma'lumotlar to'planishi, ulardan foydalanish, ulashish va foydalanuvchi huquqlari."
+    description: siteDescription
   },
   twitter: {
     card: "summary",
     title: `${privacyPolicy.title} | ${siteName}`,
-    description:
-      "Road Test maxfiylik siyosati: qaysi ma'lumotlar to'planishi, ulardan foydalanish, ulashish va foydalanuvchi huquqlari."
+    description: siteDescription
   },
   robots: {
     index: true,

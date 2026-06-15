@@ -2399,7 +2399,7 @@ function isSecureRequest(req) {
   return xfProto === "https";
 }
 
-const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 15;
+const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 function getSecret() {
