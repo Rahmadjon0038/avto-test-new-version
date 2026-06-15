@@ -63,6 +63,13 @@ const GOOGLE_CLIENT_IDS = new Set(
     .map((value) => value.trim())
     .filter(Boolean)
 );
+const APPLE_AUDIENCES = new Set(
+  String(process.env.APPLE_AUDIENCES || process.env.APPLE_CLIENT_IDS || "uz.roadtest.app")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+);
+let appleJwks = null;
 
 function parseTicketRow(row) {
   return {
@@ -2101,29 +2108,37 @@ async function updateUserAuthProfile(userId, fields) {
       : null;
   const nextGoogleSub =
     fields.googleSub !== undefined ? String(fields.googleSub || "").trim() || null : current.google_sub || null;
+  const nextAppleSub =
+    fields.appleSub !== undefined ? String(fields.appleSub || "").trim() || null : current.apple_sub || null;
 
   const updated = await dbApi.get(
     `
       UPDATE users
       SET full_name = ?,
           email = ?,
-          google_sub = ?
+          google_sub = ?,
+          apple_sub = ?
       WHERE id = ?
       RETURNING *
     `,
-    [nextFullName || null, nextEmail, nextGoogleSub, String(userId)]
+    [nextFullName || null, nextEmail, nextGoogleSub, nextAppleSub, String(userId)]
   );
   return updated;
 }
 
-async function findUserByGoogleIdentity({ email, googleSub }) {
-  if (!email && !googleSub) return null;
+async function findUserByOAuthIdentity({ email, googleSub, appleSub }) {
+  if (!email && !googleSub && !appleSub) return null;
 
   const candidates = [];
   if (email) candidates.push(await dbApi.get("SELECT * FROM users WHERE LOWER(email) = LOWER(?)", [email]));
   if (googleSub) candidates.push(await dbApi.get("SELECT * FROM users WHERE google_sub = ?", [googleSub]));
+  if (appleSub) candidates.push(await dbApi.get("SELECT * FROM users WHERE apple_sub = ?", [appleSub]));
 
   return candidates.find(Boolean) || null;
+}
+
+async function findUserByGoogleIdentity({ email, googleSub }) {
+  return findUserByOAuthIdentity({ email, googleSub });
 }
 
 async function mergeUserAccounts(targetUserId, donorUserId) {
@@ -2276,6 +2291,45 @@ async function upsertGoogleUser({ fullName, email, googleSub, currentUserId = nu
   return created;
 }
 
+async function upsertAppleUser({ fullName, email, appleSub, currentUserId = null }) {
+  const normalizedEmail = normalizeEmail(email);
+  const cleanAppleSub = String(appleSub || "").trim();
+  const currentUser = currentUserId ? await dbApi.get("SELECT * FROM users WHERE id = ?", [String(currentUserId)]) : null;
+  if (!cleanAppleSub) throw new Error("Apple akkaunt ma'lumoti topilmadi");
+
+  if (currentUser) {
+    const donor = await findUserByOAuthIdentity({ email: normalizedEmail, appleSub: cleanAppleSub });
+    if (donor && String(donor.id) !== String(currentUser.id)) {
+      await mergeUserAccounts(currentUser.id, donor.id);
+    }
+
+    return updateUserAuthProfile(currentUser.id, {
+      fullName: fullName || currentUser.full_name || normalizedEmail || "Foydalanuvchi",
+      email: normalizedEmail || currentUser.email,
+      appleSub: cleanAppleSub
+    });
+  }
+
+  const existing = await findUserByOAuthIdentity({ email: normalizedEmail, appleSub: cleanAppleSub });
+  if (existing) {
+    return updateUserAuthProfile(existing.id, {
+      fullName: fullName || existing.full_name || normalizedEmail || "Foydalanuvchi",
+      email: normalizedEmail || existing.email,
+      appleSub: cleanAppleSub
+    });
+  }
+
+  const created = await dbApi.get(
+    `
+      INSERT INTO users (full_name, phone, email, apple_sub)
+      VALUES (?, NULL, ?, ?)
+      RETURNING *
+    `,
+    [String(fullName || normalizedEmail || "Foydalanuvchi"), normalizedEmail, cleanAppleSub]
+  );
+  return created;
+}
+
 async function verifyGoogleIdToken(idToken) {
   const token = String(idToken || "").trim();
   if (!token) throw new Error("Google token topilmadi");
@@ -2296,6 +2350,40 @@ async function verifyGoogleIdToken(idToken) {
     fullName: String(body.name || body.given_name || body.email || "").trim(),
     googleSub: String(body.sub || "").trim(),
     picture: String(body.picture || "").trim()
+  };
+}
+
+async function verifyAppleIdentityToken(identityToken) {
+  const token = String(identityToken || "").trim();
+  if (!token) throw new Error("Apple token topilmadi");
+
+  const { createRemoteJWKSet, jwtVerify } = await import("jose");
+  if (!appleJwks) {
+    appleJwks = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
+  }
+
+  let verified = null;
+  let lastError = null;
+  for (const audience of APPLE_AUDIENCES) {
+    try {
+      verified = await jwtVerify(token, appleJwks, {
+        issuer: "https://appleid.apple.com",
+        audience
+      });
+      break;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (!verified) {
+    throw new Error(lastError?.message || "Apple login tasdiqlanmadi");
+  }
+
+  const payload = verified.payload || {};
+  return {
+    email: String(payload.email || "").trim().toLowerCase(),
+    appleSub: String(payload.sub || "").trim()
   };
 }
 
@@ -2718,13 +2806,13 @@ function normalizeAnswerQuestion(question) {
 function buildAnswerQuestion({ kind, id, title, question, questionIndex }) {
   const normalized = normalizeAnswerQuestion(question);
   return {
+    ...normalized,
     id: `${kind}:${String(id)}:${normalized.id || questionIndex}`,
     kind,
     sourceId: String(id),
     sourceTitle: String(title || ""),
     sourceKind: kind,
-    questionIndex: Number(questionIndex) + 1,
-    ...normalized
+    questionIndex: Number(questionIndex) + 1
   };
 }
 
@@ -3115,6 +3203,24 @@ async function handleGoogleLogin(req, res) {
   }
 }
 
+async function handleAppleLogin(req, res) {
+  try {
+    const profile = await verifyAppleIdentityToken(req.body?.identityToken);
+    const currentUser = await getUserFromAccess(req).catch(() => null);
+    const fullName = String(req.body?.fullName || "").trim();
+    const email = normalizeEmail(req.body?.email || profile.email);
+    const user = await upsertAppleUser({
+      fullName: fullName || email || "Foydalanuvchi",
+      email,
+      appleSub: profile.appleSub,
+      currentUserId: currentUser?.id || null
+    });
+    await respondWithAuthUser(req, res, user);
+  } catch (e) {
+    res.status(e?.statusCode || 400).json({ error: e?.message || "Apple orqali kirish amalga oshmadi" });
+  }
+}
+
 async function handlePasswordResetRequest(req, res) {
   try {
     const phone = req.body?.phone;
@@ -3207,6 +3313,8 @@ app.post("/api/login", handleLogin);
 
 app.post("/api/auth/google", handleGoogleLogin);
 app.post("/api/login/google", handleGoogleLogin);
+app.post("/api/auth/apple", handleAppleLogin);
+app.post("/api/login/apple", handleAppleLogin);
 
 app.post("/api/auth/password-reset/request", handlePasswordResetRequest);
 app.post("/api/password-reset/request", handlePasswordResetRequest);

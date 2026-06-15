@@ -67,6 +67,7 @@ async function initDb(dbApi) {
       phone TEXT UNIQUE,
       email TEXT UNIQUE,
       google_sub TEXT UNIQUE,
+      apple_sub TEXT UNIQUE,
       password_hash TEXT,
       password_reset_required BOOLEAN NOT NULL DEFAULT FALSE,
       pro_until TIMESTAMPTZ NULL,
@@ -79,9 +80,11 @@ async function initDb(dbApi) {
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_required BOOLEAN NOT NULL DEFAULT FALSE;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT;`);
+  await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS apple_sub TEXT;`);
   await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;`);
   await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique_idx ON users (LOWER(email)) WHERE email IS NOT NULL;`);
   await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub_unique_idx ON users (google_sub) WHERE google_sub IS NOT NULL;`);
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS users_apple_sub_unique_idx ON users (apple_sub) WHERE apple_sub IS NOT NULL;`);
 
   await dbApi.run(`
     CREATE TABLE IF NOT EXISTS promo_requests (
