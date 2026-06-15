@@ -262,6 +262,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
             >
               <Send className="lucide" aria-hidden="true" />
             </a>
+            <a className="siteSocialLink sitePrivacyLink" href="/privacy" aria-label="Privacy Policy">
+              Privacy
+            </a>
           </div>
         </div>
       </footer>
@@ -318,7 +321,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       )}
 
       {profileOpen && (
-        <div className="modal" role="dialog" aria-modal="true">
+        <div className="modal profileModal" role="dialog" aria-modal="true">
           <div className="modalHeader">
             <div className="modalTitle">Profil</div>
             <button className="btn btn-ghost" type="button" onClick={() => setProfileOpen(false)}>

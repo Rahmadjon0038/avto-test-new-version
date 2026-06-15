@@ -14,6 +14,7 @@ import {
   Send,
   Video
 } from "lucide-react";
+import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -490,6 +491,13 @@ export default function AuthPage() {
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={registerMutation.isPending}>
                   Ro‘yxatdan o‘tish
                 </button>
+                <p className="authPrivacyNote">
+                  Ro‘yxatdan o‘tish orqali siz{" "}
+                  <Link href="/privacy" className="authPrivacyLink">
+                    Privacy Policy
+                  </Link>{" "}
+                  ga rozilik bildirasiz.
+                </p>
               </form>
             ) : (
               <form className="formGrid authForm" onSubmit={onLogin}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type TouchEvent } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, TimerReset } from "lucide-react";
@@ -234,6 +234,7 @@ export default function ExamPage() {
   const [examBootstrapping, setExamBootstrapping] = useState(false);
   const autoNextTimerRef = useRef<number | null>(null);
   const questionCardRef = useRef<HTMLDivElement | null>(null);
+  const swipeStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const autoStartRequestedRef = useRef(false);
   const autoSubmittedRef = useRef(false);
   const activeExamKeyRef = useRef<string | null>(null);
@@ -453,6 +454,46 @@ export default function ExamPage() {
   });
 
   const canFinalize = Boolean(exam && !completed && !expired && !examBootstrapping && !saveMutation.isPending);
+  const handlePreviousQuestion = useCallback(() => {
+    setIdx((current) => Math.max(0, current - 1));
+  }, []);
+  const handleNextQuestion = useCallback(() => {
+    setIdx((current) => Math.min(questions.length - 1, current + 1));
+  }, [questions.length]);
+  const handleTouchStart = useCallback((event: TouchEvent<HTMLElement>) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    swipeStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now()
+    };
+  }, []);
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent<HTMLElement>) => {
+      const start = swipeStartRef.current;
+      swipeStartRef.current = null;
+      if (!start || locked || zoomedImage || !currentQuestion) return;
+
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+
+      const deltaX = touch.clientX - start.x;
+      const deltaY = touch.clientY - start.y;
+      const deltaTime = Date.now() - start.time;
+
+      if (deltaTime > 700) return;
+      if (Math.abs(deltaX) < 60) return;
+      if (Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+
+      if (deltaX < 0) {
+        handleNextQuestion();
+      } else {
+        handlePreviousQuestion();
+      }
+    },
+    [currentQuestion, handleNextQuestion, handlePreviousQuestion, locked, zoomedImage]
+  );
 
   const resetMutation = useMutation({
     mutationFn: () => authFetch("/api/exam/reset", { method: "POST" }).then(jsonOrError),
@@ -525,7 +566,7 @@ export default function ExamPage() {
   }
 
   return (
-    <section className="view examView">
+    <section className="view examView" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className="topicHeader examHeader">
         <div className="topicHeaderLeft">
           <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
@@ -660,13 +701,13 @@ export default function ExamPage() {
           </button>
         </div>
         <div className="footerCenter">
-          <button className="btn btn-ghost" type="button" onClick={() => setIdx(Math.max(0, idx - 1))} disabled={idx <= 0 || locked}>
+          <button className="btn btn-ghost" type="button" onClick={handlePreviousQuestion} disabled={idx <= 0 || locked}>
             <ChevronLeft className="lucide" aria-hidden="true" /> Orqaga
           </button>
           <button
             className="btn btn-ghost"
             type="button"
-            onClick={() => setIdx(Math.min(questions.length - 1, idx + 1))}
+            onClick={handleNextQuestion}
             disabled={idx >= questions.length - 1 || locked}
           >
             Keyingi <ChevronRight className="lucide" aria-hidden="true" />

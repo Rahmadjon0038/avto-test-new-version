@@ -1,0 +1,87 @@
+{
+  "title": "Maxfiylik siyosati",
+  "lastUpdated": "2026-06-14",
+  "lastUpdatedLabel": "14 iyun 2026",
+  "intro": [
+    "Road Test sizning shaxsiy ma'lumotlaringizni hurmat qiladi va ularni himoya qilishga intiladi.",
+    "Ushbu siyosat platformadan foydalanganda qanday ma'lumotlar yig'ilishi, ular qanday ishlatilishi va qanday himoya qilinishini tushuntiradi.",
+    "Hozircha platformada pullik obuna, to'lov tizimi va reklama mavjud emas."
+  ],
+  "highlights": [
+    {
+      "title": "Bepul platforma",
+      "text": "Hozircha xizmatlar bepul va reklamalar yo'q."
+    },
+    {
+      "title": "Saqlanadigan progress",
+      "text": "Testlar, statistikalar va natijalar hisobingizda saqlanadi."
+    },
+    {
+      "title": "Maxfiylik nazorati",
+      "text": "Siz accountni o'chirish yoki ma'lumotni tuzatishni so'rashingiz mumkin."
+    }
+  ],
+  "sections": [
+    {
+      "title": "Qanday ma'lumotlar to'planadi",
+      "items": [
+        "Ism",
+        "Email address",
+        "Login credentials",
+        "O'qish va mashq qilish progressi",
+        "Test natijalari",
+        "Imtihon statistikasi",
+        "Ilova ishlashi uchun kerak bo'lgan device information"
+      ]
+    },
+    {
+      "title": "Ma'lumotlardan qanday foydalanamiz",
+      "items": [
+        "Foydalanuvchi accountini yaratish va boshqarish",
+        "Progress va natijalarni saqlash",
+        "Statistikalarni ko'rsatish",
+        "Platforma sifatini yaxshilash",
+        "Ta'lim xizmatlarini taqdim etish"
+      ]
+    },
+    {
+      "title": "Ma'lumotlarni ulashish",
+      "items": [
+        "Road Test foydalanuvchi ma'lumotlarini sotmaydi.",
+        "Ma'lumotlar faqat qonun talab qilganda yoki ruxsat etilgan holatlarda ulashilishi mumkin."
+      ]
+    },
+    {
+      "title": "Ma'lumotlar xavfsizligi",
+      "items": [
+        "Biz foydalanuvchi ma'lumotlarini himoya qilish uchun oqilona texnik va tashkiliy choralarni qo'llaymiz."
+      ]
+    },
+    {
+      "title": "Foydalanuvchi huquqlari",
+      "items": [
+        "Accountni o'chirishni so'rash",
+        "Ma'lumotlarni tuzatishni so'rash",
+        "Support bilan bog'lanish"
+      ]
+    },
+    {
+      "title": "Bolalar maxfiyligi",
+      "items": [
+        "Platforma ta'limiy maqsadlar uchun mo'ljallangan.",
+        "Agar yosh foydalanuvchi platformadan foydalansa, ma'lumotlarni kattalar nazorati ostida ishlatish tavsiya etiladi."
+      ]
+    },
+    {
+      "title": "Siyosatdagi o'zgarishlar",
+      "items": [
+        "Road Test kelajakda ushbu Maxfiylik siyosatini yangilashi mumkin.",
+        "Yangilangan versiya shu sahifada e'lon qilinadi."
+      ]
+    }
+  ],
+  "contact": {
+    "email": "support@road-test.uz",
+    "website": "https://road-test.uz/"
+  }
+}

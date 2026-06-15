@@ -3469,7 +3469,48 @@ body {
   justify-self: start;
 }
 
+.authPrivacyNote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.authPrivacyLink {
+  color: var(--primary);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 @media (max-width: 640px) {
+  .testSettingsOverlay {
+    align-items: end;
+    place-items: end center;
+    padding: 0 6px 0;
+  }
+
+  .testSettingsModal {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 12px);
+    overflow: auto;
+    border-radius: 22px 22px 0 0;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+    margin-bottom: 0;
+  }
+
+  .testSettingsModalHeader {
+    margin-bottom: 12px;
+  }
+
+  .testSettingsList {
+    gap: 10px;
+  }
+
+  .testSettingsRow {
+    padding: 12px;
+  }
+
   .heroGrid {
     display: block;
   }
@@ -3632,6 +3673,14 @@ body {
 
 .siteSocialLink:active {
   transform: translateY(1px);
+}
+
+.sitePrivacyLink {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .hint {
@@ -5301,6 +5350,97 @@ body {
   display: grid;
   gap: 10px;
   margin-top: 10px;
+}
+
+.profileModal {
+  width: min(92vw, 460px);
+}
+
+@media (max-width: 640px) {
+  .modalResult {
+    left: 50%;
+    top: auto;
+    bottom: calc(-1 * env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh + env(safe-area-inset-bottom));
+    overflow: auto;
+    border-radius: 22px 22px 0 0;
+    padding: 14px;
+  }
+
+  .modalResult .modalBody {
+    margin-top: 8px;
+    gap: 10px;
+  }
+
+  .modalResult .resultBlock {
+    margin-top: 0;
+  }
+
+  .modalResult .resultChartBlock {
+    min-height: 0;
+    padding: 14px 12px 16px;
+  }
+
+  .modalResult .resultChartRing {
+    width: 164px;
+    height: 164px;
+  }
+
+  .modalResult .resultCloseBtn {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  .profileModal {
+    top: 16px;
+    transform: translateX(-50%);
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+  }
+
+  .profileModal .modalBody {
+    margin-top: 8px;
+  }
+
+  .profileModal .profileHero {
+    padding: 12px;
+  }
+
+  .profileModal .profileBlock {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .testSettingsOverlay {
+    align-items: end;
+    place-items: end center;
+    padding: 0 6px 0;
+  }
+
+  .testSettingsModal {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh + env(safe-area-inset-bottom));
+    overflow: auto;
+    border-radius: 22px 22px 0 0;
+    padding: 14px;
+    margin-bottom: calc(-1 * env(safe-area-inset-bottom));
+  }
+
+  .testSettingsModalHeader {
+    margin-bottom: 12px;
+  }
+
+  .testSettingsList {
+    gap: 10px;
+  }
+
+  .testSettingsRow {
+    padding: 12px;
+  }
 }
 
 .modalBodyResult {
