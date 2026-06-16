@@ -2392,6 +2392,11 @@ function generateTemporaryPassword(length = 6) {
   return digits.slice(0, length);
 }
 
+function generateAdminTemporaryPassword() {
+  const digits = crypto.randomInt(0, 100000).toString().padStart(5, "0");
+  return `RT-${digits}`;
+}
+
 function createMailTransport() {
   if (!nodemailer) return null;
   const host = String(process.env.SMTP_HOST || "").trim();
@@ -3155,13 +3160,30 @@ function getAudioExtensionFromFile(file) {
 async function respondWithAuthUser(req, res, user) {
   const phoneUi = user.phone ? formatUzPhoneForUi(user.phone) : null;
   const tokens = await issueTokensForUser(user.id, req, res);
+  const passwordResetRequired = Boolean(user.password_reset_required || user.must_change_password);
   res.json({
     ok: true,
     accessToken: tokens.accessToken,
-    user: { ...user, phone: phoneUi },
+    user: {
+      ...user,
+      phone: phoneUi,
+      password_reset_required: passwordResetRequired,
+      must_change_password: passwordResetRequired
+    },
     isPro: isUserPro(user),
-    mustChangePassword: Boolean(user.password_reset_required)
+    mustChangePassword: passwordResetRequired
   });
+}
+
+function publicAuthUser(user) {
+  const phoneUi = user.phone ? formatUzPhoneForUi(user.phone) : null;
+  const passwordResetRequired = Boolean(user.password_reset_required || user.must_change_password);
+  return {
+    ...user,
+    phone: phoneUi,
+    password_reset_required: passwordResetRequired,
+    must_change_password: passwordResetRequired
+  };
 }
 
 async function handleRegister(req, res) {
@@ -3222,32 +3244,10 @@ async function handleAppleLogin(req, res) {
 }
 
 async function handlePasswordResetRequest(req, res) {
-  try {
-    const phone = req.body?.phone;
-    const normalizedPhone = normalizeUzPhone(phone);
-    if (!normalizedPhone) return res.status(400).json({ error: "Telefon raqam kiritilishi kerak" });
-
-    const user = await dbApi.get("SELECT * FROM users WHERE phone = ?", [normalizedPhone]);
-    if (!user) return res.status(404).json({ error: "Bu telefon raqam bo‘yicha foydalanuvchi topilmadi" });
-
-    const temporaryPassword = generateTemporaryPassword(6);
-    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
-
-    await dbApi.run(
-      "UPDATE users SET password_hash = ?, password_reset_required = TRUE WHERE id = ?",
-      [passwordHash, String(user.id)]
-    );
-
-    res.json({
-      ok: true,
-      sent: true,
-      temporaryPassword,
-      message:
-        "Bir martalik parol yaratildi. Tizimga kirgandan keyin parolni albatta almashtiring."
-    });
-  } catch (e) {
-    res.status(e?.statusCode || 400).json({ error: e?.message || "Parolni tiklash amalga oshmadi" });
-  }
+  res.status(410).json({
+    error:
+      "Parolni tiklash uchun Telegram orqali adminga murojaat qiling. Vaqtinchalik parolni faqat admin yaratadi."
+  });
 }
 
 async function handlePasswordChange(req, res) {
@@ -3257,24 +3257,60 @@ async function handlePasswordChange(req, res) {
 
     const currentPassword = String(req.body?.currentPassword || "").trim();
     const nextPassword = String(req.body?.newPassword || "").trim();
-    if (!currentPassword) return res.status(400).json({ error: "Eski parolni kiriting" });
     if (nextPassword.length < 6) return res.status(400).json({ error: "Kamida 6 ta belgidan iborat yangi parol kiriting" });
 
     const row = await dbApi.get("SELECT * FROM users WHERE id = ?", [String(user.id)]);
     if (!row?.password_hash) return res.status(400).json({ error: "Parol topilmadi" });
 
-    const ok = await bcrypt.compare(currentPassword, String(row.password_hash));
-    if (!ok) return res.status(401).json({ error: "Eski parol noto‘g‘ri" });
+    if (!row.password_reset_required && !row.must_change_password) {
+      if (!currentPassword) return res.status(400).json({ error: "Eski parolni kiriting" });
+      const ok = await bcrypt.compare(currentPassword, String(row.password_hash));
+      if (!ok) return res.status(401).json({ error: "Eski parol noto‘g‘ri" });
+    }
 
     const passwordHash = await bcrypt.hash(nextPassword, 10);
     await dbApi.run(
-      "UPDATE users SET password_hash = ?, password_reset_required = FALSE WHERE id = ?",
+      "UPDATE users SET password_hash = ?, password_reset_required = FALSE, must_change_password = FALSE WHERE id = ?",
       [passwordHash, String(user.id)]
     );
 
     res.json({ ok: true, message: "Parol muvaffaqiyatli almashtirildi" });
   } catch (e) {
     res.status(e?.statusCode || 400).json({ error: e?.message || "Parol almashtirilmadi" });
+  }
+}
+
+async function handleAdminResetPassword(req, res) {
+  try {
+    const admin = await getAdminFromAccess(req);
+    if (!admin) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+
+    const targetUserId = String(req.params.userId || req.params.id || "").trim();
+    if (!targetUserId) return res.status(400).json({ error: "Foydalanuvchi topilmadi" });
+
+    const target = await dbApi.get("SELECT id, full_name, phone, is_admin FROM users WHERE CAST(id AS TEXT) = ? LIMIT 1", [
+      targetUserId
+    ]);
+    if (!target) return res.status(404).json({ error: "Foydalanuvchi topilmadi" });
+
+    const temporaryPassword = generateAdminTemporaryPassword();
+    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+    await dbApi.run("UPDATE users SET password_hash = ?, password_reset_required = TRUE, must_change_password = TRUE WHERE id = ?", [
+      passwordHash,
+      String(target.id)
+    ]);
+
+    const telegramMessage = `Salom. Road Test accountingiz uchun vaqtinchalik parol: ${temporaryPassword}. Iltimos, shu parol bilan kiring va darhol yangi parol qo‘ying.`;
+    res.json({
+      ok: true,
+      temporaryPassword,
+      mustChangePassword: true,
+      must_change_password: true,
+      password_reset_required: true,
+      telegramMessage
+    });
+  } catch (e) {
+    res.status(e?.statusCode || 400).json({ error: e?.message || "Parol reset qilinmadi" });
   }
 }
 
@@ -3320,6 +3356,7 @@ app.post("/api/auth/password-reset/request", handlePasswordResetRequest);
 app.post("/api/password-reset/request", handlePasswordResetRequest);
 app.post("/api/auth/password-change", handlePasswordChange);
 app.post("/api/password-change", handlePasswordChange);
+app.post("/auth/change-password", handlePasswordChange);
 
 app.delete("/api/auth/account", handleDeleteAccount);
 app.delete("/api/account", handleDeleteAccount);
@@ -3356,20 +3393,17 @@ app.post("/api/auth/refresh", async (req, res) => {
 
 app.post("/api/auth", requireUser, async (req, res) => {
   const u = req.user;
-  const phoneUi = u.phone ? formatUzPhoneForUi(u.phone) : null;
-  res.json({ user: { ...u, phone: phoneUi }, isPro: isUserPro(u) });
+  res.json({ user: publicAuthUser(u), isPro: isUserPro(u) });
 });
 
 app.get("/api/auth/me", requireUser, async (req, res) => {
   const u = req.user;
-  const phoneUi = u.phone ? formatUzPhoneForUi(u.phone) : null;
-  res.json({ user: { ...u, phone: phoneUi }, isPro: isUserPro(u) });
+  res.json({ user: publicAuthUser(u), isPro: isUserPro(u) });
 });
 
 app.get("/api/me", requireUser, async (req, res) => {
   const u = req.user;
-  const phoneUi = u.phone ? formatUzPhoneForUi(u.phone) : null;
-  res.json({ user: { ...u, phone: phoneUi }, isPro: isUserPro(u) });
+  res.json({ user: publicAuthUser(u), isPro: isUserPro(u) });
 });
 
 app.get("/api/topics", async (req, res) => {
@@ -4470,7 +4504,7 @@ app.get("/api/admin/users", async (req, res) => {
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const rows = await dbApi.all(
     `
-      SELECT id, full_name, phone, pro_until, created_at, is_admin
+      SELECT id, full_name, phone, pro_until, created_at, is_admin, password_reset_required, must_change_password
       FROM users
       ORDER BY is_admin DESC, created_at DESC, id DESC
     `
@@ -4482,10 +4516,15 @@ app.get("/api/admin/users", async (req, res) => {
       phone: row.phone ? String(row.phone) : "",
       pro_until: row.pro_until ? String(row.pro_until) : null,
       created_at: row.created_at ? String(row.created_at) : null,
-      is_admin: row.is_admin === true
+      is_admin: row.is_admin === true,
+      password_reset_required: row.password_reset_required === true || row.must_change_password === true,
+      must_change_password: row.password_reset_required === true || row.must_change_password === true
     }))
   });
 });
+
+app.post("/api/admin/users/:userId/reset-password", handleAdminResetPassword);
+app.post("/admin/users/:userId/reset-password", handleAdminResetPassword);
 
 app.delete("/api/admin/users/:userId", async (req, res) => {
   const admin = await getAdminFromAccess(req);

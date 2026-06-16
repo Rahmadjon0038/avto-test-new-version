@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, Search, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
+import { Copy, KeyRound, RefreshCw, Search, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -14,6 +14,13 @@ type AdminUser = {
   pro_until: string | null;
   created_at: string | null;
   is_admin: boolean;
+  password_reset_required?: boolean;
+};
+
+type ResetPasswordResult = {
+  user: AdminUser;
+  temporaryPassword: string;
+  telegramMessage: string;
 };
 
 function formatDate(value: string | null) {
@@ -33,6 +40,7 @@ export default function AdminUsersPage() {
   const { authFetch } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [resetResult, setResetResult] = useState<ResetPasswordResult | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ["admin-users"],
@@ -72,6 +80,33 @@ export default function AdminUsersPage() {
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (user: AdminUser) => {
+      const res = await authFetch(`/api/admin/users/${encodeURIComponent(user.id)}/reset-password`, { method: "POST" });
+      const data = await jsonOrError(res);
+      return {
+        user,
+        temporaryPassword: String(data.temporaryPassword || ""),
+        telegramMessage: String(data.telegramMessage || "")
+      };
+    },
+    onSuccess: async (result) => {
+      setResetResult(result);
+      toast.success("Vaqtinchalik parol yaratildi");
+      await qc.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (error: any) => toast.error(error?.message || "Parol reset qilinmadi")
+  });
+
+  async function copyText(text: string, successMessage: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(successMessage);
+    } catch {
+      toast.error("Nusxalanmadi");
+    }
+  }
 
   return (
     <section className="adminSectionPage">
@@ -134,6 +169,15 @@ export default function AdminUsersPage() {
 
             <div className="adminUserActions">
               <button
+                className="btn btn-primary btn-sm"
+                type="button"
+                onClick={() => resetPasswordMutation.mutate(user)}
+                disabled={resetPasswordMutation.isPending}
+                title="Vaqtinchalik parol yaratish"
+              >
+                <KeyRound className="lucide" aria-hidden="true" /> Reset Password
+              </button>
+              <button
                 className="btn btn-danger btn-sm"
                 type="button"
                 onClick={() => {
@@ -160,10 +204,58 @@ export default function AdminUsersPage() {
                 <span className="muted">Pro muddati</span>
                 <strong>{formatDate(user.pro_until)}</strong>
               </div>
+              <div className="adminUserRow">
+                <span className="muted">Parol holati</span>
+                <strong>{user.password_reset_required ? "Almashtirish talab qilinadi" : "Oddiy"}</strong>
+              </div>
             </div>
           </article>
         ))}
       </div>
+      {resetResult ? (
+        <>
+          <div className="modalOverlay" onClick={() => setResetResult(null)} />
+          <div className="modal" role="dialog" aria-modal="true">
+            <div className="modalHeader">
+              <div className="modalTitle">Vaqtinchalik parol yaratildi</div>
+              <button className="btn btn-ghost" type="button" onClick={() => setResetResult(null)}>
+                ✕
+              </button>
+            </div>
+            <div className="modalBody">
+              <div className="authResetNotice" style={{ marginTop: 0 }}>
+                <div className="authResetTitle">Foydalanuvchi</div>
+                <div className="authResetText">{resetResult.user.full_name || resetResult.user.phone || `ID: ${resetResult.user.id}`}</div>
+              </div>
+              <div className="profileRow profileRowCard">
+                <div className="profileKey">
+                  <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
+                  Vaqtinchalik parol
+                </div>
+                <div className="profileVal" style={{ fontSize: 18, letterSpacing: 1 }}>{resetResult.temporaryPassword}</div>
+              </div>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => copyText(resetResult.temporaryPassword, "Parol nusxalandi")}
+              >
+                <Copy className="lucide" aria-hidden="true" /> Parolni nusxalash
+              </button>
+              <div className="authResetNotice">
+                <div className="authResetTitle">Telegram xabar</div>
+                <div className="authResetText">{resetResult.telegramMessage}</div>
+              </div>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => copyText(resetResult.telegramMessage, "Telegram xabar nusxalandi")}
+              >
+                <Copy className="lucide" aria-hidden="true" /> Telegram xabarni nusxalash
+              </button>
+            </div>
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }

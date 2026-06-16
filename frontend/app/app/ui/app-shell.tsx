@@ -74,7 +74,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
   });
   const isAdmin = Boolean(me?.is_admin || user?.is_admin || meQuery.data?.user?.is_admin);
   const mustChangePassword = Boolean(
-    me?.password_reset_required || user?.password_reset_required || meQuery.data?.user?.password_reset_required
+    me?.password_reset_required ||
+      me?.must_change_password ||
+      user?.password_reset_required ||
+      user?.must_change_password ||
+      meQuery.data?.user?.password_reset_required ||
+      meQuery.data?.user?.must_change_password
   );
 
   useEffect(() => {
@@ -123,7 +128,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }
 
   const passwordChangeMutation = useMutation({
-    mutationFn: async (payload: { currentPassword: string; newPassword: string }) => {
+    mutationFn: async (payload: { currentPassword?: string; newPassword: string }) => {
       const res = await authFetch("/api/auth/password-change", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +137,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       return jsonOrError(res);
     },
     onSuccess: () => {
-      const nextMe = me ? { ...me, password_reset_required: false } : me;
+      const nextMe = me ? { ...me, password_reset_required: false, must_change_password: false } : me;
       if (nextMe) {
         setMe(nextMe);
         setUser(nextMe);
@@ -146,7 +151,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   });
 
   function submitPasswordChange() {
-    if (!passwordCurrent.trim()) {
+    if (!mustChangePassword && !passwordCurrent.trim()) {
       toast.error("Eski parolni kiriting");
       return;
     }
@@ -158,10 +163,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
       toast.error("Yangi parollar mos emas");
       return;
     }
-    passwordChangeMutation.mutate({
-      currentPassword: passwordCurrent.trim(),
-      newPassword: passwordNext.trim()
-    });
+    passwordChangeMutation.mutate(
+      mustChangePassword
+        ? { newPassword: passwordNext.trim() }
+        : { currentPassword: passwordCurrent.trim(), newPassword: passwordNext.trim() }
+    );
   }
 
   const logoutMutation = useMutation({
@@ -275,7 +281,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           onClick={() => {
             setSubOpen(false);
             setProfileOpen(false);
-            setPasswordChangeOpen(false);
+            if (!mustChangePassword) setPasswordChangeOpen(false);
           }}
         />
       )}
@@ -409,28 +415,32 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className="modal" role="dialog" aria-modal="true">
           <div className="modalHeader">
             <div className="modalTitle">Parolni almashtirish</div>
-            <button className="btn btn-ghost" type="button" onClick={() => setPasswordChangeOpen(false)}>
-              ✕
-            </button>
+            {!mustChangePassword ? (
+              <button className="btn btn-ghost" type="button" onClick={() => setPasswordChangeOpen(false)}>
+                ✕
+              </button>
+            ) : null}
           </div>
           <div className="modalBody">
             <div className="profileBlock" style={{ marginTop: 0 }}>
-              <div className="profileRow profileRowCard">
-                <div className="profileKey">
-                  <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
-                  Eski parol
+              {!mustChangePassword ? (
+                <div className="profileRow profileRowCard">
+                  <div className="profileKey">
+                    <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
+                    Eski parol
+                  </div>
+                  <div className="profileVal" style={{ width: "100%" }}>
+                    <input
+                      className="input"
+                      type={passwordVisible ? "text" : "password"}
+                      value={passwordCurrent}
+                      onChange={(e) => setPasswordCurrent(e.target.value)}
+                      placeholder="Eski parol"
+                      style={{ width: "100%" }}
+                    />
+                  </div>
                 </div>
-                <div className="profileVal" style={{ width: "100%" }}>
-                  <input
-                    className="input"
-                    type={passwordVisible ? "text" : "password"}
-                    value={passwordCurrent}
-                    onChange={(e) => setPasswordCurrent(e.target.value)}
-                    placeholder="Eski parol"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-              </div>
+              ) : null}
               <div className="profileRow profileRowCard">
                 <div className="profileKey">
                   <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />

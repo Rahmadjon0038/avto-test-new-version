@@ -74,8 +74,7 @@ export default function AuthPage() {
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [resetInfo, setResetInfo] = useState<string | null>(null);
-  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const googleButtonLoadedRef = useRef(false);
 
@@ -174,8 +173,7 @@ export default function AuthPage() {
   function openAuth(nextTab: Tab = "login") {
     setTab(nextTab);
     setAuthOpen(true);
-    setResetInfo(null);
-    setTemporaryPassword(null);
+    setForgotOpen(false);
   }
 
   function closeAuth() {
@@ -251,47 +249,15 @@ export default function AuthPage() {
     onError: (e: any) => toast.error(e?.message || "Xatolik")
   });
 
-  const resetMutation = useMutation({
-    mutationFn: (payload: { phone: string }) =>
-      fetch("/api/auth/password-reset/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }).then(jsonOrError),
-    onSuccess: (data: any) => {
-      const tempPassword = String(data?.temporaryPassword || "");
-      if (tempPassword) {
-        setPasswordLogin(tempPassword);
-        setTemporaryPassword(tempPassword);
-      }
-      setResetInfo(
-        tempPassword
-          ? `Bir martalik parol: ${tempPassword}. Tizimga kirgandan keyin darhol parolni almashtiring.`
-          : String(data?.message || "Bir martalik parol yaratildi. Tizimga kirgandan keyin parolni almashtiring.")
-      );
-      toast.success("Bir martalik parol yaratildi");
-      setTab("login");
-    },
-    onError: (e: any) => toast.error(e?.message || "Parolni tiklash amalga oshmadi")
-  });
-
-  function requestTempPassword() {
+  function forgotTelegramUrl() {
     const phoneDigits = uzLocalDigits(phoneLoginLocal);
-    if (phoneDigits.length !== 9) {
-      toast.error("Telefon raqam formati noto‘g‘ri");
-      return;
-    }
-    resetMutation.mutate({ phone: `+998${phoneDigits}` });
+    const phone = phoneDigits.length === 9 ? `+998${phoneDigits}` : "";
+    const text = `Salom, men Road Test ilovasida parolimni unutdim. Telefon raqamim: ${phone}`;
+    return `https://t.me/roadtest_support?text=${encodeURIComponent(text)}`;
   }
 
-  async function copyTemporaryPassword() {
-    if (!temporaryPassword) return;
-    try {
-      await navigator.clipboard.writeText(temporaryPassword);
-      toast.success("Parol nusxalandi");
-    } catch {
-      toast.error("Parol nusxalanmadi");
-    }
+  function openForgotTelegram() {
+    window.open(forgotTelegramUrl(), "_blank", "noopener,noreferrer");
   }
 
   async function onLogin(e: React.FormEvent) {
@@ -540,29 +506,9 @@ export default function AuthPage() {
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={loginMutation.isPending}>
                   Kirish
                 </button>
-                <button
-                  className="authForgotBtn"
-                  type="button"
-                  onClick={requestTempPassword}
-                  disabled={resetMutation.isPending}
-                >
-                  {resetMutation.isPending ? "Kutilmoqda..." : "Parolni unutdingizmi?"}
+                <button className="authForgotBtn" type="button" onClick={() => setForgotOpen(true)}>
+                  Parolni unutdingizmi?
                 </button>
-                {resetInfo ? (
-                  <div className="authResetNotice">
-                    <div className="authResetTitle">Diqqat</div>
-                    <div className="authResetText">{resetInfo}</div>
-                    {temporaryPassword ? (
-                      <button
-                        className="authCopyBtn"
-                        type="button"
-                        onClick={copyTemporaryPassword}
-                      >
-                        Parolni nusxalash
-                      </button>
-                    ) : null}
-                  </div>
-                ) : null}
               </form>
             )}
 
@@ -571,6 +517,33 @@ export default function AuthPage() {
                 <span>yoki Google bilan</span>
               </div>
               <div className="googleButtonMount" ref={googleButtonRef} />
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {forgotOpen ? (
+        <div className="authModalOverlay authForgotOverlay" role="presentation" onClick={() => setForgotOpen(false)}>
+          <div className="authForgotModal" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title" onClick={(event) => event.stopPropagation()}>
+            <div className="authModalHeader">
+              <div className="authModalTitleWrap">
+                <div className="authModalTitle" id="forgot-password-title">
+                  Parolni tiklash
+                </div>
+              </div>
+              <button className="btn btn-ghost" type="button" onClick={() => setForgotOpen(false)}>
+                ✕
+              </button>
+            </div>
+            <p className="authForgotText">
+              Agar parolingizni unutgan bo‘lsangiz, admin bilan Telegram orqali bog‘laning. Admin sizga vaqtinchalik parol beradi.
+            </p>
+            <button className="authTelegramBtn" type="button" onClick={openForgotTelegram}>
+              <Send className="lucide" aria-hidden="true" />
+              Telegram orqali adminga yozish
+            </button>
+            <div className="authResetNotice">
+              <div className="authResetTitle">Izoh</div>
+              <div className="authResetText">Adminga aynan shu xabarni yuboring. Telefon raqamingiz orqali accountingiz topiladi.</div>
             </div>
           </div>
         </div>
