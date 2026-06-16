@@ -253,7 +253,9 @@ export default function AuthPage() {
     const phoneDigits = uzLocalDigits(phoneLoginLocal);
     const phone = phoneDigits.length === 9 ? `+998${phoneDigits}` : "";
     const text = `Salom, men Road Test ilovasida parolimni unutdim. Telefon raqamim: ${phone}`;
-    return `https://t.me/roadtest_support?text=${encodeURIComponent(text)}`;
+    // Admin username: @Rahmadjonn (strip leading @ for t.me link)
+    const adminUsername = String("Rahmadjonn").replace(/^@/, "");
+    return `https://t.me/${encodeURIComponent(adminUsername)}?text=${encodeURIComponent(text)}`;
   }
 
   function openForgotTelegram() {
