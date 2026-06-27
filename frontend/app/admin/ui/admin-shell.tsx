@@ -34,9 +34,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       <aside className="adminSidebar">
         <div className="adminBrand" onClick={() => router.push("/app")} role="button" tabIndex={0}>
           <div className="adminBrandText">
-            <div className="textLogo textLogoAdmin" aria-label="ROAD TEST">
-              <span className="textLogoRoad">ROAD</span>
-              <span className="textLogoTest">TEST</span>
+            <div className="textLogo textLogoAdmin" aria-label="Topshidi">
+              <span className="textLogoRoad">Topshidi</span>
             </div>
             <div className="adminBrandSub">Admin panel</div>
           </div>
@@ -47,8 +46,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             const href = section.key === "overview" ? "/admin" : `/admin/${section.key}`;
             const active = isActive(href);
             const Icon = section.icon;
-              return (
-                <Link key={section.key} href={href} className={`adminNavItem ${active ? "active" : ""}`}>
+            return (
+              <Link key={section.key} href={href} className={`adminNavItem ${active ? "active" : ""}`}>
                 <span className={`adminNavIcon icon-${section.key}`}>
                   <Icon className="lucide" aria-hidden="true" />
                 </span>

@@ -252,7 +252,7 @@ export default function AuthPage() {
   function forgotTelegramUrl() {
     const phoneDigits = uzLocalDigits(phoneLoginLocal);
     const phone = phoneDigits.length === 9 ? `+998${phoneDigits}` : "";
-    const text = `Salom, men Road Test ilovasida parolimni unutdim. Telefon raqamim: ${phone}`;
+    const text = `Salom, men Topshidi ilovasida parolimni unutdim. Telefon raqamim: ${phone}`;
     // Admin username: @Rahmadjonn (strip leading @ for t.me link)
     const adminUsername = String("Rahmadjonn").replace(/^@/, "");
     return `https://t.me/${encodeURIComponent(adminUsername)}?text=${encodeURIComponent(text)}`;
@@ -281,9 +281,8 @@ export default function AuthPage() {
       <header className="navbar">
         <div className="navbarInner">
           <div className="brand">
-            <div className="textLogo textLogoAuth" aria-label="ROAD TEST">
-              <span className="textLogoRoad">ROAD</span>
-              <span className="textLogoTest">TEST</span>
+            <div className="textLogo textLogoAuth" aria-label="Topshidi">
+              <span className="textLogoRoad">Topshidi</span>
             </div>
           </div>
           <div className="navRight">
@@ -373,7 +372,7 @@ export default function AuthPage() {
               </div>
             </section>
 
-            <div className="seoHidden" aria-hidden="true">avto test road test roadt test avto imtihon haydovchilik testlari biletlar bo‘yicha test PDD test yo'l harakati qoidalari driving test</div>
+            <div className="seoHidden" aria-hidden="true">avto test topshidi avto imtihon haydovchilik testlari biletlar bo‘yicha test PDD test yo'l harakati qoidalari driving test</div>
           </section>
         </div>
       </main>
@@ -381,8 +380,7 @@ export default function AuthPage() {
       <footer className="siteFooter">
         <div className="siteFooterInner">
           <div className="siteFooterLogo">
-            <span className="textLogoRoad">ROAD</span>
-            <span className="textLogoTest">TEST</span>
+            <span className="textLogoRoad">Topshidi</span>
           </div>
           <div className="siteFooterLinks" aria-label="Social links">
             <a className="siteSocialLink" href="#" aria-label="Instagram">

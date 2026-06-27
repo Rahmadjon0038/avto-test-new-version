@@ -3300,7 +3300,7 @@ async function handleAdminResetPassword(req, res) {
       String(target.id)
     ]);
 
-    const telegramMessage = `Salom. Road Test accountingiz uchun vaqtinchalik parol: ${temporaryPassword}. Iltimos, shu parol bilan kiring va darhol yangi parol qo‘ying.`;
+    const telegramMessage = `Salom. Topshidi accountingiz uchun vaqtinchalik parol: ${temporaryPassword}. Iltimos, shu parol bilan kiring va darhol yangi parol qo‘ying.`;
     res.json({
       ok: true,
       temporaryPassword,

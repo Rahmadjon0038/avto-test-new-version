@@ -58,7 +58,7 @@ const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: siteName,
-  alternateName: ["Avto Test", "Road Test", "Avto Imtihon"],
+  alternateName: ["Avto Test", "Avto Imtihon", "Topshidi"],
   url: siteUrl.toString(),
   description: siteDescription,
   inLanguage: "uz"
@@ -68,7 +68,7 @@ const webApplicationJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: siteName,
-  alternateName: ["Avto Test", "Road Test", "Avto Imtihon"],
+  alternateName: ["Avto Test", "Avto Imtihon", "Topshidi"],
   url: siteUrl.toString(),
   applicationCategory: "EducationalApplication",
   operatingSystem: "Web",

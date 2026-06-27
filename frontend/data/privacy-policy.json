@@ -3,7 +3,7 @@
   "lastUpdated": "2026-06-14",
   "lastUpdatedLabel": "14 iyun 2026",
   "intro": [
-    "Road Test sizning shaxsiy ma'lumotlaringizni hurmat qiladi va ularni himoya qilishga intiladi.",
+    "Topshidi sizning shaxsiy ma'lumotlaringizni hurmat qiladi va ularni himoya qilishga intiladi.",
     "Ushbu siyosat platformadan foydalanganda qanday ma'lumotlar yig'ilishi, ular qanday ishlatilishi va qanday himoya qilinishini tushuntiradi.",
     "Hozircha platformada pullik obuna, to'lov tizimi va reklama mavjud emas."
   ],
@@ -47,7 +47,7 @@
     {
       "title": "Ma'lumotlarni ulashish",
       "items": [
-        "Road Test foydalanuvchi ma'lumotlarini sotmaydi.",
+        "Topshidi foydalanuvchi ma'lumotlarini sotmaydi.",
         "Ma'lumotlar faqat qonun talab qilganda yoki ruxsat etilgan holatlarda ulashilishi mumkin."
       ]
     },
@@ -75,7 +75,7 @@
     {
       "title": "Siyosatdagi o'zgarishlar",
       "items": [
-        "Road Test kelajakda ushbu Maxfiylik siyosatini yangilashi mumkin.",
+        "Topshidi kelajakda ushbu Maxfiylik siyosatini yangilashi mumkin.",
         "Yangilangan versiya shu sahifada e'lon qilinadi."
       ]
     }
