@@ -207,8 +207,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <header className="navbar">
         <div className="navbarInner">
           <div className="brand" role="button" tabIndex={0} onClick={() => router.push("/app")}>
-            <div className="textLogo" aria-label="Topshidi">
-              <span className="textLogoRoad">Topshidi</span>
+            <div className="textLogo" aria-label="Topshirdi">
+              <span className="textLogoRoad">Topshirdi</span>
             </div>
           </div>
 
@@ -241,7 +241,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <footer className="siteFooter">
         <div className="siteFooterInner">
           <div className="siteFooterLogo">
-            <span className="textLogoRoad">Topshidi</span>
+            <span className="textLogoRoad">Topshirdi</span>
           </div>
           <div className="siteFooterLinks" aria-label="Social links">
             <a

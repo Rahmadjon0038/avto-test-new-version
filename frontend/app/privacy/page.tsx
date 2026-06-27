@@ -17,7 +17,7 @@ import styles from "./page.module.css";
 
 const siteUrl = getSiteUrl();
 const siteDescription =
-  "Topshidi maxfiylik siyosati: qaysi ma'lumotlar to'planishi, ulardan foydalanish, ulashish va foydalanuvchi huquqlari.";
+  "Topshirdi maxfiylik siyosati: qaysi ma'lumotlar to'planishi, ulardan foydalanish, ulashish va foydalanuvchi huquqlari.";
 
 export const metadata: Metadata = {
   title: `${privacyPolicy.title} | ${siteName}`,
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
         <div className={styles.heroTop}>
           <div className={styles.brandPill}>
             <ShieldCheck size={18} />
-            <span>Topshidi</span>
+            <span>Topshirdi</span>
           </div>
           <a className={styles.downloadBtn} href="/privacy-policy.pdf" download>
             <Download size={18} />
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
             <p className={styles.kicker}>Rasmiy hujjat</p>
             <h1>{privacyPolicy.title}</h1>
             <p className={styles.lead}>
-              Topshidi foydalanuvchi ma'lumotlarini qanday yig‘ishi, saqlashi va himoya qilishini ochiq tushuntiradi.
+              Topshirdi foydalanuvchi ma'lumotlarini qanday yig‘ishi, saqlashi va himoya qilishini ochiq tushuntiradi.
             </p>
             <div className={styles.metaRow}>
               <span className={styles.metaChip}>

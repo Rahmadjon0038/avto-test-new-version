@@ -34,8 +34,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       <aside className="adminSidebar">
         <div className="adminBrand" onClick={() => router.push("/app")} role="button" tabIndex={0}>
           <div className="adminBrandText">
-            <div className="textLogo textLogoAdmin" aria-label="Topshidi">
-              <span className="textLogoRoad">Topshidi</span>
+            <div className="textLogo textLogoAdmin" aria-label="Topshirdi">
+              <span className="textLogoRoad">Topshirdi</span>
             </div>
             <div className="adminBrandSub">Admin panel</div>
           </div>

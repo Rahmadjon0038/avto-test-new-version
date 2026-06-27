@@ -1,9 +1,9 @@
-export const siteName = "Topshidi";
+export const siteName = "Topshirdi";
 export const siteDescription =
-  "Topshidi — haydovchilikka tayyorlanish uchun avto test, avto imtihon, biletlar, xatolarni ko‘rish, imtihon rejimi va video darslar platformasi.";
+  "Topshirdi — haydovchilikka tayyorlanish uchun avto test, avto imtihon, biletlar, xatolarni ko‘rish, imtihon rejimi va video darslar platformasi.";
 export const siteKeywords = [
   "avto test",
-  "Topshidi",
+  "Topshirdi",
   "avto imtihon",
   "avto testlar",
   "haydovchilikka tayyorlanish",
@@ -19,7 +19,7 @@ export const siteKeywords = [
   "driving test",
   "uzbek avto test",
   "uzbek driving test",
-  "topshidi"
+  "topshirdi"
 ];
 
 export function getSiteUrl() {

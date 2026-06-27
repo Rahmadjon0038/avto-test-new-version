@@ -3300,7 +3300,7 @@ async function handleAdminResetPassword(req, res) {
       String(target.id)
     ]);
 
-    const telegramMessage = `Salom. Topshidi accountingiz uchun vaqtinchalik parol: ${temporaryPassword}. Iltimos, shu parol bilan kiring va darhol yangi parol qo‘ying.`;
+    const telegramMessage = `Salom. Topshirdi accountingiz uchun vaqtinchalik parol: ${temporaryPassword}. Iltimos, shu parol bilan kiring va darhol yangi parol qo‘ying.`;
     res.json({
       ok: true,
       temporaryPassword,
@@ -4941,7 +4941,7 @@ app.get("/api/video-stream", async (req, res) => {
     const upstream = await fetch(parsed.toString(), {
       redirect: "follow",
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; RoadTest/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; Topshirdi/1.0)",
         Referer: "https://road-test.uz/",
         Origin: "https://road-test.uz",
         Accept: "*/*"
