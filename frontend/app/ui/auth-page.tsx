@@ -131,6 +131,18 @@ export default function AuthPage() {
   }, [authReady, accessToken, router]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const auth = params.get("auth");
+    if (auth === "login" || auth === "register") {
+      openAuth(auth);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("auth");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     document.body.style.overflow = authOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";

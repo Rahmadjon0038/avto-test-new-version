@@ -8,7 +8,7 @@ export function RegisterCta({ text }: { text?: string }) {
       <div className="publicCtaText">
         {text || "Barcha biletlar, mavzular va imtihon rejimi bilan to‘liq mashq qilish uchun ro‘yxatdan o‘ting — bepul va tez."}
       </div>
-      <Link href="/" className="btn btn-primary publicCtaBtn">
+      <Link href="/?auth=register" className="btn btn-primary publicCtaBtn">
         Ro‘yxatdan o‘tish <ArrowRight className="lucide" aria-hidden="true" />
       </Link>
     </div>

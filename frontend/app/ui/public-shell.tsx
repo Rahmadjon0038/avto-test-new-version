@@ -12,7 +12,7 @@ export default function PublicShell({ children }: { children: ReactNode }) {
             </div>
           </Link>
           <div className="navRight">
-            <Link href="/" className="btn btn-ghost headerActionBtn">
+            <Link href="/?auth=login" className="btn btn-ghost headerActionBtn">
               Tizimga kirish
             </Link>
           </div>
