@@ -6,7 +6,7 @@ import { fetchPublicTopics } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
 import { RegisterCta } from "@/app/ui/public-questions";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Mavzu bo‘yicha testlar — yo‘l belgilari va qoidalar",

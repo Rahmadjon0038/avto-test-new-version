@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site";
 import { fetchPublicTickets, fetchPublicTopics } from "@/lib/server-api";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
