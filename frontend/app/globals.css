@@ -5806,3 +5806,171 @@ body {
 .hidden {
   display: none;
 }
+
+/* --- Ochiq (public) SEO sahifalari --- */
+.publicHead {
+  margin: 18px 0 18px;
+}
+
+.publicH1 {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.publicLead {
+  margin: 0;
+  color: var(--muted, #8e8e93);
+  line-height: 1.55;
+  max-width: 720px;
+}
+
+.publicList {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.publicListItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+.publicListItem:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.publicListItemLocked {
+  opacity: 0.7;
+}
+
+.publicListMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+.publicListTitle {
+  font-weight: 800;
+}
+
+.publicListDesc {
+  font-size: 13px;
+  color: var(--muted, #8e8e93);
+}
+
+.publicQuestionList {
+  display: grid;
+  gap: 16px;
+}
+
+.publicQuestion {
+  scroll-margin-top: 80px;
+}
+
+.publicQNum {
+  color: var(--primary);
+  font-weight: 900;
+  margin-right: 4px;
+}
+
+.publicOption {
+  cursor: default;
+}
+
+.publicCorrectTag {
+  align-self: center;
+  margin: 0 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--ok) 28%, transparent);
+  color: var(--text);
+}
+
+.publicExplanationText {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.publicBreadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted, #8e8e93);
+  margin-bottom: 8px;
+}
+
+.publicBreadcrumb a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.publicInlineLink {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.publicCta {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.publicCtaText {
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.publicCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.publicLocked {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 20px;
+}
+
+.publicLockedIcon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary);
+}
+
+@media (min-width: 720px) {
+  .publicCta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .publicH1 {
+    font-size: 32px;
+  }
+}

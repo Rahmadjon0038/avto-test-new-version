@@ -5,14 +5,19 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   ArrowRight,
-  CheckCircle2,
+  BookOpen,
+  CheckCheck,
   Eye,
   EyeOff,
+  Flame,
   KeyRound,
+  LayoutGrid,
   PlayCircle,
-  ShieldCheck,
+  SlidersHorizontal,
   Send,
-  Video
+  Tickets,
+  Video,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
@@ -61,6 +66,49 @@ function InstagramMark() {
       <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <circle cx="17.1" cy="6.9" r="1.2" fill="currentColor" />
     </svg>
+  );
+}
+
+function LandingMenuItem({
+  icon,
+  title,
+  desc,
+  page,
+  href,
+  onSelect
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  page: string;
+  href?: string;
+  onSelect?: () => void;
+}) {
+  const inner = (
+    <>
+      <span className="miIcon">{icon}</span>
+      <span className="miMain">
+        <span className="miTextRow">
+          <span className="miText">{title}</span>
+        </span>
+        <span className="miDesc">{desc}</span>
+      </span>
+      <span className="miChevron">›</span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link className="menuItem" data-page={page} href={href}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <button className="menuItem" data-page={page} type="button" onClick={onSelect}>
+      {inner}
+    </button>
   );
 }
 
@@ -178,10 +226,6 @@ export default function AuthPage() {
 
   function closeAuth() {
     setAuthOpen(false);
-  }
-
-  function scrollToVideo() {
-    document.getElementById("video-lessons")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   const registerMutation = useMutation({
@@ -322,52 +366,72 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <div className="landingStats">
-              <div className="landingStat">
-                <ShieldCheck className="lucide" aria-hidden="true" />
-                <span>Mavzu bo‘yicha testlar</span>
+            <section className="landingMenuSection">
+              <div className="homeHero card">
+                <div className="homeTitle">Prava olish endi biz bilan oson!</div>
               </div>
-              <div className="landingStat">
-                <CheckCircle2 className="lucide" aria-hidden="true" />
-                <span>Biletlar rejimi</span>
-              </div>
-              <div className="landingStat">
-                <Video className="lucide" aria-hidden="true" />
-                <span>Video darslar</span>
-              </div>
-            </div>
 
-            <div className="featureGrid">
-              <article className="featureCard">
-                <div className="featureTitle">Nima beradi?</div>
-                <div className="featureText">Savollarni bo‘limlarga ajratib ishlaysiz, xatolaringizni ko‘rasiz va imtihon uslubida tayyorlanasiz.</div>
-              </article>
-              <article className="featureCard">
-                <div className="featureTitle">Qulayliklar</div>
-                <div className="featureText">Tez kirish, sodda interfeys, telefon orqali qulay foydalanish va bir joydagi barcha darslar.</div>
-              </article>
-              <article className="featureCard">
-                <div className="featureTitle">Kimlar uchun?</div>
-                <div className="featureText">Haydovchilikka tayyorlanayotganlar, bilet ishlayotganlar va imtihonga shug‘ullanayotganlar uchun.</div>
-              </article>
-            </div>
-
-            <section className="videoSection" id="video-lessons">
-              <div className="sectionHead">
-                <div>
-                  <h2 className="sectionTitle">Mavzulashtirilgan video darslar</h2>
-                </div>
-                <button className="btn btn-ghost sectionAction" type="button" onClick={() => openAuth()}>Barchasini ko‘rish <ArrowRight className="lucide" aria-hidden="true" /></button>
+              <div className="homeMenu">
+                <LandingMenuItem
+                  page="topics"
+                  icon={<LayoutGrid className="lucide" />}
+                  title="Mavzu bo‘yicha testlar"
+                  desc="Belgilar va qoidalarni bo‘limma-bo‘lim o‘rganing."
+                  href="/mavzular"
+                />
+                <LandingMenuItem
+                  page="tickets"
+                  icon={<Tickets className="lucide" />}
+                  title="Biletlar bo‘yicha testlar"
+                  desc="Rasmiy biletlar formatida yechib mashq qiling."
+                  href="/biletlar"
+                />
+                <LandingMenuItem
+                  page="custom"
+                  icon={<SlidersHorizontal className="lucide" />}
+                  title="Sozlamali testlar"
+                  desc="Savol soni va rejimni o‘zingiz tanlang."
+                  onSelect={() => openAuth()}
+                />
+                <LandingMenuItem
+                  page="mistakes"
+                  icon={<X className="lucide" />}
+                  title="Mening xatolarim"
+                  desc="Xato qilgan savollaringizni qayta ko‘rib chiqing."
+                  onSelect={() => openAuth()}
+                />
+                <LandingMenuItem
+                  page="answers"
+                  icon={<BookOpen className="lucide" />}
+                  title="Barcha testlar javoblari"
+                  desc="To‘g‘ri javoblarni izohlar bilan ko‘ring."
+                  onSelect={() => openAuth()}
+                />
+                <LandingMenuItem
+                  page="exam"
+                  icon={<CheckCheck className="lucide" />}
+                  title="Imtihon topshirish"
+                  desc="Haqiqiy imtihondek sinovdan o‘ting."
+                  onSelect={() => openAuth()}
+                />
               </div>
-              <div className="videoCard">
-                <div className="videoCardIcon">
-                  <Video className="lucide" aria-hidden="true" />
-                </div>
-                <div className="videoCardBody">
-                  <div className="videoCardTitle">Qoidalar, belgilar va testlar bo‘yicha video tushuntirishlar</div>
-                  <div className="videoCardText">
-                    Har bir mavzuni video orqali ko‘rib chiqish, keyin esa shu mavzuga oid testlarni yechish imkoniyati bor.
-                  </div>
+
+              <div className="homeSoonBlock">
+                <div className="homeMenu homeMenuSoon">
+                  <LandingMenuItem
+                    page="marathon"
+                    icon={<Flame className="lucide" />}
+                    title="Marafon rejimi"
+                    desc="Uzluksiz savollar: tezlik va aniqlikni oshiring."
+                    onSelect={() => openAuth()}
+                  />
+                  <LandingMenuItem
+                    page="videos"
+                    icon={<Video className="lucide" />}
+                    title="Video darsliklar"
+                    desc="Mavzulashtirilgan video darsliklar."
+                    onSelect={() => openAuth()}
+                  />
                 </div>
               </div>
             </section>
