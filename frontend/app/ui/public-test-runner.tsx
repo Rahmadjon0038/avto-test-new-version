@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { PublicQuestion } from "@/lib/server-api";
+import { QuestionAudio } from "@/lib/question-audio";
 
 const FALLBACK_IMAGE = "/default.png";
 
@@ -38,21 +39,42 @@ export default function PublicTestRunner({
 }) {
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const autoNextTimerRef = useRef<number | null>(null);
 
   const total = questions.length;
   const q = questions[idx];
   const answered = Object.keys(answers).length;
-  const hasImage = useMemo(() => Boolean(String(q?.image || "").trim()), [q?.image]);
+
+  function clearAutoNext() {
+    if (autoNextTimerRef.current) {
+      window.clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  }
+
+  function goTo(nextIndex: number) {
+    clearAutoNext();
+    setIdx(nextIndex);
+  }
 
   function selectOption(optionIndex: number) {
     if (!q || answers[q.id] !== undefined) return;
     setAnswers((prev) => ({ ...prev, [q.id]: optionIndex }));
+    if (idx < total - 1) {
+      clearAutoNext();
+      autoNextTimerRef.current = window.setTimeout(() => {
+        setIdx((cur) => (cur === idx ? cur + 1 : cur));
+      }, 900);
+    }
   }
 
   function reset() {
+    clearAutoNext();
     setAnswers({});
     setIdx(0);
   }
+
+  useEffect(() => clearAutoNext, []);
 
   if (!q) {
     return (
@@ -115,13 +137,12 @@ export default function PublicTestRunner({
                 <div className="publicExplanationText">{q.explanation}</div>
               </div>
             ) : null}
+            {answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
           </div>
-          {hasImage ? (
-            <div className="qLeft">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="qimg" src={resolveImg(q.image)} alt="Savol rasmi" />
-            </div>
-          ) : null}
+          <div className="qLeft">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="qimg" src={resolveImg(q.image)} alt="Savol rasmi" />
+          </div>
         </div>
       </div>
 
@@ -138,7 +159,7 @@ export default function PublicTestRunner({
                 isWrong ? "answered wrong" : ""
               }`}
               type="button"
-              onClick={() => setIdx(i)}
+              onClick={() => goTo(i)}
             >
               {i + 1}
             </button>
@@ -147,13 +168,13 @@ export default function PublicTestRunner({
       </div>
 
       <div className="ticketNavRow">
-        <button className="btn btn-ghost" type="button" onClick={() => setIdx(Math.max(0, idx - 1))} disabled={idx <= 0}>
+        <button className="btn btn-ghost" type="button" onClick={() => goTo(Math.max(0, idx - 1))} disabled={idx <= 0}>
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>
         <button
           className="btn btn-ghost"
           type="button"
-          onClick={() => setIdx(Math.min(total - 1, idx + 1))}
+          onClick={() => goTo(Math.min(total - 1, idx + 1))}
           disabled={idx >= total - 1}
         >
           Keyingi
