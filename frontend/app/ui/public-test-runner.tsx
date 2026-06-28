@@ -103,9 +103,9 @@ export default function PublicTestRunner({
             <ArrowLeft className="lucide" aria-hidden="true" /> {backLabel}
           </Link>
           <div>
-            <div className="h2" style={{ margin: 0 }}>
+            <h1 className="h2" style={{ margin: 0 }}>
               {title}
-            </div>
+            </h1>
             <div className="muted">{`Javoblar: ${answered}/${total}`}</div>
           </div>
         </div>

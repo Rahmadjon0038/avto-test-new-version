@@ -14,7 +14,7 @@ type Params = { params: Promise<{ topicId: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { topicId } = await params;
-  const { topic } = await fetchPublicTopic(topicId);
+  const { topic, status } = await fetchPublicTopic(topicId);
   const title = topic ? `${topic.title} — testlar va javoblar` : "Mavzu";
   return {
     title,
@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       ? `${topic.title}: ${topic.questions.length} ta savol, to‘g‘ri javoblar va izohlar bilan. Bepul mashq qiling.`
       : "Mavzu bo‘yicha testlar — savol va javoblar.",
     alternates: { canonical: `/mavzular/${topicId}` },
+    robots: status === 403 ? { index: false, follow: true } : undefined,
     openGraph: {
       title: `${title} | ${siteName}`,
       description: "Savollar, to‘g‘ri javoblar va izohlar bilan.",

@@ -14,7 +14,7 @@ type Params = { params: Promise<{ ticketId: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { ticketId } = await params;
-  const { ticket } = await fetchPublicTicket(ticketId);
+  const { ticket, status } = await fetchPublicTicket(ticketId);
   const title = ticket ? `${ticket.title} — savol va javoblar` : "Bilet";
   return {
     title,
@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       ? `${ticket.title}: ${ticket.questions.length} ta savol, to‘g‘ri javoblar va izohlar bilan. Avto imtihonga bepul tayyorlaning.`
       : "Haydovchilik bileti — savol va javoblar.",
     alternates: { canonical: `/biletlar/${ticketId}` },
+    robots: status === 403 ? { index: false, follow: true } : undefined,
     openGraph: {
       title: `${title} | ${siteName}`,
       description: "Savollar, to‘g‘ri javoblar va izohlar bilan.",

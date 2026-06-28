@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Lock } from "lucide-react";
-import { siteName } from "@/lib/site";
+import { siteName, getSiteUrl } from "@/lib/site";
 import { fetchPublicTopics } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
-import { RegisterCta } from "@/app/ui/public-questions";
+import { RegisterCta, buildItemListJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +24,20 @@ export const metadata: Metadata = {
 
 export default async function MavzularPage() {
   const topics = await fetchPublicTopics();
+  const base = getSiteUrl().toString().replace(/\/$/, "");
+  const itemListJsonLd = buildItemListJsonLd(
+    "Mavzu bo‘yicha testlar",
+    topics.map((t) => ({ name: t.title, url: t.free ? `${base}/mavzular/${t.id}` : undefined }))
+  );
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Bosh sahifa", url: `${base}/` },
+    { name: "Mavzular", url: `${base}/mavzular` }
+  ]);
 
   return (
     <PublicShell>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <section className="view">
         <div className="publicHead">
           <h1 className="publicH1">Mavzu bo‘yicha testlar</h1>
