@@ -5,14 +5,10 @@ import { Lock } from "lucide-react";
 import { siteName } from "@/lib/site";
 import { fetchPublicTopic } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
-import {
-  PublicQuestionList,
-  RegisterCta,
-  buildFaqJsonLd,
-  buildBreadcrumbJsonLd
-} from "@/app/ui/public-questions";
+import PublicTestRunner from "@/app/ui/public-test-runner";
+import { RegisterCta, buildFaqJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ topicId: string }> };
 
@@ -76,22 +72,8 @@ export default async function MavzuDetailPage({ params }: Params) {
     <PublicShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <section className="view">
-        <nav className="publicBreadcrumb" aria-label="Breadcrumb">
-          <Link href="/mavzular">Mavzular</Link>
-          <span aria-hidden="true">/</span>
-          <span>{topic.title}</span>
-        </nav>
-
-        <div className="publicHead">
-          <h1 className="publicH1">{topic.title}</h1>
-          <p className="publicLead">{topic.questions.length} ta savol — to‘g‘ri javoblar va izohlar bilan.</p>
-        </div>
-
-        <PublicQuestionList questions={topic.questions} />
-
-        <RegisterCta />
-      </section>
+      <PublicTestRunner title={topic.title} questions={topic.questions} backHref="/mavzular" backLabel="Mavzular" />
+      <RegisterCta />
     </PublicShell>
   );
 }

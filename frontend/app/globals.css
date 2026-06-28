@@ -5974,3 +5974,36 @@ body {
     font-size: 32px;
   }
 }
+
+/* Ochiq mavzu/bilet kartalari — locked holat */
+.topicCardLocked {
+  opacity: 0.62;
+}
+
+.topicCardLocked:hover {
+  transform: none;
+  background: var(--panel);
+}
+
+.topicLock {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 84%, transparent);
+  color: var(--muted, #8e8e93);
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+
+/* Ochiq test yechish — pastki navigatsiya */
+.ticketNavRow {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}

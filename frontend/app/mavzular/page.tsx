@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Lock, ArrowRight } from "lucide-react";
+import { Lock } from "lucide-react";
 import { siteName } from "@/lib/site";
 import { fetchPublicTopics } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
@@ -24,41 +24,38 @@ export const metadata: Metadata = {
 
 export default async function MavzularPage() {
   const topics = await fetchPublicTopics();
-  const freeCount = topics.filter((t) => t.free).length;
 
   return (
     <PublicShell>
       <section className="view">
         <div className="publicHead">
           <h1 className="publicH1">Mavzu bo‘yicha testlar</h1>
-          <p className="publicLead">
-            Belgilar va qoidalarni bo‘limma-bo‘lim o‘rganing. {freeCount > 0 ? `Birinchi mavzu hamma uchun bepul ochiq` : "Mavzular ro‘yxati"} — savollar,
-            to‘g‘ri javoblar va izohlar bilan.
-          </p>
         </div>
 
-        <div className="publicList">
-          {topics.map((t) =>
+        <div className="topicsGrid">
+          {topics.map((t, index) =>
             t.free ? (
-              <Link key={t.id} href={`/mavzular/${t.id}`} className="publicListItem">
-                <span className="publicListMain">
-                  <span className="publicListTitle">{t.title}</span>
-                  <span className="publicListDesc">{t.questionCount} ta savol · bepul</span>
+              <Link key={t.id} href={`/mavzular/${t.id}`} className="topicCard">
+                <span className="topicIndex" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-                <ArrowRight className="lucide" aria-hidden="true" />
+                <div className="topicName">{t.title}</div>
               </Link>
             ) : (
-              <Link key={t.id} href="/" className="publicListItem publicListItemLocked">
-                <span className="publicListMain">
-                  <span className="publicListTitle">{t.title}</span>
-                  <span className="publicListDesc">Ro‘yxatdan o‘tgandan keyin ochiladi</span>
+              <Link key={t.id} href="/" className="topicCard topicCardLocked">
+                <span className="topicLock" aria-hidden="true">
+                  <Lock className="lucide" />
                 </span>
-                <Lock className="lucide" aria-hidden="true" />
+                <span className="topicIndex" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="topicName">{t.title}</div>
               </Link>
             )
           )}
-          {topics.length === 0 ? <div className="muted">Mavzular hozircha mavjud emas.</div> : null}
         </div>
+
+        {topics.length === 0 ? <div className="muted">Mavzular hozircha mavjud emas.</div> : null}
 
         <RegisterCta />
       </section>
