@@ -18,7 +18,7 @@ const { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } = re
 const PORT = Number(process.env.PORT || 3000);
 const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || "15mb";
 const ALLOWED_ORIGINS = new Set(
-  String(process.env.ALLOWED_ORIGINS || "https://road-test.uz,https://www.road-test.uz,https://api.road-test.uz")
+  String(process.env.ALLOWED_ORIGINS || "https://topshirdi.uz,https://www.topshirdi.uz,https://api.topshirdi.uz")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean)
@@ -297,7 +297,7 @@ const BUNNY_LIBRARY_ID = String(process.env.BUNNY_LIBRARY_ID || "").trim();
 const BUNNY_CDN_HOSTNAME = String(process.env.BUNNY_CDN_HOSTNAME || "").trim();
 const BUNNY_API_KEY = String(process.env.BUNNY_API_KEY || "").trim();
 const BUNNY_API_BASE_URL = String(process.env.BUNNY_API_BASE_URL || "https://video.bunnycdn.com").replace(/\/+$/, "");
-const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || "https://api.road-test.uz").replace(/\/+$/, "");
+const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || "https://api.topshirdi.uz").replace(/\/+$/, "");
 
 function normalizeVideoStatus(value, fallback = "processing") {
   const raw = String(value || fallback || "").trim().toLowerCase();
@@ -4942,8 +4942,8 @@ app.get("/api/video-stream", async (req, res) => {
       redirect: "follow",
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; Topshirdi/1.0)",
-        Referer: "https://road-test.uz/",
-        Origin: "https://road-test.uz",
+        Referer: "https://topshirdi.uz/",
+        Origin: "https://topshirdi.uz",
         Accept: "*/*"
       }
     });

@@ -65,7 +65,7 @@ export default function AdminVideosPage() {
   const qc = useQueryClient();
   const router = useRouter();
   const { authFetch, accessToken } = useAuth();
-  const backendUploadBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.road-test.uz";
+  const backendUploadBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.topshirdi.uz";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<VideoForm>(() => emptyForm());
   const [selectedFileName, setSelectedFileName] = useState("");

@@ -72,9 +72,9 @@ maybe_set_default POSTGRES_PASSWORD "avtotest"
 set_env DATABASE_URL "postgresql://avtotest:avtotest@db:5432/avtotest"
 current_base_url="$(get_env BASE_URL)"
 if [ -z "$current_base_url" ] || [ "$current_base_url" = "https://your-domain-or-ngrok-url.example" ] || [ "$current_base_url" = "http://localhost:3001" ] || [ "$current_base_url" = "http://localhost:3000" ] || [ "$current_base_url" = "http://127.0.0.1:3000" ]; then
-  set_env BASE_URL "https://road-test.uz"
+  set_env BASE_URL "https://topshirdi.uz"
 fi
-maybe_set_default NEXT_PUBLIC_SITE_URL "https://road-test.uz"
+maybe_set_default NEXT_PUBLIC_SITE_URL "https://topshirdi.uz"
 maybe_set_default CARD_NUMBER "8600 xxxx xxxx xxxx"
 
 override_from_alt_env SMTP_HOST
@@ -114,5 +114,5 @@ fi
 "${compose_cmd[@]}" --env-file "$DEPLOY_ENV" up -d --build --force-recreate --remove-orphans
 
 echo "Deploy tayyor."
-echo "Frontend: https://road-test.uz"
+echo "Frontend: https://topshirdi.uz"
 echo "Backend:  http://localhost:4001"

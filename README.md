@@ -18,7 +18,7 @@ cp .env.example .env
 
 `.env` ichida quyidagilarni to‘ldiring:
 
-- `BASE_URL` — public HTTPS URL (ngrok yoki hosting). Masalan: `https://xxxx.ngrok-free.app`
+- `BASE_URL` — public HTTPS URL (ngrok yoki hosting). Masalan: `https://topshirdi.uz`
 - `CARD_NUMBER` — to‘lov uchun karta raqami (matn)
 - `SESSION_SECRET` — random string (browser login session uchun)
 - `DATABASE_URL` — local Postgres connection string, masalan: `postgresql:///avtotest`

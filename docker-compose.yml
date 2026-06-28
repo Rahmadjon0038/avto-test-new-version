@@ -44,18 +44,18 @@ services:
       dockerfile: Dockerfile.frontend
       args:
         BACKEND_URL: http://backend:4000
-        NEXT_PUBLIC_BACKEND_URL: https://api.road-test.uz
-        BASE_URL: https://road-test.uz
-        NEXT_PUBLIC_SITE_URL: https://road-test.uz
+        NEXT_PUBLIC_BACKEND_URL: https://api.topshirdi.uz
+        BASE_URL: https://topshirdi.uz
+        NEXT_PUBLIC_SITE_URL: https://topshirdi.uz
     restart: unless-stopped
     env_file:
       - .env.docker
       - .env
     environment:
       BACKEND_URL: http://backend:4000
-      NEXT_PUBLIC_BACKEND_URL: https://api.road-test.uz
-      BASE_URL: https://road-test.uz
-      NEXT_PUBLIC_SITE_URL: https://road-test.uz
+      NEXT_PUBLIC_BACKEND_URL: https://api.topshirdi.uz
+      BASE_URL: https://topshirdi.uz
+      NEXT_PUBLIC_SITE_URL: https://topshirdi.uz
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
       - "3010:3000"

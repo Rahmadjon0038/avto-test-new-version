@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 const backendUrl =
   process.env.BACKEND_URL ||
-  (process.env.NODE_ENV === "development" ? "http://127.0.0.1:4000" : "https://api.road-test.uz");
+  (process.env.NODE_ENV === "development" ? "http://127.0.0.1:4000" : "https://api.topshirdi.uz");
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   try {
