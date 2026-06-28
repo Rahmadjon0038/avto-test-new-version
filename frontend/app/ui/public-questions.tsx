@@ -1,12 +1,20 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { resolveQuestionImage, type PublicQuestion } from "@/lib/server-api";
 
 export function RegisterCta({ text }: { text?: string }) {
   return (
-    <div className="publicCta card">
-      <div className="publicCtaText">
-        {text || "Barcha biletlar, mavzular va imtihon rejimi bilan to‘liq mashq qilish uchun ro‘yxatdan o‘ting — bepul va tez."}
+    <div className="publicCta">
+      <div className="publicCtaMain">
+        <span className="publicCtaIcon" aria-hidden="true">
+          <Sparkles className="lucide" />
+        </span>
+        <div className="publicCtaCopy">
+          <div className="publicCtaTitle">Hammasi bir joyda — bepul boshlang</div>
+          <div className="publicCtaText">
+            {text || "Barcha biletlar, mavzular va imtihon rejimi bilan to‘liq mashq qilish uchun ro‘yxatdan o‘ting."}
+          </div>
+        </div>
       </div>
       <Link href="/?auth=register" className="btn btn-primary publicCtaBtn">
         Ro‘yxatdan o‘tish <ArrowRight className="lucide" aria-hidden="true" />
