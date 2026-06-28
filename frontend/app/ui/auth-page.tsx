@@ -363,7 +363,8 @@ export default function AuthPage() {
                   </span>
                 </h1>
                 <p className="landingLead">
-                  Mavzular, biletlar, xatolarni ko‘rish, imtihon rejimi va video darslar bir joyda.
+                  Topshirdi — avto test, avto imtihon va avtomobil biletlari platformasi. Mavzular, biletlar, xatolarni
+                  ko‘rish, imtihon rejimi va video darslar bir joyda.
                 </p>
 
                 <div className="landingCtaRow">
@@ -447,8 +448,6 @@ export default function AuthPage() {
                 </div>
               </div>
             </section>
-
-            <div className="seoHidden" aria-hidden="true">avto test topshirdi avto imtihon haydovchilik testlari biletlar bo‘yicha test PDD test yo'l harakati qoidalari driving test</div>
           </section>
         </div>
       </main>

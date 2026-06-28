@@ -3,7 +3,7 @@ import AuthPage from "./ui/auth-page";
 import { siteDescription, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Avto test va avto imtihon platformasi",
+  title: { absolute: "Topshirdi — avto test, avto imtihon va avtomobil biletlari" },
   description: siteDescription,
   alternates: {
     canonical: "/"

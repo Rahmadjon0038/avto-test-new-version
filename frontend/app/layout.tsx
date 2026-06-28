@@ -54,14 +54,25 @@ export const metadata: Metadata = {
   }
 };
 
-const organizationJsonLd = {
+const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: siteName,
-  alternateName: ["Avto Test", "Avto Imtihon", "Topshirdi"],
+  alternateName: ["Topshirdi", "Topshirdi.uz", "Topshirdi avto test", "Avto Test", "Avto Imtihon", "Avtomobil test"],
   url: siteUrl.toString(),
   description: siteDescription,
   inLanguage: "uz"
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteName,
+  alternateName: ["Topshirdi.uz", "Topshirdi avto test", "Topshirdi avto imtihon"],
+  url: siteUrl.toString(),
+  logo: new URL("/opengraph-image", siteUrl).toString(),
+  description: siteDescription,
+  sameAs: ["https://t.me/JURABEK_AUTOTEACHER", "https://www.instagram.com/reel/DZZ3X7agYDW/"]
 };
 
 const webApplicationJsonLd = {
@@ -86,6 +97,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="uz">
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

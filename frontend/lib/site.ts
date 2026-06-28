@@ -1,11 +1,20 @@
 export const siteName = "Topshirdi";
 export const siteDescription =
-  "Topshirdi — haydovchilikka tayyorlanish uchun avto test, avto imtihon, biletlar, xatolarni ko‘rish, imtihon rejimi va video darslar platformasi.";
+  "Topshirdi — avto test, avto imtihon va avtomobil biletlari platformasi. Haydovchilikka tayyorlanish uchun mavzuli testlar, biletlar, xatolarni ko‘rish, imtihon rejimi va video darslar bir joyda.";
 export const siteKeywords = [
-  "avto test",
+  "topshirdi",
   "Topshirdi",
+  "topshirdi.uz",
+  "topshirdi avto test",
+  "topshirdi avto imtihon",
+  "avto test",
   "avto imtihon",
   "avto testlar",
+  "avtomobil",
+  "avtomobil test",
+  "avtomobil imtihon",
+  "avtomobil testlari",
+  "avtomobil haydash",
   "haydovchilikka tayyorlanish",
   "haydovchilik testlari",
   "biletlar bo‘yicha test",
@@ -18,8 +27,7 @@ export const siteKeywords = [
   "mavzuli testlar",
   "driving test",
   "uzbek avto test",
-  "uzbek driving test",
-  "topshirdi"
+  "uzbek driving test"
 ];
 
 export function getSiteUrl() {
