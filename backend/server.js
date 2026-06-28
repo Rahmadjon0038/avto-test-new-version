@@ -3429,6 +3429,68 @@ app.get("/api/topics/:topicId", async (req, res) => {
   res.json({ topic });
 });
 
+// --- Ochiq (login talab qilmaydigan) bepul kontent — SEO uchun ---
+// Bepullik TARTIB bo'yicha aniqlanadi: dastlabki 1 mavzu va 2 bilet bepul.
+// Adminda tartib almashtirilsa ham, har doim 1- (mavzu) va 1-2- (bilet)
+// o'rindagi element ochiq turadi.
+const FREE_TOPIC_COUNT = 1;
+const FREE_TICKET_COUNT = 2;
+
+app.get("/api/public/topics", async (_req, res) => {
+  const topics = await getTopicsFromDb();
+  res.json({
+    topics: topics.map((topic, index) => ({
+      id: topic.id,
+      slug: topic.slug,
+      title: topic.title,
+      free: index < FREE_TOPIC_COUNT,
+      questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0
+    }))
+  });
+});
+
+app.get("/api/public/topics/:topicId", async (req, res) => {
+  const topics = await getTopicsFromDb();
+  const key = String(req.params.topicId || "").trim();
+  const index = topics.findIndex((topic) => String(topic.id) === key || String(topic.slug) === key);
+  if (index === -1) return res.status(404).json({ error: "Mavzu topilmadi" });
+  if (index >= FREE_TOPIC_COUNT) {
+    return res.status(403).json({ error: "Bu mavzu faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
+  }
+  const topic = topics[index];
+  res.json({
+    topic: {
+      id: topic.id,
+      slug: topic.slug,
+      title: topic.title,
+      questions: normalizeQuestions(topic.questions)
+    }
+  });
+});
+
+app.get("/api/public/tickets", async (_req, res) => {
+  const tickets = await getTickets();
+  res.json({
+    tickets: tickets.map((ticket, index) => ({
+      id: ticket.id,
+      title: ticket.title,
+      free: index < FREE_TICKET_COUNT,
+      questionCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
+    }))
+  });
+});
+
+app.get("/api/public/tickets/:ticketId", async (req, res) => {
+  const tickets = await getTickets();
+  const key = String(req.params.ticketId || "").trim();
+  const index = tickets.findIndex((ticket) => String(ticket.id) === key);
+  if (index === -1) return res.status(404).json({ error: "Bilet topilmadi" });
+  if (index >= FREE_TICKET_COUNT) {
+    return res.status(403).json({ error: "Bu bilet faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
+  }
+  res.json({ ticket: tickets[index] });
+});
+
 function maybeRawUpload(req, res, next) {
   const contentType = String(req.headers["content-type"] || "").toLowerCase();
   if (contentType.startsWith("application/json")) return next();
