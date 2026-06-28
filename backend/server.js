@@ -3469,26 +3469,34 @@ app.get("/api/public/topics/:topicId", async (req, res) => {
 });
 
 app.get("/api/public/tickets", async (_req, res) => {
-  const tickets = await getTickets();
+  // Biletlar mavzular savol bankidan generatsiya qilinadi (getGeneratedTicketsFromDb).
+  const tickets = await getGeneratedTicketsFromDb();
   res.json({
     tickets: tickets.map((ticket, index) => ({
       id: ticket.id,
       title: ticket.title,
       free: index < FREE_TICKET_COUNT,
-      questionCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
+      questionCount: ticket.questionsCount ?? (Array.isArray(ticket.questions) ? ticket.questions.length : 0)
     }))
   });
 });
 
 app.get("/api/public/tickets/:ticketId", async (req, res) => {
-  const tickets = await getTickets();
   const key = String(req.params.ticketId || "").trim();
-  const index = tickets.findIndex((ticket) => String(ticket.id) === key);
-  if (index === -1) return res.status(404).json({ error: "Bilet topilmadi" });
-  if (index >= FREE_TICKET_COUNT) {
+  const match = /^ticket-(\d+)$/i.exec(key) || /^(\d+)$/.exec(key);
+  const ticketNumber = match ? Number(match[1]) : NaN;
+  if (Number.isFinite(ticketNumber) && ticketNumber > FREE_TICKET_COUNT) {
     return res.status(403).json({ error: "Bu bilet faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
   }
-  res.json({ ticket: tickets[index] });
+  const ticket = await getGeneratedTicketByIdFromDb(key);
+  if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
+  res.json({
+    ticket: {
+      id: ticket.id,
+      title: ticket.title,
+      questions: normalizeQuestions(ticket.questions)
+    }
+  });
 });
 
 function maybeRawUpload(req, res, next) {

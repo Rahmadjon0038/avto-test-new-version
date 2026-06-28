@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-react";
+import { Cell, Pie, PieChart } from "recharts";
 import type { PublicQuestion } from "@/lib/server-api";
 import { QuestionAudio } from "@/lib/question-audio";
 
@@ -39,11 +40,20 @@ export default function PublicTestRunner({
 }) {
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [finishOpen, setFinishOpen] = useState(false);
   const autoNextTimerRef = useRef<number | null>(null);
 
   const total = questions.length;
   const q = questions[idx];
   const answered = Object.keys(answers).length;
+  const correctCount = questions.filter(
+    (question) => answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
+  ).length;
+  const correctPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const chartData = [
+    { name: "To‘g‘ri", value: correctCount },
+    { name: "Noto‘g‘ri", value: Math.max(total - correctCount, 0) }
+  ];
 
   function clearAutoNext() {
     if (autoNextTimerRef.current) {
@@ -72,6 +82,7 @@ export default function PublicTestRunner({
     clearAutoNext();
     setAnswers({});
     setIdx(0);
+    setFinishOpen(false);
   }
 
   useEffect(() => clearAutoNext, []);
@@ -167,19 +178,84 @@ export default function PublicTestRunner({
         })}
       </div>
 
-      <div className="ticketNavRow">
-        <button className="btn btn-ghost" type="button" onClick={() => goTo(Math.max(0, idx - 1))} disabled={idx <= 0}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
-        </button>
-        <button
-          className="btn btn-ghost"
-          type="button"
-          onClick={() => goTo(Math.min(total - 1, idx + 1))}
-          disabled={idx >= total - 1}
-        >
-          Keyingi
-        </button>
+      <div className="ticketFooter">
+        <div className="footerLeft">
+          <button className="btn btn-ghost" type="button" onClick={() => goTo(Math.max(0, idx - 1))} disabled={idx <= 0}>
+            <ChevronLeft className="lucide" aria-hidden="true" /> Orqaga
+          </button>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => goTo(Math.min(total - 1, idx + 1))}
+            disabled={idx >= total - 1}
+          >
+            Keyingi <ChevronRight className="lucide" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="footerRight">
+          <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(true)}>
+            <Flag className="lucide" aria-hidden="true" /> Yakunlash
+          </button>
+        </div>
       </div>
+
+      {finishOpen && (
+        <>
+          <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
+          <div className="modal modalResult" role="dialog" aria-modal="true">
+            <div className="modalHeader">
+              <div className="modalTitle">Natija</div>
+              <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="modalBody modalBodyResult">
+              <div className="finishStats finishStatsResult">
+                <div className="chartBlock">
+                  <div className="chartWrap" aria-hidden="true">
+                    <PieChart width={220} height={220} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                      <Pie
+                        data={chartData}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={72}
+                        outerRadius={96}
+                        startAngle={90}
+                        endAngle={-270}
+                        paddingAngle={0}
+                        stroke="none"
+                        cornerRadius={8}
+                      >
+                        <Cell fill="#2f6dff" />
+                        <Cell fill="rgba(255, 255, 255, 0.09)" />
+                      </Pie>
+                    </PieChart>
+                    <div className="chartCenter">
+                      <div className="chartValue">{correctPercent}%</div>
+                      <div className="chartLabel">To‘g‘ri</div>
+                    </div>
+                  </div>
+                  <div className="chartMeta">
+                    <div className="muted">To‘g‘ri javoblar</div>
+                    <div className="chartCount">
+                      {correctCount}/{total}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="payRow" style={{ marginTop: 4 }}>
+                <button className="btn btn-ghost payBtn" type="button" onClick={reset}>
+                  <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
+                </button>
+                <button className="btn btn-primary payBtn" type="button" onClick={() => setFinishOpen(false)}>
+                  Yopish
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }

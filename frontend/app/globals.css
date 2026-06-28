@@ -1297,6 +1297,7 @@ body {
   text-align: left;
   cursor: pointer;
   overflow: hidden;
+  text-decoration: none;
 }
 
 .topicCard.isCompleted {
@@ -4305,6 +4306,15 @@ body {
   place-items: center;
   background: linear-gradient(180deg, color-mix(in srgb, var(--panel2) 65%, transparent), var(--panel));
   color: var(--text);
+  text-decoration: none;
+}
+
+.ticketCardLocked {
+  opacity: 0.62;
+}
+
+.ticketCardLocked:hover {
+  border-color: var(--border);
 }
 
 .ticketCard:active {

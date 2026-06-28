@@ -28,28 +28,22 @@ export default async function BiletlarPage() {
   return (
     <PublicShell>
       <section className="view">
-        <div className="publicHead">
-          <h1 className="publicH1">Biletlar bo‘yicha testlar</h1>
+        <div className="ticketsHeader card">
+          <div className="ticketsHeaderTitle">Biletlar bo‘yicha testlar</div>
         </div>
 
-        <div className="topicsGrid">
-          {tickets.map((t, index) =>
+        <div className="ticketsGrid">
+          {tickets.map((t) =>
             t.free ? (
-              <Link key={t.id} href={`/biletlar/${t.id}`} className="topicCard">
-                <span className="topicIndex" aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="topicName">{t.title}</div>
+              <Link key={t.id} href={`/biletlar/${t.id}`} className="card ticketCard">
+                <div className="ticketTitle">{t.title}</div>
               </Link>
             ) : (
-              <Link key={t.id} href="/" className="topicCard topicCardLocked">
-                <span className="topicLock" aria-hidden="true">
+              <Link key={t.id} href="/?auth=register" className="card ticketCard ticketCardLocked">
+                <span className="lock" aria-hidden="true">
                   <Lock className="lucide" />
                 </span>
-                <span className="topicIndex" aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="topicName">{t.title}</div>
+                <div className="ticketTitle">{t.title}</div>
               </Link>
             )
           )}

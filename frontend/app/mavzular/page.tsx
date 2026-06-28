@@ -42,7 +42,7 @@ export default async function MavzularPage() {
                 <div className="topicName">{t.title}</div>
               </Link>
             ) : (
-              <Link key={t.id} href="/" className="topicCard topicCardLocked">
+              <Link key={t.id} href="/?auth=register" className="topicCard topicCardLocked">
                 <span className="topicLock" aria-hidden="true">
                   <Lock className="lucide" />
                 </span>
