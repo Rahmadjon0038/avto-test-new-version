@@ -20,7 +20,7 @@ type Question = {
 type AdminTicket = {
   id: string;
   title: string;
-  questions: Question[];
+  questions: Array<Question | null>;
 };
 
 type ImageDraft = {
@@ -48,6 +48,10 @@ function cloneQuestion(question: Question): Question {
     correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
     explanation: String(question.explanation || "")
   };
+}
+
+function cloneQuestionSlot(question: Question | null): Question | null {
+  return question ? cloneQuestion(question) : null;
 }
 
 function normalizeQuestionForSave(question: Question): Question {
@@ -92,10 +96,11 @@ export default function AdminTicketDetailPage() {
 
   useEffect(() => {
     if (ticketQuery.data) {
+      const rawQuestions = Array.isArray(ticketQuery.data.questions) ? ticketQuery.data.questions : [];
       setTicket({
         id: String(ticketQuery.data.id),
         title: String(ticketQuery.data.title || ""),
-        questions: Array.isArray(ticketQuery.data.questions) ? ticketQuery.data.questions.map(cloneQuestion) : []
+        questions: Array.from({ length: 20 }, (_, index) => cloneQuestionSlot(rawQuestions[index] || null))
       });
     }
   }, [ticketQuery.data]);
@@ -123,8 +128,9 @@ export default function AdminTicketDetailPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!ticket) throw new Error("Ticket topilmadi");
-      const normalizedQuestions = ticket.questions.map(normalizeQuestionForSave);
+      const normalizedQuestions = ticket.questions.map((question) => (question ? normalizeQuestionForSave(question) : null));
       for (const question of normalizedQuestions) {
+        if (!question) continue;
         if (!question.text) throw new Error("Savol matnini kiriting");
         if (!Array.isArray(question.options) || question.options.length < 2) {
           throw new Error("Har bir savolda kamida 2 ta variant bo‘lishi kerak");
@@ -147,10 +153,11 @@ export default function AdminTicketDetailPage() {
       return (await jsonOrError(res)) as { ticket: AdminTicket };
     },
     onSuccess: async (data) => {
+      const rawQuestions = Array.isArray(data.ticket.questions) ? data.ticket.questions : [];
       setTicket({
         id: String(data.ticket.id),
         title: String(data.ticket.title || ""),
-        questions: Array.isArray(data.ticket.questions) ? data.ticket.questions.map(cloneQuestion) : []
+        questions: Array.from({ length: 20 }, (_, index) => cloneQuestionSlot(rawQuestions[index] || null))
       });
       await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
       await qc.invalidateQueries({ queryKey: ["admin-ticket", ticketId] });
@@ -174,7 +181,7 @@ export default function AdminTicketDetailPage() {
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
 
-  const questionCount = useMemo(() => ticket?.questions?.length || 0, [ticket]);
+  const questionCount = useMemo(() => ticket?.questions?.filter(Boolean).length || 0, [ticket]);
 
   async function uploadQuestionImage(questionId: string, file: File) {
     const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -196,7 +203,7 @@ export default function AdminTicketDetailPage() {
       [questionId]: { previewUrl, uploading: true }
     }));
 
-    const currentImage = ticket?.questions.find((question) => question.id === questionId)?.image || "";
+    const currentImage = ticket?.questions.find((question) => question?.id === questionId)?.image || "";
     const imageBase64 = await fileToDataUrl(file);
 
     const res = await authFetch("/api/upload-image", {
@@ -225,7 +232,7 @@ export default function AdminTicketDetailPage() {
       prev
         ? {
             ...prev,
-            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, image: imageUrl } : question))
+            questions: prev.questions.map((question) => (question && question.id === questionId ? { ...question, image: imageUrl } : question))
           }
         : prev
     );
@@ -240,7 +247,7 @@ export default function AdminTicketDetailPage() {
   }
 
   async function deleteQuestionImage(questionId: string) {
-    const currentImage = ticket?.questions.find((question) => question.id === questionId)?.image || "";
+    const currentImage = ticket?.questions.find((question) => question?.id === questionId)?.image || "";
     const res = await authFetch("/api/upload-image", {
       method: "DELETE",
       headers: { "content-type": "application/json" },
@@ -257,7 +264,7 @@ export default function AdminTicketDetailPage() {
       prev
         ? {
             ...prev,
-            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, image: imageUrl } : question))
+            questions: prev.questions.map((question) => (question && question.id === questionId ? { ...question, image: imageUrl } : question))
           }
         : prev
     );
@@ -333,34 +340,50 @@ export default function AdminTicketDetailPage() {
 
       <div className="adminQuestionsHeader">
         <div className="adminPanelCardTitle">Savollar</div>
-        <button className="btn btn-primary" type="button" onClick={() => setTicket((prev) => (prev ? { ...prev, questions: [...prev.questions, createEmptyQuestion(prev.questions.length + 1)] } : prev))}>
-          <Plus className="lucide" aria-hidden="true" /> Savol qo‘shish
+        <button
+          className="btn btn-primary"
+          type="button"
+          onClick={() =>
+            setTicket((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    questions: prev.questions.some((item) => !item)
+                      ? prev.questions.map((item, index) => (item ? item : index === prev.questions.findIndex((slot) => !slot) ? createEmptyQuestion(index + 1) : item))
+                      : [...prev.questions, createEmptyQuestion(prev.questions.length + 1)]
+                  }
+                : prev
+            )
+          }
+        >
+          <Plus className="lucide" aria-hidden="true" /> Bo‘sh slotni to‘ldirish
         </button>
       </div>
 
       <div className="adminQuestionsGrid">
         {ticket?.questions?.length ? (
-          ticket.questions.map((question, index) => (
-            <article key={question.id} className="card adminQuestionCard">
-              <div className="adminQuestionHead">
-                <div className="adminQuestionBadge">Savol {index + 1}</div>
-                <button
-                  className="btn btn-sm"
-                  type="button"
-                  onClick={() =>
-                    setTicket((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            questions: prev.questions.filter((item) => item.id !== question.id)
-                          }
-                        : prev
-                    )
-                  }
-                >
-                  <Trash2 className="lucide" aria-hidden="true" /> O‘chirish
-                </button>
-              </div>
+          ticket.questions.map((question, index) =>
+            question ? (
+              <article key={question.id} className="card adminQuestionCard">
+                <div className="adminQuestionHead">
+                  <div className="adminQuestionBadge">Savol {index + 1}</div>
+                  <button
+                    className="btn btn-sm"
+                    type="button"
+                    onClick={() =>
+                      setTicket((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              questions: prev.questions.map((item, slotIndex) => (slotIndex === index ? null : item))
+                            }
+                          : prev
+                      )
+                    }
+                  >
+                    <Trash2 className="lucide" aria-hidden="true" /> O‘chirish
+                  </button>
+                </div>
 
               <div className="adminQuestionFields">
                 <div className="adminField adminFieldWide">
@@ -441,7 +464,7 @@ export default function AdminTicketDetailPage() {
                         prev
                           ? {
                               ...prev,
-                              questions: prev.questions.map((item) => (item.id === question.id ? { ...item, text: event.target.value } : item))
+                              questions: prev.questions.map((item) => (item && item.id === question.id ? { ...item, text: event.target.value } : item))
                             }
                           : prev
                       )
@@ -462,7 +485,7 @@ export default function AdminTicketDetailPage() {
                           ? {
                               ...prev,
                               questions: prev.questions.map((item) =>
-                                item.id === question.id ? { ...item, explanation: event.target.value } : item
+                                item && item.id === question.id ? { ...item, explanation: event.target.value } : item
                               )
                             }
                           : prev
@@ -486,7 +509,7 @@ export default function AdminTicketDetailPage() {
                             ? {
                                 ...prev,
                                 questions: prev.questions.map((item) =>
-                                  item.id === question.id
+                                  item && item.id === question.id
                                     ? {
                                         ...item,
                                         options: item.options.map((value, idx) => (idx === optionIndex ? event.target.value : value))
@@ -513,7 +536,7 @@ export default function AdminTicketDetailPage() {
                         ? {
                             ...prev,
                             questions: prev.questions.map((item) =>
-                              item.id === question.id ? { ...item, options: [...item.options, ""] } : item
+                              item && item.id === question.id ? { ...item, options: [...item.options, ""] } : item
                             )
                           }
                         : prev
@@ -532,7 +555,7 @@ export default function AdminTicketDetailPage() {
                         ? {
                             ...prev,
                             questions: prev.questions.map((item) => {
-                              if (item.id !== question.id) return item;
+                              if (!item || item.id !== question.id) return item;
                               const nextOptions = item.options.slice(0, -1);
                               const nextCorrectIndex = Math.min(item.correctIndex, nextOptions.length - 1);
                               return {
@@ -561,7 +584,7 @@ export default function AdminTicketDetailPage() {
                         ? {
                             ...prev,
                             questions: prev.questions.map((item) =>
-                              item.id === question.id ? { ...item, correctIndex: Number(event.target.value) } : item
+                              item && item.id === question.id ? { ...item, correctIndex: Number(event.target.value) } : item
                             )
                           }
                         : prev
@@ -575,8 +598,34 @@ export default function AdminTicketDetailPage() {
                   ))}
                 </select>
               </label>
-            </article>
-          ))
+              </article>
+            ) : (
+              <article key={`empty-${index}`} className="card adminQuestionCard adminEmptyQuestionCard">
+                <div className="adminQuestionHead">
+                  <div className="adminQuestionBadge">Savol {index + 1}</div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    type="button"
+                    onClick={() =>
+                      setTicket((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              questions: prev.questions.map((item, slotIndex) => (slotIndex === index ? createEmptyQuestion(index + 1) : item))
+                            }
+                          : prev
+                      )
+                    }
+                  >
+                    <Plus className="lucide" aria-hidden="true" /> To‘ldirish
+                  </button>
+                </div>
+                <div className="adminEmptyText" style={{ paddingTop: 8 }}>
+                  Bu slot bo‘sh. Keyinroq savol qo‘shishingiz mumkin.
+                </div>
+              </article>
+            )
+          )
         ) : (
           <section className="card adminEmpty adminEmptyCompact">
             <div className="adminEmptyTitle">Savollar yo‘q</div>

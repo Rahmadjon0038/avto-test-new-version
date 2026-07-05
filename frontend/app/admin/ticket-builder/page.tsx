@@ -195,7 +195,7 @@ export default function AdminTicketBuilderPage() {
   const visiblePoolQuestions = useMemo(() => poolQuestions.filter((question) => !draftQuestionIds.has(question.questionId)), [poolQuestions, draftQuestionIds]);
   const totalUnassigned = questionsQuery.data?.pages?.[0]?.total ?? visiblePoolQuestions.length;
   const filledDraftCount = useMemo(() => draftQuestions.filter(Boolean).length, [draftQuestions]);
-  const isDraftReady = filledDraftCount === 20;
+  const canSaveDraft = filledDraftCount > 0;
 
   const addMutation = useMutation({
     mutationFn: async ({ questionId, order }: { questionId: string; order: number }) => {
@@ -360,10 +360,17 @@ export default function AdminTicketBuilderPage() {
           <button
             className="btn btn-primary"
             type="button"
-            disabled={!isDraftReady || completeMutation.isPending}
+            disabled={!canSaveDraft || completeMutation.isPending}
             onClick={() => {
-              if (!isDraftReady) return toast.error("Saqlash uchun 20 ta savol kerak");
-              if (!window.confirm(`Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`)) return;
+              if (!canSaveDraft) return toast.error("Kamida bitta savol kerak");
+              if (
+                !window.confirm(
+                  filledDraftCount < 20
+                    ? `Biletni bo‘sh slotlar bilan saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
+                    : `Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`
+                )
+              )
+                return;
               completeMutation.mutate();
             }}
           >
@@ -446,10 +453,17 @@ export default function AdminTicketBuilderPage() {
             <button
               className="btn btn-primary"
               type="button"
-              disabled={!isDraftReady || completeMutation.isPending}
+              disabled={!canSaveDraft || completeMutation.isPending}
               onClick={() => {
-                if (!isDraftReady) return;
-                if (!window.confirm(`Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`)) return;
+                if (!canSaveDraft) return;
+                if (
+                  !window.confirm(
+                    filledDraftCount < 20
+                      ? `Biletni bo‘sh slotlar bilan saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
+                      : `Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`
+                  )
+                )
+                  return;
                 completeMutation.mutate();
               }}
             >

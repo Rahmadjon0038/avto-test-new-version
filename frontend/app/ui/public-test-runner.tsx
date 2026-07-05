@@ -34,7 +34,7 @@ export default function PublicTestRunner({
   backLabel = "Orqaga"
 }: {
   title: string;
-  questions: PublicQuestion[];
+  questions: Array<PublicQuestion | null>;
   backHref: string;
   backLabel?: string;
 }) {
@@ -44,15 +44,17 @@ export default function PublicTestRunner({
   const autoNextTimerRef = useRef<number | null>(null);
 
   const total = questions.length;
+  const answeredQuestions = questions.filter(Boolean);
   const q = questions[idx];
   const answered = Object.keys(answers).length;
-  const correctCount = questions.filter(
-    (question) => answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
+  const correctCount = answeredQuestions.filter(
+    (question) => question && answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
   ).length;
-  const correctPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const scoredTotal = answeredQuestions.length || total;
+  const correctPercent = scoredTotal > 0 ? Math.round((correctCount / scoredTotal) * 100) : 0;
   const chartData = [
     { name: "To‘g‘ri", value: correctCount },
-    { name: "Noto‘g‘ri", value: Math.max(total - correctCount, 0) }
+    { name: "Noto‘g‘ri", value: Math.max(scoredTotal - correctCount, 0) }
   ];
 
   function clearAutoNext() {
@@ -87,14 +89,6 @@ export default function PublicTestRunner({
 
   useEffect(() => clearAutoNext, []);
 
-  if (!q) {
-    return (
-      <section className="view">
-        <div className="muted">Savol topilmadi.</div>
-      </section>
-    );
-  }
-
   return (
     <section className="view">
       <div className="ticketHeader">
@@ -118,47 +112,58 @@ export default function PublicTestRunner({
       </div>
 
       <div className="card">
-        <div className="qTitleBar">{q.text}</div>
+        <div className="qTitleBar">{q?.text || "Bu slot hali to‘ldirilmagan"}</div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
-              {q.options.map((opt, oi) => {
-                const selected = answers[q.id];
-                const hasAnswered = selected !== undefined;
-                const correct = oi === q.correctIndex;
-                const wrong = hasAnswered && oi === selected && !correct;
-                return (
-                  <button
-                    key={oi}
-                    className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
-                    type="button"
-                    disabled={hasAnswered}
-                    onClick={() => selectOption(oi)}
-                  >
-                    <span className="optionKey">F{oi + 1}</span>
-                    <span className="optionText">{opt}</span>
-                  </button>
-                );
-              })}
+              {q?.options.length ? (
+                q.options.map((opt, oi) => {
+                  const selected = answers[q.id];
+                  const hasAnswered = selected !== undefined;
+                  const correct = oi === q.correctIndex;
+                  const wrong = hasAnswered && oi === selected && !correct;
+                  return (
+                    <button
+                      key={oi}
+                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                      type="button"
+                      disabled={hasAnswered}
+                      onClick={() => selectOption(oi)}
+                    >
+                      <span className="optionKey">F{oi + 1}</span>
+                      <span className="optionText">{opt}</span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="emptyQuestionState">Bu savol hali to‘ldirilmagan.</div>
+              )}
             </div>
 
-            {answers[q.id] !== undefined && q.explanation ? (
+            {q && answers[q.id] !== undefined && q.explanation ? (
               <div className="explanation">
                 <div className="explanationLabel">Izoh</div>
                 <div className="publicExplanationText">{q.explanation}</div>
               </div>
             ) : null}
-            {answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
+            {q && answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
           </div>
           <div className="qLeft">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="qimg" src={resolveImg(q.image)} alt="Savol rasmi" />
+            <img className="qimg" src={resolveImg(q?.image)} alt="Savol rasmi" />
           </div>
         </div>
       </div>
 
       <div className="qnav">
         {questions.map((qq, i) => {
+          if (!qq) {
+            return (
+              <button key={i} className={`qbtn ${i === idx ? "active" : ""} qbtnEmpty`} type="button" onClick={() => goTo(i)}>
+                {i + 1}
+              </button>
+            );
+          }
           const selected = answers[qq.id];
           const hasAnswered = selected !== undefined;
           const isWrong = hasAnswered && Number(selected) !== Number(qq.correctIndex);

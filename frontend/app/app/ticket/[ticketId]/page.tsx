@@ -22,7 +22,7 @@ type Question = {
   explanation?: string;
 };
 
-type Ticket = { id: string; title: string; questions: Question[] };
+type Ticket = { id: string; title: string; questions: Array<Question | null> };
 
 const FALLBACK_IMAGE = "/default.png";
 
@@ -365,14 +365,16 @@ export default function TicketPage() {
   }, []);
 
   const total = ticketQuestions.length;
+  const answeredQuestions = ticketQuestions.filter(Boolean);
   const answered = Object.keys(answers).length;
-  const correctCount = ticketQuestions.filter(
-    (question) => answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
+  const correctCount = answeredQuestions.filter(
+    (question) => question && answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
   ).length || 0;
-  const correctPercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const scoredTotal = answeredQuestions.length || total;
+  const correctPercent = scoredTotal > 0 ? Math.round((correctCount / scoredTotal) * 100) : 0;
   const chartData = [
     { name: "To‘g‘ri", value: correctCount },
-    { name: "Noto‘g‘ri", value: Math.max(total - correctCount, 0) }
+    { name: "Noto‘g‘ri", value: Math.max(scoredTotal - correctCount, 0) }
   ];
 
   const resetMutation = useMutation({
@@ -420,14 +422,6 @@ export default function TicketPage() {
     );
   }
 
-  if (!q) {
-    return (
-      <section className="view">
-        <div className="muted">Savol topilmadi.</div>
-      </section>
-    );
-  }
-
   return (
     <section className="view">
       <div className="ticketHeader">
@@ -452,41 +446,45 @@ export default function TicketPage() {
       </div>
 
       <div className="card" ref={questionCardRef}>
-        <div className="qTitleBar">{q?.text}</div>
+        <div className="qTitleBar">{q?.text || "Bu slot hali to‘ldirilmagan"}</div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
-              {q?.options.map((opt, oi) => {
-                const selected = answers[q.id];
-                const hasAnswered = selected !== undefined;
-                const correct = oi === q.correctIndex;
-                const wrong = hasAnswered && oi === selected && !correct;
-                return (
-                  <button
-                    key={oi}
-                    className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
-                    type="button"
-                    disabled={hasAnswered}
-                    onClick={() => {
-                      const nextAnswers = { ...answers, [q.id]: oi };
-                      save(nextAnswers);
-                      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
-                    }}
-                  >
-                    <span className="optionKey">F{oi + 1}</span>
-                    <span className="optionText">{opt}</span>
-                  </button>
-                );
-              })}
+              {q?.options.length ? (
+                q.options.map((opt, oi) => {
+                  const selected = answers[q.id];
+                  const hasAnswered = selected !== undefined;
+                  const correct = oi === q.correctIndex;
+                  const wrong = hasAnswered && oi === selected && !correct;
+                  return (
+                    <button
+                      key={oi}
+                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                      type="button"
+                      disabled={hasAnswered}
+                      onClick={() => {
+                        const nextAnswers = { ...answers, [q.id]: oi };
+                        save(nextAnswers);
+                        if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+                      }}
+                    >
+                      <span className="optionKey">F{oi + 1}</span>
+                      <span className="optionText">{opt}</span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="emptyQuestionState">Bu savol hali to‘ldirilmagan.</div>
+              )}
             </div>
 
-            {answers[q.id] !== undefined && q.explanation ? (
+            {q && answers[q.id] !== undefined && q.explanation ? (
               <div className="explanation">
                 <div className="explanationLabel">Izoh</div>
                 <MarkdownText text={q.explanation} />
               </div>
             ) : null}
-            {answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
+            {q && answers[q.id] !== undefined && q.audio ? <QuestionAudio audio={q.audio} /> : null}
           </div>
           <div className="qLeft">
             {imageLoading && (
@@ -517,24 +515,29 @@ export default function TicketPage() {
       </div>
 
       <div className="qnav">
-        {ticket.questions.map((qq, i) => (
-          (() => {
-            const selected = answers[qq.id];
-            const hasAnswered = selected !== undefined;
-            const isWrong = hasAnswered && Number(selected) !== Number(qq.correctIndex);
-            const isCorrect = hasAnswered && Number(selected) === Number(qq.correctIndex);
+        {ticket.questions.map((qq, i) => {
+          if (!qq) {
             return (
-              <button
-                key={qq.id}
-                className={`qbtn ${i === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
-                type="button"
-                onClick={() => setIdx(i)}
-              >
+              <button key={`empty-${i}`} className={`qbtn ${i === idx ? "active" : ""} qbtnEmpty`} type="button" onClick={() => setIdx(i)}>
                 {i + 1}
               </button>
             );
-          })()
-        ))}
+          }
+          const selected = answers[qq.id];
+          const hasAnswered = selected !== undefined;
+          const isWrong = hasAnswered && Number(selected) !== Number(qq.correctIndex);
+          const isCorrect = hasAnswered && Number(selected) === Number(qq.correctIndex);
+          return (
+            <button
+              key={qq.id}
+              className={`qbtn ${i === idx ? "active" : ""} ${isCorrect ? "answered correct" : ""} ${isWrong ? "answered wrong" : ""} ${hasAnswered && !isWrong && !isCorrect ? "answered" : ""}`}
+              type="button"
+              onClick={() => setIdx(i)}
+            >
+              {i + 1}
+            </button>
+          );
+        })}
       </div>
 
       <div className="ticketFooter">

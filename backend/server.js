@@ -153,7 +153,39 @@ function normalizeTicketQuestionRow(row) {
   };
 }
 
+function normalizeTicketSlotQuestion(question, fallbackOrder = 0) {
+  if (!question || typeof question !== "object") return null;
+  const text = String(question.text || "").trim();
+  const image = String(question.image || "").trim();
+  const audio = String(question.audio || "").trim();
+  const explanation = String(question.explanation || "").trim();
+  const options = Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [];
+  const hasContent = Boolean(text || image || audio || explanation || options.some(Boolean));
+  if (!hasContent && !String(question.id || question.questionId || "").trim()) return null;
+  return {
+    id: String(question.id || question.questionId || `slot-${fallbackOrder}`),
+    questionId: String(question.questionId || question.id || ""),
+    order: Number.isFinite(Number(question.order)) ? Number(question.order) : Number(fallbackOrder || 0),
+    topicId: Number(question.topicId || 0),
+    topicSlug: String(question.topicSlug || ""),
+    topicTitle: String(question.topicTitle || ""),
+    questionIndex: Number(question.questionIndex || 0),
+    text,
+    image,
+    audio,
+    options,
+    correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
+    explanation
+  };
+}
+
+function normalizeTicketSlotQuestions(value) {
+  const raw = Array.isArray(value) ? value : [];
+  return Array.from({ length: 20 }, (_, index) => normalizeTicketSlotQuestion(raw[index], index + 1));
+}
+
 function buildTicketQuestionQuestion(ticket, questionRow) {
+  if (!questionRow || !questionRow.questionId) return null;
   const questionId = String(questionRow.questionId || questionRow.question_key || questionRow.question?.id || "");
   const normalized = normalizeAnswerQuestion(questionRow.question);
   return {
@@ -168,6 +200,7 @@ function buildTicketQuestionQuestion(ticket, questionRow) {
 }
 
 function buildTicketBuilderQuestion(questionRow) {
+  if (!questionRow || !questionRow.questionId) return null;
   const normalized = normalizeAnswerQuestion(questionRow.question);
   return {
     id: String(questionRow.questionId || questionRow.question?.id || ""),
@@ -193,9 +226,9 @@ async function getTicketQuestionsFromDb(ticketId) {
         bank.topic_slug,
         bank.topic_title,
         bank.question_index,
-        bank.question
+      bank.question
       FROM ticket_questions tq
-      JOIN topic_question_bank bank ON bank.question_key = tq.question_id
+      LEFT JOIN topic_question_bank bank ON bank.question_key = tq.question_id
       WHERE tq.ticket_id = ?
       ORDER BY tq."order" ASC, tq.id ASC
     `,
@@ -207,11 +240,17 @@ async function getTicketQuestionsFromDb(ticketId) {
 async function refreshTicketQuestionsMirror(ticketId) {
   const ticket = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!ticket) return null;
+  const slots = normalizeTicketSlotQuestions(ticket.questions);
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const questions = questionRows.map((row) => buildTicketBuilderQuestion(row));
-  const result = await dbApi.get(
-    `UPDATE tickets SET questions = ?::jsonb, updated_at = NOW() WHERE id = ? RETURNING id, title, ticket_number, status, questions, created_at, updated_at`,
-    [JSON.stringify(questions), String(ticketId)]
+  for (const row of questionRows) {
+    const slotIndex = Number(row.order || 0) - 1;
+    if (slotIndex < 0 || slotIndex >= slots.length) continue;
+    const question = buildTicketBuilderQuestion(row);
+    slots[slotIndex] = question;
+  }
+  await dbApi.run(
+    `UPDATE tickets SET questions = ?::jsonb, updated_at = NOW() WHERE id = ?`,
+    [JSON.stringify(slots), String(ticketId)]
   );
   return getTicketBuilderFromDb(ticketId);
 }
@@ -220,24 +259,16 @@ async function getTicketFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const rawQuestions = parseQuestionsValue(row.questions);
-  const sourceRows =
-    questionRows.length > 0 && questionRows.length === rawQuestions.length
-      ? questionRows
-      : rawQuestions.map((question, index) => ({
-          id: index + 1,
-          ticketId: String(row.id),
-          questionId: String(question?.id || `${index + 1}`),
-          order: index + 1,
-          topicId: 0,
-          topicSlug: "",
-          topicTitle: String(row.title || ""),
-          questionIndex: index,
-          question
-        }));
+  const rawQuestions = normalizeTicketSlotQuestions(row.questions);
+  const sourceQuestions = rawQuestions.some(Boolean)
+    ? rawQuestions
+    : Array.from({ length: 20 }, (_, index) => {
+        const questionRow = questionRows.find((item) => Number(item.order || 0) === index + 1);
+        return questionRow ? buildTicketBuilderQuestion(questionRow) : null;
+      });
   return {
     ...normalizeTicketRow(row),
-    questions: sourceRows.map((questionRow) => buildTicketQuestionQuestion(normalizeTicketRow(row), questionRow))
+    questions: sourceQuestions
   };
 }
 
@@ -245,7 +276,10 @@ async function getTicketBuilderFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const slots = Array.from({ length: 20 }, () => null);
+  const rawSlots = normalizeTicketSlotQuestions(row.questions);
+  const slots = rawSlots.some(Boolean)
+    ? rawSlots
+    : Array.from({ length: 20 }, () => null);
   for (const questionRow of questionRows) {
     const slotIndex = Number(questionRow.order || 0) - 1;
     if (slotIndex < 0 || slotIndex >= slots.length) continue;
@@ -255,6 +289,36 @@ async function getTicketBuilderFromDb(ticketId) {
     ...normalizeTicketRow(row),
     questions: slots
   };
+}
+
+async function syncTicketQuestionsFromSlots(ticketId, slots) {
+  const normalizedSlots = normalizeTicketSlotQuestions(slots);
+  await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(ticketId)]);
+  for (const [index, question] of normalizedSlots.entries()) {
+    if (!question || !question.questionId) continue;
+    await dbApi.run(
+      `
+        INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
+        VALUES (?, ?, ?, NOW(), NOW())
+        ON CONFLICT (question_id) DO UPDATE SET
+          ticket_id = EXCLUDED.ticket_id,
+          "order" = EXCLUDED."order",
+          updated_at = EXCLUDED.updated_at
+      `,
+      [String(ticketId), String(question.questionId), index + 1]
+    );
+  }
+  return normalizedSlots;
+}
+
+async function persistTicketSlotQuestions(ticketId, slots) {
+  const normalizedSlots = normalizeTicketSlotQuestions(slots);
+  await dbApi.run(
+    `UPDATE tickets SET questions = ?::jsonb, updated_at = NOW() WHERE id = ?`,
+    [JSON.stringify(normalizedSlots), String(ticketId)]
+  );
+  await syncTicketQuestionsFromSlots(ticketId, normalizedSlots);
+  return getTicketBuilderFromDb(ticketId);
 }
 
 async function getTicketsFromDb() {
@@ -300,7 +364,7 @@ async function createTicket(input) {
   const ticketNumber = Number.isFinite(Number(input.ticketNumber)) ? Number(input.ticketNumber) : await getNextTicketNumber();
   const ticketId = String(input.id || ticketNumber);
   const status = normalizeTicketStatus(input.status || "COMPLETED");
-  const questions = normalizeTicketInputQuestions(input.questions || []);
+  const questions = normalizeTicketSlotQuestions(input.questions || []);
 
   const result = await dbApi.get(
     `
@@ -311,27 +375,7 @@ async function createTicket(input) {
     [ticketId, title || makeTicketTitle(ticketNumber), ticketNumber, status, JSON.stringify(questions)]
   );
 
-  if (Array.isArray(questions) && questions.length) {
-    const ticketQuestionRows = [];
-    for (const [index, question] of questions.entries()) {
-      const questionId = String(question.id || "");
-      if (!questionId) continue;
-      ticketQuestionRows.push([ticketId, questionId, index + 1]);
-    }
-    for (const [id, questionId, order] of ticketQuestionRows) {
-      await dbApi.run(
-        `
-          INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
-          VALUES (?, ?, ?, NOW(), NOW())
-          ON CONFLICT (question_id) DO UPDATE SET
-            ticket_id = EXCLUDED.ticket_id,
-            "order" = EXCLUDED."order",
-            updated_at = EXCLUDED.updated_at
-        `,
-        [id, questionId, order]
-      );
-    }
-  }
+  await syncTicketQuestionsFromSlots(ticketId, questions);
 
   return status === "COMPLETED" ? getTicketByIdFromDb(result.id) : getDraftTicketFromDb(result.id);
 }
@@ -340,29 +384,14 @@ async function replaceTicketQuestions(ticketId, questions) {
   const ticket = await dbApi.get("SELECT id, title, ticket_number, status FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!ticket) throw new Error("Bilet topilmadi");
 
-  const normalized = normalizeTicketInputQuestions(questions);
-  const seen = new Set();
-  for (const question of normalized) {
-    if (seen.has(question.id)) throw new Error("Bir savolni bilet ichida takrorlab bo‘lmaydi");
-    seen.add(question.id);
-  }
+  const normalized = normalizeTicketSlotQuestions(questions);
+  await dbApi.run(
+    `UPDATE tickets SET questions = ?::jsonb, updated_at = NOW() WHERE id = ?`,
+    [JSON.stringify(normalized), String(ticketId)]
+  );
+  await syncTicketQuestionsFromSlots(ticketId, normalized);
 
-  await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(ticketId)]);
-  for (const [index, question] of normalized.entries()) {
-    await dbApi.run(
-      `
-        INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
-        VALUES (?, ?, ?, NOW(), NOW())
-        ON CONFLICT (question_id) DO UPDATE SET
-          ticket_id = EXCLUDED.ticket_id,
-          "order" = EXCLUDED."order",
-          updated_at = EXCLUDED.updated_at
-      `,
-      [String(ticketId), String(question.id), index + 1]
-    );
-  }
-
-  return refreshTicketQuestionsMirror(ticketId);
+  return getTicketBuilderFromDb(ticketId);
 }
 
 async function updateTicket(id, input) {
@@ -373,7 +402,7 @@ async function updateTicket(id, input) {
   if (!title) throw new Error("Bilet nomi kiritilishi kerak");
 
   const status = input.status !== undefined ? normalizeTicketStatus(input.status) : normalizeTicketStatus(ticket.status);
-  const questions = input.questions !== undefined ? normalizeTicketInputQuestions(input.questions) : parseQuestionsValue(ticket.questions);
+  const questions = input.questions !== undefined ? normalizeTicketSlotQuestions(input.questions) : normalizeTicketSlotQuestions(ticket.questions);
 
   const result = await dbApi.get(
     `
@@ -386,20 +415,7 @@ async function updateTicket(id, input) {
   );
 
   if (input.questions !== undefined) {
-    await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(id)]);
-    for (const [index, question] of questions.entries()) {
-      await dbApi.run(
-        `
-          INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
-          VALUES (?, ?, ?, NOW(), NOW())
-          ON CONFLICT (question_id) DO UPDATE SET
-            ticket_id = EXCLUDED.ticket_id,
-            "order" = EXCLUDED."order",
-            updated_at = EXCLUDED.updated_at
-        `,
-        [String(id), String(question.id), index + 1]
-      );
-    }
+    await syncTicketQuestionsFromSlots(id, questions);
   }
 
   return normalizeTicketRow(result);
@@ -4606,20 +4622,6 @@ app.post("/api/admin/ticket-builder/add-question", async (req, res) => {
     const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
     const alreadyAssigned = await dbApi.get("SELECT id FROM ticket_questions WHERE question_id = ?", [questionId]);
     if (alreadyAssigned) return res.status(400).json({ error: "Savol allaqachon biletga biriktirilgan" });
-    const currentRows = await dbApi.all(
-      `SELECT id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
-      [draft.id]
-    );
-    const currentCount = currentRows.length;
-    if (currentCount >= 20) return res.status(400).json({ error: "Bitta biletda faqat 20 ta savol bo‘lishi kerak" });
-    const nextOrder = Number.isFinite(desiredOrderValue) && desiredOrderValue > 0 ? Math.max(1, Math.min(desiredOrderValue, 20)) : (() => {
-      for (let order = 1; order <= 20; order += 1) {
-        if (!currentRows.some((row) => Number(row.order || 0) === order)) return order;
-      }
-      return 20;
-    })();
-    const occupied = currentRows.find((row) => Number(row.order || 0) === nextOrder);
-    if (occupied) return res.status(400).json({ error: "Bu slot band. Avval savolni remove qiling" });
     const bankQuestion = await dbApi.get(
       `
         SELECT question_key, topic_id, topic_slug, topic_title, question_id, question_index, question, sort_order
@@ -4630,14 +4632,19 @@ app.post("/api/admin/ticket-builder/add-question", async (req, res) => {
       [questionId]
     );
     if (!bankQuestion) return res.status(404).json({ error: "Savol topilmadi" });
-    await dbApi.run(
-      `
-        INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
-        VALUES (?, ?, ?, NOW(), NOW())
-      `,
-      [draft.id, questionId, nextOrder]
-    );
-    const updated = await refreshTicketQuestionsMirror(draft.id);
+    const nextOrder = Number.isFinite(desiredOrderValue) && desiredOrderValue > 0 ? Math.max(1, Math.min(desiredOrderValue, 20)) : 1;
+    const nextSlots = normalizeTicketSlotQuestions(draft.questions);
+    if (nextSlots[nextOrder - 1]) return res.status(400).json({ error: "Bu slot band. Avval savolni remove qiling" });
+    nextSlots[nextOrder - 1] = buildTicketBuilderQuestion({
+      questionId,
+      order: nextOrder,
+      topicId: bankQuestion.topic_id,
+      topicSlug: bankQuestion.topic_slug,
+      topicTitle: bankQuestion.topic_title,
+      questionIndex: bankQuestion.question_index,
+      question: bankQuestion.question
+    });
+    const updated = await persistTicketSlotQuestions(draft.id, nextSlots);
     res.json({ ok: true, ticket: updated || draft });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
@@ -4652,10 +4659,11 @@ app.post("/api/admin/ticket-builder/remove-question", async (req, res) => {
   try {
     const draftTicket = await getOrCreateDraftTicket();
     const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
-    const existing = await dbApi.get("SELECT id, \"order\" FROM ticket_questions WHERE ticket_id = ? AND question_id = ?", [draft.id, questionId]);
-    if (!existing) return res.status(404).json({ error: "Savol draftda topilmadi" });
-    await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ? AND question_id = ?", [draft.id, questionId]);
-    const updated = await refreshTicketQuestionsMirror(draft.id);
+    const nextSlots = normalizeTicketSlotQuestions(draft.questions);
+    const existingIndex = nextSlots.findIndex((slot) => slot && String(slot.questionId || slot.id || "") === questionId);
+    if (existingIndex < 0) return res.status(404).json({ error: "Savol draftda topilmadi" });
+    nextSlots[existingIndex] = null;
+    const updated = await persistTicketSlotQuestions(draft.id, nextSlots);
     res.json({ ok: true, ticket: updated || draft });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
@@ -4675,24 +4683,17 @@ app.post("/api/admin/ticket-builder/reorder", async (req, res) => {
   try {
     const draftTicket = await getOrCreateDraftTicket();
     const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
-    const currentRows = await dbApi.all(
-      `SELECT id, question_id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
-      [draft.id]
-    );
-    const sourceRow = currentRows.find((item) => String(item.question_id) === questionId);
-    if (!sourceRow) return res.status(404).json({ error: "Savol topilmadi" });
-    const targetRow = currentRows.find((item) => Number(item.order || 0) === toOrder);
-    if (targetRow && String(targetRow.question_id) === questionId) {
-      return res.json({ ok: true, ticket: draft });
-    }
-    if (!targetRow) {
-      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [toOrder, sourceRow.id]);
-    } else {
-      await dbApi.run(`UPDATE ticket_questions SET "order" = 0, updated_at = NOW() WHERE id = ?`, [sourceRow.id]);
-      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [fromOrder, targetRow.id]);
-      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [toOrder, sourceRow.id]);
-    }
-    const updated = await refreshTicketQuestionsMirror(draft.id);
+    const nextSlots = normalizeTicketSlotQuestions(draft.questions);
+    const sourceIndex = fromOrder - 1;
+    const targetIndex = toOrder - 1;
+    const source = nextSlots[sourceIndex];
+    if (!source || String(source.questionId || source.id || "") !== questionId) return res.status(404).json({ error: "Savol topilmadi" });
+    if (sourceIndex === targetIndex) return res.json({ ok: true, ticket: draft });
+    const target = nextSlots[targetIndex];
+    nextSlots[sourceIndex] = target || null;
+    nextSlots[targetIndex] = { ...source, order: toOrder };
+    if (nextSlots[sourceIndex]) nextSlots[sourceIndex] = { ...nextSlots[sourceIndex], order: fromOrder };
+    const updated = await persistTicketSlotQuestions(draft.id, nextSlots);
     res.json({ ok: true, ticket: updated || draft });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
@@ -4704,10 +4705,9 @@ app.post("/api/admin/ticket-builder/complete", async (req, res) => {
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
     const currentDraft = await getOrCreateDraftTicket();
-    const currentQuestions = await getTicketQuestionsFromDb(currentDraft.id);
-    if (currentQuestions.length !== 20) {
-      return res.status(400).json({ error: "Biletni yakunlash uchun 20 ta savol kerak" });
-    }
+    const currentSlots = normalizeTicketSlotQuestions(currentDraft.questions);
+    const filledCount = currentSlots.filter(Boolean).length;
+    if (!filledCount) return res.status(400).json({ error: "Kamida bitta savol kerak" });
 
     const ticketNumber = Number(currentDraft.ticketNumber || 0) || await getNextTicketNumber();
     const completedTitle = makeTicketTitle(ticketNumber);
@@ -4715,7 +4715,7 @@ app.post("/api/admin/ticket-builder/complete", async (req, res) => {
       `UPDATE tickets SET title = ?, ticket_number = ?, status = 'COMPLETED', updated_at = NOW() WHERE id = ?`,
       [completedTitle, ticketNumber, currentDraft.id]
     );
-    await refreshTicketQuestionsMirror(currentDraft.id);
+    await persistTicketSlotQuestions(currentDraft.id, currentSlots);
 
     const nextNumber = ticketNumber + 1;
     const nextId = String(nextNumber);

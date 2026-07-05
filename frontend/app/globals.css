@@ -2681,6 +2681,25 @@ body {
   font-weight: 800;
 }
 
+.qbtnEmpty {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.emptyQuestionState {
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.adminEmptyQuestionCard {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+}
+
 .ticketBuilderLoadMoreRow {
   display: flex;
   gap: 10px;

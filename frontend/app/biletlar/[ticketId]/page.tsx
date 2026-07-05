@@ -62,7 +62,7 @@ export default async function BiletDetailPage({ params }: Params) {
 
   if (!ticket) notFound();
 
-  const faqJsonLd = buildFaqJsonLd(ticket.questions);
+  const faqJsonLd = buildFaqJsonLd(ticket.questions.filter((question): question is NonNullable<(typeof ticket.questions)[number]> => Boolean(question)));
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Bosh sahifa", url: "/" },
     { name: "Biletlar", url: "/biletlar" },

@@ -15,7 +15,7 @@ export type PublicQuestion = {
   explanation?: string;
 };
 
-export type PublicTicket = { id: string; title: string; questions: PublicQuestion[] };
+export type PublicTicket = { id: string; title: string; questions: Array<PublicQuestion | null> };
 export type PublicTopic = { id: number; slug: string; title: string; questions: PublicQuestion[] };
 export type PublicTicketSummary = { id: string; title: string; free: boolean; questionCount: number };
 export type PublicTopicSummary = { id: number; slug: string; title: string; free: boolean; questionCount: number };
