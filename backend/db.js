@@ -154,11 +154,37 @@ async function initDb(dbApi) {
     CREATE TABLE IF NOT EXISTS tickets (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
+      ticket_number INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'COMPLETED',
       questions JSONB NOT NULL DEFAULT '[]'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+  await dbApi.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS ticket_number INTEGER NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'COMPLETED';`);
+  await dbApi.run(`ALTER TABLE tickets ADD CONSTRAINT tickets_status_check CHECK (status IN ('DRAFT', 'COMPLETED'));`).catch(() => {});
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS tickets_ticket_number_unique_idx ON tickets (ticket_number);`).catch(() => {});
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS tickets_draft_unique_idx ON tickets ((status)) WHERE status = 'DRAFT';`).catch(() => {});
+
+  await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS ticket_questions (
+      id BIGSERIAL PRIMARY KEY,
+      ticket_id TEXT NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+      question_id TEXT NOT NULL,
+      "order" INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(question_id),
+      UNIQUE(ticket_id, "order")
+    );
+  `);
+  await dbApi.run(`ALTER TABLE ticket_questions ADD COLUMN IF NOT EXISTS ticket_id TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE ticket_questions ADD COLUMN IF NOT EXISTS question_id TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE ticket_questions ADD COLUMN IF NOT EXISTS "order" INTEGER NOT NULL DEFAULT 0;`);
+  await dbApi.run(`ALTER TABLE ticket_questions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS ticket_questions_question_id_unique_idx ON ticket_questions (question_id);`);
+  await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS ticket_questions_ticket_order_unique_idx ON ticket_questions (ticket_id, "order");`);
 
   await dbApi.run(`
     CREATE TABLE IF NOT EXISTS topics (

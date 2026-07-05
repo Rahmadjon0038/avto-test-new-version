@@ -9,7 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
-import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
@@ -265,13 +265,11 @@ export default function TicketPage() {
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const { settings, patchSettings } = useTestPageSettings();
-  const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
-      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
-      patchSettings(next);
+      patchSettings({ ...next, shuffleQuestions: false });
     },
-    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
+    [patchSettings]
   );
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -283,17 +281,7 @@ export default function TicketPage() {
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const autoResetRef = useRef(false);
-  const shuffleSettingRef = useRef(settings.shuffleQuestions);
-
-  const ticketQuestions = useMemo(
-    () =>
-      ticket && Array.isArray(ticket.questions)
-        ? settings.shuffleQuestions
-          ? shuffleQuestionsWithSeed(ticket.questions, shuffleSeed)
-          : ticket.questions
-        : [],
-    [settings.shuffleQuestions, shuffleSeed, ticket]
-  );
+  const ticketQuestions = useMemo(() => (ticket && Array.isArray(ticket.questions) ? ticket.questions : []), [ticket]);
   const q = useMemo(() => ticketQuestions[idx] ?? null, [ticketQuestions, idx]);
 
   const ticketQuery = useQuery({
@@ -321,12 +309,6 @@ export default function TicketPage() {
   useEffect(() => {
     // progress error is not critical
   }, [progressQuery.error]);
-
-  useEffect(() => {
-    if (shuffleSettingRef.current === settings.shuffleQuestions) return;
-    shuffleSettingRef.current = settings.shuffleQuestions;
-    setIdx(0);
-  }, [settings.shuffleQuestions]);
 
   useEffect(() => {
     if (settings.autoNext) return;
@@ -403,7 +385,6 @@ export default function TicketPage() {
   });
 
   function reset() {
-    if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
   }
 
@@ -413,9 +394,8 @@ export default function TicketPage() {
     setAnswers({});
     setIdx(0);
     setFinishOpen(false);
-    if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
-  }, [refreshShuffleSeed, settings.shuffleQuestions, ticket, resetMutation]);
+  }, [ticket, resetMutation]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
   useTestInteractions({

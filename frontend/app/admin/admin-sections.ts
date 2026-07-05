@@ -1,4 +1,4 @@
-import { BarChart3, Users, LayoutGrid, Shield, Video } from "lucide-react";
+import { BarChart3, BookOpen, Ticket, Users, LayoutGrid, Shield, Video } from "lucide-react";
 
 export type AdminSection = {
   key: string;
@@ -21,6 +21,16 @@ export const adminSections: AdminSection[] = [
     key: "topics",
     title: "Mavzular",
     icon: LayoutGrid
+  },
+  {
+    key: "questions",
+    title: "Savollar nomi",
+    icon: BookOpen
+  },
+  {
+    key: "ticket-builder",
+    title: "Bilet Constructor",
+    icon: Ticket
   },
   {
     key: "videos",

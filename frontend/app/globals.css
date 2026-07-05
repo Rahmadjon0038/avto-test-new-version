@@ -2406,6 +2406,214 @@ body {
   align-items: center;
 }
 
+.ticketBuilderLayout {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.05fr) minmax(420px, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.ticketBuilderPanel {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.ticketBuilderDraftPanel {
+  position: sticky;
+  top: 18px;
+}
+
+.ticketBuilderPanelHead {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ticketBuilderTitle {
+  font-size: 20px;
+  font-weight: 1000;
+  line-height: 1.2;
+}
+
+.ticketBuilderMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ticketBuilderSlots {
+  display: grid;
+  gap: 10px;
+  max-height: calc(100vh - 270px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.ticketBuilderSlot {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+}
+
+.ticketBuilderSlot.filled {
+  border-style: solid;
+  background: var(--panel2);
+}
+
+.ticketBuilderSlotIndex {
+  width: 48px;
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
+  background: color-mix(in srgb, var(--primary) 10%, var(--panel));
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.ticketBuilderSlotEmpty {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--border) 90%, transparent);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ticketBuilderQuestionCard {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  cursor: grab;
+  user-select: none;
+}
+
+.ticketBuilderQuestionCard.dragging {
+  opacity: 0.7;
+}
+
+.ticketBuilderQuestionCardHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.ticketBuilderGrip {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.ticketBuilderQuestionBadge {
+  flex: 1;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticketBuilderQuestionText {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ticketBuilderQuestionMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ticketBuilderFooter {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticketBuilderProgress {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.ticketBuilderPoolPanel {
+  min-height: 0;
+}
+
+.ticketBuilderSearchWrap {
+  min-width: min(100%, 420px);
+}
+
+.ticketBuilderSearchInput {
+  min-height: 44px;
+}
+
+.ticketBuilderPoolGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ticketBuilderPoolItem {
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  cursor: grab;
+}
+
+.ticketBuilderPoolHead {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticketBuilderPoolText {
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.ticketBuilderPoolMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ticketBuilderPoolTopic {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ticketBuilderLoadMoreRow {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @media (max-width: 1024px) {
   .adminLayout {
     grid-template-columns: 1fr;
@@ -2478,6 +2686,34 @@ body {
   .adminQuestionsHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .ticketBuilderLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .ticketBuilderDraftPanel {
+    position: static;
+  }
+
+  .ticketBuilderPoolGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticketBuilderPanelHead,
+  .ticketBuilderFooter,
+  .ticketBuilderLoadMoreRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ticketBuilderSearchWrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .ticketBuilderSlots {
+    max-height: none;
   }
 
   .answersHero {

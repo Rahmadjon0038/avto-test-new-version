@@ -71,11 +71,20 @@ const APPLE_AUDIENCES = new Set(
 );
 let appleJwks = null;
 
-function parseTicketRow(row) {
+function normalizeTicketStatus(value) {
+  const status = String(value || "COMPLETED").trim().toUpperCase();
+  return status === "DRAFT" ? "DRAFT" : "COMPLETED";
+}
+
+function normalizeTicketRow(row) {
   return {
     id: String(row.id),
     title: String(row.title || ""),
-    questions: parseQuestionsValue(row.questions)
+    ticketNumber: Number(row.ticket_number || 0),
+    status: normalizeTicketStatus(row.status),
+    questions: parseQuestionsValue(row.questions),
+    created_at: row.created_at ? String(row.created_at) : undefined,
+    updated_at: row.updated_at ? String(row.updated_at) : undefined
   };
 }
 
@@ -104,16 +113,6 @@ function parseJsonValue(value, fallback) {
   return fallback;
 }
 
-async function getTicketsFromDb() {
-  const rows = await dbApi.all("SELECT * FROM tickets ORDER BY created_at ASC, id ASC");
-  return rows.map(parseTicketRow);
-}
-
-async function getTicketByIdFromDb(ticketId) {
-  const row = await dbApi.get("SELECT * FROM tickets WHERE id = ?", [String(ticketId)]);
-  return row ? parseTicketRow(row) : null;
-}
-
 function normalizeQuestions(value) {
   const questions = parseQuestionsValue(value);
   return questions
@@ -139,33 +138,154 @@ function normalizeTicket(row) {
   };
 }
 
-async function getTickets() {
-  const rows = await dbApi.all("SELECT * FROM tickets ORDER BY created_at ASC, id ASC");
-  return rows.map(normalizeTicket);
+function normalizeTicketQuestionRow(row) {
+  const question = parseJsonValue(row.question, {});
+  return {
+    id: Number(row.id),
+    ticketId: String(row.ticket_id || ""),
+    questionId: String(row.question_id || ""),
+    order: Number(row.order || 0),
+    topicId: Number(row.topic_id || 0),
+    topicSlug: String(row.topic_slug || ""),
+    topicTitle: String(row.topic_title || ""),
+    questionIndex: Number(row.question_index || 0),
+    question
+  };
 }
 
-async function getTicketById(id) {
-  const row = await dbApi.get("SELECT * FROM tickets WHERE id = ?", [String(id)]);
-  return row ? normalizeTicket(row) : null;
+function buildTicketQuestionQuestion(ticket, questionRow) {
+  const questionId = String(questionRow.questionId || questionRow.question_key || questionRow.question?.id || "");
+  const normalized = normalizeAnswerQuestion(questionRow.question);
+  return {
+    id: `ticket:${String(ticket.id)}:${questionId}`,
+    kind: "ticket",
+    sourceId: String(ticket.id),
+    sourceTitle: String(ticket.title || ""),
+    sourceKind: "ticket",
+    questionIndex: Number(questionRow.order || 0),
+    ...normalized
+  };
 }
 
-async function createTicket(input) {
-  const title = String(input.title || "").trim();
-  if (!title) throw new Error("Bilet nomi kiritilishi kerak");
+function buildTicketBuilderQuestion(questionRow) {
+  const normalized = normalizeAnswerQuestion(questionRow.question);
+  return {
+    id: String(questionRow.questionId || questionRow.question?.id || ""),
+    questionId: String(questionRow.questionId || questionRow.question?.id || ""),
+    order: Number(questionRow.order || 0),
+    topicId: Number(questionRow.topicId || 0),
+    topicSlug: String(questionRow.topicSlug || ""),
+    topicTitle: String(questionRow.topicTitle || ""),
+    questionIndex: Number(questionRow.questionIndex || 0),
+    ...normalized
+  };
+}
 
-  const existingIds = await dbApi.all("SELECT id FROM tickets");
-  const numericIds = existingIds
-    .map((row) => Number(row.id))
-    .filter((value) => Number.isFinite(value));
-  let ticketId = String(input.id || "");
-  if (!ticketId) {
-    ticketId = numericIds.length ? String(Math.max(...numericIds) + 1) : "1";
-    while (existingIds.some((row) => String(row.id) === ticketId)) {
-      ticketId = String(Number(ticketId) + 1);
-    }
+async function getTicketQuestionsFromDb(ticketId) {
+  const rows = await dbApi.all(
+    `
+      SELECT
+        tq.id,
+        tq.ticket_id,
+        tq.question_id,
+        tq."order",
+        bank.topic_id,
+        bank.topic_slug,
+        bank.topic_title,
+        bank.question_index,
+        bank.question
+      FROM ticket_questions tq
+      JOIN topic_question_bank bank ON bank.question_key = tq.question_id
+      WHERE tq.ticket_id = ?
+      ORDER BY tq."order" ASC, tq.id ASC
+    `,
+    [String(ticketId)]
+  );
+  return rows.map(normalizeTicketQuestionRow);
+}
+
+async function refreshTicketQuestionsMirror(ticketId) {
+  const ticket = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
+  if (!ticket) return null;
+  const questionRows = await getTicketQuestionsFromDb(ticketId);
+  const questions = questionRows.map((row) => buildTicketBuilderQuestion(row));
+  const result = await dbApi.get(
+    `UPDATE tickets SET questions = ?::jsonb, updated_at = NOW() WHERE id = ? RETURNING id, title, ticket_number, status, questions, created_at, updated_at`,
+    [JSON.stringify(questions), String(ticketId)]
+  );
+  return getTicketBuilderFromDb(ticketId);
+}
+
+async function getTicketFromDb(ticketId) {
+  const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
+  if (!row) return null;
+  const questionRows = await getTicketQuestionsFromDb(ticketId);
+  const rawQuestions = parseQuestionsValue(row.questions);
+  const sourceRows =
+    questionRows.length > 0 && questionRows.length === rawQuestions.length
+      ? questionRows
+      : rawQuestions.map((question, index) => ({
+          id: index + 1,
+          ticketId: String(row.id),
+          questionId: String(question?.id || `${index + 1}`),
+          order: index + 1,
+          topicId: 0,
+          topicSlug: "",
+          topicTitle: String(row.title || ""),
+          questionIndex: index,
+          question
+        }));
+  return {
+    ...normalizeTicketRow(row),
+    questions: sourceRows.map((questionRow) => buildTicketQuestionQuestion(normalizeTicketRow(row), questionRow))
+  };
+}
+
+async function getTicketBuilderFromDb(ticketId) {
+  const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
+  if (!row) return null;
+  const questionRows = await getTicketQuestionsFromDb(ticketId);
+  const rawQuestions = parseQuestionsValue(row.questions);
+  const sourceRows =
+    questionRows.length > 0 && questionRows.length === rawQuestions.length
+      ? questionRows
+      : rawQuestions.map((question, index) => ({
+          id: index + 1,
+          ticketId: String(row.id),
+          questionId: String(question?.id || `${index + 1}`),
+          order: index + 1,
+          topicId: 0,
+          topicSlug: "",
+          topicTitle: String(row.title || ""),
+          questionIndex: index,
+          question
+        }));
+  return {
+    ...normalizeTicketRow(row),
+    questions: sourceRows.map((questionRow) => buildTicketBuilderQuestion(questionRow))
+  };
+}
+
+async function getTicketsFromDb() {
+  const rows = await dbApi.all(
+    "SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'COMPLETED' ORDER BY ticket_number ASC, created_at ASC, id ASC"
+  );
+  const tickets = [];
+  for (const row of rows) {
+    const ticket = await getTicketFromDb(row.id);
+    if (ticket) tickets.push(ticket);
   }
+  return tickets;
+}
 
-  const questions = normalizeQuestions(input.questions || []).map((question) => {
+async function getTicketByIdFromDb(ticketId) {
+  const ticket = await getTicketFromDb(ticketId);
+  if (ticket && ticket.status !== "COMPLETED") return null;
+  return ticket;
+}
+
+function normalizeTicketInputQuestions(inputQuestions) {
+  return normalizeQuestions(inputQuestions || []).map((question) => {
     if (question.options.length < 2) throw new Error("Har bir savolda kamida 2 ta variant bo‘lishi kerak");
     if (question.options.some((option) => !option)) throw new Error("Barcha variantlarni to‘ldiring");
     if (question.correctIndex < 0 || question.correctIndex >= question.options.length) {
@@ -173,45 +293,169 @@ async function createTicket(input) {
     }
     return question;
   });
+}
+
+async function getNextTicketNumber() {
+  const row = await dbApi.get("SELECT COALESCE(MAX(ticket_number), 0) AS max_ticket_number FROM tickets");
+  return Number(row?.max_ticket_number || 0) + 1;
+}
+
+function makeTicketTitle(ticketNumber) {
+  return `Bilet №${Number(ticketNumber) || 1}`;
+}
+
+async function createTicket(input) {
+  const title = String(input.title || "").trim();
+  const ticketNumber = Number.isFinite(Number(input.ticketNumber)) ? Number(input.ticketNumber) : await getNextTicketNumber();
+  const ticketId = String(input.id || ticketNumber);
+  const status = normalizeTicketStatus(input.status || "COMPLETED");
+  const questions = normalizeTicketInputQuestions(input.questions || []);
 
   const result = await dbApi.get(
-    `INSERT INTO tickets (id, title, questions, created_at, updated_at)
-     VALUES (?, ?, ?::jsonb, NOW(), NOW())
-     RETURNING *`,
-    [ticketId, title, JSON.stringify(questions)]
+    `
+      INSERT INTO tickets (id, title, ticket_number, status, questions, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?::jsonb, NOW(), NOW())
+      RETURNING id, title, ticket_number, status, questions, created_at, updated_at
+    `,
+    [ticketId, title || makeTicketTitle(ticketNumber), ticketNumber, status, JSON.stringify(questions)]
   );
-  return normalizeTicket(result);
+
+  if (Array.isArray(questions) && questions.length) {
+    const ticketQuestionRows = [];
+    for (const [index, question] of questions.entries()) {
+      const questionId = String(question.id || "");
+      if (!questionId) continue;
+      ticketQuestionRows.push([ticketId, questionId, index + 1]);
+    }
+    for (const [id, questionId, order] of ticketQuestionRows) {
+      await dbApi.run(
+        `
+          INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
+          VALUES (?, ?, ?, NOW(), NOW())
+          ON CONFLICT (question_id) DO UPDATE SET
+            ticket_id = EXCLUDED.ticket_id,
+            "order" = EXCLUDED."order",
+            updated_at = EXCLUDED.updated_at
+        `,
+        [id, questionId, order]
+      );
+    }
+  }
+
+  return status === "COMPLETED" ? getTicketByIdFromDb(result.id) : getDraftTicketFromDb(result.id);
+}
+
+async function replaceTicketQuestions(ticketId, questions) {
+  const ticket = await dbApi.get("SELECT id, title, ticket_number, status FROM tickets WHERE id = ?", [String(ticketId)]);
+  if (!ticket) throw new Error("Bilet topilmadi");
+
+  const normalized = normalizeTicketInputQuestions(questions);
+  const seen = new Set();
+  for (const question of normalized) {
+    if (seen.has(question.id)) throw new Error("Bir savolni bilet ichida takrorlab bo‘lmaydi");
+    seen.add(question.id);
+  }
+
+  await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(ticketId)]);
+  for (const [index, question] of normalized.entries()) {
+    await dbApi.run(
+      `
+        INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
+        VALUES (?, ?, ?, NOW(), NOW())
+        ON CONFLICT (question_id) DO UPDATE SET
+          ticket_id = EXCLUDED.ticket_id,
+          "order" = EXCLUDED."order",
+          updated_at = EXCLUDED.updated_at
+      `,
+      [String(ticketId), String(question.id), index + 1]
+    );
+  }
+
+  return refreshTicketQuestionsMirror(ticketId);
 }
 
 async function updateTicket(id, input) {
-  const ticket = await getTicketById(id);
+  const ticket = await dbApi.get("SELECT id, title, ticket_number, status, questions FROM tickets WHERE id = ?", [String(id)]);
   if (!ticket) throw new Error("Bilet topilmadi");
 
-  const title = input.title !== undefined ? String(input.title || "").trim() : ticket.title;
+  const title = input.title !== undefined ? String(input.title || "").trim() : String(ticket.title || "").trim();
   if (!title) throw new Error("Bilet nomi kiritilishi kerak");
 
-  const questions =
-    input.questions !== undefined
-      ? normalizeQuestions(input.questions).map((question) => {
-          if (question.options.length < 2) throw new Error("Har bir savolda kamida 2 ta variant bo‘lishi kerak");
-          if (question.options.some((option) => !option)) throw new Error("Barcha variantlarni to‘ldiring");
-          if (question.correctIndex < 0 || question.correctIndex >= question.options.length) {
-            throw new Error("To‘g‘ri javob variantini qayta tanlang");
-          }
-          return question;
-        })
-      : ticket.questions;
+  const status = input.status !== undefined ? normalizeTicketStatus(input.status) : normalizeTicketStatus(ticket.status);
+  const questions = input.questions !== undefined ? normalizeTicketInputQuestions(input.questions) : parseQuestionsValue(ticket.questions);
 
   const result = await dbApi.get(
-    `UPDATE tickets SET title = ?, questions = ?::jsonb, updated_at = NOW() WHERE id = ? RETURNING *`,
-    [title, JSON.stringify(questions), String(id)]
+    `
+      UPDATE tickets
+      SET title = ?, status = ?, questions = ?::jsonb, updated_at = NOW()
+      WHERE id = ?
+      RETURNING id, title, ticket_number, status, questions, created_at, updated_at
+    `,
+    [title, status, JSON.stringify(questions), String(id)]
   );
-  return normalizeTicket(result);
+
+  if (input.questions !== undefined) {
+    await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(id)]);
+    for (const [index, question] of questions.entries()) {
+      await dbApi.run(
+        `
+          INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
+          VALUES (?, ?, ?, NOW(), NOW())
+          ON CONFLICT (question_id) DO UPDATE SET
+            ticket_id = EXCLUDED.ticket_id,
+            "order" = EXCLUDED."order",
+            updated_at = EXCLUDED.updated_at
+        `,
+        [String(id), String(question.id), index + 1]
+      );
+    }
+  }
+
+  return normalizeTicketRow(result);
 }
 
 async function deleteTicket(id) {
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(id)]);
+  await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM tickets WHERE id = ?", [String(id)]);
+}
+
+async function getDraftTicketFromDb(ticketId = null) {
+  const row = ticketId
+    ? await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)])
+    : await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'DRAFT' ORDER BY created_at ASC, id ASC LIMIT 1");
+  if (!row) return null;
+  const ticket = await getTicketFromDb(row.id);
+  return ticket && ticket.status === "DRAFT" ? ticket : null;
+}
+
+async function getDraftTicketBuilderFromDb(ticketId = null) {
+  const row = ticketId
+    ? await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)])
+    : await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'DRAFT' ORDER BY created_at ASC, id ASC LIMIT 1");
+  if (!row) return null;
+  const ticket = await getTicketBuilderFromDb(row.id);
+  return ticket && ticket.status === "DRAFT" ? ticket : null;
+}
+
+async function getOrCreateDraftTicket() {
+  const existing = await getDraftTicketFromDb();
+  if (existing) return existing;
+
+  const ticketNumber = await getNextTicketNumber();
+  const ticketId = String(ticketNumber);
+  const title = makeTicketTitle(ticketNumber);
+
+  const created = await dbApi.get(
+    `
+      INSERT INTO tickets (id, title, ticket_number, status, questions, created_at, updated_at)
+      VALUES (?, ?, ?, 'DRAFT', '[]'::jsonb, NOW(), NOW())
+      RETURNING id, title, ticket_number, status, questions, created_at, updated_at
+    `,
+    [ticketId, title, ticketNumber]
+  );
+
+  return getTicketFromDb(created.id);
 }
 
 function slugifyTopic(value) {
@@ -958,16 +1202,6 @@ function chunkArray(items, size) {
   return chunks;
 }
 
-function buildGeneratedTicketFromBankChunk(chunk, ticketIndex) {
-  return {
-    id: `ticket-${ticketIndex + 1}`,
-    title: `Bilet ${ticketIndex + 1}`,
-    questions: chunk.map((item) => item.question),
-    questionsCount: chunk.length,
-    locked: false
-  };
-}
-
 function buildGeneratedCustomTestFromBankSize(bank, size) {
   const questions = bank.slice(0, size).map((item) => item.question);
   return {
@@ -978,27 +1212,8 @@ function buildGeneratedCustomTestFromBankSize(bank, size) {
   };
 }
 
-async function getGeneratedTicketsFromDb() {
-  const bank = await getTopicQuestionBankFromDb();
-  return chunkArray(bank, 20).map((chunk, index) => buildGeneratedTicketFromBankChunk(chunk, index));
-}
-
-async function getGeneratedTicketByIdFromDb(ticketId) {
-  const key = String(ticketId || "").trim();
-  const match = /^ticket-(\d+)$/i.exec(key) || /^(\d+)$/.exec(key);
-  if (!match) return null;
-  const index = Number(match[1]) - 1;
-  if (index < 0) return null;
-  const bank = await getTopicQuestionBankFromDb();
-  const chunk = bank.slice(index * 20, index * 20 + 20);
-  if (!chunk.length) return null;
-  return buildGeneratedTicketFromBankChunk(chunk, index);
-}
-
 async function getProgressTicketById(ticketId) {
-  const current = await getTicketByIdFromDb(ticketId);
-  if (current) return current;
-  return getGeneratedTicketByIdFromDb(ticketId);
+  return getTicketByIdFromDb(ticketId);
 }
 
 async function getGeneratedCustomTestsFromDb() {
@@ -3469,32 +3684,29 @@ app.get("/api/public/topics/:topicId", async (req, res) => {
 });
 
 app.get("/api/public/tickets", async (_req, res) => {
-  // Biletlar mavzular savol bankidan generatsiya qilinadi (getGeneratedTicketsFromDb).
-  const tickets = await getGeneratedTicketsFromDb();
+  const tickets = await getTicketsFromDb();
   res.json({
     tickets: tickets.map((ticket, index) => ({
       id: ticket.id,
       title: ticket.title,
       free: index < FREE_TICKET_COUNT,
-      questionCount: ticket.questionsCount ?? (Array.isArray(ticket.questions) ? ticket.questions.length : 0)
+      questionCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
     }))
   });
 });
 
 app.get("/api/public/tickets/:ticketId", async (req, res) => {
   const key = String(req.params.ticketId || "").trim();
-  const match = /^ticket-(\d+)$/i.exec(key) || /^(\d+)$/.exec(key);
-  const ticketNumber = match ? Number(match[1]) : NaN;
-  if (Number.isFinite(ticketNumber) && ticketNumber > FREE_TICKET_COUNT) {
+  const ticket = await getTicketByIdFromDb(key);
+  if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
+  if (Number(ticket.ticketNumber || 0) > FREE_TICKET_COUNT) {
     return res.status(403).json({ error: "Bu bilet faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
   }
-  const ticket = await getGeneratedTicketByIdFromDb(key);
-  if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
   res.json({
     ticket: {
       id: ticket.id,
       title: ticket.title,
-      questions: normalizeQuestions(ticket.questions)
+      questions: ticket.questions
     }
   });
 });
@@ -3926,20 +4138,21 @@ app.post("/api/browser-token", requireUser, async (req, res) => {
 });
 
 app.get("/api/tickets", requireUser, async (req, res) => {
-  const tickets = await getGeneratedTicketsFromDb();
+  const tickets = await getTicketsFromDb();
   res.json({
     tickets: tickets.map((ticket) => ({
       id: ticket.id,
       title: ticket.title,
+      status: ticket.status,
       locked: false,
-      questionsCount: ticket.questionsCount
+      questionsCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
     })),
     isPro: true
   });
 });
 
 app.get("/api/tickets/:ticketId", requireUser, async (req, res) => {
-  const ticket = await getGeneratedTicketByIdFromDb(String(req.params.ticketId));
+  const ticket = await getTicketByIdFromDb(String(req.params.ticketId));
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
   res.json({ ticket, isPro: true });
@@ -4249,7 +4462,7 @@ app.post("/api/promo/activate", requireUser, async (req, res) => {
 app.get("/api/admin/tickets", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
-  const tickets = await getTickets();
+  const tickets = await getTicketsFromDb();
   res.json({ tickets });
 });
 
@@ -4271,7 +4484,7 @@ app.post("/api/admin/tickets", async (req, res) => {
 app.get("/api/admin/tickets/:ticketId", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
-  const ticket = await getTicketById(String(req.params.ticketId));
+  const ticket = await getTicketFromDb(String(req.params.ticketId));
   if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
   res.json({ ticket });
 });
@@ -4296,6 +4509,245 @@ app.delete("/api/admin/tickets/:ticketId", async (req, res) => {
   try {
     await deleteTicket(String(req.params.ticketId));
     res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.get("/api/admin/ticket-builder/draft", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const draft = await getDraftTicketBuilderFromDb() || await getOrCreateDraftTicket().then((ticket) => getDraftTicketBuilderFromDb(ticket?.id));
+    res.json({ ticket: draft });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.get("/api/admin/ticket-builder/questions", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    await syncTopicQuestionBankFromTopics();
+    const search = String(req.query.search || "").trim().toLowerCase();
+    const pageValue = Number.parseInt(String(req.query.page ?? "1"), 10);
+    const limitValue = Number.parseInt(String(req.query.limit ?? "40"), 10);
+    const page = Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1;
+    const limit = Number.isFinite(limitValue) ? Math.max(1, Math.min(100, limitValue)) : 40;
+    const offset = (page - 1) * limit;
+    const searchLike = search ? `%${search}%` : "";
+
+    const conditions = ["NOT EXISTS (SELECT 1 FROM ticket_questions tq WHERE tq.question_id = bank.question_key)"];
+    const params = [];
+    if (search) {
+      conditions.push(
+        `(LOWER(COALESCE(bank.question->>'text', '')) LIKE ? OR LOWER(COALESCE(bank.topic_title, '')) LIKE ? OR LOWER(COALESCE(bank.question->>'explanation', '')) LIKE ?)`
+      );
+      params.push(searchLike, searchLike, searchLike);
+    }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const totalRow = await dbApi.get(
+      `
+        SELECT COUNT(*) AS total
+        FROM topic_question_bank bank
+        ${whereClause}
+      `,
+      params
+    );
+
+    const rows = await dbApi.all(
+      `
+        SELECT
+          bank.question_key,
+          bank.topic_id,
+          bank.topic_slug,
+          bank.topic_title,
+          bank.question_id,
+          bank.question_index,
+          bank.question,
+          bank.sort_order
+        FROM topic_question_bank bank
+        ${whereClause}
+        ORDER BY bank.sort_order ASC, bank.question_key ASC
+        LIMIT ? OFFSET ?
+      `,
+      [...params, limit, offset]
+    );
+
+    const questions = rows.map((row) => ({
+      id: String(row.question_key || ""),
+      questionId: String(row.question_key || ""),
+      topicId: Number(row.topic_id || 0),
+      topicSlug: String(row.topic_slug || ""),
+      topicTitle: String(row.topic_title || ""),
+      questionIndex: Number(row.question_index || 0),
+      question: parseJsonValue(row.question, {}),
+      text: String(parseJsonValue(row.question, {})?.text || ""),
+      image: String(parseJsonValue(row.question, {})?.image || ""),
+      audio: String(parseJsonValue(row.question, {})?.audio || ""),
+      options: Array.isArray(parseJsonValue(row.question, {})?.options) ? parseJsonValue(row.question, {}).options.map((option) => String(option || "")) : [],
+      correctIndex: Number.isFinite(Number(parseJsonValue(row.question, {})?.correctIndex)) ? Number(parseJsonValue(row.question, {})?.correctIndex) : 0,
+      explanation: String(parseJsonValue(row.question, {})?.explanation || "")
+    }));
+
+    res.json({
+      questions,
+      total: Number(totalRow?.total || 0),
+      page,
+      limit,
+      hasMore: page * limit < Number(totalRow?.total || 0)
+    });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.post("/api/admin/ticket-builder/add-question", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const questionId = String(req.body?.questionId || "").trim();
+  const desiredOrderValue = Number.parseInt(String(req.body?.order ?? ""), 10);
+  if (!questionId) return res.status(400).json({ error: "questionId kerak" });
+  try {
+    const draftTicket = await getOrCreateDraftTicket();
+    const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
+    const alreadyAssigned = await dbApi.get("SELECT id FROM ticket_questions WHERE question_id = ?", [questionId]);
+    if (alreadyAssigned) return res.status(400).json({ error: "Savol allaqachon biletga biriktirilgan" });
+    const currentRows = await dbApi.all(
+      `SELECT id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" DESC, id DESC`,
+      [draft.id]
+    );
+    const currentCount = currentRows.length;
+    if (currentCount >= 20) return res.status(400).json({ error: "Bitta biletda faqat 20 ta savol bo‘lishi kerak" });
+    const nextOrder =
+      Number.isFinite(desiredOrderValue) && desiredOrderValue > 0
+        ? Math.max(1, Math.min(desiredOrderValue, currentCount + 1))
+        : currentCount + 1;
+    const bankQuestion = await dbApi.get(
+      `
+        SELECT question_key, topic_id, topic_slug, topic_title, question_id, question_index, question, sort_order
+        FROM topic_question_bank
+        WHERE question_key = ?
+        LIMIT 1
+      `,
+      [questionId]
+    );
+    if (!bankQuestion) return res.status(404).json({ error: "Savol topilmadi" });
+    for (const row of currentRows) {
+      if (Number(row.order || 0) < nextOrder) break;
+      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [Number(row.order || 0) + 1, row.id]);
+    }
+    await dbApi.run(
+      `
+        INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
+        VALUES (?, ?, ?, NOW(), NOW())
+      `,
+      [draft.id, questionId, nextOrder]
+    );
+    const updated = await refreshTicketQuestionsMirror(draft.id);
+    res.json({ ok: true, ticket: updated || draft });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.post("/api/admin/ticket-builder/remove-question", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const questionId = String(req.body?.questionId || "").trim();
+  if (!questionId) return res.status(400).json({ error: "questionId kerak" });
+  try {
+    const draftTicket = await getOrCreateDraftTicket();
+    const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
+    const existing = await dbApi.get("SELECT id, \"order\" FROM ticket_questions WHERE ticket_id = ? AND question_id = ?", [draft.id, questionId]);
+    if (!existing) return res.status(404).json({ error: "Savol draftda topilmadi" });
+    await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ? AND question_id = ?", [draft.id, questionId]);
+    const remaining = await dbApi.all(
+      `SELECT id, question_id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
+      [draft.id]
+    );
+    for (const [index, row] of remaining.entries()) {
+      if (Number(row.order || 0) === index + 1) continue;
+      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [index + 1, row.id]);
+    }
+    const updated = await refreshTicketQuestionsMirror(draft.id);
+    res.json({ ok: true, ticket: updated || draft });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.post("/api/admin/ticket-builder/reorder", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const questionIds = Array.isArray(req.body?.questionIds) ? req.body.questionIds.map((value) => String(value || "").trim()).filter(Boolean) : [];
+  if (!questionIds.length) return res.status(400).json({ error: "questionIds massivi kerak" });
+  try {
+    const draftTicket = await getOrCreateDraftTicket();
+    const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
+    const currentRows = await dbApi.all(
+      `SELECT id, question_id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
+      [draft.id]
+    );
+    const currentIds = currentRows.map((row) => String(row.question_id || ""));
+    if (currentIds.length !== questionIds.length || currentIds.some((id) => !questionIds.includes(id)) || questionIds.some((id) => !currentIds.includes(id))) {
+      return res.status(400).json({ error: "Savollar to‘plami mos emas" });
+    }
+    const seen = new Set();
+    for (const [index, questionId] of questionIds.entries()) {
+      if (seen.has(questionId)) return res.status(400).json({ error: "Savollar takrorlangan" });
+      seen.add(questionId);
+      const row = currentRows.find((item) => String(item.question_id) === questionId);
+      if (!row) return res.status(400).json({ error: "Savol topilmadi" });
+      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [index + 1, row.id]);
+    }
+    const updated = await refreshTicketQuestionsMirror(draft.id);
+    res.json({ ok: true, ticket: updated || draft });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
+app.post("/api/admin/ticket-builder/complete", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const currentDraft = await getOrCreateDraftTicket();
+    const currentQuestions = await getTicketQuestionsFromDb(currentDraft.id);
+    if (currentQuestions.length !== 20) {
+      return res.status(400).json({ error: "Biletni yakunlash uchun 20 ta savol kerak" });
+    }
+
+    const ticketNumber = Number(currentDraft.ticketNumber || 0) || await getNextTicketNumber();
+    const completedTitle = makeTicketTitle(ticketNumber);
+    await dbApi.run(
+      `UPDATE tickets SET title = ?, ticket_number = ?, status = 'COMPLETED', updated_at = NOW() WHERE id = ?`,
+      [completedTitle, ticketNumber, currentDraft.id]
+    );
+    await refreshTicketQuestionsMirror(currentDraft.id);
+
+    const nextNumber = ticketNumber + 1;
+    const nextId = String(nextNumber);
+    const nextTitle = makeTicketTitle(nextNumber);
+    await dbApi.run(
+      `
+        INSERT INTO tickets (id, title, ticket_number, status, questions, created_at, updated_at)
+        VALUES (?, ?, ?, 'DRAFT', '[]'::jsonb, NOW(), NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          title = EXCLUDED.title,
+          ticket_number = EXCLUDED.ticket_number,
+          status = 'DRAFT',
+          questions = '[]'::jsonb,
+          updated_at = NOW()
+      `,
+      [nextId, nextTitle, nextNumber]
+    );
+
+    const draft = await getDraftTicketBuilderFromDb(nextId);
+    const completedTicket = await getTicketByIdFromDb(currentDraft.id);
+    res.json({ ok: true, completedTicket, draft });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
   }
@@ -5074,8 +5526,56 @@ app.get("/api/image", async (req, res) => {
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
+async function migrateTicketData() {
+  const tickets = await dbApi.all(
+    "SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets ORDER BY created_at ASC, id ASC"
+  );
+  const usedNumbers = new Set(
+    tickets
+      .map((row) => Number(row.ticket_number || 0))
+      .filter((value) => Number.isFinite(value) && value > 0)
+  );
+
+  let nextNumber = usedNumbers.size ? Math.max(...Array.from(usedNumbers)) + 1 : 1;
+
+  for (const row of tickets) {
+    const currentNumber = Number(row.ticket_number || 0);
+    if (!Number.isFinite(currentNumber) || currentNumber <= 0) {
+      const parsedId = Number(row.id);
+      const preferred = Number.isFinite(parsedId) && parsedId > 0 && !usedNumbers.has(parsedId) ? parsedId : nextNumber;
+      const ticketNumber = preferred;
+      usedNumbers.add(ticketNumber);
+      nextNumber = Math.max(nextNumber, ticketNumber + 1);
+      await dbApi.run("UPDATE tickets SET ticket_number = ?, status = CASE WHEN status = 'DRAFT' THEN 'DRAFT' ELSE 'COMPLETED' END WHERE id = ?", [
+        ticketNumber,
+        String(row.id)
+      ]);
+    } else {
+      usedNumbers.add(currentNumber);
+      nextNumber = Math.max(nextNumber, currentNumber + 1);
+    }
+
+    const existingQuestionCount = await dbApi.get("SELECT COUNT(*) AS count FROM ticket_questions WHERE ticket_id = ?", [String(row.id)]);
+    const rawQuestions = parseQuestionsValue(row.questions);
+    if (Number(existingQuestionCount?.count || 0) === 0 && rawQuestions.length) {
+      for (const [index, question] of rawQuestions.entries()) {
+        const questionId = String(question?.id || `${index + 1}`);
+        await dbApi.run(
+          `
+            INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
+            VALUES (?, ?, ?, NOW(), NOW())
+            ON CONFLICT (question_id) DO NOTHING
+          `,
+          [String(row.id), questionId, index + 1]
+        );
+      }
+    }
+  }
+}
+
 async function start() {
   await initDb(dbApi);
+  await migrateTicketData();
   await seedTopicsIfEmpty();
   await seedCustomTestsIfEmpty();
   app.listen(PORT, () => {
