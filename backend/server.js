@@ -4538,11 +4538,6 @@ app.get("/api/admin/ticket-builder/questions", async (req, res) => {
   try {
     await syncTopicQuestionBankFromTopics();
     const search = String(req.query.search || "").trim().toLowerCase();
-    const pageValue = Number.parseInt(String(req.query.page ?? "1"), 10);
-    const limitValue = Number.parseInt(String(req.query.limit ?? "40"), 10);
-    const page = Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1;
-    const limit = Number.isFinite(limitValue) ? Math.max(1, Math.min(100, limitValue)) : 40;
-    const offset = (page - 1) * limit;
     const searchLike = search ? `%${search}%` : "";
 
     const conditions = ["NOT EXISTS (SELECT 1 FROM ticket_questions tq WHERE tq.question_id = bank.question_key)"];
@@ -4578,9 +4573,8 @@ app.get("/api/admin/ticket-builder/questions", async (req, res) => {
         FROM topic_question_bank bank
         ${whereClause}
         ORDER BY bank.sort_order ASC, bank.question_key ASC
-        LIMIT ? OFFSET ?
       `,
-      [...params, limit, offset]
+      params
     );
 
     const questions = rows.map((row) => ({
@@ -4602,9 +4596,9 @@ app.get("/api/admin/ticket-builder/questions", async (req, res) => {
     res.json({
       questions,
       total: Number(totalRow?.total || 0),
-      page,
-      limit,
-      hasMore: page * limit < Number(totalRow?.total || 0)
+      page: 1,
+      limit: questions.length,
+      hasMore: false
     });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });

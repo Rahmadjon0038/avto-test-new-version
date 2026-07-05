@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { ArrowLeft, GripVertical, RefreshCw, Save, Search, Trash2 } from "lucide-react";
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth-provider";
@@ -32,7 +32,7 @@ type DraftTicket = {
   questions: Array<BuilderQuestion | null>;
 };
 
-type QuestionsPage = {
+type QuestionsResponse = {
   questions: BuilderQuestion[];
   total: number;
   page: number;
@@ -134,7 +134,6 @@ export default function AdminTicketBuilderPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dragData, setDragData] = useState<{ source: "pool" | "draft"; questionId: string; fromIndex?: number } | null>(null);
-  const pageSize = 40;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -160,40 +159,35 @@ export default function AdminTicketBuilderPage() {
     if (draftQuery.error) toast.error((draftQuery.error as any)?.message || "Xatolik");
   }, [draftQuery.error]);
 
-  const questionsQuery = useInfiniteQuery({
+  const questionsQuery = useQuery({
     queryKey: ["admin-ticket-builder-questions", debouncedSearch],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
-      const params = new URLSearchParams({
-        page: String(pageParam || 1),
-        limit: String(pageSize),
-        search: debouncedSearch
-      });
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (debouncedSearch) params.set("search", debouncedSearch);
       const res = await authFetch(`/api/admin/ticket-builder/questions?${params.toString()}`);
       const data = await jsonOrError(res);
       return {
         questions: Array.isArray(data.questions) ? (data.questions as BuilderQuestion[]) : [],
         total: Number(data.total || 0),
         page: Number(data.page || 1),
-        limit: Number(data.limit || pageSize),
+        limit: Number(data.limit || 0),
         hasMore: Boolean(data.hasMore)
-      } as QuestionsPage;
-    },
-    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.page + 1 : undefined)
+      } as QuestionsResponse;
+    }
   });
 
   useEffect(() => {
     if (questionsQuery.error) toast.error((questionsQuery.error as any)?.message || "Xatolik");
   }, [questionsQuery.error]);
 
-  const poolQuestions = useMemo(() => (questionsQuery.data?.pages || []).flatMap((page) => page.questions).map(cloneQuestion), [questionsQuery.data]);
+  const poolQuestions = useMemo(() => (questionsQuery.data?.questions || []).map(cloneQuestion), [questionsQuery.data]);
   const draftQuestions = useMemo(() => normalizeDraftSlots(draft?.questions || []), [draft]);
   const draftQuestionIds = useMemo(
     () => new Set(draftQuestions.filter(Boolean).map((item) => String(item?.questionId || ""))),
     [draftQuestions]
   );
   const visiblePoolQuestions = useMemo(() => poolQuestions.filter((question) => !draftQuestionIds.has(question.questionId)), [poolQuestions, draftQuestionIds]);
-  const totalUnassigned = questionsQuery.data?.pages?.[0]?.total ?? visiblePoolQuestions.length;
+  const totalUnassigned = questionsQuery.data?.total ?? visiblePoolQuestions.length;
   const filledDraftCount = useMemo(() => draftQuestions.filter(Boolean).length, [draftQuestions]);
   const canSaveDraft = filledDraftCount > 0;
 
@@ -543,12 +537,12 @@ export default function AdminTicketBuilderPage() {
           </div>
 
           <div className="ticketBuilderLoadMoreRow">
-            <div className="adminSectionSub">{questionsQuery.isFetching ? "Yangilanmoqda..." : `${visiblePoolQuestions.length} / ${totalUnassigned} ko‘rsatildi`}</div>
-            {questionsQuery.hasNextPage ? (
-              <button className="btn btn-ghost" type="button" onClick={() => questionsQuery.fetchNextPage()} disabled={questionsQuery.isFetchingNextPage}>
-                <RefreshCw className="lucide" aria-hidden="true" /> Ko‘proq yuklash
-              </button>
-            ) : null}
+            <div className="adminSectionSub">
+              {questionsQuery.isFetching ? "Yangilanmoqda..." : `${visiblePoolQuestions.length} / ${totalUnassigned} savol yuklandi`}
+            </div>
+            <button className="btn btn-ghost" type="button" onClick={() => questionsQuery.refetch()} disabled={questionsQuery.isFetching}>
+              <RefreshCw className="lucide" aria-hidden="true" /> Yangilash
+            </button>
           </div>
         </main>
       </div>
