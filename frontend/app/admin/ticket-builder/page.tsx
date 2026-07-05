@@ -435,6 +435,16 @@ export default function AdminTicketBuilderPage() {
                         </div>
                       ) : null}
                       <div className="ticketBuilderQuestionText">{question.text || "Savol matni yo‘q"}</div>
+                      {Array.isArray(question.options) && question.options.length ? (
+                        <div className="ticketBuilderOptionList ticketBuilderOptionListCompact">
+                          {question.options.map((option, optionIndex) => (
+                            <div key={`${question.questionId}-draft-${optionIndex}`} className="ticketBuilderOptionItem">
+                              <span className="ticketBuilderOptionKey">{optionLabel(optionIndex)}</span>
+                              <span className="ticketBuilderOptionText">{option || "Bo‘sh variant"}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                       <div className="ticketBuilderQuestionMeta">
                         <span className="badge">ID: {question.questionId}</span>
                         <span className="badge">{Array.isArray(question.options) ? question.options.length : 0} variant</span>

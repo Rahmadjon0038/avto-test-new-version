@@ -2637,6 +2637,11 @@ body {
   padding-top: 2px;
 }
 
+.ticketBuilderOptionListCompact {
+  gap: 4px;
+  padding-top: 0;
+}
+
 .ticketBuilderOptionItem {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);
