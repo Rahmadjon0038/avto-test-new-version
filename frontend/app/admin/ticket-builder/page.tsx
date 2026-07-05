@@ -108,6 +108,10 @@ function resolveQuestionImage(image?: string) {
   return value;
 }
 
+function optionLabel(index: number) {
+  return String.fromCharCode(65 + index);
+}
+
 export default function AdminTicketBuilderPage() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -436,6 +440,16 @@ export default function AdminTicketBuilderPage() {
                     <span className="badge">{Array.isArray(question.options) ? question.options.length : 0} variant</span>
                   </div>
                   <div className="ticketBuilderPoolText">{question.text || "Savol matni yo‘q"}</div>
+                  {Array.isArray(question.options) && question.options.length ? (
+                    <div className="ticketBuilderOptionList">
+                      {question.options.map((option, optionIndex) => (
+                        <div key={`${question.questionId}-${optionIndex}`} className="ticketBuilderOptionItem">
+                          <span className="ticketBuilderOptionKey">{optionLabel(optionIndex)}</span>
+                          <span className="ticketBuilderOptionText">{option || "Bo‘sh variant"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                   <div className="ticketBuilderPoolMeta">
                     <span className="ticketBuilderPoolTopic">{question.topicTitle || "Kategoriya yo‘q"}</span>
                   </div>
