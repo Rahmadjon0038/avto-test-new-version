@@ -245,24 +245,15 @@ async function getTicketBuilderFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const rawQuestions = parseQuestionsValue(row.questions);
-  const sourceRows =
-    questionRows.length > 0 && questionRows.length === rawQuestions.length
-      ? questionRows
-      : rawQuestions.map((question, index) => ({
-          id: index + 1,
-          ticketId: String(row.id),
-          questionId: String(question?.id || `${index + 1}`),
-          order: index + 1,
-          topicId: 0,
-          topicSlug: "",
-          topicTitle: String(row.title || ""),
-          questionIndex: index,
-          question
-        }));
+  const slots = Array.from({ length: 20 }, () => null);
+  for (const questionRow of questionRows) {
+    const slotIndex = Number(questionRow.order || 0) - 1;
+    if (slotIndex < 0 || slotIndex >= slots.length) continue;
+    slots[slotIndex] = buildTicketBuilderQuestion(questionRow);
+  }
   return {
     ...normalizeTicketRow(row),
-    questions: sourceRows.map((questionRow) => buildTicketBuilderQuestion(questionRow))
+    questions: slots
   };
 }
 
@@ -4616,15 +4607,19 @@ app.post("/api/admin/ticket-builder/add-question", async (req, res) => {
     const alreadyAssigned = await dbApi.get("SELECT id FROM ticket_questions WHERE question_id = ?", [questionId]);
     if (alreadyAssigned) return res.status(400).json({ error: "Savol allaqachon biletga biriktirilgan" });
     const currentRows = await dbApi.all(
-      `SELECT id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" DESC, id DESC`,
+      `SELECT id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
       [draft.id]
     );
     const currentCount = currentRows.length;
     if (currentCount >= 20) return res.status(400).json({ error: "Bitta biletda faqat 20 ta savol bo‘lishi kerak" });
-    const nextOrder =
-      Number.isFinite(desiredOrderValue) && desiredOrderValue > 0
-        ? Math.max(1, Math.min(desiredOrderValue, currentCount + 1))
-        : currentCount + 1;
+    const nextOrder = Number.isFinite(desiredOrderValue) && desiredOrderValue > 0 ? Math.max(1, Math.min(desiredOrderValue, 20)) : (() => {
+      for (let order = 1; order <= 20; order += 1) {
+        if (!currentRows.some((row) => Number(row.order || 0) === order)) return order;
+      }
+      return 20;
+    })();
+    const occupied = currentRows.find((row) => Number(row.order || 0) === nextOrder);
+    if (occupied) return res.status(400).json({ error: "Bu slot band. Avval savolni remove qiling" });
     const bankQuestion = await dbApi.get(
       `
         SELECT question_key, topic_id, topic_slug, topic_title, question_id, question_index, question, sort_order
@@ -4635,10 +4630,6 @@ app.post("/api/admin/ticket-builder/add-question", async (req, res) => {
       [questionId]
     );
     if (!bankQuestion) return res.status(404).json({ error: "Savol topilmadi" });
-    for (const row of currentRows) {
-      if (Number(row.order || 0) < nextOrder) break;
-      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [Number(row.order || 0) + 1, row.id]);
-    }
     await dbApi.run(
       `
         INSERT INTO ticket_questions (ticket_id, question_id, "order", created_at, updated_at)
@@ -4664,14 +4655,6 @@ app.post("/api/admin/ticket-builder/remove-question", async (req, res) => {
     const existing = await dbApi.get("SELECT id, \"order\" FROM ticket_questions WHERE ticket_id = ? AND question_id = ?", [draft.id, questionId]);
     if (!existing) return res.status(404).json({ error: "Savol draftda topilmadi" });
     await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ? AND question_id = ?", [draft.id, questionId]);
-    const remaining = await dbApi.all(
-      `SELECT id, question_id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
-      [draft.id]
-    );
-    for (const [index, row] of remaining.entries()) {
-      if (Number(row.order || 0) === index + 1) continue;
-      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [index + 1, row.id]);
-    }
     const updated = await refreshTicketQuestionsMirror(draft.id);
     res.json({ ok: true, ticket: updated || draft });
   } catch (e) {
@@ -4682,8 +4665,13 @@ app.post("/api/admin/ticket-builder/remove-question", async (req, res) => {
 app.post("/api/admin/ticket-builder/reorder", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
-  const questionIds = Array.isArray(req.body?.questionIds) ? req.body.questionIds.map((value) => String(value || "").trim()).filter(Boolean) : [];
-  if (!questionIds.length) return res.status(400).json({ error: "questionIds massivi kerak" });
+  const questionId = String(req.body?.questionId || "").trim();
+  const fromOrder = Number.parseInt(String(req.body?.fromOrder ?? ""), 10);
+  const toOrder = Number.parseInt(String(req.body?.toOrder ?? ""), 10);
+  if (!questionId) return res.status(400).json({ error: "questionId kerak" });
+  if (!Number.isFinite(fromOrder) || !Number.isFinite(toOrder) || fromOrder < 1 || toOrder < 1 || fromOrder > 20 || toOrder > 20) {
+    return res.status(400).json({ error: "fromOrder/toOrder noto‘g‘ri" });
+  }
   try {
     const draftTicket = await getOrCreateDraftTicket();
     const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
@@ -4691,17 +4679,18 @@ app.post("/api/admin/ticket-builder/reorder", async (req, res) => {
       `SELECT id, question_id, "order" FROM ticket_questions WHERE ticket_id = ? ORDER BY "order" ASC, id ASC`,
       [draft.id]
     );
-    const currentIds = currentRows.map((row) => String(row.question_id || ""));
-    if (currentIds.length !== questionIds.length || currentIds.some((id) => !questionIds.includes(id)) || questionIds.some((id) => !currentIds.includes(id))) {
-      return res.status(400).json({ error: "Savollar to‘plami mos emas" });
+    const sourceRow = currentRows.find((item) => String(item.question_id) === questionId);
+    if (!sourceRow) return res.status(404).json({ error: "Savol topilmadi" });
+    const targetRow = currentRows.find((item) => Number(item.order || 0) === toOrder);
+    if (targetRow && String(targetRow.question_id) === questionId) {
+      return res.json({ ok: true, ticket: draft });
     }
-    const seen = new Set();
-    for (const [index, questionId] of questionIds.entries()) {
-      if (seen.has(questionId)) return res.status(400).json({ error: "Savollar takrorlangan" });
-      seen.add(questionId);
-      const row = currentRows.find((item) => String(item.question_id) === questionId);
-      if (!row) return res.status(400).json({ error: "Savol topilmadi" });
-      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [index + 1, row.id]);
+    if (!targetRow) {
+      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [toOrder, sourceRow.id]);
+    } else {
+      await dbApi.run(`UPDATE ticket_questions SET "order" = 0, updated_at = NOW() WHERE id = ?`, [sourceRow.id]);
+      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [fromOrder, targetRow.id]);
+      await dbApi.run(`UPDATE ticket_questions SET "order" = ?, updated_at = NOW() WHERE id = ?`, [toOrder, sourceRow.id]);
     }
     const updated = await refreshTicketQuestionsMirror(draft.id);
     res.json({ ok: true, ticket: updated || draft });

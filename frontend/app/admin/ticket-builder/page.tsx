@@ -29,7 +29,7 @@ type DraftTicket = {
   title: string;
   ticketNumber: number;
   status: "DRAFT" | "COMPLETED" | string;
-  questions: BuilderQuestion[];
+  questions: Array<BuilderQuestion | null>;
 };
 
 type QuestionsPage = {
@@ -59,35 +59,49 @@ function cloneQuestion(question: BuilderQuestion): BuilderQuestion {
 }
 
 function cloneDraft(ticket: DraftTicket): DraftTicket {
+  const rawQuestions = Array.isArray(ticket.questions) ? ticket.questions : [];
+  const slots: Array<BuilderQuestion | null> = Array.from({ length: 20 }, (_, index) => {
+    const question = rawQuestions[index] || null;
+    return question ? cloneQuestion(question) : null;
+  });
   return {
     id: String(ticket.id || ""),
     title: String(ticket.title || ""),
     ticketNumber: Number(ticket.ticketNumber || 0),
     status: String(ticket.status || "DRAFT"),
-    questions: Array.isArray(ticket.questions) ? ticket.questions.map(cloneQuestion) : []
+    questions: slots
   };
 }
 
-function normalizeQuestionList(items: BuilderQuestion[]) {
-  return items.map((item, index) => ({
-    ...cloneQuestion(item),
-    order: index + 1
-  }));
+function normalizeDraftSlots(items: Array<BuilderQuestion | null>) {
+  return Array.from({ length: 20 }, (_, index) => {
+    const item = items[index] || null;
+    if (!item) return null;
+    return {
+      ...cloneQuestion(item),
+      order: index + 1
+    };
+  });
 }
 
-function insertAt<T>(items: T[], index: number, item: T) {
-  const next = [...items];
-  const safeIndex = Math.max(0, Math.min(index, next.length));
-  next.splice(safeIndex, 0, item);
-  return next;
-}
-
-function moveItem<T>(items: T[], fromIndex: number, toIndex: number) {
-  const next = [...items];
-  const [item] = next.splice(fromIndex, 1);
-  if (item === undefined) return next;
-  next.splice(Math.max(0, Math.min(toIndex, next.length)), 0, item);
-  return next;
+function setCompactDragImage(event: DragEvent<HTMLElement>) {
+  const source = event.currentTarget as HTMLElement | null;
+  if (!source) return;
+  const clone = source.cloneNode(true) as HTMLElement;
+  clone.style.position = "absolute";
+  clone.style.top = "-1000px";
+  clone.style.left = "-1000px";
+  clone.style.width = `${Math.max(240, source.clientWidth)}px`;
+  clone.style.pointerEvents = "none";
+  clone.style.transform = "scale(0.9)";
+  clone.style.transformOrigin = "top left";
+  clone.style.opacity = "0.92";
+  clone.style.boxSizing = "border-box";
+  document.body.appendChild(clone);
+  event.dataTransfer.setDragImage(clone, Math.min(source.clientWidth / 2, 120), Math.min(source.clientHeight / 2, 60));
+  window.setTimeout(() => {
+    clone.remove();
+  }, 0);
 }
 
 function resolveQuestionImage(image?: string) {
@@ -173,11 +187,15 @@ export default function AdminTicketBuilderPage() {
   }, [questionsQuery.error]);
 
   const poolQuestions = useMemo(() => (questionsQuery.data?.pages || []).flatMap((page) => page.questions).map(cloneQuestion), [questionsQuery.data]);
-  const draftQuestions = useMemo(() => normalizeQuestionList(draft?.questions || []), [draft]);
-  const draftQuestionIds = useMemo(() => new Set(draftQuestions.map((item) => item.questionId)), [draftQuestions]);
+  const draftQuestions = useMemo(() => normalizeDraftSlots(draft?.questions || []), [draft]);
+  const draftQuestionIds = useMemo(
+    () => new Set(draftQuestions.filter(Boolean).map((item) => String(item?.questionId || ""))),
+    [draftQuestions]
+  );
   const visiblePoolQuestions = useMemo(() => poolQuestions.filter((question) => !draftQuestionIds.has(question.questionId)), [poolQuestions, draftQuestionIds]);
   const totalUnassigned = questionsQuery.data?.pages?.[0]?.total ?? visiblePoolQuestions.length;
-  const isDraftReady = draftQuestions.length === 20;
+  const filledDraftCount = useMemo(() => draftQuestions.filter(Boolean).length, [draftQuestions]);
+  const isDraftReady = filledDraftCount === 20;
 
   const addMutation = useMutation({
     mutationFn: async ({ questionId, order }: { questionId: string; order: number }) => {
@@ -214,11 +232,11 @@ export default function AdminTicketBuilderPage() {
   });
 
   const reorderMutation = useMutation({
-    mutationFn: async (questionIds: string[]) => {
+    mutationFn: async ({ questionId, fromOrder, toOrder }: { questionId: string; fromOrder: number; toOrder: number }) => {
       const res = await authFetch("/api/admin/ticket-builder/reorder", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ questionIds })
+        body: JSON.stringify({ questionId, fromOrder, toOrder })
       });
       return jsonOrError(res);
     },
@@ -265,15 +283,16 @@ export default function AdminTicketBuilderPage() {
           toast.error("Bu katakcha band. Avval savolni remove qiling.");
           return;
         }
-        if (draftQuestions.length >= 20) {
+        if (filledDraftCount >= 20) {
           toast.error("Bitta biletga faqat 20 ta savol qo‘shiladi");
           return;
         }
         if (draftQuestionIds.has(payload.questionId)) return;
         const sourceQuestion = visiblePoolQuestions.find((item) => item.questionId === payload.questionId);
         if (!sourceQuestion) return;
-        const optimistic = insertAt(draftQuestions, slotIndex, sourceQuestion).slice(0, 20);
-        setDraft({ ...draft, questions: normalizeQuestionList(optimistic) });
+        const optimistic = [...draftQuestions];
+        optimistic[slotIndex] = { ...sourceQuestion, order: slotIndex + 1 };
+        setDraft({ ...draft, questions: optimistic });
         await addMutation.mutateAsync({ questionId: payload.questionId, order: slotIndex + 1 }).catch(() => {
           void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
           void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
@@ -284,12 +303,26 @@ export default function AdminTicketBuilderPage() {
       const fromIndex = Number(payload.fromIndex ?? -1);
       if (!Number.isFinite(fromIndex) || fromIndex < 0 || fromIndex >= draftQuestions.length) return;
       if (fromIndex === slotIndex) return;
-      const nextQuestions = moveItem(draftQuestions, fromIndex, slotIndex).slice(0, 20);
-      setDraft({ ...draft, questions: normalizeQuestionList(nextQuestions) });
-      await reorderMutation.mutateAsync(nextQuestions.map((item) => item.questionId)).catch(() => {
-        void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
-        void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
-      });
+      const nextQuestions = [...draftQuestions];
+      const sourceQuestion = nextQuestions[fromIndex];
+      if (!sourceQuestion) return;
+      const targetQuestion = nextQuestions[slotIndex] || null;
+      nextQuestions[fromIndex] = null;
+      nextQuestions[slotIndex] = { ...sourceQuestion, order: slotIndex + 1 };
+      if (targetQuestion) {
+        nextQuestions[fromIndex] = { ...targetQuestion, order: fromIndex + 1 };
+      }
+      setDraft({ ...draft, questions: nextQuestions });
+      await reorderMutation
+        .mutateAsync({
+          questionId: sourceQuestion.questionId,
+          fromOrder: fromIndex + 1,
+          toOrder: slotIndex + 1
+        })
+        .catch(() => {
+          void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+          void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
+        });
     };
   }
 
@@ -297,6 +330,7 @@ export default function AdminTicketBuilderPage() {
     return (event: DragEvent<HTMLElement>) => {
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("application/json", JSON.stringify({ source: "pool", questionId: question.questionId }));
+      setCompactDragImage(event);
       setDragData({ source: "pool", questionId: question.questionId });
     };
   }
@@ -308,6 +342,7 @@ export default function AdminTicketBuilderPage() {
         "application/json",
         JSON.stringify({ source: "draft", questionId: question.questionId, fromIndex: index })
       );
+      setCompactDragImage(event);
       setDragData({ source: "draft", questionId: question.questionId, fromIndex: index });
     };
   }
@@ -328,7 +363,7 @@ export default function AdminTicketBuilderPage() {
             disabled={!isDraftReady || completeMutation.isPending}
             onClick={() => {
               if (!isDraftReady) return toast.error("Saqlash uchun 20 ta savol kerak");
-              if (!window.confirm(`Ushbu biletni yakunlaysizmi? ${draftQuestions.length}/20 savol tayyor.`)) return;
+              if (!window.confirm(`Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`)) return;
               completeMutation.mutate();
             }}
           >
@@ -345,7 +380,7 @@ export default function AdminTicketBuilderPage() {
               <div className="adminPanelCardDesc">Savollarni chap tarafdagi 20 slotga drag qilib joylang.</div>
             </div>
             <div className="ticketBuilderMeta">
-              <span className="badge">{draftQuestions.length}/20 savol</span>
+              <span className="badge">{filledDraftCount}/20 savol</span>
               <span className="badge">{draft?.status || "DRAFT"}</span>
             </div>
           </div>
@@ -376,14 +411,19 @@ export default function AdminTicketBuilderPage() {
                           type="button"
                           title="Remove"
                           aria-label="Remove"
-                          onClick={() => removeMutation.mutate(question.questionId)}
+                          onClick={() => {
+                            const nextQuestions = [...draftQuestions];
+                            nextQuestions[index] = null;
+                            if (draft) setDraft({ ...draft, questions: nextQuestions });
+                            removeMutation.mutate(question.questionId);
+                          }}
                           disabled={removeMutation.isPending}
                         >
                           <Trash2 className="lucide" aria-hidden="true" />
                         </button>
                       </div>
                       {resolveQuestionImage(question.image) ? (
-                        <div className="ticketBuilderPreviewWrap">
+                        <div className="ticketBuilderPreviewWrap ticketBuilderPreviewWrapCompact">
                           <img className="ticketBuilderPreviewImg" src={resolveQuestionImage(question.image)} alt={question.text || "Savol rasmi"} loading="lazy" />
                         </div>
                       ) : null}
@@ -402,14 +442,14 @@ export default function AdminTicketBuilderPage() {
           </div>
 
           <div className="ticketBuilderFooter">
-            <div className="ticketBuilderProgress">{draftQuestions.length}/20 savol</div>
+            <div className="ticketBuilderProgress">{filledDraftCount}/20 savol</div>
             <button
               className="btn btn-primary"
               type="button"
               disabled={!isDraftReady || completeMutation.isPending}
               onClick={() => {
                 if (!isDraftReady) return;
-                if (!window.confirm(`Ushbu biletni yakunlaysizmi? ${draftQuestions.length}/20 savol tayyor.`)) return;
+                if (!window.confirm(`Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`)) return;
                 completeMutation.mutate();
               }}
             >

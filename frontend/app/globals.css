@@ -2500,7 +2500,8 @@ body {
 }
 
 .ticketBuilderQuestionCard.dragging {
-  opacity: 0.7;
+  opacity: 0.78;
+  transform: scale(0.98);
 }
 
 .ticketBuilderQuestionCardHead {
@@ -2545,7 +2546,12 @@ body {
 }
 
 .ticketBuilderPreviewWrapSmall {
-  max-height: 96px;
+  max-height: 72px;
+}
+
+.ticketBuilderPreviewWrapCompact {
+  max-height: 78px;
+  width: min(100%, 280px);
 }
 
 .ticketBuilderPreviewImg {
@@ -2597,6 +2603,16 @@ body {
   display: grid;
   gap: 8px;
   cursor: grab;
+}
+
+.ticketBuilderPoolItem .ticketBuilderPreviewWrapSmall {
+  width: min(100%, 220px);
+}
+
+.ticketBuilderPoolItem .ticketBuilderPreviewImg,
+.ticketBuilderQuestionCard .ticketBuilderPreviewImg {
+  max-height: 100%;
+  object-position: center top;
 }
 
 .ticketBuilderPoolHead {
