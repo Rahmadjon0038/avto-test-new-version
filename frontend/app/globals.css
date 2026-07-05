@@ -2542,23 +2542,25 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  background: #000;
+  background: #f6f7fb;
 }
 
 .ticketBuilderPreviewWrapSmall {
-  max-height: 72px;
+  max-height: 88px;
 }
 
 .ticketBuilderPreviewWrapCompact {
-  max-height: 78px;
+  max-height: 92px;
   width: min(100%, 280px);
 }
 
 .ticketBuilderPreviewImg {
   display: block;
   width: 100%;
+  height: auto;
   max-height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #f6f7fb;
 }
 
 .ticketBuilderQuestionMeta {
@@ -2612,7 +2614,7 @@ body {
 .ticketBuilderPoolItem .ticketBuilderPreviewImg,
 .ticketBuilderQuestionCard .ticketBuilderPreviewImg {
   max-height: 100%;
-  object-position: center top;
+  object-position: center center;
 }
 
 .ticketBuilderPoolHead {
