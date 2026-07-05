@@ -260,6 +260,11 @@ export default function AdminTicketBuilderPage() {
       if (!payload?.questionId || !draft) return;
 
       if (payload.source === "pool") {
+        const occupiedQuestion = draftQuestions[slotIndex] || null;
+        if (occupiedQuestion) {
+          toast.error("Bu katakcha band. Avval savolni remove qiling.");
+          return;
+        }
         if (draftQuestions.length >= 20) {
           toast.error("Bitta biletga faqat 20 ta savol qo‘shiladi");
           return;
@@ -377,6 +382,11 @@ export default function AdminTicketBuilderPage() {
                           <Trash2 className="lucide" aria-hidden="true" />
                         </button>
                       </div>
+                      {resolveQuestionImage(question.image) ? (
+                        <div className="ticketBuilderPreviewWrap">
+                          <img className="ticketBuilderPreviewImg" src={resolveQuestionImage(question.image)} alt={question.text || "Savol rasmi"} loading="lazy" />
+                        </div>
+                      ) : null}
                       <div className="ticketBuilderQuestionText">{question.text || "Savol matni yo‘q"}</div>
                       <div className="ticketBuilderQuestionMeta">
                         <span className="badge">ID: {question.questionId}</span>
@@ -439,6 +449,11 @@ export default function AdminTicketBuilderPage() {
                     <span className="badge">ID: {question.questionId}</span>
                     <span className="badge">{Array.isArray(question.options) ? question.options.length : 0} variant</span>
                   </div>
+                  {resolveQuestionImage(question.image) ? (
+                    <div className="ticketBuilderPreviewWrap ticketBuilderPreviewWrapSmall">
+                      <img className="ticketBuilderPreviewImg" src={resolveQuestionImage(question.image)} alt={question.text || "Savol rasmi"} loading="lazy" />
+                    </div>
+                  ) : null}
                   <div className="ticketBuilderPoolText">{question.text || "Savol matni yo‘q"}</div>
                   {Array.isArray(question.options) && question.options.length ? (
                     <div className="ticketBuilderOptionList">

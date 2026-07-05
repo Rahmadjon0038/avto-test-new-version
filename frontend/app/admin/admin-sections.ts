@@ -28,6 +28,11 @@ export const adminSections: AdminSection[] = [
     icon: BookOpen
   },
   {
+    key: "tickets",
+    title: "Biletlar",
+    icon: Ticket
+  },
+  {
     key: "ticket-builder",
     title: "Bilet Constructor",
     icon: Ticket
