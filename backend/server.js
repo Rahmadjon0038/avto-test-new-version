@@ -5175,7 +5175,7 @@ app.post("/api/upload-image", async (req, res) => {
     }
 
     if (ticketId && questionId) {
-      const ticket = await getTicketById(ticketId);
+      const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
         String(question.id) === questionId ? { ...question, image: imageUrl } : question
@@ -5228,7 +5228,7 @@ app.delete("/api/upload-image", async (req, res) => {
     }
 
     if (ticketId) {
-      const ticket = await getTicketById(ticketId);
+      const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
         String(question.id) === questionId ? { ...question, image: "" } : question
@@ -5306,7 +5306,7 @@ app.post("/api/upload-audio", async (req, res) => {
     }
 
     if (ticketId && questionId) {
-      const ticket = await getTicketById(ticketId);
+      const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
         String(question.id) === questionId ? { ...question, audio: audioUrl } : question
@@ -5359,7 +5359,7 @@ app.delete("/api/upload-audio", async (req, res) => {
     }
 
     if (ticketId) {
-      const ticket = await getTicketById(ticketId);
+      const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
         String(question.id) === questionId ? { ...question, audio: "" } : question
