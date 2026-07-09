@@ -5178,7 +5178,7 @@ app.post("/api/upload-image", async (req, res) => {
       const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, image: imageUrl } : question
+        question && String(question.id) === questionId ? { ...question, image: imageUrl } : question
       );
       await updateTicket(ticketId, { title: ticket.title, questions: updatedQuestions });
     }
@@ -5187,7 +5187,7 @@ app.post("/api/upload-image", async (req, res) => {
       const topic = await getTopicFromDb(topicId);
       if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
       const updatedQuestions = topic.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, image: imageUrl } : question
+        question && String(question.id) === questionId ? { ...question, image: imageUrl } : question
       );
       await updateTopic(topicId, { title: topic.title, questions: updatedQuestions });
     }
@@ -5196,7 +5196,7 @@ app.post("/api/upload-image", async (req, res) => {
       const customTest = await getCustomTestFromDb(customTestId);
       if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
       const updatedQuestions = customTest.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, image: imageUrl } : question
+        question && String(question.id) === questionId ? { ...question, image: imageUrl } : question
       );
       await updateCustomTest(customTestId, { title: customTest.title, questions: updatedQuestions });
     }
@@ -5231,7 +5231,7 @@ app.delete("/api/upload-image", async (req, res) => {
       const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, image: "" } : question
+        question && String(question.id) === questionId ? { ...question, image: "" } : question
       );
       await updateTicket(ticketId, { title: ticket.title, questions: updatedQuestions });
     }
@@ -5240,7 +5240,7 @@ app.delete("/api/upload-image", async (req, res) => {
       const topic = await getTopicFromDb(topicId);
       if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
       const updatedQuestions = topic.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, image: "" } : question
+        question && String(question.id) === questionId ? { ...question, image: "" } : question
       );
       await updateTopic(topicId, { title: topic.title, questions: updatedQuestions });
     }
@@ -5249,7 +5249,7 @@ app.delete("/api/upload-image", async (req, res) => {
       const customTest = await getCustomTestFromDb(customTestId);
       if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
       const updatedQuestions = customTest.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, image: "" } : question
+        question && String(question.id) === questionId ? { ...question, image: "" } : question
       );
       await updateCustomTest(customTestId, { title: customTest.title, questions: updatedQuestions });
     }
@@ -5309,7 +5309,7 @@ app.post("/api/upload-audio", async (req, res) => {
       const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, audio: audioUrl } : question
+        question && String(question.id) === questionId ? { ...question, audio: audioUrl } : question
       );
       await updateTicket(ticketId, { title: ticket.title, questions: updatedQuestions });
     }
@@ -5318,7 +5318,7 @@ app.post("/api/upload-audio", async (req, res) => {
       const topic = await getTopicFromDb(topicId);
       if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
       const updatedQuestions = topic.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, audio: audioUrl } : question
+        question && String(question.id) === questionId ? { ...question, audio: audioUrl } : question
       );
       await updateTopic(topicId, { title: topic.title, questions: updatedQuestions });
     }
@@ -5327,7 +5327,7 @@ app.post("/api/upload-audio", async (req, res) => {
       const customTest = await getCustomTestFromDb(customTestId);
       if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
       const updatedQuestions = customTest.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, audio: audioUrl } : question
+        question && String(question.id) === questionId ? { ...question, audio: audioUrl } : question
       );
       await updateCustomTest(customTestId, { title: customTest.title, questions: updatedQuestions });
     }
@@ -5362,7 +5362,7 @@ app.delete("/api/upload-audio", async (req, res) => {
       const ticket = await getTicketFromDb(ticketId);
       if (!ticket) return res.status(404).json({ error: "Bilet topilmadi" });
       const updatedQuestions = ticket.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, audio: "" } : question
+        question && String(question.id) === questionId ? { ...question, audio: "" } : question
       );
       await updateTicket(ticketId, { title: ticket.title, questions: updatedQuestions });
     }
@@ -5371,7 +5371,7 @@ app.delete("/api/upload-audio", async (req, res) => {
       const topic = await getTopicFromDb(topicId);
       if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
       const updatedQuestions = topic.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, audio: "" } : question
+        question && String(question.id) === questionId ? { ...question, audio: "" } : question
       );
       await updateTopic(topicId, { title: topic.title, questions: updatedQuestions });
     }
@@ -5380,7 +5380,7 @@ app.delete("/api/upload-audio", async (req, res) => {
       const customTest = await getCustomTestFromDb(customTestId);
       if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
       const updatedQuestions = customTest.questions.map((question) =>
-        String(question.id) === questionId ? { ...question, audio: "" } : question
+        question && String(question.id) === questionId ? { ...question, audio: "" } : question
       );
       await updateCustomTest(customTestId, { title: customTest.title, questions: updatedQuestions });
     }
