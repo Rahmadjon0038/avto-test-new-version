@@ -350,13 +350,63 @@ function normalizeTicketInputQuestions(inputQuestions) {
   });
 }
 
-async function getNextTicketNumber() {
-  const row = await dbApi.get("SELECT COALESCE(MAX(ticket_number), 0) AS max_ticket_number FROM tickets");
-  return Number(row?.max_ticket_number || 0) + 1;
+async function getNextTicketNumber(excludeTicketId = null) {
+  // O'chirilgan bilet raqamlari qayta ishlatiladi: eng kichik bo'sh raqam qaytadi.
+  const rows = excludeTicketId
+    ? await dbApi.all("SELECT ticket_number FROM tickets WHERE id <> ?", [String(excludeTicketId)])
+    : await dbApi.all("SELECT ticket_number FROM tickets");
+  const used = new Set(
+    rows.map((row) => Number(row.ticket_number || 0)).filter((value) => Number.isFinite(value) && value > 0)
+  );
+  let next = 1;
+  while (used.has(next)) next += 1;
+  return next;
 }
 
 function makeTicketTitle(ticketNumber) {
   return `Bilet №${Number(ticketNumber) || 1}`;
+}
+
+async function renumberTicket(ticketRow, nextNumber) {
+  const currentId = String(ticketRow.id);
+  const nextId = String(nextNumber);
+  const currentNumber = Number(ticketRow.ticket_number || 0);
+  const currentTitle = String(ticketRow.title || "").trim();
+  const nextTitle = !currentTitle || currentTitle === makeTicketTitle(currentNumber) ? makeTicketTitle(nextNumber) : currentTitle;
+
+  if (nextId === currentId) {
+    await dbApi.run("UPDATE tickets SET ticket_number = ?, title = ?, updated_at = NOW() WHERE id = ?", [
+      nextNumber,
+      nextTitle,
+      currentId
+    ]);
+    return currentId;
+  }
+
+  const idTaken = await dbApi.get("SELECT id FROM tickets WHERE id = ?", [nextId]);
+  if (idTaken) return currentId;
+
+  const fullRow = await dbApi.get("SELECT questions FROM tickets WHERE id = ?", [currentId]);
+  const slots = normalizeTicketSlotQuestions(fullRow?.questions);
+  // ticket_questions.ticket_id FK tickets(id) ga bog'langan — id almashishidan oldin bolalarni bo'shatamiz
+  await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [currentId]);
+  await dbApi.run("UPDATE tickets SET id = ?, ticket_number = ?, title = ?, updated_at = NOW() WHERE id = ?", [
+    nextId,
+    nextNumber,
+    nextTitle,
+    currentId
+  ]);
+  await dbApi.run("UPDATE test_progress SET ticket_id = ? WHERE ticket_id = ?", [nextId, currentId]);
+  await syncTicketQuestionsFromSlots(nextId, slots);
+  return nextId;
+}
+
+async function ensureDraftTicketNumber(draftId) {
+  const row = await dbApi.get("SELECT id, title, ticket_number, status FROM tickets WHERE id = ?", [String(draftId)]);
+  if (!row || normalizeTicketStatus(row.status) !== "DRAFT") return String(draftId);
+  const expected = await getNextTicketNumber(row.id);
+  if (Number(row.ticket_number || 0) === expected) return String(row.id);
+  return renumberTicket(row, expected);
 }
 
 async function createTicket(input) {
@@ -4535,7 +4585,10 @@ app.get("/api/admin/ticket-builder/draft", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
-    const draft = await getDraftTicketBuilderFromDb() || await getOrCreateDraftTicket().then((ticket) => getDraftTicketBuilderFromDb(ticket?.id));
+    const created = await getOrCreateDraftTicket();
+    // Bilet o'chirilgan bo'lsa, draft raqami bo'shagan eng kichik raqamga tushadi
+    const draftId = await ensureDraftTicketNumber(created.id);
+    const draft = await getDraftTicketBuilderFromDb(draftId);
     res.json({ ticket: draft });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
@@ -4716,33 +4769,31 @@ app.post("/api/admin/ticket-builder/complete", async (req, res) => {
     const filledCount = currentSlots.filter(Boolean).length;
     if (!filledCount) return res.status(400).json({ error: "Kamida bitta savol kerak" });
 
-    const ticketNumber = Number(currentDraft.ticketNumber || 0) || await getNextTicketNumber();
+    // Yakunlashdan oldin raqamni tekshiramiz: bilet o'chirilgan bo'lsa, bo'sh raqam olinadi
+    const draftId = await ensureDraftTicketNumber(currentDraft.id);
+    const draftRow = await dbApi.get("SELECT id, ticket_number FROM tickets WHERE id = ?", [draftId]);
+    const ticketNumber = Number(draftRow?.ticket_number || 0) || (await getNextTicketNumber(draftId));
     const completedTitle = makeTicketTitle(ticketNumber);
     await dbApi.run(
       `UPDATE tickets SET title = ?, ticket_number = ?, status = 'COMPLETED', updated_at = NOW() WHERE id = ?`,
-      [completedTitle, ticketNumber, currentDraft.id]
+      [completedTitle, ticketNumber, draftId]
     );
-    await persistTicketSlotQuestions(currentDraft.id, currentSlots);
+    await persistTicketSlotQuestions(draftId, currentSlots);
 
-    const nextNumber = ticketNumber + 1;
+    const nextNumber = await getNextTicketNumber();
     const nextId = String(nextNumber);
     const nextTitle = makeTicketTitle(nextNumber);
     await dbApi.run(
       `
         INSERT INTO tickets (id, title, ticket_number, status, questions, created_at, updated_at)
         VALUES (?, ?, ?, 'DRAFT', '[]'::jsonb, NOW(), NOW())
-        ON CONFLICT (id) DO UPDATE SET
-          title = EXCLUDED.title,
-          ticket_number = EXCLUDED.ticket_number,
-          status = 'DRAFT',
-          questions = '[]'::jsonb,
-          updated_at = NOW()
+        ON CONFLICT (id) DO NOTHING
       `,
       [nextId, nextTitle, nextNumber]
     );
 
-    const draft = await getDraftTicketBuilderFromDb(nextId);
-    const completedTicket = await getTicketByIdFromDb(currentDraft.id);
+    const draft = await getDraftTicketBuilderFromDb(nextId) || await getDraftTicketBuilderFromDb();
+    const completedTicket = await getTicketByIdFromDb(draftId);
     res.json({ ok: true, completedTicket, draft });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
