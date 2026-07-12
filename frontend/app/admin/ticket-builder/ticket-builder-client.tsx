@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type DragEvent } from "react";
-import { ArrowLeft, GripVertical, RefreshCw, Save, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, GripVertical, Plus, RefreshCw, Save, Search, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -167,7 +167,8 @@ export default function AdminTicketBuilderPage() {
 
   useEffect(() => {
     const ticketData = isEditingExistingTicket ? editingTicketQuery.data : draftQuery.data;
-    if (ticketData) setDraft(cloneDraft(ticketData));
+    // Rejim almashganda (tahrirlash <-> yangi draft) eski bilet ekranda qolib ketmasligi uchun tozalaymiz
+    setDraft(ticketData ? cloneDraft(ticketData) : null);
   }, [draftQuery.data, editingTicketQuery.data, isEditingExistingTicket]);
 
   useEffect(() => {
@@ -416,8 +417,15 @@ export default function AdminTicketBuilderPage() {
             <RefreshCw className="lucide" aria-hidden="true" /> {isEditingExistingTicket ? "Biletni yangilash" : "Draftni yangilash"}
           </button>
           {isEditingExistingTicket ? (
-            <button className="btn btn-ghost" type="button" onClick={() => router.push("/admin/ticket-builder")}>
-              <ArrowLeft className="lucide" aria-hidden="true" /> Yangi draft
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={() => {
+                void qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+                router.push("/admin/ticket-builder");
+              }}
+            >
+              <Plus className="lucide" aria-hidden="true" /> Yangi bilet yaratish
             </button>
           ) : null}
           <button
@@ -448,10 +456,12 @@ export default function AdminTicketBuilderPage() {
         <aside className="card ticketBuilderPanel ticketBuilderDraftPanel">
           <div className="ticketBuilderPanelHead">
             <div>
-              <div className="ticketBuilderTitle">{draft?.title || "Bilet №1"}</div>
+              <div className="ticketBuilderTitle">
+                {draft?.title || ((isEditingExistingTicket ? editingTicketQuery.isFetching : draftQuery.isFetching) ? "Yuklanmoqda..." : "Bilet")}
+              </div>
               <div className="adminPanelCardDesc">
                 Savollarni chap tarafdagi 20 slotga drag qilib joylang.
-                {isEditingExistingTicket ? " Bu bilet tahrirlash rejimida ochilgan." : ""}
+                {isEditingExistingTicket ? " Bu bilet tahrirlash rejimida ochilgan. Yangi bilet yaratish uchun yuqoridagi “Yangi bilet yaratish” tugmasini bosing." : ""}
               </div>
             </div>
             <div className="ticketBuilderMeta">
