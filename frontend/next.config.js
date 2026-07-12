@@ -1,10 +1,15 @@
 /** @type {import('next').NextConfig} */
+const path = require("path");
+
 const backendUrl =
   process.env.BACKEND_URL ||
   (process.env.NODE_ENV === "development" ? "http://127.0.0.1:4000" : "https://api.topshirdi.uz");
 
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    root: path.resolve(__dirname, "..")
+  },
   async rewrites() {
     return [
       {
