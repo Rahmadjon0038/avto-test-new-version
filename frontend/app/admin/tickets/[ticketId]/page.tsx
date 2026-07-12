@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Save, Ticket, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -313,6 +313,9 @@ export default function AdminTicketDetailPage() {
         <div className="adminTicketActions">
           <button className="btn btn-ghost" type="button" onClick={() => router.push("/admin/tickets")}>
             <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          </button>
+          <button className="btn btn-ghost" type="button" onClick={() => router.push(`/admin/ticket-builder?ticketId=${encodeURIComponent(ticketId)}`)}>
+            <Ticket className="lucide" aria-hidden="true" /> Constructorda ochish
           </button>
           <button className="btn btn-danger" type="button" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
             <Trash2 className="lucide" aria-hidden="true" /> O‘chirish

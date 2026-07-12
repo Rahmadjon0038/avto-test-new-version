@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { ArrowLeft, GripVertical, RefreshCw, Save, Search, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
@@ -128,12 +128,15 @@ function optionLabel(index: number) {
 
 export default function AdminTicketBuilderPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const [draft, setDraft] = useState<DraftTicket | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dragData, setDragData] = useState<{ source: "pool" | "draft"; questionId: string; fromIndex?: number } | null>(null);
+  const editingTicketId = searchParams.get("ticketId")?.trim() || "";
+  const isEditingExistingTicket = Boolean(editingTicketId);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -148,16 +151,29 @@ export default function AdminTicketBuilderPage() {
       const res = await authFetch("/api/admin/ticket-builder/draft");
       const data = await jsonOrError(res);
       return data.ticket as DraftTicket;
-    }
+    },
+    enabled: !isEditingExistingTicket
+  });
+
+  const editingTicketQuery = useQuery({
+    queryKey: ["admin-ticket-builder-ticket", editingTicketId],
+    queryFn: async () => {
+      const res = await authFetch(`/api/admin/tickets/${encodeURIComponent(editingTicketId)}`);
+      const data = await jsonOrError(res);
+      return data.ticket as DraftTicket;
+    },
+    enabled: isEditingExistingTicket
   });
 
   useEffect(() => {
-    if (draftQuery.data) setDraft(cloneDraft(draftQuery.data));
-  }, [draftQuery.data]);
+    const ticketData = isEditingExistingTicket ? editingTicketQuery.data : draftQuery.data;
+    if (ticketData) setDraft(cloneDraft(ticketData));
+  }, [draftQuery.data, editingTicketQuery.data, isEditingExistingTicket]);
 
   useEffect(() => {
-    if (draftQuery.error) toast.error((draftQuery.error as any)?.message || "Xatolik");
-  }, [draftQuery.error]);
+    const queryError = isEditingExistingTicket ? editingTicketQuery.error : draftQuery.error;
+    if (queryError) toast.error((queryError as any)?.message || "Xatolik");
+  }, [draftQuery.error, editingTicketQuery.error, isEditingExistingTicket]);
 
   const questionsQuery = useQuery({
     queryKey: ["admin-ticket-builder-questions", debouncedSearch],
@@ -190,20 +206,27 @@ export default function AdminTicketBuilderPage() {
   const totalUnassigned = questionsQuery.data?.total ?? visiblePoolQuestions.length;
   const filledDraftCount = useMemo(() => draftQuestions.filter(Boolean).length, [draftQuestions]);
   const canSaveDraft = filledDraftCount > 0;
+  const activeTicketId = isEditingExistingTicket ? editingTicketId : draft?.id || "";
 
   const addMutation = useMutation({
     mutationFn: async ({ questionId, order }: { questionId: string; order: number }) => {
       const res = await authFetch("/api/admin/ticket-builder/add-question", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ questionId, order })
+        body: JSON.stringify({ questionId, order, ticketId: activeTicketId })
       });
       return jsonOrError(res);
     },
     onSuccess: async (data: any) => {
       if (data?.ticket) setDraft(cloneDraft(data.ticket));
-      await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+      if (isEditingExistingTicket) {
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-ticket", editingTicketId] });
+        await qc.invalidateQueries({ queryKey: ["admin-ticket", editingTicketId] });
+      } else {
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+      }
       await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
+      await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
@@ -213,14 +236,20 @@ export default function AdminTicketBuilderPage() {
       const res = await authFetch("/api/admin/ticket-builder/remove-question", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ questionId })
+        body: JSON.stringify({ questionId, ticketId: activeTicketId })
       });
       return jsonOrError(res);
     },
     onSuccess: async (data: any) => {
       if (data?.ticket) setDraft(cloneDraft(data.ticket));
-      await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+      if (isEditingExistingTicket) {
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-ticket", editingTicketId] });
+        await qc.invalidateQueries({ queryKey: ["admin-ticket", editingTicketId] });
+      } else {
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+      }
       await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
+      await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
@@ -230,30 +259,60 @@ export default function AdminTicketBuilderPage() {
       const res = await authFetch("/api/admin/ticket-builder/reorder", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ questionId, fromOrder, toOrder })
+        body: JSON.stringify({ questionId, fromOrder, toOrder, ticketId: activeTicketId })
       });
       return jsonOrError(res);
     },
     onSuccess: async (data: any) => {
       if (data?.ticket) setDraft(cloneDraft(data.ticket));
-      await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+      if (isEditingExistingTicket) {
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-ticket", editingTicketId] });
+        await qc.invalidateQueries({ queryKey: ["admin-ticket", editingTicketId] });
+      } else {
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
+      }
       await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
+      await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
 
-  const completeMutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: async () => {
+      if (!draft) throw new Error("Ticket topilmadi");
+      const normalizedQuestions = normalizeDraftSlots(
+        draft.questions.map((question) => (question ? cloneQuestion(question) : null))
+      );
+      if (isEditingExistingTicket) {
+        const res = await authFetch(`/api/admin/tickets/${encodeURIComponent(activeTicketId)}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            title: draft.title,
+            questions: normalizedQuestions
+          })
+        });
+        return (await jsonOrError(res)) as { ticket: DraftTicket };
+      }
       const res = await authFetch("/api/admin/ticket-builder/complete", {
         method: "POST"
       });
       return jsonOrError(res);
     },
     onSuccess: async (data: any) => {
+      if (isEditingExistingTicket) {
+        if (data?.ticket) setDraft(cloneDraft(data.ticket));
+        await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-ticket", editingTicketId] });
+        await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
+        await qc.invalidateQueries({ queryKey: ["admin-ticket", editingTicketId] });
+        toast.success("Bilet yangilandi");
+        return;
+      }
       toast.success("Bilet yakunlandi");
       if (data?.draft) setDraft(cloneDraft(data.draft));
       await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-draft"] });
       await qc.invalidateQueries({ queryKey: ["admin-ticket-builder-questions"] });
+      await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
   });
@@ -348,27 +407,39 @@ export default function AdminTicketBuilderPage() {
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>
         <div className="adminTopicActions">
-          <button className="btn btn-ghost" type="button" onClick={() => draftQuery.refetch()} disabled={draftQuery.isFetching}>
-            <RefreshCw className="lucide" aria-hidden="true" /> Draftni yangilash
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => (isEditingExistingTicket ? editingTicketQuery.refetch() : draftQuery.refetch())}
+            disabled={isEditingExistingTicket ? editingTicketQuery.isFetching : draftQuery.isFetching}
+          >
+            <RefreshCw className="lucide" aria-hidden="true" /> {isEditingExistingTicket ? "Biletni yangilash" : "Draftni yangilash"}
           </button>
+          {isEditingExistingTicket ? (
+            <button className="btn btn-ghost" type="button" onClick={() => router.push("/admin/ticket-builder")}>
+              <ArrowLeft className="lucide" aria-hidden="true" /> Yangi draft
+            </button>
+          ) : null}
           <button
             className="btn btn-primary"
             type="button"
-            disabled={!canSaveDraft || completeMutation.isPending}
+            disabled={!canSaveDraft || saveMutation.isPending}
             onClick={() => {
               if (!canSaveDraft) return toast.error("Kamida bitta savol kerak");
               if (
                 !window.confirm(
-                  filledDraftCount < 20
-                    ? `Biletni bo‘sh slotlar bilan saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
-                    : `Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`
+                  isEditingExistingTicket
+                    ? `Bu biletni saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
+                    : filledDraftCount < 20
+                      ? `Biletni bo‘sh slotlar bilan saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
+                      : `Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`
                 )
               )
                 return;
-              completeMutation.mutate();
+              saveMutation.mutate();
             }}
           >
-            <Save className="lucide" aria-hidden="true" /> Saqlash
+            <Save className="lucide" aria-hidden="true" /> {isEditingExistingTicket ? "Saqlash" : "Saqlash"}
           </button>
         </div>
       </div>
@@ -378,11 +449,15 @@ export default function AdminTicketBuilderPage() {
           <div className="ticketBuilderPanelHead">
             <div>
               <div className="ticketBuilderTitle">{draft?.title || "Bilet №1"}</div>
-              <div className="adminPanelCardDesc">Savollarni chap tarafdagi 20 slotga drag qilib joylang.</div>
+              <div className="adminPanelCardDesc">
+                Savollarni chap tarafdagi 20 slotga drag qilib joylang.
+                {isEditingExistingTicket ? " Bu bilet tahrirlash rejimida ochilgan." : ""}
+              </div>
             </div>
             <div className="ticketBuilderMeta">
               <span className="badge">{filledDraftCount}/20 savol</span>
               <span className="badge">{draft?.status || "DRAFT"}</span>
+              {isEditingExistingTicket ? <span className="badge badge-success">Tahrirlash</span> : null}
             </div>
           </div>
 
@@ -457,18 +532,20 @@ export default function AdminTicketBuilderPage() {
             <button
               className="btn btn-primary"
               type="button"
-              disabled={!canSaveDraft || completeMutation.isPending}
+              disabled={!canSaveDraft || saveMutation.isPending}
               onClick={() => {
                 if (!canSaveDraft) return;
                 if (
                   !window.confirm(
-                    filledDraftCount < 20
-                      ? `Biletni bo‘sh slotlar bilan saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
-                      : `Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`
+                    isEditingExistingTicket
+                      ? `Bu biletni saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
+                      : filledDraftCount < 20
+                        ? `Biletni bo‘sh slotlar bilan saqlaysizmi? Hozir ${filledDraftCount}/20 savol to‘ldirilgan.`
+                        : `Ushbu biletni yakunlaysizmi? ${filledDraftCount}/20 savol tayyor.`
                   )
                 )
                   return;
-                completeMutation.mutate();
+                saveMutation.mutate();
               }}
             >
               <Save className="lucide" aria-hidden="true" /> Saqlash

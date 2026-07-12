@@ -125,6 +125,14 @@ export default function AdminTicketsPage() {
                 >
                   <Pencil className="lucide" aria-hidden="true" />
                 </Link>
+                <Link
+                  href={`/admin/ticket-builder?ticketId=${encodeURIComponent(ticket.id)}`}
+                  className="btn btn-sm adminIconBtn"
+                  title="Constructorda ochish"
+                  aria-label="Constructorda ochish"
+                >
+                  <Ticket className="lucide" aria-hidden="true" />
+                </Link>
                 <button
                   className="btn btn-sm adminIconBtn adminIconBtnDelete"
                   type="button"

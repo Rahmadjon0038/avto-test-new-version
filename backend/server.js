@@ -465,6 +465,16 @@ async function getOrCreateDraftTicket() {
   return getTicketFromDb(created.id);
 }
 
+async function getTicketBuilderTarget(ticketId = null) {
+  const normalizedTicketId = String(ticketId || "").trim();
+  if (normalizedTicketId) {
+    const ticket = await getTicketBuilderFromDb(normalizedTicketId);
+    if (!ticket) throw new Error("Bilet topilmadi");
+    return ticket;
+  }
+  return getOrCreateDraftTicket();
+}
+
 function slugifyTopic(value) {
   const text = String(value || "")
     .trim()
@@ -4609,11 +4619,12 @@ app.post("/api/admin/ticket-builder/add-question", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const questionId = String(req.body?.questionId || "").trim();
+  const ticketId = String(req.body?.ticketId || "").trim();
   const desiredOrderValue = Number.parseInt(String(req.body?.order ?? ""), 10);
   if (!questionId) return res.status(400).json({ error: "questionId kerak" });
   try {
-    const draftTicket = await getOrCreateDraftTicket();
-    const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
+    const draftTicket = await getTicketBuilderTarget(ticketId);
+    const draft = await getTicketBuilderFromDb(draftTicket.id);
     const alreadyAssigned = await dbApi.get("SELECT id FROM ticket_questions WHERE question_id = ?", [questionId]);
     if (alreadyAssigned) return res.status(400).json({ error: "Savol allaqachon biletga biriktirilgan" });
     const bankQuestion = await dbApi.get(
@@ -4649,10 +4660,11 @@ app.post("/api/admin/ticket-builder/remove-question", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const questionId = String(req.body?.questionId || "").trim();
+  const ticketId = String(req.body?.ticketId || "").trim();
   if (!questionId) return res.status(400).json({ error: "questionId kerak" });
   try {
-    const draftTicket = await getOrCreateDraftTicket();
-    const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
+    const draftTicket = await getTicketBuilderTarget(ticketId);
+    const draft = await getTicketBuilderFromDb(draftTicket.id);
     const nextSlots = normalizeTicketSlotQuestions(draft.questions);
     const existingIndex = nextSlots.findIndex((slot) => slot && String(slot.questionId || slot.id || "") === questionId);
     if (existingIndex < 0) return res.status(404).json({ error: "Savol draftda topilmadi" });
@@ -4668,6 +4680,7 @@ app.post("/api/admin/ticket-builder/reorder", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const questionId = String(req.body?.questionId || "").trim();
+  const ticketId = String(req.body?.ticketId || "").trim();
   const fromOrder = Number.parseInt(String(req.body?.fromOrder ?? ""), 10);
   const toOrder = Number.parseInt(String(req.body?.toOrder ?? ""), 10);
   if (!questionId) return res.status(400).json({ error: "questionId kerak" });
@@ -4675,8 +4688,8 @@ app.post("/api/admin/ticket-builder/reorder", async (req, res) => {
     return res.status(400).json({ error: "fromOrder/toOrder noto‘g‘ri" });
   }
   try {
-    const draftTicket = await getOrCreateDraftTicket();
-    const draft = await getDraftTicketBuilderFromDb(draftTicket.id);
+    const draftTicket = await getTicketBuilderTarget(ticketId);
+    const draft = await getTicketBuilderFromDb(draftTicket.id);
     const nextSlots = normalizeTicketSlotQuestions(draft.questions);
     const sourceIndex = fromOrder - 1;
     const targetIndex = toOrder - 1;
