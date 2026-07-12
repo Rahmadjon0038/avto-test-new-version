@@ -5,11 +5,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# --include=dev: NODE_ENV=production bo'lsa ham typescript/@types build uchun kerak
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY frontend/package.json frontend/package-lock.json ./frontend/
-RUN npm --prefix frontend ci
+RUN npm --prefix frontend ci --include=dev
 
 COPY frontend ./frontend
 
