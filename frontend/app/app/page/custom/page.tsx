@@ -28,15 +28,15 @@ export default function CustomTestsPage() {
         </button>
       </div>
 
-      <div className="topicsHero card">
-        <div className="topicsHeroIcon">
-          <LayoutGrid className="lucide" aria-hidden="true" />
+        <div className="topicsHero card">
+          <div className="topicsHeroIcon">
+            <LayoutGrid className="lucide" aria-hidden="true" />
+          </div>
+          <div>
+            <div className="topicsTitle">Sozlamali testlar</div>
+            <div className="topicsSub">Kartalar biletlar bankidagi savollardan yig‘iladi.</div>
+          </div>
         </div>
-        <div>
-          <div className="topicsTitle">Sozlamali testlar</div>
-          <div className="topicsSub">Kartaga bosganda shu testning alohida sahifasi ochiladi.</div>
-        </div>
-      </div>
 
       {customTestsQuery.isLoading ? <div className="muted">Testlar yuklanmoqda...</div> : null}
 

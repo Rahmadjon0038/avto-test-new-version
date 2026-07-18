@@ -391,9 +391,28 @@ body {
   text-align: left;
 }
 
+.mistakesTabPractice {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 92%, #000 8%), color-mix(in srgb, var(--primary) 72%, #000 28%));
+  border-color: color-mix(in srgb, var(--primary) 70%, var(--border));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(47, 109, 255, 0.22);
+}
+
+.mistakesTabPractice.active {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 100%, #000 0%), color-mix(in srgb, var(--primary) 84%, #000 16%));
+  border-color: color-mix(in srgb, var(--primary) 78%, #fff 22%);
+  color: #fff;
+}
+
 .mistakesTab.active {
   border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
   background: color-mix(in srgb, var(--primary) 12%, var(--panel));
+}
+
+.mistakesTabPractice.active {
+  border-color: color-mix(in srgb, var(--primary) 78%, #fff 22%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 100%, #000 0%), color-mix(in srgb, var(--primary) 84%, #000 16%));
+  color: #fff;
 }
 
 .mistakesTab .badge {
@@ -984,6 +1003,31 @@ body {
   margin-top: 4px;
   font-weight: 800;
   line-height: 1.4;
+}
+
+.mistakesQuestionCardHead {
+  position: relative;
+  padding-right: 40px;
+}
+
+.mistakesDeleteBtn {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--bad) 48%, var(--border));
+  background: color-mix(in srgb, var(--bad) 20%, var(--panel2));
+  color: var(--bad);
+  display: grid;
+  place-items: center;
+  box-shadow: none;
+}
+
+.mistakesDeleteBtn:hover {
+  border-color: color-mix(in srgb, var(--bad) 68%, var(--border));
+  background: color-mix(in srgb, var(--bad) 28%, var(--panel2));
 }
 
 .mistakesCardActions {
@@ -4638,6 +4682,7 @@ body {
   text-align: center;
   display: grid;
   place-items: center;
+  gap: 8px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--panel2) 65%, transparent), var(--panel));
   color: var(--text);
   text-decoration: none;
@@ -4662,6 +4707,87 @@ body {
 .ticketTitle {
   font-weight: 900;
   font-size: 18px;
+}
+
+.ticketProgress {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 100%;
+}
+
+.ticketProgressItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  max-width: 100%;
+}
+
+.ticketProgressItem.good {
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--border));
+  background: color-mix(in srgb, var(--ok) 16%, var(--panel2));
+}
+
+.ticketProgressItem.bad {
+  border-color: color-mix(in srgb, var(--bad) 42%, var(--border));
+  background: color-mix(in srgb, var(--bad) 14%, var(--panel2));
+}
+
+.ticketProgressItem.mutedItem {
+  color: var(--muted);
+}
+
+.ticketProgressEmpty {
+  min-height: 28px;
+}
+
+.ticketResultStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ticketResultStat {
+  border: 1px solid color-mix(in srgb, var(--ok) 36%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ok) 14%, var(--panel2));
+  padding: 12px;
+  text-align: center;
+}
+
+.ticketResultStat.bad {
+  border-color: color-mix(in srgb, var(--bad) 38%, var(--border));
+  background: color-mix(in srgb, var(--bad) 14%, var(--panel2));
+}
+
+.ticketResultStat.mutedStat {
+  border-color: var(--border);
+  background: var(--panel2);
+}
+
+.ticketResultStatLabel {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ticketResultStatValue {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 1000;
+  line-height: 1;
 }
 
 .lock {

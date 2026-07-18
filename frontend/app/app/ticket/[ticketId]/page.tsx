@@ -370,12 +370,18 @@ export default function TicketPage() {
   const correctCount = answeredQuestions.filter(
     (question) => question && answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
   ).length || 0;
+  const wrongCount = Math.max(answered - correctCount, 0);
+  const unansweredCount = Math.max(total - answered, 0);
   const scoredTotal = answeredQuestions.length || total;
   const correctPercent = scoredTotal > 0 ? Math.round((correctCount / scoredTotal) * 100) : 0;
   const chartData = [
     { name: "To‘g‘ri", value: correctCount },
     { name: "Noto‘g‘ri", value: Math.max(scoredTotal - correctCount, 0) }
   ];
+  const closeResult = useCallback(() => {
+    setFinishOpen(false);
+    router.push("/app/tickets");
+  }, [router]);
 
   const resetMutation = useMutation({
     mutationFn: () => authFetch(`/api/progress/${encodeURIComponent(ticketId)}/reset`, { method: "POST" }).then(jsonOrError),
@@ -558,11 +564,11 @@ export default function TicketPage() {
 
       {finishOpen && (
         <>
-          <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
+          <div className="modalOverlay" onClick={closeResult} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">Natija</div>
-              <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-ghost" type="button" onClick={closeResult}>
                 ✕
               </button>
             </div>
@@ -598,8 +604,22 @@ export default function TicketPage() {
                     <div className="chartCount">{correctCount}/{total}</div>
                   </div>
                 </div>
+                <div className="ticketResultStats">
+                  <div className="ticketResultStat">
+                    <div className="ticketResultStatLabel">To‘g‘ri</div>
+                    <div className="ticketResultStatValue">{correctCount}</div>
+                  </div>
+                  <div className="ticketResultStat bad">
+                    <div className="ticketResultStatLabel">Xato</div>
+                    <div className="ticketResultStatValue">{wrongCount}</div>
+                  </div>
+                  <div className="ticketResultStat mutedStat">
+                    <div className="ticketResultStatLabel">Belgilanmagan</div>
+                    <div className="ticketResultStatValue">{unansweredCount}</div>
+                  </div>
+                </div>
               </div>
-              <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-primary" type="button" onClick={closeResult}>
                 Yopish
               </button>
             </div>

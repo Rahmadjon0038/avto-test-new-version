@@ -333,6 +333,31 @@ async function getTicketsFromDb() {
   return tickets;
 }
 
+function buildTicketQuestionBankKey(ticketId, questionId) {
+  return `ticket:${String(ticketId)}:${String(questionId)}`;
+}
+
+async function getTicketQuestionBankFromDb() {
+  const tickets = await getTicketsFromDb();
+  const bank = [];
+
+  for (const ticket of tickets) {
+    for (const [index, question] of (Array.isArray(ticket.questions) ? ticket.questions : []).entries()) {
+      if (!question) continue;
+      const questionId = String(question.id || `${index + 1}`);
+      bank.push({
+        questionKey: buildTicketQuestionBankKey(ticket.id, questionId),
+        ticketId: String(ticket.id),
+        ticketTitle: String(ticket.title || ""),
+        questionIndex: index,
+        question: normalizeAnswerQuestion(question)
+      });
+    }
+  }
+
+  return bank;
+}
+
 async function getTicketByIdFromDb(ticketId) {
   const ticket = await getTicketFromDb(ticketId);
   if (ticket && ticket.status !== "COMPLETED") return null;
@@ -1270,7 +1295,14 @@ function chunkArray(items, size) {
 }
 
 function buildGeneratedCustomTestFromBankSize(bank, size) {
-  const questions = bank.slice(0, size).map((item) => item.question);
+  const questions = bank.slice(0, size).map((item) => ({
+    ...item.question,
+    id: String(item.questionKey || item.question?.id || ""),
+    kind: "ticket",
+    sourceId: String(item.ticketId || ""),
+    sourceTitle: String(item.ticketTitle || ""),
+    questionIndex: Number(item.questionIndex || 0) + 1
+  }));
   return {
     id: 1000 + size,
     title: `${size} ta`,
@@ -1284,7 +1316,7 @@ async function getProgressTicketById(ticketId) {
 }
 
 async function getGeneratedCustomTestsFromDb() {
-  const bank = await getTopicQuestionBankFromDb();
+  const bank = await getTicketQuestionBankFromDb();
   const results = [];
   for (let size = 20; size <= bank.length; size += 20) {
     results.push(buildGeneratedCustomTestFromBankSize(bank, size));
@@ -1299,7 +1331,7 @@ async function getGeneratedCustomTestByIdFromDb(testId) {
   const rawId = Number(match[1]);
   const size = rawId >= 1000 ? rawId - 1000 : rawId;
   if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
-  const bank = await getTopicQuestionBankFromDb();
+  const bank = await getTicketQuestionBankFromDb();
   if (size > bank.length) return null;
   return buildGeneratedCustomTestFromBankSize(bank, size);
 }
@@ -3111,6 +3143,32 @@ function buildMistakeQuestion({ kind, id, title, question, questionIndex, wrongA
   };
 }
 
+function calculateTicketProgressStats(ticket, answers = {}) {
+  const questions = Array.isArray(ticket?.questions) ? ticket.questions : [];
+  let correctCount = 0;
+  let answeredCount = 0;
+
+  for (const question of questions) {
+    if (!question) continue;
+    const selected = answers?.[question.id];
+    if (selected === undefined || selected === null) continue;
+    answeredCount += 1;
+    if (Number(selected) === Number(question.correctIndex)) correctCount += 1;
+  }
+
+  const totalCount = questions.length;
+  const wrongCount = Math.max(0, answeredCount - correctCount);
+  const unansweredCount = Math.max(0, totalCount - answeredCount);
+
+  return {
+    totalCount,
+    answeredCount,
+    correctCount,
+    wrongCount,
+    unansweredCount
+  };
+}
+
 async function deleteUserMistake(userId, questionKey) {
   await dbApi.run("DELETE FROM user_mistakes WHERE user_id = ? AND question_key = ?", [String(userId), String(questionKey)]);
 }
@@ -3968,12 +4026,12 @@ app.post("/api/custom-test-progress/:testId/reset", requireUser, async (req, res
 });
 
 app.get("/api/answers", requireUser, async (req, res) => {
-  const bank = await getTopicQuestionBankFromDb();
+  const bank = await getTicketQuestionBankFromDb();
   const questions = bank.map((item) =>
     buildAnswerQuestion({
-      kind: "topic",
-      id: item.topicId,
-      title: item.topicTitle,
+      kind: "ticket",
+      id: item.ticketId,
+      title: item.ticketTitle,
       question: item.question,
       questionIndex: item.questionIndex
     })
@@ -4206,13 +4264,34 @@ app.post("/api/browser-token", requireUser, async (req, res) => {
 
 app.get("/api/tickets", requireUser, async (req, res) => {
   const tickets = await getTicketsFromDb();
+  const progressRows = await dbApi.all("SELECT ticket_id, answers, completed, score, updated_at FROM test_progress WHERE user_id = ?", [
+    String(req.user.id)
+  ]);
+  const progressByTicketId = new Map(progressRows.map((row) => [String(row.ticket_id || ""), row]));
   res.json({
     tickets: tickets.map((ticket) => ({
       id: ticket.id,
       title: ticket.title,
       status: ticket.status,
       locked: false,
-      questionsCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
+      questionsCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0,
+      progress: (() => {
+        const row = progressByTicketId.get(String(ticket.id));
+        if (!row) return null;
+        let answers = {};
+        try {
+          answers = JSON.parse(row.answers || "{}");
+        } catch {
+          answers = {};
+        }
+        return {
+          ticketId: String(ticket.id),
+          completed: Boolean(row.completed),
+          score: Number(row.score || 0),
+          updatedAt: row.updated_at ? String(row.updated_at) : null,
+          ...calculateTicketProgressStats(ticket, answers)
+        };
+      })()
     })),
     isPro: true
   });
@@ -4228,6 +4307,8 @@ app.get("/api/tickets/:ticketId", requireUser, async (req, res) => {
 app.get("/api/progress/:ticketId", requireUser, async (req, res) => {
   const userId = String(req.user.id);
   const ticketId = String(req.params.ticketId);
+  const ticket = await getProgressTicketById(ticketId);
+  if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
   const row = await dbApi.get(
     "SELECT * FROM test_progress WHERE user_id = ? AND ticket_id = ?",
@@ -4235,13 +4316,21 @@ app.get("/api/progress/:ticketId", requireUser, async (req, res) => {
   );
   if (!row) return res.json({ progress: null });
 
+  let answers = {};
+  try {
+    answers = JSON.parse(row.answers || "{}");
+  } catch {
+    answers = {};
+  }
+
   res.json({
     progress: {
       ticketId: row.ticket_id,
-      answers: JSON.parse(row.answers || "{}"),
+      answers,
       completed: !!row.completed,
       score: row.score,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
+      ...calculateTicketProgressStats(ticket, answers)
     }
   });
 });
@@ -4478,7 +4567,8 @@ app.post("/api/progress/:ticketId", requireUser, async (req, res) => {
     answers
   });
 
-  res.json({ ok: true, completed, score: correct, total: ticket.questions.length });
+  const stats = calculateTicketProgressStats(ticket, answers);
+  res.json({ ok: true, completed, score: correct, total: ticket.questions.length, ...stats });
 });
 
 app.post("/api/progress/:ticketId/reset", requireUser, async (req, res) => {
@@ -4498,6 +4588,14 @@ app.post("/api/progress/:ticketId/reset", requireUser, async (req, res) => {
     [userId, ticketId, JSON.stringify({})]
   );
 
+  res.json({ ok: true });
+});
+
+app.delete("/api/mistakes/:questionKey", requireUser, async (req, res) => {
+  const userId = String(req.user.id);
+  const questionKey = String(req.params.questionKey || "").trim();
+  if (!questionKey) return res.status(400).json({ error: "Savol kaliti kerak" });
+  await deleteUserMistake(userId, questionKey);
   res.json({ ok: true });
 });
 

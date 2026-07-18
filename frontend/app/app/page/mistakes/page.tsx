@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -330,6 +330,20 @@ export default function MistakesPage() {
     }
   });
 
+  const removeMistakeMutation = useMutation({
+    mutationFn: async (questionKey: string) => {
+      const res = await authFetch(`/api/mistakes/${encodeURIComponent(questionKey)}`, {
+        method: "DELETE"
+      });
+      return jsonOrError(res);
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["mistakes"] });
+      toast.success("Xato o‘chirildi");
+    },
+    onError: (error: any) => toast.error(error?.message || "Xatolik")
+  });
+
   function scheduleAutoNext(nextIndex: number) {
     if (autoNextTimerRef.current) window.clearTimeout(autoNextTimerRef.current);
     autoNextTimerRef.current = window.setTimeout(() => {
@@ -399,7 +413,11 @@ export default function MistakesPage() {
           <span>Mening xatolarim</span>
           <span className="badge">{questions.length}</span>
         </button>
-        <button className={`mistakesTab ${tab === "practice" ? "active" : ""}`} type="button" onClick={() => setTab("practice")}>
+        <button
+          className={`mistakesTab mistakesTabPractice ${tab === "practice" ? "active" : ""}`}
+          type="button"
+          onClick={() => setTab("practice")}
+        >
           <Target className="lucide" aria-hidden="true" />
           <span>Xatolarim ustida ishlash</span>
           <span className="badge">{questions.length}</span>
@@ -421,9 +439,17 @@ export default function MistakesPage() {
             <div className="answersQuestionGrid mistakesQuestionGrid">
               {questions.map((question, index) => (
                 <article className="card answersQuestionCard mistakesQuestionCard" key={question.id || `${question.sourceId}-${index}`}>
-                  <div className="answersQuestionCardHead">
+                  <div className="answersQuestionCardHead mistakesQuestionCardHead">
                     <div className="answersQuestionCardTitle">{mistakeLabel(question, index)}</div>
                     <span className="badge">{question.hasImage ? "Rasmli" : "Rasmsiz"}</span>
+                    <button
+                      className="mistakesDeleteBtn"
+                      type="button"
+                      aria-label="Xatoni o‘chirish"
+                      onClick={() => removeMistakeMutation.mutate(question.id)}
+                    >
+                      <Trash2 className="lucide" aria-hidden="true" />
+                    </button>
                   </div>
 
                   <div className="mistakesSource">{question.sourceTitle}</div>

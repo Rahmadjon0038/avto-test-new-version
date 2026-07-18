@@ -9,7 +9,24 @@ import { useEffect } from "react";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
-type Ticket = { id: string; title: string; locked: boolean };
+type TicketProgress = {
+  ticketId: string;
+  completed: boolean;
+  score: number;
+  updatedAt: string | null;
+  totalCount: number;
+  answeredCount: number;
+  correctCount: number;
+  wrongCount: number;
+  unansweredCount: number;
+};
+
+type Ticket = {
+  id: string;
+  title: string;
+  locked: boolean;
+  progress?: TicketProgress | null;
+};
 
 export default function TicketsPage() {
   const router = useRouter();
@@ -48,6 +65,17 @@ export default function TicketsPage() {
             onClick={() => router.push(`/app/ticket/${encodeURIComponent(t.id)}`)}
           >
             <div className="ticketTitle">{t.title}</div>
+            {t.progress ? (
+              <div className="ticketProgress">
+                <span className="ticketProgressItem good">{t.progress.correctCount} ta to‘g‘ri</span>
+                <span className="ticketProgressItem bad">{t.progress.wrongCount} ta xato</span>
+                <span className="ticketProgressItem mutedItem">{t.progress.unansweredCount} ta belgilanmagan</span>
+              </div>
+            ) : (
+              <div className="ticketProgress ticketProgressEmpty">
+                <span className="ticketProgressItem mutedItem">Natija hali yo‘q</span>
+              </div>
+            )}
           </button>
         ))}
       </div>

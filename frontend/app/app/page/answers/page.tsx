@@ -147,7 +147,7 @@ export default function AnswersPage() {
           </div>
           <div>
             <div className="answersTitle">Barcha testlar javoblari</div>
-            <div className="muted">Tizimdagi barcha bo‘limlardagi savollar alohida kartalarda ko‘rsatiladi.</div>
+            <div className="muted">Javoblar faqat biletlar bankidagi savollardan ko‘rsatiladi.</div>
           </div>
         </div>
         <div className="answersHeroMeta">
