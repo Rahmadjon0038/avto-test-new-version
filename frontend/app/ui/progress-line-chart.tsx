@@ -1,8 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis } from "recharts";
-
 type ProgressLineChartProps = {
   correct: number;
   wrong: number;
@@ -25,15 +22,6 @@ export default function ProgressLineChart({
   const wrongPercent = total > 0 ? Math.round((wrong / total) * 100) : 0;
   const unansweredPercent = total > 0 ? Math.round((unanswered / total) * 100) : 0;
 
-  const data = useMemo(
-    () => [
-      { label: "To‘g‘ri", value: correctPercent },
-      { label: "Xato", value: wrongPercent },
-      { label: "Bo‘sh", value: unansweredPercent }
-    ],
-    [correctPercent, unansweredPercent, wrongPercent]
-  );
-
   return (
     <div className={["progressLineCard", className].filter(Boolean).join(" ")}>
       <div className="progressLineHeader">
@@ -46,20 +34,10 @@ export default function ProgressLineChart({
 
       <div className="progressLineChartArea">
         {total > 0 ? (
-          <ResponsiveContainer width="100%" height={72}>
-            <LineChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-              <XAxis dataKey="label" hide />
-              <YAxis hide domain={[0, 100]} />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="var(--primary)"
-                strokeWidth={2.6}
-                dot={{ r: 3, strokeWidth: 2, fill: "var(--panel)" }}
-                activeDot={{ r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="progressLineTrack" aria-hidden="true">
+            <div className="progressLineFill" style={{ width: `${correctPercent}%` }} />
+            <div className="progressLineMarker" style={{ left: `${correctPercent}%` }} />
+          </div>
         ) : (
           <div className="progressLineEmpty">{emptyText}</div>
         )}

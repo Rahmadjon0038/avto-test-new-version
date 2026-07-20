@@ -8,7 +8,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
-import ProgressLineChart from "@/app/ui/progress-line-chart";
 
 type TicketProgress = {
   ticketId: string;
@@ -65,21 +64,17 @@ export default function TicketsPage() {
             type="button"
             onClick={() => router.push(`/app/ticket/${encodeURIComponent(t.id)}`)}
           >
-            <div className="ticketCardBody">
+            <div className={`ticketCardBody ${t.progress ? "" : "isEmpty"}`}>
               <div className="ticketTitle">{t.title}</div>
               {t.progress ? (
-                <ProgressLineChart
-                  correct={t.progress.correctCount}
-                  wrong={t.progress.wrongCount}
-                  unanswered={t.progress.unansweredCount}
-                  title="Bilet progressi"
-                  className="ticketProgressChart"
-                />
-              ) : (
-                <div className="ticketProgress ticketProgressEmpty">
-                  <span className="ticketProgressItem mutedItem">Natija hali yo‘q</span>
-                </div>
-              )}
+                <>
+                  <div className="ticketMiniStats">
+                    <span className="ticketMiniStat good">{`${t.progress.correctCount} ta to‘g‘ri`}</span>
+                    <span className="ticketMiniStat bad">{`${t.progress.wrongCount} ta noto‘g‘ri`}</span>
+                    <span className="ticketMiniStat muted">{`${t.progress.unansweredCount} ta belgilanmagan`}</span>
+                  </div>
+                </>
+              ) : null}
             </div>
           </button>
         ))}

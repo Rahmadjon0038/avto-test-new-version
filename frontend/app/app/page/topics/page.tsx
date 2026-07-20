@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
-import ProgressLineChart from "@/app/ui/progress-line-chart";
+import ProgressStatsBlock from "@/app/ui/progress-stats-block";
 import type { TopicCard } from "../topics-data";
 
 export default function TopicsPage() {
@@ -105,44 +105,54 @@ export default function TopicsPage() {
 }
 
 type TopicProgress = {
-  correctCount?: number;
-  wrongCount?: number;
-  unansweredCount?: number;
-  totalCount?: number;
+  answers?: Record<string, number>;
+  score?: number;
+  completed?: boolean;
 };
 
 function TopicProgressPreview({ topicId }: { topicId: number }) {
   const { authFetch, authReady } = useAuth();
 
-  const progressQuery = useQuery({
-    queryKey: ["topic-progress", topicId],
+  const topicQuery = useQuery({
+    queryKey: ["topic-card", topicId],
     queryFn: async () => {
-      const res = await authFetch(`/api/topic-progress/${encodeURIComponent(String(topicId))}`);
-      return jsonOrError(res) as TopicProgress;
+      const res = await authFetch(`/api/topics/${encodeURIComponent(String(topicId))}`);
+      const data = await jsonOrError(res);
+      return data?.topic as TopicCard | null;
     },
     enabled: authReady
   });
 
+  const progressQuery = useQuery({
+    queryKey: ["topic-progress", topicId],
+    queryFn: async () => {
+      const res = await authFetch(`/api/topic-progress/${encodeURIComponent(String(topicId))}`);
+      const data = await jsonOrError(res);
+      return (data?.progress || null) as TopicProgress | null;
+    },
+    enabled: authReady
+  });
+
+  if (!authReady || topicQuery.isLoading || progressQuery.isLoading) return null;
+
+  const topic = topicQuery.data;
   const progress = progressQuery.data;
-  const correct = progress?.correctCount ?? 0;
-  const wrong = progress?.wrongCount ?? 0;
-  const unanswered = progress?.unansweredCount ?? 0;
+  if (!topic || !progress) return null;
 
-  if (!authReady || progressQuery.isLoading) {
-    return <div className="topicProgressEmpty">Yuklanmoqda...</div>;
-  }
+  const totalCount = Array.isArray(topic.questions) ? topic.questions.length : 0;
+  if (!totalCount) return null;
 
-  if (!progressQuery.data || progressQuery.error) {
-    return <div className="topicProgressEmpty">Natija hali yo‘q</div>;
-  }
+  const answeredCount = Object.keys(progress.answers || {}).length;
+  const correctCount = Number(progress.score || 0);
+  const wrongCount = Math.max(0, answeredCount - correctCount);
+  const unansweredCount = Math.max(0, totalCount - answeredCount);
 
   return (
-    <ProgressLineChart
-      correct={correct}
-      wrong={wrong}
-      unanswered={unanswered}
-      title="Mavzu progressi"
-      className="topicProgressChart"
+    <ProgressStatsBlock
+      correct={correctCount}
+      wrong={wrongCount}
+      unanswered={unansweredCount}
+      className="topicProgressStats"
     />
   );
 }

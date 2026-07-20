@@ -4709,61 +4709,77 @@ body {
 
 .ticketTitle {
   font-weight: 900;
-  font-size: 18px;
+  font-size: 22px;
+  line-height: 1.1;
 }
 
 .ticketCardBody {
   width: 100%;
   display: grid;
-  gap: 12px;
+  gap: 6px;
 }
 
-.ticketProgress {
-  display: grid;
-  gap: 6px;
+.ticketCardBody.isEmpty {
+  place-content: center;
+  min-height: 108px;
+  gap: 0;
   justify-items: center;
-  width: 100%;
+  text-align: center;
 }
 
-.ticketProgressItem {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 900;
+.ticketCardBody.isEmpty .ticketTitle {
+  align-self: center;
+}
+
+.ticketMiniCount {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
   line-height: 1;
-  letter-spacing: 0.02em;
-  border: 1px solid var(--border);
-  background: var(--panel2);
-  max-width: 100%;
 }
 
-.ticketProgressItem.good {
-  border-color: color-mix(in srgb, var(--ok) 42%, var(--border));
-  background: color-mix(in srgb, var(--ok) 16%, var(--panel2));
+.ticketMiniStats {
+  display: grid;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
-.ticketProgressItem.bad {
-  border-color: color-mix(in srgb, var(--bad) 42%, var(--border));
-  background: color-mix(in srgb, var(--bad) 14%, var(--panel2));
+.ticketMiniStat.good {
+  color: var(--ok);
 }
 
-.ticketProgressItem.mutedItem {
+.ticketMiniStat.bad {
+  color: var(--bad);
+}
+
+.ticketMiniStat.muted {
   color: var(--muted);
 }
 
-.ticketProgressEmpty {
-  min-height: 76px;
+.progressStatsBlock {
   display: grid;
-  place-items: center;
+  gap: 6px;
+  margin-top: 2px;
 }
 
-.ticketProgressChart,
-.topicProgressChart {
-  width: 100%;
+.progressStatsItem {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.progressStatsItem.good {
+  color: var(--ok);
+}
+
+.progressStatsItem.bad {
+  color: var(--bad);
+}
+
+.progressStatsItem.muted {
+  color: var(--muted);
 }
 
 .progressLineCard {
@@ -4806,11 +4822,40 @@ body {
 }
 
 .progressLineChartArea {
-  min-height: 72px;
+  display: grid;
+  align-items: center;
+  min-height: 34px;
+}
+
+.progressLineTrack {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 18%, var(--panel2));
+  overflow: hidden;
+}
+
+.progressLineFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 72%, var(--ok)));
+}
+
+.progressLineMarker {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: var(--panel);
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent);
 }
 
 .progressLineEmpty {
-  min-height: 72px;
+  min-height: 34px;
   display: grid;
   place-items: center;
   color: var(--muted);

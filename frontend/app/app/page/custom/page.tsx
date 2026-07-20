@@ -5,10 +5,14 @@ import { ArrowLeft, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useAuth } from "@/app/auth-provider";
+import { jsonOrError } from "@/lib/api-authed";
 import { fetchCustomTests } from "../custom-data";
+import ProgressStatsBlock from "@/app/ui/progress-stats-block";
 
 export default function CustomTestsPage() {
   const router = useRouter();
+  const { authFetch, authReady } = useAuth();
   const customTestsQuery = useQuery({
     queryKey: ["custom-tests"],
     queryFn: fetchCustomTests
@@ -48,10 +52,65 @@ export default function CustomTestsPage() {
             </span>
             <div className="topicNameRow">
               <div className="topicName">{customTest.title}</div>
+              <CustomProgressPreview
+                testId={customTest.id}
+                questionsCount={customTest.questionsCount || 0}
+                authFetch={authFetch}
+                authReady={authReady}
+              />
             </div>
           </button>
         ))}
       </div>
     </section>
+  );
+}
+
+type CustomProgress = {
+  answers?: Record<string, number>;
+  score?: number;
+  completed?: boolean;
+};
+
+type AuthFetch = ReturnType<typeof useAuth>["authFetch"];
+
+function CustomProgressPreview({
+  testId,
+  questionsCount,
+  authFetch,
+  authReady
+}: {
+  testId: number;
+  questionsCount: number;
+  authFetch: AuthFetch;
+  authReady: boolean;
+}) {
+  const progressQuery = useQuery({
+    queryKey: ["custom-test-progress", testId],
+    queryFn: async () => {
+      const res = await authFetch(`/api/custom-test-progress/${encodeURIComponent(String(testId))}`);
+      const data = await jsonOrError(res);
+      return (data?.progress || null) as CustomProgress | null;
+    },
+    enabled: authReady
+  });
+
+  if (!authReady || progressQuery.isLoading) return null;
+
+  const progress = progressQuery.data;
+  if (!progress || !questionsCount) return null;
+
+  const answeredCount = Object.keys(progress.answers || {}).length;
+  const correctCount = Number(progress.score || 0);
+  const wrongCount = Math.max(0, answeredCount - correctCount);
+  const unansweredCount = Math.max(0, questionsCount - answeredCount);
+
+  return (
+    <ProgressStatsBlock
+      correct={correctCount}
+      wrong={wrongCount}
+      unanswered={unansweredCount}
+      className="topicProgressStats"
+    />
   );
 }

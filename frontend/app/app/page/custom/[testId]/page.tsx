@@ -393,6 +393,10 @@ export default function CustomTestPage() {
     { name: "To‘g‘ri", value: correctCount },
     { name: "Noto‘g‘ri", value: Math.max(total - correctCount, 0) }
   ];
+  const closeResult = useCallback(() => {
+    setFinishOpen(false);
+    router.push("/app/page/custom");
+  }, [router]);
 
   const resetMutation = useMutation({
     mutationFn: () => authFetch(`/api/custom-test-progress/${encodeURIComponent(testId)}/reset`, { method: "POST" }).then(jsonOrError),
@@ -592,11 +596,11 @@ export default function CustomTestPage() {
 
       {finishOpen && (
         <>
-          <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
+          <div className="modalOverlay" onClick={closeResult} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">Natija</div>
-              <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-ghost" type="button" onClick={closeResult}>
                 ✕
               </button>
             </div>
@@ -633,7 +637,7 @@ export default function CustomTestPage() {
                   </div>
                 </div>
               </div>
-              <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-primary" type="button" onClick={closeResult}>
                 Yopish
               </button>
             </div>
