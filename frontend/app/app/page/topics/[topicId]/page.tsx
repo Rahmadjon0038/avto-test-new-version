@@ -9,6 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
+import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
@@ -738,6 +739,11 @@ export default function TopicPage() {
     { name: "To‘g‘ri", value: correct },
     { name: "Noto‘g‘ri", value: Math.max(total - correct, 0) }
   ];
+  const closeResult = useCallback(() => {
+    setFinishOpen(false);
+    void qc.invalidateQueries({ queryKey: ["topics"] });
+    router.push("/app/page/topics");
+  }, [qc, router]);
 
   const resetMutation = useMutation({
     mutationFn: () => authFetch(`/api/topic-progress/${encodeURIComponent(topicId)}/reset`, { method: "POST" }).then(jsonOrError),
@@ -764,6 +770,15 @@ export default function TopicPage() {
   }, [refreshShuffleSeed, settings.shuffleQuestions, topic, resetMutation]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
+  useArrowQuestionNavigation({
+    enabled: Boolean(q) && !zoomedImage && !finishOpen,
+    onPrevious: () => {
+      if (idx > 0) setIdx((current) => Math.max(0, current - 1));
+    },
+    onNext: () => {
+      if (idx < total - 1) setIdx((current) => Math.min(total - 1, current + 1));
+    }
+  });
   useTestInteractions({
     enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
     currentIndex: idx,
@@ -1002,11 +1017,11 @@ export default function TopicPage() {
 
       {finishOpen && (
         <>
-          <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
+          <div className="modalOverlay" onClick={closeResult} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">Natija</div>
-              <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-ghost" type="button" onClick={closeResult}>
                 ✕
               </button>
             </div>
@@ -1043,7 +1058,7 @@ export default function TopicPage() {
                   </div>
                 </div>
               </div>
-              <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-primary" type="button" onClick={closeResult}>
                 Yopish
               </button>
             </div>

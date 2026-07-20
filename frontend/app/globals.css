@@ -1330,10 +1330,11 @@ body {
 .topicCard {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  flex-direction: column;
   gap: 12px;
-  padding: 22px 24px;
-  min-height: 96px;
+  padding: 22px 24px 18px;
+  min-height: 168px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--panel);
@@ -1404,7 +1405,7 @@ body {
 }
 
 .topicName {
-  max-width: 75%;
+  max-width: none;
   font-size: 20px;
   font-weight: 1000;
   line-height: 1.2;
@@ -1416,6 +1417,8 @@ body {
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  min-width: 0;
+  margin-top: 22px;
 }
 
 .topicMeta {
@@ -4673,16 +4676,16 @@ body {
 }
 
 .ticketCard {
-  min-height: 90px;
-  padding: 16px 12px;
+  min-height: 172px;
+  padding: 16px 14px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: transform 0.08s ease;
-  text-align: center;
+  text-align: left;
   display: grid;
-  place-items: center;
-  gap: 8px;
+  place-items: stretch;
+  gap: 10px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--panel2) 65%, transparent), var(--panel));
   color: var(--text);
   text-decoration: none;
@@ -4707,6 +4710,12 @@ body {
 .ticketTitle {
   font-weight: 900;
   font-size: 18px;
+}
+
+.ticketCardBody {
+  width: 100%;
+  display: grid;
+  gap: 12px;
 }
 
 .ticketProgress {
@@ -4747,7 +4756,99 @@ body {
 }
 
 .ticketProgressEmpty {
-  min-height: 28px;
+  min-height: 76px;
+  display: grid;
+  place-items: center;
+}
+
+.ticketProgressChart,
+.topicProgressChart {
+  width: 100%;
+}
+
+.progressLineCard {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 12px 10px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel2) 84%, transparent), var(--panel));
+}
+
+.progressLineHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.progressLineValue {
+  font-size: 22px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.progressLineTitle {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.progressLineMeta {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.progressLineChartArea {
+  min-height: 72px;
+}
+
+.progressLineEmpty {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.progressLineLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.progressLineLegendItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.progressLineLegendItem.good {
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--border));
+  background: color-mix(in srgb, var(--ok) 16%, var(--panel2));
+}
+
+.progressLineLegendItem.bad {
+  border-color: color-mix(in srgb, var(--bad) 42%, var(--border));
+  background: color-mix(in srgb, var(--bad) 14%, var(--panel2));
+}
+
+.progressLineLegendItem.muted {
+  color: var(--muted);
 }
 
 .ticketResultStats {

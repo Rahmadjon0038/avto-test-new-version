@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import ProgressLineChart from "@/app/ui/progress-line-chart";
 import type { TopicCard } from "../topics-data";
 
 export default function TopicsPage() {
@@ -92,10 +93,56 @@ export default function TopicsPage() {
             <span className="topicIndex" aria-hidden="true">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <div className="topicName">{topic.title}</div>
+            <div className="topicNameRow">
+              <div className="topicName">{topic.title}</div>
+              <TopicProgressPreview topicId={topic.id} />
+            </div>
           </article>
         ))}
       </div>
     </section>
+  );
+}
+
+type TopicProgress = {
+  correctCount?: number;
+  wrongCount?: number;
+  unansweredCount?: number;
+  totalCount?: number;
+};
+
+function TopicProgressPreview({ topicId }: { topicId: number }) {
+  const { authFetch, authReady } = useAuth();
+
+  const progressQuery = useQuery({
+    queryKey: ["topic-progress", topicId],
+    queryFn: async () => {
+      const res = await authFetch(`/api/topic-progress/${encodeURIComponent(String(topicId))}`);
+      return jsonOrError(res) as TopicProgress;
+    },
+    enabled: authReady
+  });
+
+  const progress = progressQuery.data;
+  const correct = progress?.correctCount ?? 0;
+  const wrong = progress?.wrongCount ?? 0;
+  const unanswered = progress?.unansweredCount ?? 0;
+
+  if (!authReady || progressQuery.isLoading) {
+    return <div className="topicProgressEmpty">Yuklanmoqda...</div>;
+  }
+
+  if (!progressQuery.data || progressQuery.error) {
+    return <div className="topicProgressEmpty">Natija hali yo‘q</div>;
+  }
+
+  return (
+    <ProgressLineChart
+      correct={correct}
+      wrong={wrong}
+      unanswered={unanswered}
+      title="Mavzu progressi"
+      className="topicProgressChart"
+    />
   );
 }

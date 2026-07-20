@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import ProgressLineChart from "@/app/ui/progress-line-chart";
 
 type TicketProgress = {
   ticketId: string;
@@ -64,18 +65,22 @@ export default function TicketsPage() {
             type="button"
             onClick={() => router.push(`/app/ticket/${encodeURIComponent(t.id)}`)}
           >
-            <div className="ticketTitle">{t.title}</div>
-            {t.progress ? (
-              <div className="ticketProgress">
-                <span className="ticketProgressItem good">{t.progress.correctCount} ta to‘g‘ri</span>
-                <span className="ticketProgressItem bad">{t.progress.wrongCount} ta xato</span>
-                <span className="ticketProgressItem mutedItem">{t.progress.unansweredCount} ta belgilanmagan</span>
-              </div>
-            ) : (
-              <div className="ticketProgress ticketProgressEmpty">
-                <span className="ticketProgressItem mutedItem">Natija hali yo‘q</span>
-              </div>
-            )}
+            <div className="ticketCardBody">
+              <div className="ticketTitle">{t.title}</div>
+              {t.progress ? (
+                <ProgressLineChart
+                  correct={t.progress.correctCount}
+                  wrong={t.progress.wrongCount}
+                  unanswered={t.progress.unansweredCount}
+                  title="Bilet progressi"
+                  className="ticketProgressChart"
+                />
+              ) : (
+                <div className="ticketProgress ticketProgressEmpty">
+                  <span className="ticketProgressItem mutedItem">Natija hali yo‘q</span>
+                </div>
+              )}
+            </div>
           </button>
         ))}
       </div>

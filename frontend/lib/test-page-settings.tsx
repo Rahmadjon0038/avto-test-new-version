@@ -200,3 +200,51 @@ export function shuffleQuestionsWithSeed<T extends { id: string }>(questions: T[
   }
   return items;
 }
+
+export function shuffleQuestionOptionsWithSeed<T extends { id: string; options: string[]; correctIndex: number }>(
+  question: T,
+  seedValue: number
+) {
+  if (!Array.isArray(question.options) || question.options.length < 2) {
+    return question;
+  }
+
+  const entries = question.options.map((option, index) => ({ option, index }));
+  const shuffled = shuffleArrayWithSeed(entries, seedValue ^ stableHash(question.id));
+  const options = shuffled.map((entry) => entry.option);
+  const correctIndex = shuffled.findIndex((entry) => entry.index === question.correctIndex);
+
+  return {
+    ...question,
+    options,
+    correctIndex: correctIndex >= 0 ? correctIndex : 0
+  };
+}
+
+function stableHash(value: string) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return hash >>> 0;
+}
+
+function shuffleArrayWithSeed<T>(items: T[], seedValue: number) {
+  const result = [...items];
+  let seed = Number.isFinite(seedValue) && seedValue > 0 ? seedValue >>> 0 : 1;
+  const random = () => {
+    seed = (seed + 0x6d2b79f5) >>> 0;
+    let value = seed;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(random() * (index + 1));
+    [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+  }
+
+  return result;
+}

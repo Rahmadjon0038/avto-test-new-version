@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, TimerReset } fro
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
@@ -232,12 +233,12 @@ export default function ExamPage() {
   const [timerReady, setTimerReady] = useState(false);
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
   const [examBootstrapping, setExamBootstrapping] = useState(false);
+  const [examReady, setExamReady] = useState(false);
   const autoNextTimerRef = useRef<number | null>(null);
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const autoStartRequestedRef = useRef(false);
   const autoSubmittedRef = useRef(false);
-  const activeExamKeyRef = useRef<string | null>(null);
   const latestAnswersRef = useRef<Record<string, number>>({});
   const hasSeenPositiveTimerRef = useRef(false);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
@@ -255,7 +256,7 @@ export default function ExamPage() {
     if (examQuery.error) toast.error(uzErrorMessage(examQuery.error, "Imtihon ma'lumotlari yuklanmadi"));
   }, [examQuery.error]);
 
-  const exam = examQuery.data || null;
+  const exam = examReady ? examQuery.data || null : null;
   const questions = useMemo(
     () => (exam?.questions ? (settings.shuffleQuestions ? shuffleQuestionsWithSeed(exam.questions, shuffleSeed) : exam.questions) : []),
     [exam?.questions, settings.shuffleQuestions, shuffleSeed]
@@ -288,27 +289,15 @@ export default function ExamPage() {
   useEffect(() => {
     if (!exam) return;
     setExamBootstrapping(false);
+    setExamReady(true);
     setAutoStartAttempted(true);
-    const nextExamKey = `${exam.startedAt}::${exam.examCount}`;
-    const isNewSession = activeExamKeyRef.current !== nextExamKey;
-    activeExamKeyRef.current = nextExamKey;
     latestAnswersRef.current = exam.answers || {};
     hasSeenPositiveTimerRef.current = Number(exam.remainingSeconds || 0) > 0;
     setAnswers(exam.answers || {});
     setSecondsLeft(Number(exam.remainingSeconds || 0));
     setTimerReady(true);
     autoSubmittedRef.current = false;
-    if (typeof window !== "undefined") {
-      const savedIndexRaw = window.localStorage.getItem(`exam:index:${nextExamKey}`);
-      const savedIndex = savedIndexRaw === null ? 0 : Number(savedIndexRaw);
-      if (Number.isFinite(savedIndex)) {
-        setIdx(Math.max(0, Math.min(savedIndex, Math.max(0, questions.length - 1))));
-      } else {
-        setIdx(0);
-      }
-    } else if (isNewSession) {
-      setIdx(0);
-    }
+    setIdx((current) => Math.min(current, Math.max(0, questions.length - 1)));
   }, [exam?.updatedAt, exam?.startedAt, exam?.examCount, questions.length]);
 
   function scheduleAutoNext(nextIndex: number) {
@@ -405,6 +394,7 @@ export default function ExamPage() {
         await qc.invalidateQueries({ queryKey: ["exam"] });
         await examQuery.refetch();
       }
+      setExamReady(true);
       setIdx(0);
       setFinalResult(null);
       setFinishOpen(false);
@@ -460,6 +450,13 @@ export default function ExamPage() {
   const handleNextQuestion = useCallback(() => {
     setIdx((current) => Math.min(questions.length - 1, current + 1));
   }, [questions.length]);
+
+  useArrowQuestionNavigation({
+    enabled: Boolean(currentQuestion) && !zoomedImage && !finishOpen && !locked,
+    onPrevious: handlePreviousQuestion,
+    onNext: handleNextQuestion
+  });
+
   const handleTouchStart = useCallback((event: TouchEvent<HTMLElement>) => {
     const touch = event.touches[0];
     if (!touch) return;
@@ -499,6 +496,7 @@ export default function ExamPage() {
     mutationFn: () => authFetch("/api/exam/reset", { method: "POST" }).then(jsonOrError),
     onMutate: async () => {
       setExamBootstrapping(true);
+      setExamReady(false);
       setFinishOpen(false);
       setFinalResult(null);
       setAnswers({});
@@ -506,8 +504,10 @@ export default function ExamPage() {
       setIdx(0);
       setSecondsLeft(0);
       setAutoStartAttempted(true);
-      activeExamKeyRef.current = null;
       hasSeenPositiveTimerRef.current = false;
+      setTimerReady(false);
+      void qc.cancelQueries({ queryKey: ["exam"] });
+      qc.setQueryData(["exam"], null);
       await qc.invalidateQueries({ queryKey: ["exam"] });
     },
     onError: () => {
@@ -528,24 +528,23 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (!authReady) return;
-    if (!examQuery.isFetched) return;
     if (autoStartAttempted || autoStartRequestedRef.current) return;
     autoStartRequestedRef.current = true;
     setExamBootstrapping(true);
+    setExamReady(false);
     setAutoStartAttempted(true);
     setFinishOpen(false);
     setFinalResult(null);
     setAnswers({});
     latestAnswersRef.current = {};
     setIdx(0);
+    setSecondsLeft(0);
+    setTimerReady(false);
+    hasSeenPositiveTimerRef.current = false;
+    void qc.cancelQueries({ queryKey: ["exam"] });
+    qc.setQueryData(["exam"], null);
     startMutation.mutate(20);
-  }, [authReady, examQuery.isFetched, autoStartAttempted, startMutation]);
-
-  useEffect(() => {
-    if (!exam || !exam.startedAt || locked) return;
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(`exam:index:${exam.startedAt}::${exam.examCount}`, String(idx));
-  }, [exam, idx, locked]);
+  }, [authReady, autoStartAttempted, qc, startMutation]);
 
   const showExamLoading =
     !exam &&

@@ -9,7 +9,14 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
-import { TestPageSettingsButton, useTestPageSettings } from "@/lib/test-page-settings";
+import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
+import {
+  TestPageSettingsButton,
+  shuffleQuestionOptionsWithSeed,
+  shuffleQuestionsWithSeed,
+  useShuffleSeed,
+  useTestPageSettings
+} from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type Question = {
@@ -265,11 +272,13 @@ export default function TicketPage() {
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const { settings, patchSettings } = useTestPageSettings();
+  const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
-      patchSettings({ ...next, shuffleQuestions: false });
+      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
+      patchSettings(next);
     },
-    [patchSettings]
+    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
   );
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -282,7 +291,20 @@ export default function TicketPage() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const autoResetRef = useRef(false);
   const ticketQuestions = useMemo(() => (ticket && Array.isArray(ticket.questions) ? ticket.questions : []), [ticket]);
-  const q = useMemo(() => ticketQuestions[idx] ?? null, [ticketQuestions, idx]);
+  const displayQuestions = useMemo(() => {
+    if (!ticketQuestions.length) return ticketQuestions;
+    if (!settings.shuffleQuestions) return ticketQuestions;
+
+    const filledQuestions = ticketQuestions.filter((question): question is Question => Boolean(question));
+    const shuffledQuestions = shuffleQuestionsWithSeed(filledQuestions, shuffleSeed).map((question) =>
+      shuffleQuestionOptionsWithSeed(question, shuffleSeed)
+    );
+
+    let cursor = 0;
+    return ticketQuestions.map((question) => (question ? shuffledQuestions[cursor++] : null));
+  }, [settings.shuffleQuestions, shuffleSeed, ticketQuestions]);
+
+  const q = useMemo(() => displayQuestions[idx] ?? null, [displayQuestions, idx]);
 
   const ticketQuery = useQuery({
     queryKey: ["ticket", ticketId],
@@ -365,7 +387,7 @@ export default function TicketPage() {
   }, []);
 
   const total = ticketQuestions.length;
-  const answeredQuestions = ticketQuestions.filter(Boolean);
+  const answeredQuestions = displayQuestions.filter(Boolean);
   const answered = Object.keys(answers).length;
   const correctCount = answeredQuestions.filter(
     (question) => question && answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
@@ -406,6 +428,15 @@ export default function TicketPage() {
   }, [ticket, resetMutation]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
+  useArrowQuestionNavigation({
+    enabled: Boolean(q) && !zoomedImage && !finishOpen,
+    onPrevious: () => {
+      if (idx > 0) setIdx((current) => Math.max(0, current - 1));
+    },
+    onNext: () => {
+      if (idx < total - 1) setIdx((current) => Math.min(total - 1, current + 1));
+    }
+  });
   useTestInteractions({
     enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
     currentIndex: idx,
@@ -456,8 +487,8 @@ export default function TicketPage() {
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
-              {q?.options.length ? (
-                q.options.map((opt, oi) => {
+                {q?.options.length ? (
+                  q.options.map((opt, oi) => {
                   const selected = answers[q.id];
                   const hasAnswered = selected !== undefined;
                   const correct = oi === q.correctIndex;

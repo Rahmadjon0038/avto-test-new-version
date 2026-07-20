@@ -9,6 +9,7 @@ import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
+import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
@@ -418,6 +419,15 @@ export default function CustomTestPage() {
   }, [customTest, refreshShuffleSeed, resetMutation, settings.shuffleQuestions]);
 
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
+  useArrowQuestionNavigation({
+    enabled: Boolean(q) && !zoomedImage && !finishOpen,
+    onPrevious: () => {
+      if (idx > 0) setIdx((current) => Math.max(0, current - 1));
+    },
+    onNext: () => {
+      if (idx < total - 1) setIdx((current) => Math.min(total - 1, current + 1));
+    }
+  });
   useTestInteractions({
     enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
     currentIndex: idx,

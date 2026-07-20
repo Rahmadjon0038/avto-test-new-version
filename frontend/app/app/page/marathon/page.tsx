@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, Flame } from "lu
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type AnswerQuestion = {
@@ -160,6 +161,15 @@ export default function MarathonPage() {
   }, [currentQuestion?.id, currentQuestion?.image]);
 
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
+  useArrowQuestionNavigation({
+    enabled: Boolean(currentQuestion) && !zoomedImage && !finishOpen,
+    onPrevious: () => {
+      if (currentIndex > 0) setCurrentIndex((current) => Math.max(0, current - 1));
+    },
+    onNext: () => {
+      if (currentIndex < total - 1) setCurrentIndex((current) => Math.min(total - 1, current + 1));
+    }
+  });
 
   async function ensureNextQuestionLoaded() {
     if (nextBankIndex < bank.length) return bank[nextBankIndex];
