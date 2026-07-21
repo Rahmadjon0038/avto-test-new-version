@@ -154,6 +154,7 @@ async function initDb(dbApi) {
     CREATE TABLE IF NOT EXISTS tickets (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
+      title_i18n JSONB NOT NULL DEFAULT '{}'::jsonb,
       ticket_number INTEGER NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'COMPLETED',
       questions JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -163,6 +164,7 @@ async function initDb(dbApi) {
   `);
   await dbApi.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS ticket_number INTEGER NOT NULL DEFAULT 0;`);
   await dbApi.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'COMPLETED';`);
+  await dbApi.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS title_i18n JSONB NOT NULL DEFAULT '{}'::jsonb;`);
   await dbApi.run(`ALTER TABLE tickets ADD CONSTRAINT tickets_status_check CHECK (status IN ('DRAFT', 'COMPLETED'));`).catch(() => {});
   await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS tickets_ticket_number_unique_idx ON tickets (ticket_number);`).catch(() => {});
   await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS tickets_draft_unique_idx ON tickets ((status)) WHERE status = 'DRAFT';`).catch(() => {});
@@ -191,6 +193,7 @@ async function initDb(dbApi) {
       id BIGSERIAL PRIMARY KEY,
       slug TEXT UNIQUE NOT NULL,
       title TEXT NOT NULL,
+      title_i18n JSONB NOT NULL DEFAULT '{}'::jsonb,
       questions JSONB NOT NULL DEFAULT '[]'::jsonb,
       admin_marked BOOLEAN NOT NULL DEFAULT FALSE,
       description TEXT NOT NULL DEFAULT '',
@@ -201,6 +204,7 @@ async function initDb(dbApi) {
     );
   `);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS slug TEXT;`);
+  await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS title_i18n JSONB NOT NULL DEFAULT '{}'::jsonb;`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS questions JSONB NOT NULL DEFAULT '[]'::jsonb;`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS admin_marked BOOLEAN NOT NULL DEFAULT FALSE;`);
   await dbApi.run(`ALTER TABLE topics ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';`);

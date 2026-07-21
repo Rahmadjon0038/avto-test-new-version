@@ -80,6 +80,7 @@ function normalizeTicketRow(row) {
   return {
     id: String(row.id),
     title: String(row.title || ""),
+    titleI18n: normalizeTitleI18n(row.title_i18n, row.title),
     ticketNumber: Number(row.ticket_number || 0),
     status: normalizeTicketStatus(row.status),
     questions: parseQuestionsValue(row.questions),
@@ -113,6 +114,110 @@ function parseJsonValue(value, fallback) {
   return fallback;
 }
 
+const SUPPORTED_LANGUAGES = ["uz_latn", "uz_cyrl", "ru"];
+const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES);
+const DEFAULT_LANGUAGE = "uz_latn";
+
+function normalizeLanguageCode(value, fallback = DEFAULT_LANGUAGE) {
+  const raw = String(value || "").trim().toLowerCase().replace(/-/g, "_");
+  if (!raw) return fallback;
+  return SUPPORTED_LANGUAGE_SET.has(raw) ? raw : fallback;
+}
+
+function normalizeTitleI18n(value, fallbackTitle = "") {
+  const source = parseJsonValue(value, {});
+  const normalized = {};
+  for (const lang of SUPPORTED_LANGUAGES) {
+    const raw = source?.[lang];
+    const text =
+      typeof raw === "string"
+        ? raw
+        : String(raw?.text || raw?.title || raw?.value || "").trim();
+    if (text) normalized[lang] = text;
+  }
+  if (!Object.keys(normalized).length) {
+    const fallback = String(fallbackTitle || "").trim();
+    if (fallback) normalized[DEFAULT_LANGUAGE] = fallback;
+  }
+  return normalized;
+}
+
+function normalizeQuestionI18n(value, baseQuestion = null) {
+  const source = parseJsonValue(value, {});
+  const normalized = {};
+  for (const lang of SUPPORTED_LANGUAGES) {
+    const raw = source?.[lang];
+    if (!raw || typeof raw !== "object") continue;
+    const options = Array.isArray(raw.options) ? raw.options.map((option) => String(option || "").trim()) : [];
+    const text = String(raw.text || "").trim();
+    const image = String(raw.image || "").trim();
+    const audio = String(raw.audio || "").trim();
+    const explanation = String(raw.explanation || "").trim();
+    const correctIndex = Number.isFinite(Number(raw.correctIndex))
+      ? Number(raw.correctIndex)
+      : Number(baseQuestion?.correctIndex || 0);
+    const hasContent = Boolean(text || image || audio || explanation || options.some(Boolean) || Number.isFinite(Number(raw.correctIndex)));
+    if (!hasContent) continue;
+    normalized[lang] = {
+      text,
+      image,
+      audio,
+      options,
+      correctIndex,
+      explanation
+    };
+  }
+  return normalized;
+}
+
+function hasQuestionI18n(value) {
+  return Object.keys(parseJsonValue(value, {})).some((lang) => SUPPORTED_LANGUAGE_SET.has(String(lang || "").trim().toLowerCase().replace(/-/g, "_")));
+}
+
+function localizeQuestion(question, lang) {
+  const normalizedLang = normalizeLanguageCode(lang, "");
+  if (!normalizedLang || !question || typeof question !== "object") return question;
+  const localized = parseJsonValue(question.i18n, {})?.[normalizedLang];
+  if (!localized || typeof localized !== "object") return question;
+
+  const next = { ...question };
+  if (localized.text !== undefined && String(localized.text).trim()) next.text = String(localized.text);
+  if (localized.image !== undefined) next.image = String(localized.image || "");
+  if (localized.audio !== undefined) next.audio = String(localized.audio || "");
+  if (Array.isArray(localized.options) && localized.options.length) {
+    next.options = localized.options.map((option) => String(option || "").trim());
+  }
+  if (localized.explanation !== undefined) next.explanation = String(localized.explanation || "");
+  if (Number.isFinite(Number(localized.correctIndex))) next.correctIndex = Number(localized.correctIndex);
+  return next;
+}
+
+function localizeQuestions(questions, lang) {
+  return Array.isArray(questions) ? questions.map((question) => (question ? localizeQuestion(question, lang) : question)) : [];
+}
+
+function localizeTopic(topic, lang) {
+  const normalizedLang = normalizeLanguageCode(lang, "");
+  if (!normalizedLang || !topic || typeof topic !== "object") return topic;
+  const title = String(topic.title_i18n?.[normalizedLang] || "").trim();
+  return {
+    ...topic,
+    title: title || topic.title,
+    questions: localizeQuestions(topic.questions, normalizedLang)
+  };
+}
+
+function localizeTicket(ticket, lang) {
+  const normalizedLang = normalizeLanguageCode(lang, "");
+  if (!normalizedLang || !ticket || typeof ticket !== "object") return ticket;
+  const title = String(ticket.title_i18n?.[normalizedLang] || "").trim();
+  return {
+    ...ticket,
+    title: title || ticket.title,
+    questions: localizeQuestions(ticket.questions, normalizedLang)
+  };
+}
+
 function normalizeQuestions(value) {
   const questions = parseQuestionsValue(value);
   return questions
@@ -123,15 +228,17 @@ function normalizeQuestions(value) {
       text: String(question?.text || ""),
       options: Array.isArray(question?.options) ? question.options.map((option) => String(option || "").trim()) : [],
       correctIndex: Number.isFinite(Number(question?.correctIndex)) ? Number(question.correctIndex) : 0,
-      explanation: String(question?.explanation || "")
+      explanation: String(question?.explanation || ""),
+      i18n: normalizeQuestionI18n(question?.i18n, question)
     }))
-    .filter((question) => question.text || question.options.some(Boolean));
+    .filter((question) => question.text || question.options.some(Boolean) || Object.keys(question.i18n || {}).length > 0);
 }
 
 function normalizeTicket(row) {
   return {
     id: String(row.id),
     title: String(row.title || ""),
+    titleI18n: normalizeTitleI18n(row.title_i18n, row.title),
     questions: normalizeQuestions(row.questions),
     created_at: row.created_at ? String(row.created_at) : undefined,
     updated_at: row.updated_at ? String(row.updated_at) : undefined
@@ -160,7 +267,8 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0) {
   const audio = String(question.audio || "").trim();
   const explanation = String(question.explanation || "").trim();
   const options = Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [];
-  const hasContent = Boolean(text || image || audio || explanation || options.some(Boolean));
+  const i18n = normalizeQuestionI18n(question.i18n, question);
+  const hasContent = Boolean(text || image || audio || explanation || options.some(Boolean) || Object.keys(i18n || {}).length > 0);
   if (!hasContent && !String(question.id || question.questionId || "").trim()) return null;
   return {
     id: String(question.id || question.questionId || `slot-${fallbackOrder}`),
@@ -175,7 +283,8 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0) {
     audio,
     options,
     correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
-    explanation
+    explanation,
+    i18n
   };
 }
 
@@ -238,7 +347,7 @@ async function getTicketQuestionsFromDb(ticketId) {
 }
 
 async function refreshTicketQuestionsMirror(ticketId) {
-  const ticket = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
+  const ticket = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!ticket) return null;
   const slots = normalizeTicketSlotQuestions(ticket.questions);
   const questionRows = await getTicketQuestionsFromDb(ticketId);
@@ -256,7 +365,7 @@ async function refreshTicketQuestionsMirror(ticketId) {
 }
 
 async function getTicketFromDb(ticketId) {
-  const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
+  const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
   const rawQuestions = normalizeTicketSlotQuestions(row.questions);
@@ -273,7 +382,7 @@ async function getTicketFromDb(ticketId) {
 }
 
 async function getTicketBuilderFromDb(ticketId) {
-  const row = await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
+  const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
   const rawSlots = normalizeTicketSlotQuestions(row.questions);
@@ -323,7 +432,7 @@ async function persistTicketSlotQuestions(ticketId, slots) {
 
 async function getTicketsFromDb() {
   const rows = await dbApi.all(
-    "SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'COMPLETED' ORDER BY ticket_number ASC, created_at ASC, id ASC"
+    "SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'COMPLETED' ORDER BY ticket_number ASC, created_at ASC, id ASC"
   );
   const tickets = [];
   for (const row of rows) {
@@ -435,7 +544,8 @@ async function ensureDraftTicketNumber(draftId) {
 }
 
 async function createTicket(input) {
-  const title = String(input.title || "").trim();
+  const titleI18n = normalizeTitleI18n(input.titleI18n || input.title_i18n || {}, input.title || "");
+  const title = String(input.title || titleI18n[DEFAULT_LANGUAGE] || "").trim();
   const ticketNumber = Number.isFinite(Number(input.ticketNumber)) ? Number(input.ticketNumber) : await getNextTicketNumber();
   const ticketId = String(input.id || ticketNumber);
   const status = normalizeTicketStatus(input.status || "COMPLETED");
@@ -443,11 +553,11 @@ async function createTicket(input) {
 
   const result = await dbApi.get(
     `
-      INSERT INTO tickets (id, title, ticket_number, status, questions, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?::jsonb, NOW(), NOW())
-      RETURNING id, title, ticket_number, status, questions, created_at, updated_at
+      INSERT INTO tickets (id, title, title_i18n, ticket_number, status, questions, created_at, updated_at)
+      VALUES (?, ?, ?::jsonb, ?, ?, ?::jsonb, NOW(), NOW())
+      RETURNING id, title, title_i18n, ticket_number, status, questions, created_at, updated_at
     `,
-    [ticketId, title || makeTicketTitle(ticketNumber), ticketNumber, status, JSON.stringify(questions)]
+    [ticketId, title || makeTicketTitle(ticketNumber), JSON.stringify(titleI18n), ticketNumber, status, JSON.stringify(questions)]
   );
 
   await syncTicketQuestionsFromSlots(ticketId, questions);
@@ -470,10 +580,12 @@ async function replaceTicketQuestions(ticketId, questions) {
 }
 
 async function updateTicket(id, input) {
-  const ticket = await dbApi.get("SELECT id, title, ticket_number, status, questions FROM tickets WHERE id = ?", [String(id)]);
+  const ticket = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions FROM tickets WHERE id = ?", [String(id)]);
   if (!ticket) throw new Error("Bilet topilmadi");
 
-  const title = input.title !== undefined ? String(input.title || "").trim() : String(ticket.title || "").trim();
+  const titleI18n = normalizeTitleI18n(input.titleI18n || input.title_i18n || ticket.title_i18n || {}, input.title !== undefined ? input.title : ticket.title);
+  const title =
+    input.title !== undefined ? String(input.title || "").trim() : String(titleI18n[DEFAULT_LANGUAGE] || ticket.title || "").trim();
   if (!title) throw new Error("Bilet nomi kiritilishi kerak");
 
   const status = input.status !== undefined ? normalizeTicketStatus(input.status) : normalizeTicketStatus(ticket.status);
@@ -482,11 +594,11 @@ async function updateTicket(id, input) {
   const result = await dbApi.get(
     `
       UPDATE tickets
-      SET title = ?, status = ?, questions = ?::jsonb, updated_at = NOW()
+      SET title = ?, title_i18n = ?::jsonb, status = ?, questions = ?::jsonb, updated_at = NOW()
       WHERE id = ?
-      RETURNING id, title, ticket_number, status, questions, created_at, updated_at
+      RETURNING id, title, title_i18n, ticket_number, status, questions, created_at, updated_at
     `,
-    [title, status, JSON.stringify(questions), String(id)]
+    [title, JSON.stringify(titleI18n), status, JSON.stringify(questions), String(id)]
   );
 
   if (input.questions !== undefined) {
@@ -504,8 +616,8 @@ async function deleteTicket(id) {
 
 async function getDraftTicketFromDb(ticketId = null) {
   const row = ticketId
-    ? await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)])
-    : await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'DRAFT' ORDER BY created_at ASC, id ASC LIMIT 1");
+    ? await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)])
+    : await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'DRAFT' ORDER BY created_at ASC, id ASC LIMIT 1");
   if (!row) return null;
   const ticket = await getTicketFromDb(row.id);
   return ticket && ticket.status === "DRAFT" ? ticket : null;
@@ -513,8 +625,8 @@ async function getDraftTicketFromDb(ticketId = null) {
 
 async function getDraftTicketBuilderFromDb(ticketId = null) {
   const row = ticketId
-    ? await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)])
-    : await dbApi.get("SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'DRAFT' ORDER BY created_at ASC, id ASC LIMIT 1");
+    ? await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)])
+    : await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'DRAFT' ORDER BY created_at ASC, id ASC LIMIT 1");
   if (!row) return null;
   const ticket = await getTicketBuilderFromDb(row.id);
   return ticket && ticket.status === "DRAFT" ? ticket : null;
@@ -566,6 +678,7 @@ function normalizeTopicRow(row) {
     id: Number(row.id),
     slug: String(row.slug || ""),
     title: String(row.title || ""),
+    titleI18n: normalizeTitleI18n(row.title_i18n, row.title),
     questions: parseQuestionsValue(row.questions),
     adminMarked: row.admin_marked === true
   };
@@ -573,11 +686,17 @@ function normalizeTopicRow(row) {
 
 function normalizeTopicInput(input = {}, fallbackTitle = "", current = null) {
   const source = typeof input === "string" ? { title: input } : input || {};
-  const titleSource = source.title !== undefined ? source.title : current?.title || fallbackTitle;
+  const titleI18n = normalizeTitleI18n(
+    source.titleI18n || source.title_i18n || current?.titleI18n || current?.title_i18n || {},
+    source.title || current?.title || fallbackTitle
+  );
+  const titleSource =
+    source.title !== undefined ? source.title : titleI18n[DEFAULT_LANGUAGE] || current?.title || fallbackTitle;
   const title = String(titleSource || "").trim();
   if (!title) throw new Error("Mavzu nomi kiritilishi kerak");
   return {
     title,
+    titleI18n,
     slug: String(source.slug || current?.slug || "").trim() || slugifyTopic(title),
     adminMarked: source.adminMarked !== undefined ? Boolean(source.adminMarked) : Boolean(current?.adminMarked || false),
     questions:
@@ -592,7 +711,8 @@ function normalizeTopicInput(input = {}, fallbackTitle = "", current = null) {
 function normalizeImportedTopicQuestion(input = {}, index = 0) {
   const source = input && typeof input === "object" ? input : {};
   const text = String(source.text || "").trim();
-  if (!text) throw new Error(`Savol ${index + 1}: matn kiritilishi kerak`);
+  const i18n = normalizeQuestionI18n(source.i18n, source);
+  if (!text && !Object.keys(i18n || {}).length) throw new Error(`Savol ${index + 1}: matn yoki tarjima kiritilishi kerak`);
 
   const image = String(source.image || "").trim();
   const audio = String(source.audio || "").trim();
@@ -613,19 +733,20 @@ function normalizeImportedTopicQuestion(input = {}, index = 0) {
     text,
     options,
     correctIndex,
-    explanation
+    explanation,
+    i18n
   };
 }
 
 async function getTopicsFromDb() {
-  const rows = await dbApi.all("SELECT id, slug, title, questions, admin_marked FROM topics ORDER BY id ASC");
+  const rows = await dbApi.all("SELECT id, slug, title, title_i18n, questions, admin_marked FROM topics ORDER BY id ASC");
   return rows.map(normalizeTopicRow);
 }
 
 async function getTopicFromDb(topicId) {
   const key = String(topicId || "").trim();
   if (!key) return null;
-  const row = await dbApi.get("SELECT id, slug, title, questions, admin_marked FROM topics WHERE CAST(id AS TEXT) = ? OR slug = ? LIMIT 1", [key, key]);
+  const row = await dbApi.get("SELECT id, slug, title, title_i18n, questions, admin_marked FROM topics WHERE CAST(id AS TEXT) = ? OR slug = ? LIMIT 1", [key, key]);
   return row ? normalizeTopicRow(row) : null;
 }
 
@@ -633,7 +754,7 @@ const BUNNY_LIBRARY_ID = String(process.env.BUNNY_LIBRARY_ID || "").trim();
 const BUNNY_CDN_HOSTNAME = String(process.env.BUNNY_CDN_HOSTNAME || "").trim();
 const BUNNY_API_KEY = String(process.env.BUNNY_API_KEY || "").trim();
 const BUNNY_API_BASE_URL = String(process.env.BUNNY_API_BASE_URL || "https://video.bunnycdn.com").replace(/\/+$/, "");
-const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || "https://api.topshirdi.uz").replace(/\/+$/, "");
+const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || "http://127.0.0.1:4001").replace(/\/+$/, "");
 
 function normalizeVideoStatus(value, fallback = "processing") {
   const raw = String(value || fallback || "").trim().toLowerCase();
@@ -1170,7 +1291,8 @@ function normalizeTopicQuestionSnapshot(topic, question, questionIndex) {
     text: String(normalized.text || ""),
     options: Array.isArray(normalized.options) ? normalized.options.map((option) => String(option || "")) : [],
     correctIndex: Number.isFinite(Number(normalized.correctIndex)) ? Number(normalized.correctIndex) : 0,
-    explanation: String(normalized.explanation || "")
+    explanation: String(normalized.explanation || ""),
+    i18n: normalizeQuestionI18n(normalized.i18n, normalized)
   };
 }
 
@@ -1354,11 +1476,11 @@ async function createTopic(input) {
   const slug = await ensureUniqueTopicSlug(next.slug);
   const result = await dbApi.get(
     `
-      INSERT INTO topics (slug, title, questions, admin_marked, created_at, updated_at)
-      VALUES (?, ?, ?::jsonb, ?, NOW(), NOW())
+      INSERT INTO topics (slug, title, title_i18n, questions, admin_marked, created_at, updated_at)
+      VALUES (?, ?, ?::jsonb, ?::jsonb, ?, NOW(), NOW())
       RETURNING *
     `,
-    [slug, next.title, JSON.stringify(next.questions), next.adminMarked]
+    [slug, next.title, JSON.stringify(next.titleI18n), JSON.stringify(next.questions), next.adminMarked]
   );
   await syncTopicQuestionBankFromTopics();
   return normalizeTopicRow(result);
@@ -1372,11 +1494,11 @@ async function updateTopic(topicId, input) {
   const result = await dbApi.get(
     `
       UPDATE topics
-      SET slug = ?, title = ?, questions = ?::jsonb, admin_marked = ?, updated_at = NOW()
+      SET slug = ?, title = ?, title_i18n = ?::jsonb, questions = ?::jsonb, admin_marked = ?, updated_at = NOW()
       WHERE id = ?
       RETURNING *
     `,
-    [slug, next.title, JSON.stringify(next.questions), next.adminMarked, current.id]
+    [slug, next.title, JSON.stringify(next.titleI18n), JSON.stringify(next.questions), next.adminMarked, current.id]
   );
   await syncTopicQuestionBankFromTopics();
   return normalizeTopicRow(result);
@@ -1418,11 +1540,11 @@ async function importTopics(topicItems) {
     const item = topicItems[index];
     const existingInput = typeof item === "string" ? { title: item } : item || {};
       const existingBySlug = String(existingInput.slug || "").trim()
-      ? await dbApi.get("SELECT id, slug, title, questions, admin_marked FROM topics WHERE slug = ?", [String(existingInput.slug).trim()])
+      ? await dbApi.get("SELECT id, slug, title, title_i18n, questions, admin_marked FROM topics WHERE slug = ?", [String(existingInput.slug).trim()])
       : null;
     const next = normalizeTopicInput(existingInput, existingInput.title || `Mavzu ${index + 1}`, existingBySlug ? normalizeTopicRow(existingBySlug) : null);
     const slug = existingBySlug ? String(existingBySlug.slug) : await ensureUniqueTopicSlug(next.slug);
-    const existing = await dbApi.get("SELECT id, slug, title, questions, admin_marked FROM topics WHERE slug = ?", [slug]);
+    const existing = await dbApi.get("SELECT id, slug, title, title_i18n, questions, admin_marked FROM topics WHERE slug = ?", [slug]);
     if (existing) {
       const updated = await dbApi.get(
         `
@@ -3119,7 +3241,8 @@ function normalizeAnswerQuestion(question) {
     correctIndex,
     correctAnswer: options[correctIndex] || "",
     explanation: String(question?.explanation || ""),
-    hasImage: Boolean(String(question?.image || "").trim())
+    hasImage: Boolean(String(question?.image || "").trim()),
+    i18n: normalizeQuestionI18n(question?.i18n, question)
   };
 }
 
@@ -3749,6 +3872,7 @@ app.get("/api/me", requireUser, async (req, res) => {
 
 app.get("/api/topics", async (req, res) => {
   const user = await getUserFromAccess(req);
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const topics = await getTopicsFromDb();
   let completedMap = new Map();
   if (user) {
@@ -3758,7 +3882,7 @@ app.get("/api/topics", async (req, res) => {
   res.json({
     topics: topics.map((topic) => ({
       id: topic.id,
-      title: topic.title,
+      title: lang ? String(topic.titleI18n?.[lang] || topic.title || "") : topic.title,
       completed: completedMap.get(String(topic.id)) || false
     }))
   });
@@ -3767,7 +3891,8 @@ app.get("/api/topics", async (req, res) => {
 app.get("/api/topics/:topicId", async (req, res) => {
   const topic = await getTopicFromDb(String(req.params.topicId));
   if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
-  res.json({ topic });
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  res.json({ topic: lang ? localizeTopic(topic, lang) : topic });
 });
 
 // --- Ochiq (login talab qilmaydigan) bepul kontent — SEO uchun ---
@@ -3777,13 +3902,14 @@ app.get("/api/topics/:topicId", async (req, res) => {
 const FREE_TOPIC_COUNT = 1;
 const FREE_TICKET_COUNT = 2;
 
-app.get("/api/public/topics", async (_req, res) => {
+app.get("/api/public/topics", async (req, res) => {
   const topics = await getTopicsFromDb();
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   res.json({
     topics: topics.map((topic, index) => ({
       id: topic.id,
       slug: topic.slug,
-      title: topic.title,
+      title: lang ? String(topic.titleI18n?.[lang] || topic.title || "") : topic.title,
       free: index < FREE_TOPIC_COUNT,
       questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0
     }))
@@ -3799,22 +3925,25 @@ app.get("/api/public/topics/:topicId", async (req, res) => {
     return res.status(403).json({ error: "Bu mavzu faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
   }
   const topic = topics[index];
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   res.json({
-    topic: {
+    topic: lang ? localizeTopic(topic, lang) : {
       id: topic.id,
       slug: topic.slug,
       title: topic.title,
+      titleI18n: topic.titleI18n,
       questions: normalizeQuestions(topic.questions)
     }
   });
 });
 
-app.get("/api/public/tickets", async (_req, res) => {
+app.get("/api/public/tickets", async (req, res) => {
   const tickets = await getTicketsFromDb();
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   res.json({
     tickets: tickets.map((ticket, index) => ({
       id: ticket.id,
-      title: ticket.title,
+      title: lang ? String(ticket.titleI18n?.[lang] || ticket.title || "") : ticket.title,
       free: index < FREE_TICKET_COUNT,
       questionCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
     }))
@@ -3828,12 +3957,16 @@ app.get("/api/public/tickets/:ticketId", async (req, res) => {
   if (Number(ticket.ticketNumber || 0) > FREE_TICKET_COUNT) {
     return res.status(403).json({ error: "Bu bilet faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
   }
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   res.json({
-    ticket: {
-      id: ticket.id,
-      title: ticket.title,
-      questions: ticket.questions
-    }
+    ticket: lang
+      ? localizeTicket(ticket, lang)
+      : {
+          id: ticket.id,
+          title: ticket.title,
+          titleI18n: ticket.titleI18n,
+          questions: ticket.questions
+        }
   });
 });
 
@@ -4264,6 +4397,7 @@ app.post("/api/browser-token", requireUser, async (req, res) => {
 });
 
 app.get("/api/tickets", requireUser, async (req, res) => {
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const tickets = await getTicketsFromDb();
   const progressRows = await dbApi.all("SELECT ticket_id, answers, completed, score, updated_at FROM test_progress WHERE user_id = ?", [
     String(req.user.id)
@@ -4272,7 +4406,7 @@ app.get("/api/tickets", requireUser, async (req, res) => {
   res.json({
     tickets: tickets.map((ticket) => ({
       id: ticket.id,
-      title: ticket.title,
+      title: lang ? String(ticket.titleI18n?.[lang] || ticket.title || "") : ticket.title,
       status: ticket.status,
       locked: false,
       questionsCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0,
@@ -4301,8 +4435,8 @@ app.get("/api/tickets", requireUser, async (req, res) => {
 app.get("/api/tickets/:ticketId", requireUser, async (req, res) => {
   const ticket = await getTicketByIdFromDb(String(req.params.ticketId));
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
-
-  res.json({ ticket, isPro: true });
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  res.json({ ticket: lang ? localizeTicket(ticket, lang) : ticket, isPro: true });
 });
 
 app.get("/api/progress/:ticketId", requireUser, async (req, res) => {
@@ -5674,7 +5808,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 
 async function migrateTicketData() {
   const tickets = await dbApi.all(
-    "SELECT id, title, ticket_number, status, questions, created_at, updated_at FROM tickets ORDER BY created_at ASC, id ASC"
+    "SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets ORDER BY created_at ASC, id ASC"
   );
   const usedNumbers = new Set(
     tickets
