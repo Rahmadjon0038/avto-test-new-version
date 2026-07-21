@@ -2806,8 +2806,9 @@ function isSecureRequest(req) {
   return xfProto === "https";
 }
 
-const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
-const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+// 2 oy atrofida sessiya saqlash uchun access va refresh tokenlar muddati uzaytirildi.
+const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 60;
+const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 60;
 
 function getSecret() {
   return process.env.AUTH_JWT_SECRET || process.env.SESSION_SECRET || process.env.BOT_TOKEN || "";
