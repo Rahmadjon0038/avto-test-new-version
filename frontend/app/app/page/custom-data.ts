@@ -1,3 +1,5 @@
+import { appendLanguageQuery, getBrowserLanguage, normalizeLanguageCode } from "@/lib/site-language";
+
 export type CustomTestCard = {
   id: number;
   title: string;
@@ -18,16 +20,17 @@ async function parseJson(res: Response) {
   return data as any;
 }
 
-export async function fetchCustomTests(): Promise<CustomTestCard[]> {
-  const res = await fetch(appendLanguageQuery("/api/custom-tests", getBrowserLanguage()));
+export async function fetchCustomTests(language?: string | null): Promise<CustomTestCard[]> {
+  const lang = normalizeLanguageCode(language || getBrowserLanguage());
+  const res = await fetch(appendLanguageQuery("/api/custom-tests", lang));
   const data = await parseJson(res);
   return Array.isArray(data.customTests) ? data.customTests : [];
 }
 
-export async function fetchCustomTestById(testId: string): Promise<CustomTestCard | null> {
-  const res = await fetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, getBrowserLanguage()));
+export async function fetchCustomTestById(testId: string, language?: string | null): Promise<CustomTestCard | null> {
+  const lang = normalizeLanguageCode(language || getBrowserLanguage());
+  const res = await fetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, lang));
   if (res.status === 404) return null;
   const data = await parseJson(res);
   return data?.customTest || null;
 }
-import { appendLanguageQuery, getBrowserLanguage } from "@/lib/site-language";

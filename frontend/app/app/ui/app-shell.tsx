@@ -54,8 +54,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   const initials = useMemo(() => getInitials(me?.full_name || ""), [me]);
-  const displayName = useMemo(() => me?.full_name || "Profil", [me]);
-  const displayPhone = useMemo(() => me?.phone || "Telefon qo‘shilmagan", [me]);
+  const displayName = useMemo(() => me?.full_name || t("profile.title"), [me, t]);
+  const displayPhone = useMemo(() => me?.phone || t("profile.phoneMissing"), [me, t]);
 
   useEffect(() => {
     if (user) setMe(user);
@@ -145,24 +145,24 @@ export default function AppShell({ children }: { children: ReactNode }) {
         setUser(nextMe);
       }
       setPasswordChangeOpen(false);
-      toast.success("Parol muvaffaqiyatli almashtirildi");
+      toast.success(t("profile.passwordChanged"));
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Parol almashtirilmadi");
+      toast.error(error?.message || t("profile.passwordChangeFailed"));
     }
   });
 
   function submitPasswordChange() {
     if (!mustChangePassword && !passwordCurrent.trim()) {
-      toast.error("Eski parolni kiriting");
+      toast.error(t("profile.currentPasswordRequired"));
       return;
     }
     if (passwordNext.length < 6) {
-      toast.error("Yangi parol kamida 6 ta belgidan iborat bo‘lsin");
+      toast.error(t("profile.newPasswordMin"));
       return;
     }
     if (passwordNext !== passwordNextConfirm) {
-      toast.error("Yangi parollar mos emas");
+      toast.error(t("profile.passwordMismatch"));
       return;
     }
     passwordChangeMutation.mutate(
@@ -191,17 +191,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
       setPasswordChangeOpen(false);
       setAccessToken(null);
       setUser(null);
-      toast.success("Account o‘chirildi");
+      toast.success(t("profile.accountDeleted"));
       router.replace("/");
     },
     onError: (error: any) => {
-      toast.error(error?.message || "Account o‘chirilmadi");
+      toast.error(error?.message || t("profile.accountDeleteFailed"));
     }
   });
 
   function confirmPurchase() {
     setSubOpen(false);
-    toast.success("Obuna sotib olindi");
+    toast.success(t("profile.subscriptionPurchased"));
   }
 
   return (
@@ -304,7 +304,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {subOpen && (
         <div className="modal" role="dialog" aria-modal="true">
           <div className="modalHeader">
-            <div className="modalTitle">Obuna tanlang</div>
+            <div className="modalTitle">{t("profile.subscriptionTitle")}</div>
             <button className="btn btn-ghost" type="button" onClick={() => setSubOpen(false)}>
               ✕
             </button>
@@ -312,16 +312,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className="modalBody">
             <div className="subGrid">
               <button className={`subOption ${plan === "1w" ? "active" : ""}`} type="button" onClick={() => setPlan("1w")}>
-                <div className="subTitle">1 haftalik</div>
-                <div className="subPrice">14 000 so‘m</div>
+                <div className="subTitle">{t("profile.plan1w")}</div>
+                <div className="subPrice">{t("profile.price1w")}</div>
               </button>
               <button className={`subOption ${plan === "2w" ? "active" : ""}`} type="button" onClick={() => setPlan("2w")}>
-                <div className="subTitle">2 haftalik</div>
-                <div className="subPrice">28 000 so‘m</div>
+                <div className="subTitle">{t("profile.plan2w")}</div>
+                <div className="subPrice">{t("profile.price2w")}</div>
               </button>
               <button className={`subOption ${plan === "1m" ? "active" : ""}`} type="button" onClick={() => setPlan("1m")}>
-                <div className="subTitle">1 oylik</div>
-                <div className="subPrice">45 000 so‘m</div>
+                <div className="subTitle">{t("profile.plan1m")}</div>
+                <div className="subPrice">{t("profile.price1m")}</div>
               </button>
             </div>
 
@@ -335,7 +335,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </div>
 
             <button className="btn btn-primary" type="button" onClick={confirmPurchase}>
-              Roziman
+              {t("profile.confirmPurchase")}
             </button>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {profileOpen && (
         <div className="modal profileModal" role="dialog" aria-modal="true">
           <div className="modalHeader">
-            <div className="modalTitle">Profil</div>
+            <div className="modalTitle">{t("profile.title")}</div>
             <button className="btn btn-ghost" type="button" onClick={() => setProfileOpen(false)}>
               ✕
             </button>
@@ -354,13 +354,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <div className="profileAvatar">{initials}</div>
               <div className="profileIntro">
                 <div className="profileName">{displayName}</div>
-                <div className="profileSub">Sizning shaxsiy kabinet ma’lumotlaringiz</div>
+                <div className="profileSub">{t("profile.subtitle")}</div>
                 <div className="profilePills">
                   <span className="profilePill profilePillAccent">
-                    <BadgeCheck className="lucide" aria-hidden="true" /> Faol profil
+                    <BadgeCheck className="lucide" aria-hidden="true" /> {t("profile.active")}
                   </span>
                   <span className="profilePill">
-                    <UserCircle2 className="lucide" aria-hidden="true" /> A'zo
+                    <UserCircle2 className="lucide" aria-hidden="true" /> {t("profile.member")}
                   </span>
                 </div>
               </div>
@@ -370,16 +370,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <div className="profileRow profileRowCard">
                 <div className="profileKey">
                   <Phone className="lucide profileKeyIcon" aria-hidden="true" />
-                  Telefon
+                  {t("profile.phone")}
                 </div>
                 <div className="profileVal">{displayPhone}</div>
               </div>
               <button className="btn btn-primary" type="button" onClick={openPasswordChange}>
-                Parolni almashtirish
+                {t("profile.changePassword")}
               </button>
             </div>
             <button className="btn btn-danger" type="button" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
-              Chiqish
+              {t("profile.logout")}
             </button>
             <button
               className="btn btn-ghost"
@@ -387,7 +387,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               onClick={() => setDeleteAccountOpen(true)}
               style={{ marginTop: 10, color: "var(--danger)", borderColor: "rgba(185, 38, 38, 0.35)" }}
             >
-              <Trash2 className="lucide" aria-hidden="true" /> Delete account
+              <Trash2 className="lucide" aria-hidden="true" /> {t("profile.deleteAccount")}
             </button>
           </div>
         </div>
@@ -396,22 +396,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {deleteAccountOpen && (
         <div className="modal" role="dialog" aria-modal="true">
           <div className="modalHeader">
-            <div className="modalTitle">Accountni o‘chirish</div>
+            <div className="modalTitle">{t("profile.deleteTitle")}</div>
             <button className="btn btn-ghost" type="button" onClick={() => setDeleteAccountOpen(false)}>
               ✕
             </button>
           </div>
           <div className="modalBody">
             <div className="authResetNotice" style={{ marginTop: 0 }}>
-              <div className="authResetTitle">Diqqat</div>
+              <div className="authResetTitle">{t("profile.deleteWarningTitle")}</div>
               <div className="authResetText">
-                Siz accountni butunlay o‘chirmoqchimisiz? Agar bunday qilsangiz, barcha ma’lumotlaringizni qayta tiklab
-                bo‘lmaydi.
+                {t("profile.deleteWarningText")}
               </div>
             </div>
             <div className="payRow" style={{ marginTop: 14 }}>
               <button className="btn btn-ghost payBtn" type="button" onClick={() => setDeleteAccountOpen(false)}>
-                Bekor qilish
+                {t("profile.cancel")}
               </button>
               <button
                 className="btn btn-danger payBtn"
@@ -419,7 +418,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => deleteAccountMutation.mutate()}
                 disabled={deleteAccountMutation.isPending}
               >
-                Roziman
+                {t("profile.confirm")}
               </button>
             </div>
           </div>
@@ -429,7 +428,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {passwordChangeOpen && (
         <div className="modal" role="dialog" aria-modal="true">
           <div className="modalHeader">
-            <div className="modalTitle">Parolni almashtirish</div>
+            <div className="modalTitle">{t("profile.changePassword")}</div>
             {!mustChangePassword ? (
               <button className="btn btn-ghost" type="button" onClick={() => setPasswordChangeOpen(false)}>
                 ✕
@@ -442,7 +441,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <div className="profileRow profileRowCard">
                   <div className="profileKey">
                     <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
-                    Eski parol
+                    {t("profile.currentPassword")}
                   </div>
                   <div className="profileVal" style={{ width: "100%" }}>
                     <input
@@ -450,7 +449,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                       type={passwordVisible ? "text" : "password"}
                       value={passwordCurrent}
                       onChange={(e) => setPasswordCurrent(e.target.value)}
-                      placeholder="Eski parol"
+                      placeholder={t("profile.currentPassword")}
                       style={{ width: "100%" }}
                     />
                   </div>
@@ -459,7 +458,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <div className="profileRow profileRowCard">
                 <div className="profileKey">
                   <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
-                  Yangi parol
+                  {t("profile.newPassword")}
                 </div>
                 <div className="profileVal" style={{ width: "100%" }}>
                   <input
@@ -467,7 +466,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     type={passwordVisible ? "text" : "password"}
                     value={passwordNext}
                     onChange={(e) => setPasswordNext(e.target.value)}
-                    placeholder="Kamida 6 ta belgi"
+                    placeholder={t("profile.newPassword")}
                     style={{ width: "100%" }}
                   />
                 </div>
@@ -475,7 +474,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <div className="profileRow profileRowCard">
                 <div className="profileKey">
                   <KeyRound className="lucide profileKeyIcon" aria-hidden="true" />
-                  Takrorlang
+                  {t("profile.confirmPassword")}
                 </div>
                 <div className="profileVal" style={{ width: "100%" }}>
                   <input
@@ -483,7 +482,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     type={passwordVisible ? "text" : "password"}
                     value={passwordNextConfirm}
                     onChange={(e) => setPasswordNextConfirm(e.target.value)}
-                    placeholder="Yangi parolni tasdiqlang"
+                    placeholder={t("profile.confirmPassword")}
                     style={{ width: "100%" }}
                   />
                 </div>
@@ -492,15 +491,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <div className="payRow" style={{ marginTop: 4 }}>
               <button className="btn btn-ghost payBtn" type="button" onClick={() => setPasswordVisible((v) => !v)}>
                 {passwordVisible ? <EyeOff className="lucide" aria-hidden="true" /> : <Eye className="lucide" aria-hidden="true" />}
-                {passwordVisible ? "Yashirish" : "Ko‘rsatish"}
+                {passwordVisible ? t("profile.hidePassword") : t("profile.showPassword")}
               </button>
               <button className="btn btn-primary payBtn" type="button" onClick={submitPasswordChange} disabled={passwordChangeMutation.isPending}>
-                Saqlash
+                {t("common.save")}
               </button>
             </div>
             {mustChangePassword ? (
               <div className="authResetNotice" style={{ marginTop: 12 }}>
-                <div className="authResetTitle">Diqqat</div>
+                <div className="authResetTitle">{t("profile.deleteWarningTitle")}</div>
                 <div className="authResetText">
                   Siz bir martalik parol bilan kirgansiz. Parolni almashtirmaguningizcha tizimdan to‘liq foydalanish uchun
                   shu oynadan yangi parol qo‘ying.

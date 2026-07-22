@@ -22,6 +22,7 @@ import {
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
 type Tab = "register" | "login";
@@ -115,6 +116,7 @@ function LandingMenuItem({
 export default function AuthPage() {
   const router = useRouter();
   const { setAccessToken, setUser, authReady, accessToken } = useAuth();
+  const { t } = useSiteLanguage();
   const [tab, setTab] = useState<Tab>("login");
   const [authOpen, setAuthOpen] = useState(false);
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
@@ -177,7 +179,7 @@ export default function AuthPage() {
         callback: async (response: { credential?: string }) => {
           const credential = String(response?.credential || "");
           if (!credential) {
-            toast.error("Google token topilmadi");
+            toast.error(t("auth.googleTokenMissing"));
             return;
           }
           try {
@@ -188,11 +190,11 @@ export default function AuthPage() {
             }).then(jsonOrError);
             if (data?.accessToken) setAccessToken(String(data.accessToken));
             if (data?.user) setUser(data.user);
-            toast.success("Google orqali kirildi");
+            toast.success(t("auth.googleLoginSuccess"));
             setAuthOpen(false);
             router.push("/app");
           } catch (error: any) {
-            toast.error(error?.message || "Google orqali kirish amalga oshmadi");
+            toast.error(error?.message || t("auth.googleLoginFailed"));
           }
         }
       });
@@ -254,7 +256,7 @@ export default function AuthPage() {
       setPasswordRegister("");
       setPasswordLogin("");
       setTab("login");
-      toast.success("Ro‘yxatdan o‘tildi. Endi tizimga kiring.");
+      toast.success(t("auth.registerSuccess"));
     },
     onError: (e: any, variables) => {
       const message = String(e?.message || "Xatolik");
@@ -265,7 +267,7 @@ export default function AuthPage() {
         setPasswordRegister("");
         setPasswordLogin("");
         setTab("login");
-        toast.error("Bu raqam allaqachon ro‘yxatdan o‘tgan, iltimos tizimga kiring");
+        toast.error(t("auth.alreadyRegistered"));
         return;
       }
       toast.error(message);
@@ -280,8 +282,8 @@ export default function AuthPage() {
     const rawPassword = String(formData.get("password") || passwordRegister);
     const phoneDigits = uzLocalDigits(rawPhone);
 
-    if (phoneDigits.length !== 9) return toast.error("Telefon raqam formati noto‘g‘ri");
-    if (rawPassword.length < 6) return toast.error("Kamida 6 ta belgidan iborat parol yarating");
+    if (phoneDigits.length !== 9) return toast.error(t("auth.phoneFormatInvalid"));
+    if (rawPassword.length < 6) return toast.error(t("auth.passwordTooShort"));
 
     registerMutation.mutate({
       phone: `+998${phoneDigits}`,
@@ -299,10 +301,10 @@ export default function AuthPage() {
     onSuccess: (data: any) => {
       if (data?.accessToken) setAccessToken(String(data.accessToken));
       if (data?.user) setUser(data.user);
-      toast.success("Kirish muvaffaqiyatli");
+      toast.success(t("auth.loginSuccess"));
       router.push("/app");
     },
-    onError: (e: any) => toast.error(e?.message || "Xatolik")
+    onError: (e: any) => toast.error(e?.message || t("common.error"))
   });
 
   function forgotTelegramUrl() {
@@ -326,8 +328,8 @@ export default function AuthPage() {
     const rawPassword = String(formData.get("password") || passwordLogin);
     const phoneDigits = uzLocalDigits(rawPhone);
 
-    if (phoneDigits.length !== 9) return toast.error("Telefon raqam formati noto‘g‘ri");
-    if (!rawPassword) return toast.error("Parolni kiriting");
+    if (phoneDigits.length !== 9) return toast.error(t("auth.phoneFormatInvalid"));
+    if (!rawPassword) return toast.error(t("auth.passwordRequired"));
 
     loginMutation.mutate({ phone: `+998${phoneDigits}`, password: rawPassword });
   }
@@ -344,7 +346,7 @@ export default function AuthPage() {
           <div className="navRight">
             <button className="btn btn-ghost headerActionBtn" type="button" onClick={() => openAuth()}>
               <ArrowRight className="lucide" aria-hidden="true" />
-              Tizimga kirish
+              {t("nav.login")}
             </button>
           </div>
         </div>
@@ -356,24 +358,17 @@ export default function AuthPage() {
             <div className="heroGrid">
               <div className="heroCopy">
                 <h1 className="landingTitle">
-                  <span className="landingLine">Haydovchilikka</span>
-                  <span className="landingLine">tayyorlanish uchun tezkor</span>
-                  <span className="landingLine">
-                    va <span className="landingAccent">qulay</span> platforma.
-                  </span>
+                  <span className="landingLine">{t("auth.heroTitle")}</span>
                 </h1>
-                <p className="landingLead">
-                  Topshirdi — avto test, avto imtihon va avtomobil biletlari platformasi. Mavzular, biletlar, xatolarni
-                  ko‘rish, imtihon rejimi va video darslar bir joyda.
-                </p>
+                <p className="landingLead">{t("auth.heroText")}</p>
 
                 <div className="landingCtaRow">
                   <button className="btn btn-primary landingStartBtn" type="button" onClick={() => openAuth()}>
-                    Boshlash
+                    {t("auth.enterTests")}
                   </button>
                   <button className="btn btn-ghost landingVideoBtn" type="button" onClick={() => openAuth()}>
                     <PlayCircle className="lucide" aria-hidden="true" />
-                    Video darslar
+                    {t("home.videosTitle")}
                   </button>
                 </div>
               </div>
@@ -381,50 +376,50 @@ export default function AuthPage() {
 
             <section className="landingMenuSection">
               <div className="homeHero card">
-                <div className="homeTitle">Prava olish endi biz bilan oson!</div>
+                <div className="homeTitle">{t("home.hero")}</div>
               </div>
 
               <div className="homeMenu">
                 <LandingMenuItem
                   page="topics"
                   icon={<LayoutGrid className="lucide" />}
-                  title="Mavzu bo‘yicha testlar"
-                  desc="Belgilar va qoidalarni bo‘limma-bo‘lim o‘rganing."
+                  title={t("home.topicsTitle")}
+                  desc={t("home.topicsDesc")}
                   href="/mavzular"
                 />
                 <LandingMenuItem
                   page="tickets"
                   icon={<Tickets className="lucide" />}
-                  title="Biletlar bo‘yicha testlar"
-                  desc="Rasmiy biletlar formatida yechib mashq qiling."
+                  title={t("home.ticketsTitle")}
+                  desc={t("home.ticketsDesc")}
                   href="/biletlar"
                 />
                 <LandingMenuItem
                   page="custom"
                   icon={<SlidersHorizontal className="lucide" />}
-                  title="Sozlamali testlar"
-                  desc="Savol soni va rejimni o‘zingiz tanlang."
+                  title={t("home.customTitle")}
+                  desc={t("home.customDesc")}
                   onSelect={() => openAuth()}
                 />
                 <LandingMenuItem
                   page="mistakes"
                   icon={<X className="lucide" />}
-                  title="Mening xatolarim"
-                  desc="Xato qilgan savollaringizni qayta ko‘rib chiqing."
+                  title={t("home.mistakesTitle")}
+                  desc={t("home.mistakesDesc")}
                   onSelect={() => openAuth()}
                 />
                 <LandingMenuItem
                   page="answers"
                   icon={<BookOpen className="lucide" />}
-                  title="Barcha testlar javoblari"
-                  desc="To‘g‘ri javoblarni izohlar bilan ko‘ring."
+                  title={t("home.answersTitle")}
+                  desc={t("home.answersDesc")}
                   onSelect={() => openAuth()}
                 />
                 <LandingMenuItem
                   page="exam"
                   icon={<CheckCheck className="lucide" />}
-                  title="Imtihon topshirish"
-                  desc="Haqiqiy imtihondek sinovdan o‘ting."
+                  title={t("home.examTitle")}
+                  desc={t("home.examDesc")}
                   onSelect={() => openAuth()}
                 />
               </div>
@@ -434,15 +429,15 @@ export default function AuthPage() {
                   <LandingMenuItem
                     page="marathon"
                     icon={<Flame className="lucide" />}
-                    title="Marafon rejimi"
-                    desc="Uzluksiz savollar: tezlik va aniqlikni oshiring."
+                    title={t("home.marathonTitle")}
+                    desc={t("home.marathonDesc")}
                     onSelect={() => openAuth()}
                   />
                   <LandingMenuItem
                     page="videos"
                     icon={<Video className="lucide" />}
-                    title="Video darsliklar"
-                    desc="Mavzulashtirilgan video darsliklar."
+                    title={t("home.videosTitle")}
+                    desc={t("home.videosDesc")}
                     onSelect={() => openAuth()}
                   />
                 </div>
@@ -474,7 +469,7 @@ export default function AuthPage() {
             <div className="authModalHeader">
               <div className="authModalTitleWrap">
                 <div className="authModalTitle" id="auth-modal-title">
-                  {tab === "login" ? "Tizimga kirish" : "Ro‘yxatdan o‘tish"}
+                  {tab === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}
                 </div>
               </div>
               <button className="btn btn-ghost" type="button" onClick={closeAuth}>
@@ -484,17 +479,17 @@ export default function AuthPage() {
 
             <div className="authTabs" role="tablist" aria-label="Auth tabs">
               <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
-                Tizimga kirish
+                {t("auth.loginTitle")}
               </button>
               <button type="button" className={`authTab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")} aria-pressed={tab === "register"}>
-                Ro‘yxatdan o‘tish
+                {t("auth.registerTitle")}
               </button>
             </div>
 
             {tab === "register" ? (
               <form className="formGrid authForm" onSubmit={onRegister}>
                 <div>
-                  <div className="fieldLabel">Telefon raqam</div>
+                  <div className="fieldLabel">{t("auth.phone")}</div>
                   <div className="inputGroup authInputGroup inputPhone noRight">
                     <span className="inputAddon inputAddonText">+998</span>
                     <input
@@ -510,7 +505,7 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <div className="fieldLabel">Parol</div>
+                  <div className="fieldLabel">{t("auth.password")}</div>
                   <div className="inputGroup authInputGroup">
                     <span className="inputAddon">
                       <KeyRound className="lucide" aria-hidden="true" />
@@ -519,31 +514,31 @@ export default function AuthPage() {
                       name="password"
                       className="input inputField"
                       type={showPass ? "text" : "password"}
-                      placeholder="Kamida 6 ta belgi"
+                      placeholder={t("auth.passwordTooShort")}
                       autoComplete="new-password"
                       value={passwordRegister}
                       onChange={(e) => setPasswordRegister(e.target.value)}
                     />
-                    <button className="inputIconBtn" type="button" onClick={() => setShowPass((v) => !v)} aria-label="Show password">
+                    <button className="inputIconBtn" type="button" onClick={() => setShowPass((v) => !v)} aria-label={showPass ? t("profile.hidePassword") : t("profile.showPassword")}>
                       {showPass ? <EyeOff className="lucide" aria-hidden="true" /> : <Eye className="lucide" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={registerMutation.isPending}>
-                  Ro‘yxatdan o‘tish
+                  {t("auth.registerTitle")}
                 </button>
                 <p className="authPrivacyNote">
-                  Ro‘yxatdan o‘tish orqali siz{" "}
+                  {t("auth.registerAgreementPrefix")}
                   <Link href="/privacy" className="authPrivacyLink">
-                    Privacy Policy
+                    {t("footer.privacy")}
                   </Link>{" "}
-                  ga rozilik bildirasiz.
+                  {t("auth.registerAgreementSuffix")}
                 </p>
               </form>
             ) : (
               <form className="formGrid authForm" onSubmit={onLogin}>
                 <div>
-                  <div className="fieldLabel">Telefon raqam</div>
+                  <div className="fieldLabel">{t("auth.phone")}</div>
                   <div className="inputGroup authInputGroup inputPhone noRight">
                     <span className="inputAddon inputAddonText">+998</span>
                     <input
@@ -559,7 +554,7 @@ export default function AuthPage() {
                 </div>
 
                 <div>
-                  <div className="fieldLabel">Parol</div>
+                  <div className="fieldLabel">{t("auth.password")}</div>
                   <div className="inputGroup authInputGroup">
                     <span className="inputAddon">
                       <KeyRound className="lucide" aria-hidden="true" />
@@ -568,28 +563,28 @@ export default function AuthPage() {
                       name="password"
                       className="input inputField"
                       type={showPass ? "text" : "password"}
-                      placeholder="Parol"
+                      placeholder={t("auth.password")}
                       autoComplete="current-password"
                       value={passwordLogin}
                       onChange={(e) => setPasswordLogin(e.target.value)}
                     />
-                    <button className="inputIconBtn" type="button" onClick={() => setShowPass((v) => !v)} aria-label="Show password">
+                    <button className="inputIconBtn" type="button" onClick={() => setShowPass((v) => !v)} aria-label={showPass ? t("profile.hidePassword") : t("profile.showPassword")}>
                       {showPass ? <EyeOff className="lucide" aria-hidden="true" /> : <Eye className="lucide" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
                 <button className="btn btn-primary authSubmitBtn" type="submit" disabled={loginMutation.isPending}>
-                  Kirish
+                  {t("auth.loginButton")}
                 </button>
                 <button className="authForgotBtn" type="button" onClick={() => setForgotOpen(true)}>
-                  Parolni unutdingizmi?
+                  {t("auth.forgotPassword")}
                 </button>
               </form>
             )}
 
             <div className="authGoogleBlock">
               <div className="authDivider">
-                <span>yoki Google bilan</span>
+                <span>{t("auth.orGoogle")}</span>
               </div>
               <div className="googleButtonMount" ref={googleButtonRef} />
             </div>
@@ -602,23 +597,21 @@ export default function AuthPage() {
             <div className="authModalHeader">
               <div className="authModalTitleWrap">
                 <div className="authModalTitle" id="forgot-password-title">
-                  Parolni tiklash
+                  {t("auth.forgotTitle")}
                 </div>
               </div>
               <button className="btn btn-ghost" type="button" onClick={() => setForgotOpen(false)}>
                 ✕
               </button>
             </div>
-            <p className="authForgotText">
-              Agar parolingizni unutgan bo‘lsangiz, admin bilan Telegram orqali bog‘laning. Admin sizga vaqtinchalik parol beradi.
-            </p>
+            <p className="authForgotText">{t("auth.forgotText")}</p>
             <button className="authTelegramBtn" type="button" onClick={openForgotTelegram}>
               <Send className="lucide" aria-hidden="true" />
-              Telegram orqali adminga yozish
+              {t("auth.forgotTelegram")}
             </button>
             <div className="authResetNotice">
-              <div className="authResetTitle">Izoh</div>
-              <div className="authResetText">Adminga aynan shu xabarni yuboring. Telefon raqamingiz orqali accountingiz topiladi.</div>
+              <div className="authResetTitle">{t("auth.forgotNoteTitle")}</div>
+              <div className="authResetText">{t("auth.forgotNoteText")}</div>
             </div>
           </div>
         </div>

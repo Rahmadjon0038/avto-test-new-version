@@ -1,3 +1,5 @@
+import { appendLanguageQuery, getBrowserLanguage, normalizeLanguageCode } from "@/lib/site-language";
+
 export type TopicCard = {
   id: number;
   title: string;
@@ -18,16 +20,17 @@ async function parseJson(res: Response) {
   return data as any;
 }
 
-export async function fetchTopics(): Promise<TopicCard[]> {
-  const res = await fetch(appendLanguageQuery("/api/topics", getBrowserLanguage()));
+export async function fetchTopics(language?: string | null): Promise<TopicCard[]> {
+  const lang = normalizeLanguageCode(language || getBrowserLanguage());
+  const res = await fetch(appendLanguageQuery("/api/topics", lang));
   const data = await parseJson(res);
   return Array.isArray(data.topics) ? data.topics : [];
 }
 
-export async function fetchTopicById(topicId: string): Promise<TopicCard | null> {
-  const res = await fetch(appendLanguageQuery(`/api/topics/${encodeURIComponent(topicId)}`, getBrowserLanguage()));
+export async function fetchTopicById(topicId: string, language?: string | null): Promise<TopicCard | null> {
+  const lang = normalizeLanguageCode(language || getBrowserLanguage());
+  const res = await fetch(appendLanguageQuery(`/api/topics/${encodeURIComponent(topicId)}`, lang));
   if (res.status === 404) return null;
   const data = await parseJson(res);
   return data?.topic || null;
 }
-import { appendLanguageQuery, getBrowserLanguage } from "@/lib/site-language";

@@ -17,7 +17,7 @@ export default function CustomTestsPage() {
   const { t, language } = useSiteLanguage();
   const customTestsQuery = useQuery({
     queryKey: ["custom-tests", language],
-    queryFn: fetchCustomTests
+    queryFn: () => fetchCustomTests(language)
   });
 
   useEffect(() => {
