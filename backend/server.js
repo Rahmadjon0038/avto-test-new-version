@@ -220,17 +220,48 @@ function localizeTicket(ticket, lang) {
   };
 }
 
-function normalizeQuestions(value) {
+function normalizeQuestions(value, currentQuestions = null) {
   const questions = parseQuestionsValue(value);
+  const currentById = new Map(
+    Array.isArray(currentQuestions)
+      ? currentQuestions
+          .filter(Boolean)
+          .map((question, index) => [String(question?.id || `${index + 1}`), question])
+      : []
+  );
   return questions
     .map((question, index) => ({
       id: String(question?.id || `${index + 1}`),
-      image: String(question?.image || ""),
-      audio: String(question?.audio || ""),
-      text: String(question?.text || ""),
-      options: Array.isArray(question?.options) ? question.options.map((option) => String(option || "").trim()) : [],
-      correctIndex: Number.isFinite(Number(question?.correctIndex)) ? Number(question.correctIndex) : 0,
-      explanation: String(question?.explanation || ""),
+      image: String(
+        question?.image !== undefined && String(question?.image).trim()
+          ? question.image
+          : currentById.get(String(question?.id || `${index + 1}`))?.image || ""
+      ),
+      audio: String(
+        question?.audio !== undefined && String(question?.audio).trim()
+          ? question.audio
+          : currentById.get(String(question?.id || `${index + 1}`))?.audio || ""
+      ),
+      text: String(
+        question?.text !== undefined && String(question?.text).trim()
+          ? question.text
+          : currentById.get(String(question?.id || `${index + 1}`))?.text || ""
+      ),
+      options: Array.isArray(question?.options) && question.options.some((option) => String(option || "").trim())
+        ? question.options.map((option) => String(option || "").trim())
+        : Array.isArray(currentById.get(String(question?.id || `${index + 1}`))?.options)
+          ? currentById.get(String(question?.id || `${index + 1}`)).options.map((option) => String(option || "").trim())
+          : [],
+      correctIndex: Number.isFinite(Number(question?.correctIndex))
+        ? Number(question.correctIndex)
+        : Number.isFinite(Number(currentById.get(String(question?.id || `${index + 1}`))?.correctIndex))
+          ? Number(currentById.get(String(question?.id || `${index + 1}`))?.correctIndex)
+          : 0,
+      explanation: String(
+        question?.explanation !== undefined && String(question?.explanation).trim()
+          ? question.explanation
+          : currentById.get(String(question?.id || `${index + 1}`))?.explanation || ""
+      ),
       i18n: normalizeQuestionI18n(question?.i18n, question)
     }))
     .filter((question) => question.text || question.options.some(Boolean) || Object.keys(question.i18n || {}).length > 0);
@@ -703,7 +734,7 @@ function normalizeTopicInput(input = {}, fallbackTitle = "", current = null) {
     adminMarked: source.adminMarked !== undefined ? Boolean(source.adminMarked) : Boolean(current?.adminMarked || false),
     questions:
       source.questions !== undefined
-        ? normalizeQuestions(source.questions)
+        ? normalizeQuestions(source.questions, Array.isArray(current?.questions) ? current.questions : null)
         : Array.isArray(current?.questions)
           ? current.questions
           : []
