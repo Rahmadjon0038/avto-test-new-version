@@ -389,7 +389,27 @@ function normalizeTicketSlotQuestions(value, currentQuestions = null) {
   return mergeTicketSlotQuestions(value, currentQuestions);
 }
 
-function hydrateTicketSlotQuestions(rawQuestions, questionRows = []) {
+function extractTopicQuestionId(questionKey) {
+  const raw = String(questionKey || "").trim();
+  if (!raw) return "";
+  const parts = raw.split(":");
+  return parts.length >= 3 ? parts.slice(2).join(":") : raw;
+}
+
+async function getTopicQuestionSnapshot(topicId, questionKey) {
+  const key = String(topicId || "").trim();
+  const questionId = extractTopicQuestionId(questionKey);
+  if (!key || !questionId) return null;
+
+  const topic = await getTopicFromDb(key);
+  if (!topic || !Array.isArray(topic.questions)) return null;
+
+  const rawQuestion = topic.questions.find((question) => String(question?.id || "") === questionId) || null;
+  if (!rawQuestion) return null;
+  return normalizeQuestions([rawQuestion])[0] || null;
+}
+
+async function hydrateTicketSlotQuestions(rawQuestions, questionRows = []) {
   const rawSlots = normalizeTicketSlotQuestions(rawQuestions, rawQuestions);
   const rowsByOrder = new Map(
     Array.isArray(questionRows)
@@ -398,18 +418,39 @@ function hydrateTicketSlotQuestions(rawQuestions, questionRows = []) {
           .map((row) => [Number(row.order || 0), row])
       : []
   );
+  const topicQuestionCache = new Map();
 
-  return Array.from({ length: 20 }, (_, index) => {
+  const results = [];
+  for (let index = 0; index < 20; index += 1) {
     const rawSlot = rawSlots[index] || null;
     const row = rowsByOrder.get(index + 1) || null;
-    if (!rawSlot && !row) return null;
+    if (!rawSlot && !row) {
+      results.push(null);
+      continue;
+    }
+
     const bankQuestion = row ? row.question : null;
-    return normalizeTicketSlotQuestion(
-      rawSlot || bankQuestion || null,
-      index + 1,
-      bankQuestion || rawSlot || null
+    let topicQuestion = null;
+    if (row && row.topicId && row.questionId) {
+      const cacheKey = `${row.topicId}:${row.questionId}`;
+      if (topicQuestionCache.has(cacheKey)) {
+        topicQuestion = topicQuestionCache.get(cacheKey);
+      } else {
+        topicQuestion = await getTopicQuestionSnapshot(row.topicId, row.questionId);
+        topicQuestionCache.set(cacheKey, topicQuestion);
+      }
+    }
+
+    results.push(
+      normalizeTicketSlotQuestion(
+        rawSlot || bankQuestion || topicQuestion || null,
+        index + 1,
+        topicQuestion || bankQuestion || rawSlot || null
+      )
     );
-  });
+  }
+
+  return results;
 }
 
 function buildTicketQuestionQuestion(ticket, questionRow) {
@@ -487,7 +528,7 @@ async function getTicketFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const sourceQuestions = hydrateTicketSlotQuestions(row.questions, questionRows);
+  const sourceQuestions = await hydrateTicketSlotQuestions(row.questions, questionRows);
   return {
     ...normalizeTicketRow(row),
     questions: sourceQuestions
@@ -498,7 +539,7 @@ async function getTicketBuilderFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const slots = hydrateTicketSlotQuestions(row.questions, questionRows);
+  const slots = await hydrateTicketSlotQuestions(row.questions, questionRows);
   return {
     ...normalizeTicketRow(row),
     questions: slots
