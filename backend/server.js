@@ -389,6 +389,29 @@ function normalizeTicketSlotQuestions(value, currentQuestions = null) {
   return mergeTicketSlotQuestions(value, currentQuestions);
 }
 
+function hydrateTicketSlotQuestions(rawQuestions, questionRows = []) {
+  const rawSlots = normalizeTicketSlotQuestions(rawQuestions, rawQuestions);
+  const rowsByOrder = new Map(
+    Array.isArray(questionRows)
+      ? questionRows
+          .filter(Boolean)
+          .map((row) => [Number(row.order || 0), row])
+      : []
+  );
+
+  return Array.from({ length: 20 }, (_, index) => {
+    const rawSlot = rawSlots[index] || null;
+    const row = rowsByOrder.get(index + 1) || null;
+    if (!rawSlot && !row) return null;
+    const bankQuestion = row ? row.question : null;
+    return normalizeTicketSlotQuestion(
+      rawSlot || bankQuestion || null,
+      index + 1,
+      bankQuestion || rawSlot || null
+    );
+  });
+}
+
 function buildTicketQuestionQuestion(ticket, questionRow) {
   if (!questionRow || !questionRow.questionId) return null;
   const questionId = String(questionRow.questionId || questionRow.question_key || questionRow.question?.id || "");
@@ -464,13 +487,7 @@ async function getTicketFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const rawQuestions = normalizeTicketSlotQuestions(row.questions);
-  const sourceQuestions = rawQuestions.some(Boolean)
-    ? rawQuestions
-    : Array.from({ length: 20 }, (_, index) => {
-        const questionRow = questionRows.find((item) => Number(item.order || 0) === index + 1);
-        return questionRow ? buildTicketBuilderQuestion(questionRow) : null;
-      });
+  const sourceQuestions = hydrateTicketSlotQuestions(row.questions, questionRows);
   return {
     ...normalizeTicketRow(row),
     questions: sourceQuestions
@@ -481,15 +498,7 @@ async function getTicketBuilderFromDb(ticketId) {
   const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
   if (!row) return null;
   const questionRows = await getTicketQuestionsFromDb(ticketId);
-  const rawSlots = normalizeTicketSlotQuestions(row.questions);
-  const slots = rawSlots.some(Boolean)
-    ? rawSlots
-    : Array.from({ length: 20 }, () => null);
-  for (const questionRow of questionRows) {
-    const slotIndex = Number(questionRow.order || 0) - 1;
-    if (slotIndex < 0 || slotIndex >= slots.length) continue;
-    slots[slotIndex] = buildTicketBuilderQuestion(questionRow);
-  }
+  const slots = hydrateTicketSlotQuestions(row.questions, questionRows);
   return {
     ...normalizeTicketRow(row),
     questions: slots
