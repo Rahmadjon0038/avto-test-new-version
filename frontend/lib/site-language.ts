@@ -41,6 +41,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       tickets: "Biletlar",
       topics: "Mavzular"
     },
+    social: {
+      instagram: "Instagram",
+      telegram: "Telegram"
+    },
     auth: {
       brand: "Topshirdi",
       heroTitle: "Haydovchilikka tayyormisiz?",
@@ -188,7 +192,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Video darsliklar",
       loading: "Video darslar yuklanmoqda...",
       empty: "Hozircha videodarslar mavjud emas",
-      retry: "Qayta urinish"
+      retry: "Qayta urinish",
+      back: "Orqaga",
+      playerLoading: "Video yuklanmoqda...",
+      premium: "Premium"
     },
     settings: {
       title: "Test sozlamalari",
@@ -288,6 +295,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       privacy: "Махфийлик сиёсати",
       tickets: "Билетлар",
       topics: "Мавзулар"
+    },
+    social: {
+      instagram: "Instagram",
+      telegram: "Telegram"
     },
     auth: {
       brand: "Topshirdi",
@@ -432,7 +443,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Видео дарсликлар",
       loading: "Видео дарслар юкланмоқда...",
       empty: "Ҳозирча видеодарсликлар мавжуд эмас",
-      retry: "Қайта уриниш"
+      retry: "Қайта уриниш",
+      back: "Орқага",
+      playerLoading: "Видео юкланмоқда...",
+      premium: "Премиум"
     },
     settings: {
       title: "Тест созламалари",
@@ -532,6 +546,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       privacy: "Политика конфиденциальности",
       tickets: "Билеты",
       topics: "Темы"
+    },
+    social: {
+      instagram: "Instagram",
+      telegram: "Telegram"
     },
     auth: {
       brand: "Topshirdi",
@@ -680,7 +698,10 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Видео уроки",
       loading: "Загрузка видеоуроков...",
       empty: "Пока нет видеоуроков",
-      retry: "Повторить"
+      retry: "Повторить",
+      back: "Назад",
+      playerLoading: "Видео загружается...",
+      premium: "Премиум"
     },
     settings: {
       title: "Настройки теста",

@@ -28,7 +28,7 @@ type VideoLesson = {
 export default function VideosPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
-  const { language } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const [selectedVideoId, setSelectedVideoId] = useState<number | null>(null);
   const [playbackUrl, setPlaybackUrl] = useState("");
   const [loadingPlayback, setLoadingPlayback] = useState(false);
@@ -50,9 +50,9 @@ export default function VideosPage() {
 
   useEffect(() => {
     if (videosQuery.error) {
-      toast.error((videosQuery.error as any)?.message || "Xatolik");
+      toast.error((videosQuery.error as any)?.message || t("common.error"));
     }
-  }, [videosQuery.error]);
+  }, [t, videosQuery.error]);
 
   const videos = videosQuery.data || [];
 
@@ -86,7 +86,7 @@ export default function VideosPage() {
   if (!authReady) {
     return (
       <section className="view">
-        <div className="muted">Video darslar yuklanmoqda...</div>
+        <div className="muted">{t("videos.loading")}</div>
       </section>
     );
   }
@@ -95,14 +95,14 @@ export default function VideosPage() {
     <section className="view">
       <div className="ticketHeader">
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
         <div className="h2" style={{ margin: 0 }}>
-          Video darsliklar
+          {t("videos.title")}
         </div>
       </div>
 
-      {videosQuery.isLoading ? <div className="muted">Video darslar yuklanmoqda...</div> : null}
+      {videosQuery.isLoading ? <div className="muted">{t("videos.loading")}</div> : null}
 
       {videos.length ? (
         <div className="videoLessonsGrid">
@@ -129,6 +129,7 @@ export default function VideosPage() {
                     onRetry={() => void loadPlayback(video)}
                     onStarted={handlePlayerStarted}
                     poster={video.videoThumbnail || ""}
+                    t={t}
                   />
                 ) : (
                   <div
@@ -144,7 +145,7 @@ export default function VideosPage() {
                     <div className="videoLessonPlay">
                       <Play className="lucide" aria-hidden="true" />
                     </div>
-                    {video.premiumOnly ? <span className="videoLessonPremium">Premium</span> : null}
+                    {video.premiumOnly ? <span className="videoLessonPremium">{t("videos.premium")}</span> : null}
                   </>
                 ) : null}
               </div>
@@ -156,7 +157,7 @@ export default function VideosPage() {
         </div>
       ) : videosQuery.isLoading ? null : (
         <div className="card" style={{ padding: 16 }}>
-          <div className="muted">Hozircha videodarslar mavjud emas</div>
+          <div className="muted">{t("videos.empty")}</div>
         </div>
       )}
     </section>
@@ -169,7 +170,8 @@ function BunnyHlsPlayer({
   error,
   onRetry,
   onStarted,
-  poster = ""
+  poster = "",
+  t
 }: {
   src: string;
   loading: boolean;
@@ -177,6 +179,7 @@ function BunnyHlsPlayer({
   onRetry: () => void;
   onStarted: () => void;
   poster?: string;
+  t: (key: string) => string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -225,7 +228,7 @@ function BunnyHlsPlayer({
         {loading ? (
           <div className="videoPlayerOverlay">
             <div className="videoPlayerSpinner" />
-            <span>Video yuklanmoqda...</span>
+            <span>{t("videos.playerLoading")}</span>
           </div>
         ) : null}
         {error ? (
@@ -233,7 +236,7 @@ function BunnyHlsPlayer({
             <CircleAlert className="lucide" aria-hidden="true" />
             <span>{error}</span>
             <button className="btn btn-primary btn-sm" type="button" onClick={onRetry}>
-              <RefreshCw className="lucide" aria-hidden="true" /> Qayta urinish
+              <RefreshCw className="lucide" aria-hidden="true" /> {t("videos.retry")}
             </button>
           </div>
         ) : null}

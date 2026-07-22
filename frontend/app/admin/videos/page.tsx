@@ -26,6 +26,11 @@ type VideoLesson = {
   topicId: number;
   topicTitle: string;
   title: string;
+  titleI18n?: {
+    uz_latn?: string;
+    uz_cyrl?: string;
+    ru?: string;
+  };
   description: string;
   category: string;
   premiumOnly: boolean;
@@ -39,6 +44,9 @@ type VideoLesson = {
 
 type VideoForm = {
   topicId: string;
+  titleUzLatn: string;
+  titleUzCyrl: string;
+  titleRu: string;
   file: File | null;
 };
 
@@ -50,6 +58,9 @@ type UploadResponse = {
 
 const emptyForm = (): VideoForm => ({
   topicId: "",
+  titleUzLatn: "",
+  titleUzCyrl: "",
+  titleRu: "",
   file: null
 });
 
@@ -109,6 +120,17 @@ export default function AdminVideosPage() {
       xhr.open("POST", endpoint, true);
       if (accessToken) xhr.setRequestHeader("authorization", `Bearer ${accessToken}`);
       xhr.setRequestHeader("x-topic-id", meta.topicId);
+      xhr.setRequestHeader(
+        "x-video-title-i18n",
+        JSON.stringify({
+          uz_latn: meta.titleUzLatn,
+          uz_cyrl: meta.titleUzCyrl,
+          ru: meta.titleRu
+        })
+      );
+      xhr.setRequestHeader("x-video-title-uz-latn", meta.titleUzLatn || "");
+      xhr.setRequestHeader("x-video-title-uz-cyrl", meta.titleUzCyrl || "");
+      xhr.setRequestHeader("x-video-title-ru", meta.titleRu || "");
       xhr.setRequestHeader("x-file-name", file.name || "video.mp4");
       xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
       xhr.upload.onprogress = (event) => {
@@ -220,6 +242,24 @@ export default function AdminVideosPage() {
             void saveVideo();
           }}
         >
+          <input
+            className="input"
+            value={form.titleUzLatn}
+            onChange={(event) => setForm((current) => ({ ...current, titleUzLatn: event.target.value }))}
+            placeholder="Video sarlavhasi - O‘zbek lotin"
+          />
+          <input
+            className="input"
+            value={form.titleUzCyrl}
+            onChange={(event) => setForm((current) => ({ ...current, titleUzCyrl: event.target.value }))}
+            placeholder="Видео сарлавҳаси - Ўзбек кирилл"
+          />
+          <input
+            className="input"
+            value={form.titleRu}
+            onChange={(event) => setForm((current) => ({ ...current, titleRu: event.target.value }))}
+            placeholder="Название видео - Русский"
+          />
           <select
             className="input"
             value={form.topicId}
@@ -234,22 +274,20 @@ export default function AdminVideosPage() {
           </select>
 
           <div className="adminUploadRow">
-            <input
-              ref={fileInputRef}
-              className="input"
-              type="file"
-              accept="video/mp4,video/*"
-              onChange={(event) =>
-                {
+              <input
+                ref={fileInputRef}
+                className="input"
+                type="file"
+                accept="video/mp4,video/*"
+                onChange={(event) => {
                   const file = event.target.files?.[0] || null;
                   setSelectedFileName(file?.name || "");
                   setForm((current) => ({
                     ...current,
                     file
                   }));
-                }
-              }
-            />
+                }}
+              />
             <button
               className="btn btn-ghost"
               type="button"

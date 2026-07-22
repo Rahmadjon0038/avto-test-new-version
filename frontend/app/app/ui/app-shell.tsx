@@ -266,25 +266,29 @@ export default function AppShell({ children }: { children: ReactNode }) {
               href="https://www.instagram.com/reel/DZZ3X7agYDW/"
               target="_blank"
               rel="noreferrer"
-              aria-label="Instagram"
+              aria-label={t("social.instagram")}
+              title={t("social.instagram")}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
                 <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
                 <circle cx="17.1" cy="6.9" r="1.2" fill="currentColor" />
               </svg>
+              <span className="siteSocialLinkText">{t("social.instagram")}</span>
             </a>
             <a
               className="siteSocialLink"
               href="https://t.me/JURABEK_AUTOTEACHER"
               target="_blank"
               rel="noreferrer"
-              aria-label="Telegram"
+              aria-label={t("social.telegram")}
+              title={t("social.telegram")}
             >
               <Send className="lucide" aria-hidden="true" />
+              <span className="siteSocialLinkText">{t("social.telegram")}</span>
             </a>
-            <a className="siteSocialLink sitePrivacyLink" href="/privacy" aria-label="Privacy Policy">
-              Privacy
+            <a className="siteSocialLink sitePrivacyLink" href="/privacy" aria-label={t("footer.privacy")} title={t("footer.privacy")}>
+              <span className="siteSocialLinkText">{t("footer.privacy")}</span>
             </a>
           </div>
         </div>

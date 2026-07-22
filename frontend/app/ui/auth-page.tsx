@@ -453,11 +453,13 @@ export default function AuthPage() {
             <span className="textLogoRoad">Topshirdi</span>
           </div>
           <div className="siteFooterLinks" aria-label="Social links">
-            <a className="siteSocialLink" href="#" aria-label="Instagram">
+            <a className="siteSocialLink" href="#" aria-label={t("social.instagram")} title={t("social.instagram")}>
               <InstagramMark />
+              <span className="siteSocialLinkText">{t("social.instagram")}</span>
             </a>
-            <a className="siteSocialLink" href="#" aria-label="Telegram">
+            <a className="siteSocialLink" href="#" aria-label={t("social.telegram")} title={t("social.telegram")}>
               <Send className="lucide" aria-hidden="true" />
+              <span className="siteSocialLinkText">{t("social.telegram")}</span>
             </a>
           </div>
         </div>

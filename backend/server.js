@@ -33,7 +33,7 @@ app.use((req, res, next) => {
     res.setHeader("Vary", "Origin");
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Authorization, Content-Type, X-Topic-Id, X-File-Name, X-Video-Title, X-Video-Description, X-Video-Category, X-Premium-Only, X-Title, X-Video-File-Name"
+      "Authorization, Content-Type, X-Topic-Id, X-File-Name, X-Video-Title, X-Video-Description, X-Video-Category, X-Premium-Only, X-Title, X-Video-File-Name, X-Video-Title-I18n, X-Video-Title-Uz-Latn, X-Video-Title-Uz-Cyrl, X-Video-Title-Ru"
     );
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,PUT,DELETE,OPTIONS");
     res.setHeader("Access-Control-Max-Age", "86400");
@@ -995,6 +995,8 @@ function normalizeVideoLessonRow(row) {
   const bunnyVideoId = String(row.bunny_video_id || "").trim();
   const bunnyLibraryId = String(row.bunny_library_id || BUNNY_LIBRARY_ID || "").trim();
   const title = String(row.title || row.topic_title || "").trim();
+  const titleI18n = normalizeTitleI18n(row.title_i18n, title);
+  const topicTitleI18n = normalizeTitleI18n(row.topic_title_i18n, row.topic_title || title);
   const playbackUrl = String(row.playback_url || buildBunnyPlaybackUrl(bunnyVideoId) || "").trim();
   const thumbnailUrl = String(row.video_thumbnail || buildBunnyThumbnailUrl(bunnyVideoId) || "").trim();
   const status = normalizeVideoStatus(
@@ -1007,7 +1009,9 @@ function normalizeVideoLessonRow(row) {
     topicId: Number(row.topic_id || 0),
     topicSlug: String(row.topic_slug || ""),
     topicTitle: String(row.topic_title || title),
+    topicTitleI18n,
     title,
+    titleI18n,
     description: String(row.description || ""),
     category: String(row.category || ""),
     premiumOnly: row.premium_only === true || row.premium_only === 1 || row.premium_only === "1",
@@ -1027,10 +1031,11 @@ function normalizeVideoLessonInput(input = {}, current = null) {
   const source = typeof input === "string" ? { title: input } : input || {};
   const topicId = Number(source.topicId ?? current?.topicId ?? 0);
   if (!Number.isFinite(topicId) || topicId <= 0) throw new Error("Dars mavzusi tanlanishi kerak");
-  const title = String(source.title || current?.title || "").trim();
+  const titleI18n = normalizeTitleI18n(source.titleI18n || source.title_i18n || current?.titleI18n || current?.title_i18n || {}, source.title || current?.title || "");
+  const title = String(source.title || titleI18n[DEFAULT_LANGUAGE] || current?.title || "").trim();
   const description = String(source.description || current?.description || "").trim();
   const category = String(source.category || current?.category || "").trim();
-  return { topicId, title, description, category, premiumOnly: false };
+  return { topicId, title, titleI18n, description, category, premiumOnly: false };
 }
 
 function getBunnyHeaders(extra = {}) {
@@ -1181,6 +1186,7 @@ async function getVideoLessonsFromDb() {
         v.id,
         v.topic_id,
         v.title,
+        v.title_i18n,
         v.description,
         v.category,
         v.premium_only,
@@ -1195,7 +1201,8 @@ async function getVideoLessonsFromDb() {
         v.created_at,
         v.updated_at,
         t.slug AS topic_slug,
-        t.title AS topic_title
+        t.title AS topic_title,
+        t.title_i18n AS topic_title_i18n
       FROM video_lessons v
       LEFT JOIN topics t ON t.id = v.topic_id
       ORDER BY v.created_at ASC, v.id ASC
@@ -1215,6 +1222,7 @@ async function getVideoLessonByIdFromDb(videoId) {
         v.id,
         v.topic_id,
         v.title,
+        v.title_i18n,
         v.description,
         v.category,
         v.premium_only,
@@ -1229,7 +1237,8 @@ async function getVideoLessonByIdFromDb(videoId) {
         v.created_at,
         v.updated_at,
         t.slug AS topic_slug,
-        t.title AS topic_title
+        t.title AS topic_title,
+        t.title_i18n AS topic_title_i18n
       FROM video_lessons v
       LEFT JOIN topics t ON t.id = v.topic_id
       WHERE CAST(v.id AS TEXT) = ?
@@ -1249,6 +1258,7 @@ async function getVideoLessonByBunnyVideoIdFromDb(bunnyVideoId) {
         v.id,
         v.topic_id,
         v.title,
+        v.title_i18n,
         v.description,
         v.category,
         v.premium_only,
@@ -1263,7 +1273,8 @@ async function getVideoLessonByBunnyVideoIdFromDb(bunnyVideoId) {
         v.created_at,
         v.updated_at,
         t.slug AS topic_slug,
-        t.title AS topic_title
+        t.title AS topic_title,
+        t.title_i18n AS topic_title_i18n
       FROM video_lessons v
       LEFT JOIN topics t ON t.id = v.topic_id
       WHERE v.bunny_video_id = ?
@@ -1334,6 +1345,7 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
       INSERT INTO video_lessons (
         topic_id,
         title,
+        title_i18n,
         description,
         category,
         premium_only,
@@ -1346,12 +1358,13 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
         created_at,
         updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      VALUES (?, ?, ?::jsonb, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
       RETURNING *
     `,
     [
       next.topicId,
       title,
+      JSON.stringify(next.titleI18n || {}),
       description,
       category,
       next.premiumOnly,
@@ -1363,7 +1376,12 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
       playbackUrl
     ]
   );
-  return normalizeVideoLessonRow({ ...result, topic_slug: topic.slug, topic_title: topic.title });
+  return normalizeVideoLessonRow({
+    ...result,
+    topic_slug: topic.slug,
+    topic_title: topic.title,
+    topic_title_i18n: topic.titleI18n
+  });
 }
 
 async function updateVideoLesson(videoId, input = {}, fileBuffer = null, contentType = "application/octet-stream") {
@@ -1432,6 +1450,7 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
       UPDATE video_lessons
       SET topic_id = ?,
           title = ?,
+          title_i18n = ?::jsonb,
           description = ?,
           category = ?,
           premium_only = ?,
@@ -1448,6 +1467,7 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
     [
       next.topicId,
       title,
+      JSON.stringify(next.titleI18n || {}),
       description,
       category,
       next.premiumOnly,
@@ -1461,7 +1481,12 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
     ]
   );
 
-  return normalizeVideoLessonRow({ ...result, topic_slug: topic.slug, topic_title: topic.title });
+  return normalizeVideoLessonRow({
+    ...result,
+    topic_slug: topic.slug,
+    topic_title: topic.title,
+    topic_title_i18n: topic.titleI18n
+  });
 }
 
 async function deleteVideoLesson(videoId) {
@@ -4188,14 +4213,24 @@ function maybeRawUpload(req, res, next) {
   return express.raw({ type: () => true, limit: "1024mb" })(req, res, next);
 }
 
-function serializeVideoLesson(video, user = null, adminView = false) {
+function resolveLocalizedText(i18n, fallback, lang) {
+  const normalizedLang = normalizeLanguageCode(lang, "");
+  const resolved = normalizedLang ? String(i18n?.[normalizedLang] || "").trim() : "";
+  return resolved || String(fallback || "").trim();
+}
+
+function serializeVideoLesson(video, user = null, adminView = false, lang = "") {
   const canPlay = adminView || !video.premiumOnly || isUserPro(user) || Boolean(user?.is_admin);
+  const title = resolveLocalizedText(video.titleI18n, video.title || video.topicTitle, lang);
+  const topicTitle = resolveLocalizedText(video.topicTitleI18n, video.topicTitle || video.title, lang);
   return {
     id: video.id,
     topicId: video.topicId,
     topicSlug: video.topicSlug,
-    topicTitle: video.topicTitle,
-    title: video.title || video.topicTitle,
+    topicTitle,
+    topicTitleI18n: video.topicTitleI18n || {},
+    title,
+    titleI18n: video.titleI18n || {},
     description: video.description,
     category: video.category,
     premiumOnly: video.premiumOnly,
@@ -4212,18 +4247,30 @@ function serializeVideoLesson(video, user = null, adminView = false) {
 }
 
 async function handleListVideoLessons(req, res, user, adminView = false) {
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const videos = await getVideoLessonsFromDb();
   res.json({
-    videos: videos.map((video) => serializeVideoLesson(video, user, adminView))
+    videos: videos.map((video) => serializeVideoLesson(video, user, adminView, lang))
   });
 }
 
 async function readVideoLessonPayload(req) {
   const body = Buffer.isBuffer(req.body) ? null : (req.body && typeof req.body === "object" ? req.body : {});
   const headers = req.headers || {};
+  const headerTitleI18n = parseJsonValue(headers["x-video-title-i18n"], {});
+  const titleI18n =
+    body?.titleI18n ??
+    body?.title_i18n ??
+    (headerTitleI18n && typeof headerTitleI18n === "object" ? headerTitleI18n : null) ??
+    {
+      uz_latn: headers["x-video-title-uz-latn"],
+      uz_cyrl: headers["x-video-title-uz-cyrl"],
+      ru: headers["x-video-title-ru"]
+    };
   return {
     topicId: body?.topicId ?? body?.topic_id ?? headers["x-topic-id"],
     title: body?.title ?? headers["x-video-title"] ?? headers["x-title"],
+    titleI18n,
     description: body?.description ?? headers["x-video-description"] ?? "",
     category: body?.category ?? headers["x-video-category"] ?? "",
     premiumOnly: body?.premiumOnly ?? body?.premium_only ?? headers["x-premium-only"],
@@ -4243,7 +4290,8 @@ app.get("/api/videos", requireUser, async (req, res) => {
 app.get("/api/video-lessons/:lessonId", requireUser, async (req, res) => {
   const video = await getVideoLessonByIdFromDb(String(req.params.lessonId));
   if (!video) return res.status(404).json({ error: "Video topilmadi" });
-  res.json({ video: serializeVideoLesson(video, req.user, false) });
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  res.json({ video: serializeVideoLesson(video, req.user, false, lang) });
 });
 
 app.get("/api/video-lessons/:lessonId/playback", requireUser, async (req, res) => {
@@ -4252,9 +4300,10 @@ app.get("/api/video-lessons/:lessonId/playback", requireUser, async (req, res) =
   const allowed = !video.premiumOnly || isUserPro(req.user) || Boolean(req.user?.is_admin);
   if (!allowed) return res.status(403).json({ error: "Premium video" });
   if (!video.playbackUrl) return res.status(404).json({ error: "Playback URL topilmadi" });
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   res.json({
     playbackUrl: video.playbackUrl,
-    video: serializeVideoLesson(video, req.user, false)
+    video: serializeVideoLesson(video, req.user, false, lang)
   });
 });
 

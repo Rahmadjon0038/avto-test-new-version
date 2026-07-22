@@ -254,6 +254,7 @@ async function initDb(dbApi) {
       id BIGSERIAL PRIMARY KEY,
       topic_id BIGINT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
       title TEXT NOT NULL DEFAULT '',
+      title_i18n JSONB NOT NULL DEFAULT '{}'::jsonb,
       description TEXT NOT NULL DEFAULT '',
       category TEXT NOT NULL DEFAULT '',
       premium_only BOOLEAN NOT NULL DEFAULT FALSE,
@@ -271,6 +272,7 @@ async function initDb(dbApi) {
   `);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS topic_id BIGINT NOT NULL DEFAULT 0;`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';`);
+  await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS title_i18n JSONB NOT NULL DEFAULT '{}'::jsonb;`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ADD COLUMN IF NOT EXISTS premium_only BOOLEAN NOT NULL DEFAULT FALSE;`);
@@ -289,6 +291,7 @@ async function initDb(dbApi) {
   await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_id SET DEFAULT '';`);
   await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_url SET NOT NULL;`);
   await dbApi.run(`ALTER TABLE video_lessons ALTER COLUMN youtube_id SET NOT NULL;`);
+  await dbApi.run(`UPDATE video_lessons SET title_i18n = '{}'::jsonb WHERE title_i18n IS NULL;`);
   await dbApi.run(`CREATE INDEX IF NOT EXISTS video_lessons_topic_id_idx ON video_lessons (topic_id);`);
 
   await dbApi.run(`
