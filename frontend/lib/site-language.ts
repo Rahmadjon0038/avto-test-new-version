@@ -135,7 +135,13 @@ const translations: Record<LanguageCode, TranslationTree> = {
       empty: "Hozircha xatolar yo‘q",
       listTab: "Ro‘yxat",
       practiceTab: "Mashq qilish",
-      clear: "Tozalash"
+      clear: "Tozalash",
+      kindTicket: "Bilet",
+      kindTopic: "Mavzu",
+      kindCustom: "Custom",
+      kindQuestion: "Savol",
+      correctAnswer: "To‘g‘ri javob",
+      wrongAnswer: "Noto‘g‘ri javob"
     },
     answers: {
       title: "Barcha testlar javoblari",
@@ -372,7 +378,13 @@ const translations: Record<LanguageCode, TranslationTree> = {
       empty: "Ҳозирча хатолар йўқ",
       listTab: "Рўйхат",
       practiceTab: "Машқ қилиш",
-      clear: "Тозалаш"
+      clear: "Тозалаш",
+      kindTicket: "Билет",
+      kindTopic: "Мавзу",
+      kindCustom: "Custom",
+      kindQuestion: "Савол",
+      correctAnswer: "Тўғри жавоб",
+      wrongAnswer: "Нотўғри жавоб"
     },
     answers: {
       title: "Барча тестлар жавоблари",
@@ -609,7 +621,13 @@ const translations: Record<LanguageCode, TranslationTree> = {
       empty: "Пока ошибок нет",
       listTab: "Список",
       practiceTab: "Практика",
-      clear: "Очистить"
+      clear: "Очистить",
+      kindTicket: "Билет",
+      kindTopic: "Тема",
+      kindCustom: "Custom",
+      kindQuestion: "Вопрос",
+      correctAnswer: "Правильный ответ",
+      wrongAnswer: "Неправильный ответ"
     },
     answers: {
       title: "Ответы ко всем тестам",

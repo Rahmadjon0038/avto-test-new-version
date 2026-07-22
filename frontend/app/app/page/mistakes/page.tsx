@@ -236,9 +236,15 @@ function optionLetter(index: number) {
   return String.fromCharCode(65 + index);
 }
 
-function mistakeLabel(question: MistakeQuestion, index: number) {
+function mistakeLabel(question: MistakeQuestion, index: number, t: (key: string) => string) {
   const kindLabel =
-    question.kind === "ticket" ? "Bilet" : question.kind === "topic" ? "Mavzu" : question.kind === "custom" ? "Custom" : "Savol";
+    question.kind === "ticket"
+      ? t("mistakes.kindTicket")
+      : question.kind === "topic"
+        ? t("mistakes.kindTopic")
+        : question.kind === "custom"
+          ? t("mistakes.kindCustom")
+          : t("mistakes.kindQuestion");
   return `${kindLabel} ${String(index + 1).padStart(2, "0")}`;
 }
 
@@ -442,7 +448,7 @@ export default function MistakesPage() {
               {questions.map((question, index) => (
                 <article className="card answersQuestionCard mistakesQuestionCard" key={question.id || `${question.sourceId}-${index}`}>
                   <div className="answersQuestionCardHead mistakesQuestionCardHead">
-                    <div className="answersQuestionCardTitle">{mistakeLabel(question, index)}</div>
+                    <div className="answersQuestionCardTitle">{mistakeLabel(question, index, t)}</div>
                     <span className="badge">{question.hasImage ? t("answers.withImage") : t("answers.withoutImage")}</span>
                     <button
                       className="mistakesDeleteBtn"
@@ -465,13 +471,13 @@ export default function MistakesPage() {
 
                   <div className="mistakesAnswerRow">
                     <div className="mistakesAnswerBox bad">
-                      <div className="mistakesAnswerLabel">{t("public.correctAnswer")}</div>
+                      <div className="mistakesAnswerLabel">{t("mistakes.wrongAnswer")}</div>
                       <div className="mistakesAnswerValue">
                         {question.wrongAnswer === null ? "—" : question.options[question.wrongAnswer] || t("common.noData")}
                       </div>
                     </div>
                     <div className="mistakesAnswerBox good">
-                      <div className="mistakesAnswerLabel">{t("public.correctAnswer")}</div>
+                      <div className="mistakesAnswerLabel">{t("mistakes.correctAnswer")}</div>
                       <div className="mistakesAnswerValue">{question.correctAnswer || "—"}</div>
                     </div>
                   </div>

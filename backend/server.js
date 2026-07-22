@@ -220,6 +220,35 @@ function localizeTicket(ticket, lang) {
   };
 }
 
+async function localizeMistakeRow(row, lang) {
+  const question = row?.question && typeof row.question === "object" ? localizeQuestion(row.question, lang) : row?.question || {};
+  let sourceTitle = String(row?.source_title || question?.sourceTitle || "").trim();
+  const sourceKind = String(row?.source_kind || question?.kind || "").trim();
+  const sourceId = String(row?.source_id || question?.sourceId || "").trim();
+
+  if (lang && sourceKind && sourceId) {
+    if (sourceKind === "ticket") {
+      const ticket = await getTicketByIdFromDb(sourceId);
+      if (ticket) sourceTitle = String(localizeTicket(ticket, lang)?.title || sourceTitle).trim() || sourceTitle;
+    } else if (sourceKind === "topic") {
+      const topic = await getTopicFromDb(sourceId);
+      if (topic) sourceTitle = String(localizeTopic(topic, lang)?.title || sourceTitle).trim() || sourceTitle;
+    }
+  }
+
+  return {
+    ...(question || {}),
+    id: String(row?.question_key || question?.id || ""),
+    kind: sourceKind,
+    sourceId,
+    sourceTitle,
+    questionIndex: Number(row?.question_index || question?.questionIndex || 0),
+    wrongAnswer: Number.isFinite(Number(row?.wrong_answer)) ? Number(row.wrong_answer) : null,
+    createdAt: row?.created_at,
+    updatedAt: row?.updated_at
+  };
+}
+
 function normalizeQuestions(value, currentQuestions = null) {
   const questions = parseQuestionsValue(value);
   const currentById = new Map(
@@ -4383,6 +4412,7 @@ app.get("/api/answers", requireUser, async (req, res) => {
 
 app.get("/api/mistakes", requireUser, async (req, res) => {
   const userId = String(req.user.id);
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const rows = await dbApi.all(
     `
     SELECT question_key, source_kind, source_id, source_title, question_index, question, wrong_answer, created_at, updated_at
@@ -4393,17 +4423,7 @@ app.get("/api/mistakes", requireUser, async (req, res) => {
     [userId]
   );
 
-  const questions = rows.map((row) => ({
-    ...(row.question || {}),
-    id: String(row.question_key || row.question?.id || ""),
-    kind: String(row.source_kind || row.question?.kind || ""),
-    sourceId: String(row.source_id || row.question?.sourceId || ""),
-    sourceTitle: String(row.source_title || row.question?.sourceTitle || ""),
-    questionIndex: Number(row.question_index || row.question?.questionIndex || 0),
-    wrongAnswer: Number.isFinite(Number(row.wrong_answer)) ? Number(row.wrong_answer) : null,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  }));
+  const questions = await Promise.all(rows.map((row) => localizeMistakeRow(row, lang)));
 
   res.json({ questions });
 });
