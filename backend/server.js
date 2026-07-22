@@ -1582,9 +1582,9 @@ function chunkArray(items, size) {
   return chunks;
 }
 
-function buildGeneratedCustomTestFromBankSize(bank, size) {
+function buildGeneratedCustomTestFromBankSize(bank, size, lang = "") {
   const questions = bank.slice(0, size).map((item) => ({
-    ...item.question,
+    ...localizeQuestion(item.question, lang),
     id: String(item.questionKey || item.question?.id || ""),
     kind: "ticket",
     sourceId: String(item.ticketId || ""),
@@ -1603,16 +1603,16 @@ async function getProgressTicketById(ticketId) {
   return getTicketByIdFromDb(ticketId);
 }
 
-async function getGeneratedCustomTestsFromDb() {
+async function getGeneratedCustomTestsFromDb(lang = "") {
   const bank = await getTicketQuestionBankFromDb();
   const results = [];
   for (let size = 20; size <= bank.length; size += 20) {
-    results.push(buildGeneratedCustomTestFromBankSize(bank, size));
+    results.push(buildGeneratedCustomTestFromBankSize(bank, size, lang));
   }
   return results;
 }
 
-async function getGeneratedCustomTestByIdFromDb(testId) {
+async function getGeneratedCustomTestByIdFromDb(testId, lang = "") {
   const key = String(testId || "").trim();
   const match = /^(\d+)$/.exec(key);
   if (!match) return null;
@@ -1621,7 +1621,7 @@ async function getGeneratedCustomTestByIdFromDb(testId) {
   if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
   const bank = await getTicketQuestionBankFromDb();
   if (size > bank.length) return null;
-  return buildGeneratedCustomTestFromBankSize(bank, size);
+  return buildGeneratedCustomTestFromBankSize(bank, size, lang);
 }
 
 async function ensureUniqueTopicSlug(baseSlug, ignoreId = null) {
@@ -4225,7 +4225,8 @@ app.get("/api/videos/:lessonId/playback", requireUser, async (req, res) => {
 });
 
 app.get("/api/custom-tests", async (_req, res) => {
-  const customTests = await getGeneratedCustomTestsFromDb();
+  const lang = normalizeLanguageCode(_req.query.lang || _req.headers["x-lang"] || "", "");
+  const customTests = await getGeneratedCustomTestsFromDb(lang);
   res.json({
     customTests: customTests.map((test) => ({
       id: test.id,
@@ -4236,7 +4237,8 @@ app.get("/api/custom-tests", async (_req, res) => {
 });
 
 app.get("/api/custom-tests/:testId", async (req, res) => {
-  const customTest = await getGeneratedCustomTestByIdFromDb(String(req.params.testId));
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  const customTest = await getGeneratedCustomTestByIdFromDb(String(req.params.testId), lang);
   if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
   res.json({ customTest });
 });

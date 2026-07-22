@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
+import { appendLanguageQuery } from "@/lib/site-language";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
@@ -302,7 +303,7 @@ export default function CustomTestPage() {
   const customTestQuery = useQuery({
     queryKey: ["custom-test", testId, language],
     queryFn: async () => {
-      const res = await authFetch(`/api/custom-tests/${encodeURIComponent(testId)}`);
+      const res = await authFetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, language));
       const data = await jsonOrError(res);
       setCustomTest(data.customTest);
       return data;
