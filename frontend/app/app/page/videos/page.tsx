@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
 type VideoLesson = {
@@ -27,6 +28,7 @@ type VideoLesson = {
 export default function VideosPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
+  const { language } = useSiteLanguage();
   const [selectedVideoId, setSelectedVideoId] = useState<number | null>(null);
   const [playbackUrl, setPlaybackUrl] = useState("");
   const [loadingPlayback, setLoadingPlayback] = useState(false);
@@ -37,7 +39,7 @@ export default function VideosPage() {
   }, []);
 
   const videosQuery = useQuery({
-    queryKey: ["video-lessons"],
+    queryKey: ["video-lessons", language],
     enabled: authReady,
     queryFn: async () => {
       const res = await authFetch("/api/video-lessons");

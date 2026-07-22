@@ -58,7 +58,7 @@ function resolveQuestionImage(image?: string) {
 export default function MarathonPage() {
   const router = useRouter();
   const { authFetch } = useAuth();
-  const { t } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const autoNextTimerRef = useRef<number | null>(null);
 
@@ -140,7 +140,7 @@ export default function MarathonPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [authFetch]);
+  }, [authFetch, language]);
 
   useEffect(() => {
     void loadInitial();

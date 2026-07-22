@@ -63,7 +63,7 @@ function questionKeyLabel(index: number) {
 
 export default function AnswersPage() {
   const { authFetch } = useAuth();
-  const { t } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -92,7 +92,7 @@ export default function AnswersPage() {
   }, []);
 
   const answersQuery = useInfiniteQuery({
-    queryKey: ["answers", debouncedSearch, filter],
+    queryKey: ["answers", language, debouncedSearch, filter],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const params = new URLSearchParams({

@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Globe, LogIn } from "lucide-react";
@@ -24,6 +26,7 @@ export default function PublicShell({ children }: { children: ReactNode }) {
                   onClick={() => setLanguage(option.code)}
                   aria-pressed={language === option.code}
                   title={option.label}
+                  data-lang={option.code}
                 >
                   <Globe className="lucide" aria-hidden="true" />
                   <span>{option.shortLabel}</span>

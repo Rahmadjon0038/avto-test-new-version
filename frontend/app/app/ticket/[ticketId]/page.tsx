@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-re
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
@@ -271,6 +272,7 @@ export default function TicketPage() {
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
   const handleSettingsChange = useCallback(
@@ -307,7 +309,7 @@ export default function TicketPage() {
   const q = useMemo(() => displayQuestions[idx] ?? null, [displayQuestions, idx]);
 
   const ticketQuery = useQuery({
-    queryKey: ["ticket", ticketId],
+    queryKey: ["ticket", ticketId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/tickets/${encodeURIComponent(ticketId)}`);
       const data = await jsonOrError(res);
@@ -317,7 +319,7 @@ export default function TicketPage() {
   });
 
   const progressQuery = useQuery({
-    queryKey: ["progress", ticketId],
+    queryKey: ["progress", ticketId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/progress/${encodeURIComponent(ticketId)}`);
       return jsonOrError(res);
@@ -361,7 +363,7 @@ export default function TicketPage() {
         body: JSON.stringify({ answers: nextAnswers })
       }).then(jsonOrError),
     onError: (e: any) => toast.error(e?.message || "Xatolik"),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["progress", ticketId] })
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["progress", ticketId, language] })
   });
 
   function save(nextAnswers: Record<string, number>) {
@@ -410,7 +412,7 @@ export default function TicketPage() {
     onSettled: () => {
       setAnswers({});
       setIdx(0);
-      qc.invalidateQueries({ queryKey: ["progress", ticketId] });
+      qc.invalidateQueries({ queryKey: ["progress", ticketId, language] });
     }
   });
 

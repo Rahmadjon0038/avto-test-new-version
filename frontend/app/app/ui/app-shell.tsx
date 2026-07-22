@@ -225,6 +225,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     onClick={() => setLanguage(option.code)}
                     aria-pressed={language === option.code}
                     title={option.label}
+                    data-lang={option.code}
                   >
                     <span>{option.shortLabel}</span>
                   </button>

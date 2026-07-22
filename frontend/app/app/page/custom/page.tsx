@@ -14,9 +14,9 @@ import ProgressStatsBlock from "@/app/ui/progress-stats-block";
 export default function CustomTestsPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
-  const { t } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const customTestsQuery = useQuery({
-    queryKey: ["custom-tests"],
+    queryKey: ["custom-tests", language],
     queryFn: fetchCustomTests
   });
 
@@ -59,6 +59,7 @@ export default function CustomTestsPage() {
                 questionsCount={customTest.questionsCount || 0}
                 authFetch={authFetch}
                 authReady={authReady}
+                language={language}
               />
             </div>
           </button>
@@ -80,15 +81,17 @@ function CustomProgressPreview({
   testId,
   questionsCount,
   authFetch,
-  authReady
+  authReady,
+  language
 }: {
   testId: number;
   questionsCount: number;
   authFetch: AuthFetch;
   authReady: boolean;
+  language: string;
 }) {
   const progressQuery = useQuery({
-    queryKey: ["custom-test-progress", testId],
+    queryKey: ["custom-test-progress", testId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/custom-test-progress/${encodeURIComponent(String(testId))}`);
       const data = await jsonOrError(res);

@@ -179,6 +179,88 @@ body {
   min-width: 0;
 }
 
+.languageRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, var(--primary) 8%), var(--panel2));
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.languageChip {
+  --chip: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chip) 28%, var(--border));
+  background: color-mix(in srgb, var(--chip) 10%, var(--panel));
+  color: color-mix(in srgb, var(--chip) 82%, #ffffff 18%);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.languageChip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--chip);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--chip) 16%, transparent);
+}
+
+.languageChip[data-lang="uz_latn"] {
+  --chip: #2f6dff;
+}
+
+.languageChip[data-lang="uz_cyrl"] {
+  --chip: #8b5cf6;
+}
+
+.languageChip[data-lang="ru"] {
+  --chip: #22c55e;
+}
+
+.languageChip:hover {
+  transform: translateY(-1px);
+  color: #ffffff;
+  border-color: color-mix(in srgb, var(--chip) 52%, #ffffff 16%);
+  background: color-mix(in srgb, var(--chip) 18%, var(--panel));
+}
+
+.languageChip.active {
+  color: #ffffff;
+  border-color: color-mix(in srgb, var(--chip) 58%, #ffffff 18%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--chip) 92%, #000 8%),
+    color-mix(in srgb, var(--chip) 72%, #000 28%)
+  );
+  box-shadow: 0 10px 18px color-mix(in srgb, var(--chip) 28%, transparent);
+}
+
+.languageChip.active::before {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+}
+
 .actionRow > .profileChip {
   justify-content: center;
 }
@@ -227,6 +309,8 @@ body {
 
   .actionRow {
     gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
 
@@ -250,6 +334,17 @@ body {
   .textLogoRoad,
   .textLogoTest {
     font-size: clamp(1.35rem, 4vw, 1.8rem);
+  }
+
+  .languageRow {
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .languageChip {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 }
 

@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, Mic, RotateCcw, Trash2, Upl
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
@@ -298,6 +299,7 @@ export default function TopicPage() {
   const topicId = String(params.topicId || "");
   const qc = useQueryClient();
   const { authFetch, authReady, accessToken } = useAuth();
+  const { language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`topic:${topicId}`);
   const handleSettingsChange = useCallback(
@@ -325,7 +327,7 @@ export default function TopicPage() {
   const mediaChunksRef = useRef<Blob[]>([]);
   const recordingQuestionIdRef = useRef<string | null>(null);
   const meQuery = useQuery({
-    queryKey: ["topic-me"],
+    queryKey: ["topic-me", language],
     queryFn: async () => {
       const res = await authFetch("/api/auth/me");
       return jsonOrError(res);
@@ -347,7 +349,7 @@ export default function TopicPage() {
   const q = useMemo(() => topicQuestions[idx] ?? null, [topicQuestions, idx]);
 
   const topicQuery = useQuery({
-    queryKey: ["topic", topicId],
+    queryKey: ["topic", topicId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/topics/${encodeURIComponent(topicId)}`);
       const data = await jsonOrError(res);
@@ -357,7 +359,7 @@ export default function TopicPage() {
   });
 
   const progressQuery = useQuery({
-    queryKey: ["topic-progress", topicId],
+    queryKey: ["topic-progress", topicId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/topic-progress/${encodeURIComponent(topicId)}`);
       return jsonOrError(res);
@@ -702,7 +704,7 @@ export default function TopicPage() {
         body: JSON.stringify({ answers: nextAnswers })
       }).then(jsonOrError),
     onError: (e: any) => toast.error(e?.message || "Xatolik"),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["topic-progress", topicId] })
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["topic-progress", topicId, language] })
   });
 
   function save(nextAnswers: Record<string, number>) {
@@ -741,16 +743,16 @@ export default function TopicPage() {
   ];
   const closeResult = useCallback(() => {
     setFinishOpen(false);
-    void qc.invalidateQueries({ queryKey: ["topics"] });
+    void qc.invalidateQueries({ queryKey: ["topics", language] });
     router.push("/app/page/topics");
-  }, [qc, router]);
+  }, [language, qc, router]);
 
   const resetMutation = useMutation({
     mutationFn: () => authFetch(`/api/topic-progress/${encodeURIComponent(topicId)}/reset`, { method: "POST" }).then(jsonOrError),
     onSettled: () => {
       setAnswers({});
       setIdx(0);
-      qc.invalidateQueries({ queryKey: ["topic-progress", topicId] });
+      qc.invalidateQueries({ queryKey: ["topic-progress", topicId, language] });
     }
   });
 

@@ -15,9 +15,9 @@ export default function TopicsPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch, authReady } = useAuth();
-  const { t } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const topicsQuery = useQuery({
-    queryKey: ["topics"],
+    queryKey: ["topics", language],
     queryFn: async () => {
       const res = await authFetch("/api/topics");
       const data = await jsonOrError(res);
@@ -114,9 +114,10 @@ type TopicProgress = {
 
 function TopicProgressPreview({ topicId }: { topicId: number }) {
   const { authFetch, authReady } = useAuth();
+  const { language } = useSiteLanguage();
 
   const topicQuery = useQuery({
-    queryKey: ["topic-card", topicId],
+    queryKey: ["topic-card", topicId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/topics/${encodeURIComponent(String(topicId))}`);
       const data = await jsonOrError(res);
@@ -126,7 +127,7 @@ function TopicProgressPreview({ topicId }: { topicId: number }) {
   });
 
   const progressQuery = useQuery({
-    queryKey: ["topic-progress", topicId],
+    queryKey: ["topic-progress", topicId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/topic-progress/${encodeURIComponent(String(topicId))}`);
       const data = await jsonOrError(res);

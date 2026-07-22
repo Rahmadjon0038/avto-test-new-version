@@ -214,7 +214,7 @@ export default function ExamPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch, authReady } = useAuth();
-  const { t } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("exam");
   const handleSettingsChange = useCallback(
@@ -246,7 +246,7 @@ export default function ExamPage() {
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const examQuery = useQuery({
-    queryKey: ["exam"],
+    queryKey: ["exam", language],
     queryFn: async () => {
       const res = await authFetch("/api/exam");
       const data = await jsonOrError(res);

@@ -246,7 +246,7 @@ export default function MistakesPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch } = useAuth();
-  const { t } = useSiteLanguage();
+  const { t, language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("mistakes");
   const handleSettingsChange = useCallback(
@@ -267,7 +267,7 @@ export default function MistakesPage() {
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const mistakesQuery = useQuery({
-    queryKey: ["mistakes"],
+    queryKey: ["mistakes", language],
     queryFn: async () => {
       const res = await authFetch("/api/mistakes");
       const data = await jsonOrError(res);

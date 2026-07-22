@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-re
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
@@ -265,6 +266,7 @@ export default function CustomTestPage() {
   const testId = String(params.testId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`custom:${testId}`);
   const handleSettingsChange = useCallback(
@@ -298,7 +300,7 @@ export default function CustomTestPage() {
   const q = useMemo(() => customTestQuestions[idx] ?? null, [customTestQuestions, idx]);
 
   const customTestQuery = useQuery({
-    queryKey: ["custom-test", testId],
+    queryKey: ["custom-test", testId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/custom-tests/${encodeURIComponent(testId)}`);
       const data = await jsonOrError(res);
@@ -308,7 +310,7 @@ export default function CustomTestPage() {
   });
 
   const progressQuery = useQuery({
-    queryKey: ["custom-test-progress", testId],
+    queryKey: ["custom-test-progress", testId, language],
     queryFn: async () => {
       const res = await authFetch(`/api/custom-test-progress/${encodeURIComponent(testId)}`);
       return jsonOrError(res);
@@ -358,7 +360,7 @@ export default function CustomTestPage() {
         body: JSON.stringify({ answers: nextAnswers })
       }).then(jsonOrError),
     onError: (e: any) => toast.error(e?.message || "Xatolik"),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-test-progress", testId] })
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-test-progress", testId, language] })
   });
 
   function save(nextAnswers: Record<string, number>) {
@@ -403,7 +405,7 @@ export default function CustomTestPage() {
     onSettled: () => {
       setAnswers({});
       setIdx(0);
-      qc.invalidateQueries({ queryKey: ["custom-test-progress", testId] });
+      qc.invalidateQueries({ queryKey: ["custom-test-progress", testId, language] });
     }
   });
 
