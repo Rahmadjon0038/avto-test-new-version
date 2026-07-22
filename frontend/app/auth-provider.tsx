@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import toast from "react-hot-toast";
 import { useCookies } from "react-cookie";
-import { appendLanguageQuery, getBrowserLanguage, getTranslation } from "@/lib/site-language";
+import { getBrowserLanguage, getTranslation } from "@/lib/site-language";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -96,7 +96,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let token = accessTokenRef.current;
       if (!token) token = await refresh();
 
-      const requestPath = appendLanguageQuery(path, getBrowserLanguage());
+      const [basePath, queryString = ""] = String(path || "").split("?");
+      const params = new URLSearchParams(queryString);
+      if (!params.has("lang")) {
+        params.set("lang", getBrowserLanguage());
+      }
+      const requestPath = `${basePath}?${params.toString()}`;
       const headers = new Headers(init?.headers);
       if (token) headers.set("authorization", `Bearer ${token}`);
       let res = await fetch(requestPath, { ...init, headers });

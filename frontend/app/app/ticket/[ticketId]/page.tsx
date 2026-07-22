@@ -11,6 +11,7 @@ import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
+import { appendLanguageQuery } from "@/lib/site-language";
 import {
   TestPageSettingsButton,
   shuffleQuestionOptionsWithSeed,
@@ -311,7 +312,7 @@ export default function TicketPage() {
   const ticketQuery = useQuery({
     queryKey: ["ticket", ticketId, language],
     queryFn: async () => {
-      const res = await authFetch(`/api/tickets/${encodeURIComponent(ticketId)}`);
+      const res = await authFetch(appendLanguageQuery(`/api/tickets/${encodeURIComponent(ticketId)}`, language));
       const data = await jsonOrError(res);
       setTicket(data.ticket);
       return data;
@@ -321,7 +322,7 @@ export default function TicketPage() {
   const progressQuery = useQuery({
     queryKey: ["progress", ticketId, language],
     queryFn: async () => {
-      const res = await authFetch(`/api/progress/${encodeURIComponent(ticketId)}`);
+      const res = await authFetch(appendLanguageQuery(`/api/progress/${encodeURIComponent(ticketId)}`, language));
       return jsonOrError(res);
     }
   });
@@ -357,7 +358,7 @@ export default function TicketPage() {
 
   const saveMutation = useMutation({
     mutationFn: (nextAnswers: Record<string, number>) =>
-      authFetch(`/api/progress/${encodeURIComponent(ticketId)}`, {
+      authFetch(appendLanguageQuery(`/api/progress/${encodeURIComponent(ticketId)}`, language), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: nextAnswers })
@@ -408,7 +409,8 @@ export default function TicketPage() {
   }, [router]);
 
   const resetMutation = useMutation({
-    mutationFn: () => authFetch(`/api/progress/${encodeURIComponent(ticketId)}/reset`, { method: "POST" }).then(jsonOrError),
+    mutationFn: () =>
+      authFetch(appendLanguageQuery(`/api/progress/${encodeURIComponent(ticketId)}/reset`, language), { method: "POST" }).then(jsonOrError),
     onSettled: () => {
       setAnswers({});
       setIdx(0);
