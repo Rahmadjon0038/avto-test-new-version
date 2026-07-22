@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, TimerReset } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
@@ -213,6 +214,7 @@ export default function ExamPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch, authReady } = useAuth();
+  const { t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("exam");
   const handleSettingsChange = useCallback(
@@ -253,7 +255,7 @@ export default function ExamPage() {
   });
 
   useEffect(() => {
-    if (examQuery.error) toast.error(uzErrorMessage(examQuery.error, "Imtihon ma'lumotlari yuklanmadi"));
+    if (examQuery.error) toast.error(uzErrorMessage(examQuery.error, t("exam.loading")));
   }, [examQuery.error]);
 
   const exam = examReady ? examQuery.data || null : null;
@@ -385,7 +387,7 @@ export default function ExamPage() {
       }).then(jsonOrError),
     onError: (error: any) => {
       setExamBootstrapping(false);
-      toast.error(uzErrorMessage(error, "Imtihonni boshlashda xatolik"));
+      toast.error(uzErrorMessage(error, t("common.error")));
     },
     onSuccess: async (data: any) => {
       if (data?.exam) {
@@ -401,7 +403,7 @@ export default function ExamPage() {
       setExamBootstrapping(false);
       hasSeenPositiveTimerRef.current = false;
       if (settings.shuffleQuestions) refreshShuffleSeed();
-      toast.success("Imtihon boshlandi");
+      toast.success(t("exam.title"));
     }
   });
 
@@ -418,7 +420,7 @@ export default function ExamPage() {
       }).then(jsonOrError),
     onError: (error: any, variables: { previousAnswers?: Record<string, number> } | undefined) => {
       if (variables?.previousAnswers) setAnswers(variables.previousAnswers);
-      toast.error(uzErrorMessage(error, "Javoblarni saqlashda xatolik"));
+      toast.error(uzErrorMessage(error, t("common.error")));
     },
     onSuccess: async (_data: any, variables) => {
       await qc.invalidateQueries({ queryKey: ["exam"] });
@@ -438,7 +440,7 @@ export default function ExamPage() {
         const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
         setFinalResult({ correct, wrong, total, percent });
         setFinishOpen(true);
-        toast.success("Imtihon yakunlandi");
+        toast.success(t("exam.resultTitle"));
       }
     }
   });
@@ -514,7 +516,7 @@ export default function ExamPage() {
       setExamBootstrapping(false);
     },
     onSuccess: () => {
-      toast.success("Imtihon qayta boshlanmoqda...");
+      toast.success(t("exam.restart"));
       window.location.reload();
     }
   });
@@ -557,8 +559,8 @@ export default function ExamPage() {
           <div className="examLoadingSpinnerWrap">
             <span className="examLoadingSpinner" />
           </div>
-          <div className="examLoadingTitle">Imtihon boshlanmoqda</div>
-          <div className="examLoadingText">Savollar tayyorlanmoqda, biroz kuting...</div>
+          <div className="examLoadingTitle">{t("exam.loading")}</div>
+          <div className="examLoadingText">{t("common.loading")}</div>
         </div>
       </section>
     );
@@ -569,11 +571,11 @@ export default function ExamPage() {
       <div className="topicHeader examHeader">
         <div className="topicHeaderLeft">
           <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-            <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+            <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
           </button>
           <div>
             <div className="h2" style={{ margin: 0 }}>
-              Imtihon topshirish
+              {t("exam.title")}
             </div>
           </div>
         </div>
@@ -591,14 +593,14 @@ export default function ExamPage() {
         <div className="card examResultBanner">
           <div>
             <div className="h2" style={{ margin: 0 }}>
-              {completed ? "Imtihon yakunlandi" : "Vaqt tugadi"}
+              {completed ? t("exam.resultTitle") : t("common.error")}
             </div>
             <div className="muted">
               {exam?.score || 0} ta to‘g‘ri · {questions.length} ta savol
             </div>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>
-            {resetMutation.isPending ? "O‘chirilmoqda..." : "Yangi imtihon"}
+            {resetMutation.isPending ? t("common.loading") : t("exam.restart")}
           </button>
         </div>
       )}
@@ -645,7 +647,7 @@ export default function ExamPage() {
 
             <div className="qLeft">
               {imageLoading && (
-                <div className="qImageLoader" aria-label="Rasm yuklanmoqda">
+                <div className="qImageLoader" aria-label={t("common.loading")}>
                   <span className="qSpinner" />
                 </div>
               )}
@@ -653,12 +655,12 @@ export default function ExamPage() {
                 className="imageZoomTrigger"
                 type="button"
                 onClick={() => setZoomedImage(resolveQuestionImage(currentQuestion.image))}
-                aria-label="Rasmni kattalashtirish"
+                aria-label={t("common.loading")}
               >
                 <img
                   className={`qimg ${imageLoading ? "isLoading" : ""}`}
                   src={resolveQuestionImage(currentQuestion.image)}
-                  alt="Savol rasmi"
+                  alt={t("common.loading")}
                   onLoad={() => setImageLoading(false)}
                   onError={(event) => {
                     const img = event.currentTarget;
@@ -696,12 +698,12 @@ export default function ExamPage() {
       <div className="topicFooter">
         <div className="footerLeft">
           <button className="btn btn-danger btn-sm examResetBtn" type="button" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>
-            <RotateCcw className="lucide" aria-hidden="true" /> {resetMutation.isPending ? "Qayta boshlanmoqda..." : "Qayta boshlash"}
+            <RotateCcw className="lucide" aria-hidden="true" /> {resetMutation.isPending ? t("common.loading") : t("exam.restart")}
           </button>
         </div>
         <div className="footerCenter">
           <button className="btn btn-ghost" type="button" onClick={handlePreviousQuestion} disabled={idx <= 0 || locked}>
-            <ChevronLeft className="lucide" aria-hidden="true" /> Orqaga
+            <ChevronLeft className="lucide" aria-hidden="true" /> {t("common.back")}
           </button>
           <button
             className="btn btn-ghost"
@@ -709,12 +711,12 @@ export default function ExamPage() {
             onClick={handleNextQuestion}
             disabled={idx >= questions.length - 1 || locked}
           >
-            Keyingi <ChevronRight className="lucide" aria-hidden="true" />
+            {t("common.next")} <ChevronRight className="lucide" aria-hidden="true" />
           </button>
         </div>
         <div className="footerRight">
           <button className="btn btn-primary" type="button" onClick={() => saveMutation.mutate({ answers, finalize: true })} disabled={!canFinalize}>
-            <Flag className="lucide" aria-hidden="true" /> Yakunlash
+            <Flag className="lucide" aria-hidden="true" /> {t("exam.finish")}
           </button>
         </div>
       </div>
@@ -724,7 +726,7 @@ export default function ExamPage() {
           <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
-              <div className="modalTitle">Natija</div>
+              <div className="modalTitle">{t("exam.resultTitle")}</div>
               <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
                 ✕
               </button>
@@ -733,7 +735,7 @@ export default function ExamPage() {
               <div className="resultBlock resultChartBlock">
                 <div className="resultChart">
                   <div className="resultSolved">
-                    <div className="muted">Yechilgan</div>
+                    <div className="muted">{t("progress.title")}</div>
                     <div className="resultSolvedValue">
                       {finalResult.correct}/{finalResult.total}
                     </div>
@@ -746,13 +748,13 @@ export default function ExamPage() {
                     >
                       <div className="resultChartCenter">
                     <div className="resultChartValue">{chartCorrectPercent}%</div>
-                    <div className="resultChartLabel">To‘g‘ri</div>
+                    <div className="resultChartLabel">{t("exam.correctLabel")}</div>
                       </div>
                     </div>
                 </div>
               </div>
               <button className="btn btn-primary resultCloseBtn" type="button" onClick={() => setFinishOpen(false)}>
-                Yopish
+                {t("publicRunner.finishButton")}
               </button>
             </div>
           </div>

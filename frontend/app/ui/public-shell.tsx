@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Globe, LogIn } from "lucide-react";
+import { useSiteLanguage } from "@/app/site-language-provider";
 
 export default function PublicShell({ children }: { children: ReactNode }) {
+  const { language, setLanguage, options, t } = useSiteLanguage();
   return (
     <>
       <header className="navbar">
@@ -11,9 +14,24 @@ export default function PublicShell({ children }: { children: ReactNode }) {
               <span className="textLogoRoad">Topshirdi</span>
             </div>
           </Link>
-          <div className="navRight">
+          <div className="navRight" style={{ gap: 12 }}>
+            <div className="languageRow" aria-label={t("common.selectLanguage")}>
+              {options.map((option) => (
+                <button
+                  key={option.code}
+                  className={`languageChip ${language === option.code ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setLanguage(option.code)}
+                  aria-pressed={language === option.code}
+                  title={option.label}
+                >
+                  <Globe className="lucide" aria-hidden="true" />
+                  <span>{option.shortLabel}</span>
+                </button>
+              ))}
+            </div>
             <Link href="/?auth=login" className="btn btn-ghost headerActionBtn">
-              Tizimga kirish
+              <LogIn className="lucide" aria-hidden="true" /> {t("nav.login")}
             </Link>
           </div>
         </div>
@@ -28,13 +46,13 @@ export default function PublicShell({ children }: { children: ReactNode }) {
           </div>
           <div className="siteFooterLinks">
             <Link href="/biletlar" className="siteSocialLink sitePrivacyLink">
-              Biletlar
+              {t("footer.tickets")}
             </Link>
             <Link href="/mavzular" className="siteSocialLink sitePrivacyLink">
-              Mavzular
+              {t("footer.topics")}
             </Link>
             <a className="siteSocialLink sitePrivacyLink" href="/privacy">
-              Privacy
+              {t("footer.privacy")}
             </a>
           </div>
         </div>

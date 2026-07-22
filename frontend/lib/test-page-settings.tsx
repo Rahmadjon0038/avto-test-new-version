@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Cog, Shuffle, Sparkles, X } from "lucide-react";
+import { useSiteLanguage } from "@/app/site-language-provider";
 
 export type TestPageSettings = {
   shuffleQuestions: boolean;
@@ -111,6 +112,7 @@ type TestPageSettingsButtonProps = {
 
 export function TestPageSettingsButton({ settings, onChange, className }: TestPageSettingsButtonProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useSiteLanguage();
 
   const dialogId = useMemo(() => `test-settings-${Math.random().toString(36).slice(2, 8)}`, []);
 
@@ -128,8 +130,8 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
       <button
         className={["testSettingsTrigger", className].filter(Boolean).join(" ")}
         type="button"
-        title="Sozlamalar"
-        aria-label="Sozlamalar"
+        title={t("nav.profile")}
+        aria-label={t("nav.profile")}
         onClick={() => setOpen(true)}
       >
         <Cog className="lucide" aria-hidden="true" />
@@ -147,9 +149,9 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
             <div className="testSettingsModalHeader">
               <div>
                 <div id={dialogId} className="testSettingsModalTitle">
-                  Test sozlamalari
+                  {t("settings.title")}
                 </div>
-                <div className="testSettingsModalSubtitle">Test yechish ko‘rinishini o‘zingizga moslang.</div>
+                <div className="testSettingsModalSubtitle">{t("settings.subtitle")}</div>
               </div>
               <button className="testSettingsClose" type="button" aria-label="Yopish" onClick={() => setOpen(false)}>
                 <X className="lucide" aria-hidden="true" />
@@ -158,15 +160,15 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
 
             <div className="testSettingsList">
               <ToggleRow
-                title="Testlarni aralashtirish"
-                description="Savollar tartibi har safar aralash ko‘rinadi."
+                title={t("settings.shuffleTitle")}
+                description={t("settings.shuffleDesc")}
                 enabled={settings.shuffleQuestions}
                 onToggle={(next) => onChange({ ...settings, shuffleQuestions: next })}
                 icon={<Shuffle className="lucide" aria-hidden="true" />}
               />
               <ToggleRow
-                title="Avtomatik o‘tish"
-                description="Javob tanlanganda keyingi savolga o‘tadi."
+                title={t("settings.autoNextTitle")}
+                description={t("settings.autoNextDesc")}
                 enabled={settings.autoNext}
                 onToggle={(next) => onChange({ ...settings, autoNext: next })}
                 icon={<Sparkles className="lucide" aria-hidden="true" />}

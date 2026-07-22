@@ -5,6 +5,8 @@ import { siteName, getSiteUrl } from "@/lib/site";
 import { fetchPublicTopics } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
 import { RegisterCta, buildItemListJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
+import { getServerLanguage } from "@/lib/site-language-server";
+import { getTranslation } from "@/lib/site-language";
 
 export const dynamic = "force-dynamic";
 
@@ -23,15 +25,17 @@ export const metadata: Metadata = {
 };
 
 export default async function MavzularPage() {
-  const topics = await fetchPublicTopics();
+  const lang = await getServerLanguage();
+  const t = (key: string, vars?: Record<string, string | number>) => getTranslation(lang, key, vars);
+  const topics = await fetchPublicTopics(lang);
   const base = getSiteUrl().toString().replace(/\/$/, "");
   const itemListJsonLd = buildItemListJsonLd(
-    "Mavzu bo‘yicha testlar",
+    t("topics.title"),
     topics.map((t) => ({ name: t.title, url: t.free ? `${base}/mavzular/${t.id}` : undefined }))
   );
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Bosh sahifa", url: `${base}/` },
-    { name: "Mavzular", url: `${base}/mavzular` }
+    { name: t("common.back"), url: `${base}/` },
+    { name: t("footer.topics"), url: `${base}/mavzular` }
   ]);
 
   return (
@@ -40,7 +44,7 @@ export default async function MavzularPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <section className="view">
         <div className="publicHead">
-          <h1 className="publicH1">Mavzu bo‘yicha testlar</h1>
+          <h1 className="publicH1">{t("topics.title")}</h1>
         </div>
 
         <div className="topicsGrid">
@@ -66,7 +70,7 @@ export default async function MavzularPage() {
           )}
         </div>
 
-        {topics.length === 0 ? <div className="muted">Mavzular hozircha mavjud emas.</div> : null}
+        {topics.length === 0 ? <div className="muted">{t("topics.empty")}</div> : null}
 
         <RegisterCta />
       </section>

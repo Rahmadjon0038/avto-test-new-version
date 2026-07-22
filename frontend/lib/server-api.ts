@@ -31,23 +31,29 @@ async function getJson(path: string): Promise<{ ok: boolean; status: number; dat
   }
 }
 
-export async function fetchPublicTickets(): Promise<PublicTicketSummary[]> {
-  const r = await getJson("/api/public/tickets");
+import { appendLanguageQuery, getBrowserLanguage } from "./site-language";
+
+function resolveLang(lang?: string | null) {
+  return lang || getBrowserLanguage();
+}
+
+export async function fetchPublicTickets(lang?: string | null): Promise<PublicTicketSummary[]> {
+  const r = await getJson(appendLanguageQuery("/api/public/tickets", resolveLang(lang)));
   return r.ok && Array.isArray(r.data?.tickets) ? r.data.tickets : [];
 }
 
-export async function fetchPublicTicket(id: string): Promise<{ ticket: PublicTicket | null; status: number }> {
-  const r = await getJson(`/api/public/tickets/${encodeURIComponent(id)}`);
+export async function fetchPublicTicket(id: string, lang?: string | null): Promise<{ ticket: PublicTicket | null; status: number }> {
+  const r = await getJson(appendLanguageQuery(`/api/public/tickets/${encodeURIComponent(id)}`, resolveLang(lang)));
   return { ticket: r.ok ? (r.data?.ticket ?? null) : null, status: r.status };
 }
 
-export async function fetchPublicTopics(): Promise<PublicTopicSummary[]> {
-  const r = await getJson("/api/public/topics");
+export async function fetchPublicTopics(lang?: string | null): Promise<PublicTopicSummary[]> {
+  const r = await getJson(appendLanguageQuery("/api/public/topics", resolveLang(lang)));
   return r.ok && Array.isArray(r.data?.topics) ? r.data.topics : [];
 }
 
-export async function fetchPublicTopic(id: string): Promise<{ topic: PublicTopic | null; status: number }> {
-  const r = await getJson(`/api/public/topics/${encodeURIComponent(id)}`);
+export async function fetchPublicTopic(id: string, lang?: string | null): Promise<{ topic: PublicTopic | null; status: number }> {
+  const r = await getJson(appendLanguageQuery(`/api/public/topics/${encodeURIComponent(id)}`, resolveLang(lang)));
   return { topic: r.ok ? (r.data?.topic ?? null) : null, status: r.status };
 }
 

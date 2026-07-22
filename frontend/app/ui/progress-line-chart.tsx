@@ -1,5 +1,7 @@
 "use client";
 
+import { useSiteLanguage } from "@/app/site-language-provider";
+
 type ProgressLineChartProps = {
   correct: number;
   wrong: number;
@@ -17,6 +19,7 @@ export default function ProgressLineChart({
   emptyText = "Natija hali yo‘q",
   className
 }: ProgressLineChartProps) {
+  const { t } = useSiteLanguage();
   const total = Math.max(correct + wrong + unanswered, 0);
   const correctPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
   const wrongPercent = total > 0 ? Math.round((wrong / total) * 100) : 0;
@@ -27,9 +30,9 @@ export default function ProgressLineChart({
       <div className="progressLineHeader">
         <div>
           <div className="progressLineValue">{correctPercent}%</div>
-          <div className="progressLineTitle">{title}</div>
+          <div className="progressLineTitle">{title === "Progres" ? t("progress.title") : title}</div>
         </div>
-        <div className="progressLineMeta">{total > 0 ? `${correct}/${total}` : emptyText}</div>
+        <div className="progressLineMeta">{total > 0 ? `${correct}/${total}` : emptyText === "Natija hali yo‘q" ? t("progress.empty") : emptyText}</div>
       </div>
 
       <div className="progressLineChartArea">
@@ -44,9 +47,9 @@ export default function ProgressLineChart({
       </div>
 
       <div className="progressLineLegend">
-        <span className="progressLineLegendItem good">{correctPercent}% to‘g‘ri</span>
-        <span className="progressLineLegendItem bad">{wrongPercent}% xato</span>
-        <span className="progressLineLegendItem muted">{unansweredPercent}% bo‘sh</span>
+        <span className="progressLineLegendItem good">{correctPercent}% {t("progress.correct", { count: "" }).replace(/^ /, "").replace("{count}", "")}</span>
+        <span className="progressLineLegendItem bad">{wrongPercent}% {t("progress.wrong", { count: "" }).replace(/^ /, "").replace("{count}", "")}</span>
+        <span className="progressLineLegendItem muted">{unansweredPercent}% {t("progress.unanswered", { count: "" }).replace(/^ /, "").replace("{count}", "")}</span>
       </div>
     </div>
   );

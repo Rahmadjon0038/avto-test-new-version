@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { fetchCustomTests } from "../custom-data";
 import ProgressStatsBlock from "@/app/ui/progress-stats-block";
@@ -13,6 +14,7 @@ import ProgressStatsBlock from "@/app/ui/progress-stats-block";
 export default function CustomTestsPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
+  const { t } = useSiteLanguage();
   const customTestsQuery = useQuery({
     queryKey: ["custom-tests"],
     queryFn: fetchCustomTests
@@ -28,7 +30,7 @@ export default function CustomTestsPage() {
     <section className="view">
       <div className="sectionTopBar" style={{ marginBottom: 12 }}>
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
       </div>
 
@@ -37,12 +39,12 @@ export default function CustomTestsPage() {
             <LayoutGrid className="lucide" aria-hidden="true" />
           </div>
           <div>
-            <div className="topicsTitle">Sozlamali testlar</div>
-            <div className="topicsSub">Kartalar biletlar bankidagi savollardan yig‘iladi.</div>
+            <div className="topicsTitle">{t("custom.title")}</div>
+            <div className="topicsSub">{t("custom.subtitle")}</div>
           </div>
         </div>
 
-      {customTestsQuery.isLoading ? <div className="muted">Testlar yuklanmoqda...</div> : null}
+      {customTestsQuery.isLoading ? <div className="muted">{t("custom.loading")}</div> : null}
 
       <div className="topicsGrid">
         {(customTestsQuery.data || []).map((customTest, index) => (

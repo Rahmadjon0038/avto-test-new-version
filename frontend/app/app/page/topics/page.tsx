@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import ProgressStatsBlock from "@/app/ui/progress-stats-block";
 import type { TopicCard } from "../topics-data";
@@ -14,6 +15,7 @@ export default function TopicsPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch, authReady } = useAuth();
+  const { t } = useSiteLanguage();
   const topicsQuery = useQuery({
     queryKey: ["topics"],
     queryFn: async () => {
@@ -49,7 +51,7 @@ export default function TopicsPage() {
     <section className="view">
       <div style={{ marginBottom: 12 }}>
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
       </div>
 
@@ -58,12 +60,12 @@ export default function TopicsPage() {
           <LayoutGrid className="lucide" aria-hidden="true" />
         </div>
         <div>
-          <div className="topicsTitle">Mavzularni tanlang</div>
-          <div className="topicsSub">Kartaga bosganda shu mavzuning alohida sahifasi ochiladi.</div>
+          <div className="topicsTitle">{t("topics.title")}</div>
+          <div className="topicsSub">{t("topics.subtitle")}</div>
         </div>
       </div>
 
-      {topicsQuery.isLoading ? <div className="muted">Mavzular yuklanmoqda...</div> : null}
+      {topicsQuery.isLoading ? <div className="muted">{t("topics.loading")}</div> : null}
 
       <div className="topicsGrid">
         {(topicsQuery.data || []).map((topic, index) => (

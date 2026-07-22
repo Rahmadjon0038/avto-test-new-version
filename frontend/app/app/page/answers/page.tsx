@@ -5,6 +5,7 @@ import { ArrowLeft, BookOpen, ChevronDown, Check, Filter, Image, ImageOff, Searc
 import { useInfiniteQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 
@@ -53,9 +54,7 @@ function resolveQuestionImage(image?: string) {
 }
 
 function resolveFilterLabel(filter: FilterKey) {
-  if (filter === "with-image") return "Rasmli testlar";
-  if (filter === "without-image") return "Rasmsiz testlar";
-  return "Barchasi";
+  return filter;
 }
 
 function questionKeyLabel(index: number) {
@@ -64,6 +63,7 @@ function questionKeyLabel(index: number) {
 
 export default function AnswersPage() {
   const { authFetch } = useAuth();
+  const { t } = useSiteLanguage();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -136,46 +136,46 @@ export default function AnswersPage() {
     <section className="view">
       <div className="sectionTopBar" style={{ marginBottom: 12 }}>
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => window.history.back()}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
       </div>
 
       <div className="answersHero card">
         <div className="answersHeroLeft">
-          <div className="answersHeroIcon">
-            <BookOpen className="lucide" aria-hidden="true" />
+            <div className="answersHeroIcon">
+              <BookOpen className="lucide" aria-hidden="true" />
+            </div>
+            <div>
+            <div className="answersTitle">{t("answers.title")}</div>
+            <div className="muted">{t("answers.subtitle")}</div>
+            </div>
           </div>
-          <div>
-            <div className="answersTitle">Barcha testlar javoblari</div>
-            <div className="muted">Javoblar faqat biletlar bankidagi savollardan ko‘rsatiladi.</div>
+          <div className="answersHeroMeta">
+          <span className="badge">{t("answers.total", { count: counts.all })}</span>
+          <span className="badge">{t("answers.loaded", { count: counts.loaded })}</span>
+          <span className="badge">{answersQuery.hasNextPage ? t("answers.continue") : t("answers.allDone")}</span>
           </div>
         </div>
-        <div className="answersHeroMeta">
-          <span className="badge">{counts.all} ta savol</span>
-          <span className="badge">{counts.loaded} yuklandi</span>
-          <span className="badge">{answersQuery.hasNextPage ? "Davom etadi" : "Hammasi"}</span>
-        </div>
-      </div>
 
       <div className="answersFilters">
         <button className={`answersFilter ${filter === "all" ? "active" : ""}`} type="button" onClick={() => setFilter("all")}>
           <Filter className="lucide" aria-hidden="true" />
-          <span>{resolveFilterLabel("all")}</span>
+          <span>{t("answers.all")}</span>
         </button>
         <button className={`answersFilter ${filter === "with-image" ? "active" : ""}`} type="button" onClick={() => setFilter("with-image")}>
           <Image className="lucide" aria-hidden="true" />
-          <span>{resolveFilterLabel("with-image")}</span>
+          <span>{t("answers.withImage")}</span>
         </button>
         <button className={`answersFilter ${filter === "without-image" ? "active" : ""}`} type="button" onClick={() => setFilter("without-image")}>
           <ImageOff className="lucide" aria-hidden="true" />
-          <span>{resolveFilterLabel("without-image")}</span>
+          <span>{t("answers.withoutImage")}</span>
         </button>
       </div>
 
       <div className="answersSearch card">
-        <div className="adminPanelCardHead">
+          <div className="adminPanelCardHead">
           <div className="adminPanelCardTitle">
-            <Search className="lucide" aria-hidden="true" /> Qidirish
+            <Search className="lucide" aria-hidden="true" /> {t("answers.search")}
           </div>
         </div>
         <div className="answersSearchRow">
@@ -185,7 +185,7 @@ export default function AnswersPage() {
               className="input adminSearchInput answersSearchInput"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Savol, izoh yoki javob bo‘yicha qidiring"
+              placeholder={t("answers.placeholder")}
             />
             <div className="answersFilterSelect" ref={filterRef}>
               <button
@@ -210,7 +210,7 @@ export default function AnswersPage() {
                     }}
                   >
                     {filter === "all" ? <Check className="lucide" aria-hidden="true" /> : null}
-                    <span>Barchasi</span>
+                    <span>{t("answers.all")}</span>
                   </button>
                   <button
                     className={`answersFilterOption ${filter === "with-image" ? "active" : ""}`}
@@ -221,7 +221,7 @@ export default function AnswersPage() {
                     }}
                   >
                     {filter === "with-image" ? <Check className="lucide" aria-hidden="true" /> : null}
-                    <span>Rasmli</span>
+                    <span>{t("answers.withImage")}</span>
                   </button>
                   <button
                     className={`answersFilterOption ${filter === "without-image" ? "active" : ""}`}
@@ -232,7 +232,7 @@ export default function AnswersPage() {
                     }}
                   >
                     {filter === "without-image" ? <Check className="lucide" aria-hidden="true" /> : null}
-                    <span>Rasmsiz</span>
+                    <span>{t("answers.withoutImage")}</span>
                   </button>
                 </div>
               ) : null}
@@ -242,7 +242,7 @@ export default function AnswersPage() {
           <div className="answersQuickFilters">
             <button className={`answersQuickFilter ${filter === "all" ? "active" : ""}`} type="button" onClick={() => setFilter("all")}>
               <Check className="lucide" aria-hidden="true" />
-              <span>Barchasi</span>
+              <span>{t("answers.all")}</span>
             </button>
             <button
               className={`answersQuickFilter ${filter === "with-image" ? "active" : ""}`}
@@ -250,7 +250,7 @@ export default function AnswersPage() {
               onClick={() => setFilter("with-image")}
             >
               <Image className="lucide" aria-hidden="true" />
-              <span>Rasmli</span>
+              <span>{t("answers.withImage")}</span>
             </button>
             <button
               className={`answersQuickFilter ${filter === "without-image" ? "active" : ""}`}
@@ -258,7 +258,7 @@ export default function AnswersPage() {
               onClick={() => setFilter("without-image")}
             >
               <ImageOff className="lucide" aria-hidden="true" />
-              <span>Rasmsiz</span>
+              <span>{t("answers.withoutImage")}</span>
             </button>
           </div>
         </div>

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
 type SubPlan = "1w" | "2w" | "1m";
@@ -35,6 +36,7 @@ function getInitials(name: string) {
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const { language, setLanguage, options, t } = useSiteLanguage();
   const { authFetch, setAccessToken, setUser, authReady, accessToken, user } = useAuth();
   const showSubscriptionButton = false;
 
@@ -214,20 +216,34 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
           <div className="actions">
             <div className="actionRow">
+              <div className="languageRow" aria-label={t("common.selectLanguage")}>
+                {options.map((option) => (
+                  <button
+                    key={option.code}
+                    className={`languageChip ${language === option.code ? "active" : ""}`}
+                    type="button"
+                    onClick={() => setLanguage(option.code)}
+                    aria-pressed={language === option.code}
+                    title={option.label}
+                  >
+                    <span>{option.shortLabel}</span>
+                  </button>
+                ))}
+              </div>
               {isAdmin ? (
                 <button className="btn btn-ghost headerActionBtn" type="button" onClick={() => router.push("/admin")}>
-                  <ShieldCheck className="lucide" aria-hidden="true" /> Admin panel
+                  <ShieldCheck className="lucide" aria-hidden="true" /> {t("nav.adminPanel")}
                 </button>
               ) : null}
 
               {showSubscriptionButton ? (
                 <button className="btn btn-primary headerActionBtn" type="button" onClick={openSubscription}>
-                  <span className="labelFull">Obunani sotib olish</span>
-                  <span className="labelShort">Obuna</span>
+                  <span className="labelFull">{t("nav.buySubscription")}</span>
+                  <span className="labelShort">{t("nav.subscription")}</span>
                 </button>
               ) : null}
 
-              <button className="profileChip headerActionBtn" type="button" title="Profil" onClick={openProfile}>
+              <button className="profileChip headerActionBtn" type="button" title={t("nav.profile")} onClick={openProfile}>
                 <span className="avatarCircle">{initials}</span>
                 <span id="profileName">{displayName}</span>
               </button>

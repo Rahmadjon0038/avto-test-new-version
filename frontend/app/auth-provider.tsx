@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import toast from "react-hot-toast";
 import { useCookies } from "react-cookie";
+import { appendLanguageQuery, getBrowserLanguage, getTranslation } from "@/lib/site-language";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -95,9 +96,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let token = accessTokenRef.current;
       if (!token) token = await refresh();
 
+      const requestPath = appendLanguageQuery(path, getBrowserLanguage());
       const headers = new Headers(init?.headers);
       if (token) headers.set("authorization", `Bearer ${token}`);
-      let res = await fetch(path, { ...init, headers });
+      let res = await fetch(requestPath, { ...init, headers });
 
       if (res.status !== 401) return res;
 
@@ -106,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!refreshed) return res;
       const headers2 = new Headers(init?.headers);
       headers2.set("authorization", `Bearer ${refreshed}`);
-      res = await fetch(path, { ...init, headers: headers2 });
+      res = await fetch(requestPath, { ...init, headers: headers2 });
       return res;
     },
     [refresh]
@@ -118,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {}
     setToken(null);
     setProfile(null);
-    toast.success("Chiqildi");
+    toast.success(getTranslation(getBrowserLanguage(), "common.close"));
   }, [setToken, setProfile]);
 
   const value = useMemo(

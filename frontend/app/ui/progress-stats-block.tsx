@@ -1,5 +1,7 @@
 "use client";
 
+import { useSiteLanguage } from "@/app/site-language-provider";
+
 type ProgressStatsBlockProps = {
   correct: number;
   wrong: number;
@@ -13,11 +15,12 @@ export default function ProgressStatsBlock({
   unanswered,
   className
 }: ProgressStatsBlockProps) {
+  const { t } = useSiteLanguage();
   return (
     <div className={["progressStatsBlock", className].filter(Boolean).join(" ")}>
-      <span className="progressStatsItem good">{`${correct} ta to‘g‘ri`}</span>
-      <span className="progressStatsItem bad">{`${wrong} ta noto‘g‘ri`}</span>
-      <span className="progressStatsItem muted">{`${unanswered} ta belgilanmagan`}</span>
+      <span className="progressStatsItem good">{t("progress.correct", { count: correct })}</span>
+      <span className="progressStatsItem bad">{t("progress.wrong", { count: wrong })}</span>
+      <span className="progressStatsItem muted">{t("progress.unanswered", { count: unanswered })}</span>
     </div>
   );
 }

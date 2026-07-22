@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-re
 import { Cell, Pie, PieChart } from "recharts";
 import type { PublicQuestion } from "@/lib/server-api";
 import { QuestionAudio } from "@/lib/question-audio";
+import { useSiteLanguage } from "@/app/site-language-provider";
 
 const FALLBACK_IMAGE = "/default.png";
 
@@ -38,6 +39,7 @@ export default function PublicTestRunner({
   backHref: string;
   backLabel?: string;
 }) {
+  const { t } = useSiteLanguage();
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [finishOpen, setFinishOpen] = useState(false);
@@ -100,19 +102,19 @@ export default function PublicTestRunner({
             <h1 className="h2" style={{ margin: 0 }}>
               {title}
             </h1>
-            <div className="muted">{`Javoblar: ${answered}/${total}`}</div>
+            <div className="muted">{t("publicRunner.unanswered", { answered, total })}</div>
           </div>
         </div>
 
         <div className="topicHeaderActions">
           <button className="btn btn-danger btn-sm" type="button" onClick={reset}>
-            <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
+            <RotateCcw className="lucide" aria-hidden="true" /> {t("publicRunner.restart")}
           </button>
         </div>
       </div>
 
       <div className="card">
-        <div className="qTitleBar">{q?.text || "Bu slot hali to‘ldirilmagan"}</div>
+        <div className="qTitleBar">{q?.text || t("publicRunner.emptySlot")}</div>
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
@@ -136,13 +138,13 @@ export default function PublicTestRunner({
                   );
                 })
               ) : (
-                <div className="emptyQuestionState">Bu savol hali to‘ldirilmagan.</div>
+                <div className="emptyQuestionState">{t("publicRunner.emptyQuestion")}</div>
               )}
             </div>
 
             {q && answers[q.id] !== undefined && q.explanation ? (
               <div className="explanation">
-                <div className="explanationLabel">Izoh</div>
+                <div className="explanationLabel">{t("public.explanation")}</div>
                 <div className="publicExplanationText">{q.explanation}</div>
               </div>
             ) : null}
@@ -186,7 +188,7 @@ export default function PublicTestRunner({
       <div className="ticketFooter">
         <div className="footerLeft">
           <button className="btn btn-ghost" type="button" onClick={() => goTo(Math.max(0, idx - 1))} disabled={idx <= 0}>
-            <ChevronLeft className="lucide" aria-hidden="true" /> Orqaga
+            <ChevronLeft className="lucide" aria-hidden="true" /> {t("common.back")}
           </button>
           <button
             className="btn btn-ghost"
@@ -194,12 +196,12 @@ export default function PublicTestRunner({
             onClick={() => goTo(Math.min(total - 1, idx + 1))}
             disabled={idx >= total - 1}
           >
-            Keyingi <ChevronRight className="lucide" aria-hidden="true" />
+            {t("common.next")} <ChevronRight className="lucide" aria-hidden="true" />
           </button>
         </div>
         <div className="footerRight">
           <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(true)}>
-            <Flag className="lucide" aria-hidden="true" /> Yakunlash
+            <Flag className="lucide" aria-hidden="true" /> {t("publicRunner.finish")}
           </button>
         </div>
       </div>
@@ -209,7 +211,7 @@ export default function PublicTestRunner({
           <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
-              <div className="modalTitle">Natija</div>
+              <div className="modalTitle">{t("publicRunner.resultTitle")}</div>
               <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
                 ✕
               </button>
@@ -242,7 +244,7 @@ export default function PublicTestRunner({
                     </div>
                   </div>
                   <div className="chartMeta">
-                    <div className="muted">To‘g‘ri javoblar</div>
+                    <div className="muted">{t("publicRunner.correctAnswers")}</div>
                     <div className="chartCount">
                       {correctCount}/{total}
                     </div>
@@ -251,10 +253,10 @@ export default function PublicTestRunner({
               </div>
               <div className="payRow" style={{ marginTop: 4 }}>
                 <button className="btn btn-ghost payBtn" type="button" onClick={reset}>
-                  <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
+                  <RotateCcw className="lucide" aria-hidden="true" /> {t("publicRunner.restart")}
                 </button>
                 <button className="btn btn-primary payBtn" type="button" onClick={() => setFinishOpen(false)}>
-                  Yopish
+                  {t("publicRunner.finishButton")}
                 </button>
               </div>
             </div>

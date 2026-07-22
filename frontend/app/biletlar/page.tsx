@@ -5,6 +5,8 @@ import { siteName, getSiteUrl } from "@/lib/site";
 import { fetchPublicTickets } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
 import { RegisterCta, buildItemListJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
+import { getServerLanguage } from "@/lib/site-language-server";
+import { getTranslation } from "@/lib/site-language";
 
 export const dynamic = "force-dynamic";
 
@@ -23,15 +25,17 @@ export const metadata: Metadata = {
 };
 
 export default async function BiletlarPage() {
-  const tickets = await fetchPublicTickets();
+  const lang = await getServerLanguage();
+  const t = (key: string, vars?: Record<string, string | number>) => getTranslation(lang, key, vars);
+  const tickets = await fetchPublicTickets(lang);
   const base = getSiteUrl().toString().replace(/\/$/, "");
   const itemListJsonLd = buildItemListJsonLd(
-    "Biletlar bo‘yicha testlar",
+    t("tickets.title"),
     tickets.map((t) => ({ name: t.title, url: t.free ? `${base}/biletlar/${t.id}` : undefined }))
   );
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Bosh sahifa", url: `${base}/` },
-    { name: "Biletlar", url: `${base}/biletlar` }
+    { name: t("common.back"), url: `${base}/` },
+    { name: t("footer.tickets"), url: `${base}/biletlar` }
   ]);
 
   return (
@@ -40,7 +44,7 @@ export default async function BiletlarPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <section className="view">
         <div className="ticketsHeader card">
-          <div className="ticketsHeaderTitle">Biletlar bo‘yicha testlar</div>
+          <div className="ticketsHeaderTitle">{t("tickets.title")}</div>
         </div>
 
         <div className="ticketsGrid">
@@ -60,7 +64,7 @@ export default async function BiletlarPage() {
           )}
         </div>
 
-        {tickets.length === 0 ? <div className="muted">Biletlar hozircha mavjud emas.</div> : null}
+        {tickets.length === 0 ? <div className="muted">{t("tickets.empty")}</div> : null}
 
         <RegisterCta />
       </section>

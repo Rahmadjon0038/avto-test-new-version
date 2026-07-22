@@ -19,14 +19,15 @@ async function parseJson(res: Response) {
 }
 
 export async function fetchTopics(): Promise<TopicCard[]> {
-  const res = await fetch("/api/topics");
+  const res = await fetch(appendLanguageQuery("/api/topics", getBrowserLanguage()));
   const data = await parseJson(res);
   return Array.isArray(data.topics) ? data.topics : [];
 }
 
 export async function fetchTopicById(topicId: string): Promise<TopicCard | null> {
-  const res = await fetch(`/api/topics/${encodeURIComponent(topicId)}`);
+  const res = await fetch(appendLanguageQuery(`/api/topics/${encodeURIComponent(topicId)}`, getBrowserLanguage()));
   if (res.status === 404) return null;
   const data = await parseJson(res);
   return data?.topic || null;
 }
+import { appendLanguageQuery, getBrowserLanguage } from "@/lib/site-language";

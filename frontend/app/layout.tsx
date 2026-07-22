@@ -1,8 +1,10 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Providers from "./providers";
 import { getSiteUrl, siteDescription, siteKeywords, siteName } from "@/lib/site";
+import { LANGUAGE_COOKIE, normalizeLanguageCode } from "@/lib/site-language";
 
 const siteUrl = getSiteUrl();
 
@@ -93,9 +95,11 @@ const webApplicationJsonLd = {
   }
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const lang = normalizeLanguageCode(cookieStore.get(LANGUAGE_COOKIE)?.value || "uz_latn");
   return (
-    <html lang="uz">
+    <html lang={lang.replace("_", "-")}>
       <body>
         <script
           type="application/ld+json"

@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, Flame } from "lucide-react";
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { useTestInteractions } from "@/lib/test-interactions";
@@ -57,6 +58,7 @@ function resolveQuestionImage(image?: string) {
 export default function MarathonPage() {
   const router = useRouter();
   const { authFetch } = useAuth();
+  const { t } = useSiteLanguage();
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const autoNextTimerRef = useRef<number | null>(null);
 
@@ -225,7 +227,7 @@ export default function MarathonPage() {
   if (isLoading) {
     return (
       <section className="view">
-        <div className="muted">Marafon yuklanmoqda...</div>
+        <div className="muted">{t("marathon.loading")}</div>
       </section>
     );
   }
@@ -235,15 +237,15 @@ export default function MarathonPage() {
       <section className="view">
         <div className="sectionTopBar" style={{ marginBottom: 12 }}>
           <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-            <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+            <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
           </button>
         </div>
         <div className="card" style={{ padding: 18 }}>
           <div className="h2" style={{ margin: 0 }}>
-            Marafon rejimi
+            {t("marathon.title")}
           </div>
           <div className="muted" style={{ marginTop: 8 }}>
-            Hozircha savollar topilmadi.
+            {t("marathon.empty")}
           </div>
         </div>
       </section>
@@ -264,7 +266,7 @@ export default function MarathonPage() {
         }}
       >
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
         <button
           className="btn btn-danger btn-sm"
@@ -274,7 +276,7 @@ export default function MarathonPage() {
             loadInitial();
           }}
         >
-          <RotateCcw className="lucide" aria-hidden="true" /> Qayta boshlash
+          <RotateCcw className="lucide" aria-hidden="true" /> {t("marathon.restart")}
         </button>
       </div>
 
@@ -284,12 +286,12 @@ export default function MarathonPage() {
             <Flame className="lucide" aria-hidden="true" />
           </div>
           <div>
-            <div className="topicsTitle">Marafon rejimi</div>
-            <div className="topicsSub">{`Savollar: ${answered}/${total}`}</div>
+            <div className="topicsTitle">{t("marathon.title")}</div>
+            <div className="topicsSub">{t("marathon.answerCount", { answered, total })}</div>
           </div>
         </div>
         <div className="answersHeroMeta">
-          <span className="badge">{correctCount} to‘g‘ri</span>
+          <span className="badge">{t("marathon.correctLabel")} {correctCount}</span>
         </div>
       </div>
 
@@ -371,15 +373,15 @@ export default function MarathonPage() {
       <div className="topicFooter">
         <div className="footerLeft">
           <button className="btn btn-ghost" type="button" onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex <= 0}>
-            <ChevronLeft className="lucide" aria-hidden="true" /> Orqaga
+            <ChevronLeft className="lucide" aria-hidden="true" /> {t("common.back")}
           </button>
           <button className="btn btn-ghost" type="button" onClick={() => setCurrentIndex(Math.min(visibleQuestions.length - 1, currentIndex + 1))} disabled={currentIndex >= visibleQuestions.length - 1}>
-            Keyingi <ChevronRight className="lucide" aria-hidden="true" />
+            {t("common.next")} <ChevronRight className="lucide" aria-hidden="true" />
           </button>
         </div>
         <div className="footerRight">
           <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(true)}>
-            <Flag className="lucide" aria-hidden="true" /> Yakunlash
+            <Flag className="lucide" aria-hidden="true" /> {t("marathon.finish")}
           </button>
         </div>
       </div>
@@ -389,7 +391,7 @@ export default function MarathonPage() {
           <div className="modalOverlay" onClick={() => router.push("/app")} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
-              <div className="modalTitle">Natija</div>
+              <div className="modalTitle">{t("marathon.resultTitle")}</div>
               <button className="btn btn-ghost" type="button" onClick={() => router.push("/app")}>
                 ✕
               </button>
@@ -418,17 +420,17 @@ export default function MarathonPage() {
                     </PieChart>
                     <div className="chartCenter">
                       <div className="chartValue">{percent}%</div>
-                      <div className="chartLabel">Foiz</div>
+                      <div className="chartLabel">{t("progress.title")}</div>
                     </div>
                   </div>
                   <div className="chartMeta">
-                    <div className="muted">To‘g‘ri javoblar</div>
+                    <div className="muted">{t("progress.title")}</div>
                     <div className="chartCount">{correctCount}/{visibleQuestions.length}</div>
                   </div>
                 </div>
               </div>
               <button className="btn btn-primary" type="button" onClick={() => router.push("/app")}>
-                Yopish
+                {t("publicRunner.finishButton")}
               </button>
             </div>
           </div>

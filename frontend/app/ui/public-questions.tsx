@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { resolveQuestionImage, type PublicQuestion } from "@/lib/server-api";
+import { useSiteLanguage } from "@/app/site-language-provider";
 
 export function RegisterCta({ text }: { text?: string }) {
+  const { t } = useSiteLanguage();
   return (
     <div className="publicCta">
       <div className="publicCtaMain">
@@ -10,20 +12,21 @@ export function RegisterCta({ text }: { text?: string }) {
           <Sparkles className="lucide" />
         </span>
         <div className="publicCtaCopy">
-          <div className="publicCtaTitle">Hammasi bir joyda — bepul boshlang</div>
+          <div className="publicCtaTitle">{t("public.registerCtaTitle")}</div>
           <div className="publicCtaText">
-            {text || "Barcha biletlar, mavzular va imtihon rejimi bilan to‘liq mashq qilish uchun ro‘yxatdan o‘ting."}
+            {text || t("public.registerCtaText")}
           </div>
         </div>
       </div>
       <Link href="/?auth=register" className="btn btn-primary publicCtaBtn">
-        Ro‘yxatdan o‘tish <ArrowRight className="lucide" aria-hidden="true" />
+        {t("public.registerCtaButton")} <ArrowRight className="lucide" aria-hidden="true" />
       </Link>
     </div>
   );
 }
 
 export function PublicQuestionList({ questions }: { questions: PublicQuestion[] }) {
+  const { t } = useSiteLanguage();
   return (
     <div className="publicQuestionList">
       {questions.map((q, i) => {
@@ -42,14 +45,14 @@ export function PublicQuestionList({ questions }: { questions: PublicQuestion[] 
                       <div className={`option publicOption ${correct ? "correct" : ""}`} key={oi}>
                         <span className="optionKey">F{oi + 1}</span>
                         <span className="optionText">{opt}</span>
-                        {correct ? <span className="publicCorrectTag">To‘g‘ri javob</span> : null}
+                        {correct ? <span className="publicCorrectTag">{t("public.correctAnswer")}</span> : null}
                       </div>
                     );
                   })}
                 </div>
                 {q.explanation ? (
                   <div className="explanation">
-                    <div className="explanationLabel">Izoh</div>
+                    <div className="explanationLabel">{t("public.explanation")}</div>
                     <div className="publicExplanationText">{q.explanation}</div>
                   </div>
                 ) : null}

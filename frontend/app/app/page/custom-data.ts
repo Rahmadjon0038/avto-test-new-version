@@ -19,14 +19,15 @@ async function parseJson(res: Response) {
 }
 
 export async function fetchCustomTests(): Promise<CustomTestCard[]> {
-  const res = await fetch("/api/custom-tests");
+  const res = await fetch(appendLanguageQuery("/api/custom-tests", getBrowserLanguage()));
   const data = await parseJson(res);
   return Array.isArray(data.customTests) ? data.customTests : [];
 }
 
 export async function fetchCustomTestById(testId: string): Promise<CustomTestCard | null> {
-  const res = await fetch(`/api/custom-tests/${encodeURIComponent(testId)}`);
+  const res = await fetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, getBrowserLanguage()));
   if (res.status === 404) return null;
   const data = await parseJson(res);
   return data?.customTest || null;
 }
+import { appendLanguageQuery, getBrowserLanguage } from "@/lib/site-language";

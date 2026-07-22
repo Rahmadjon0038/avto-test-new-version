@@ -3,24 +3,31 @@
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-
-const titleMap: Record<string, string> = {
-  topics: "Mavzu bo‘yicha testlar",
-  custom: "Sozlamali testlar",
-  mistakes: "Mening xatolarim",
-  marathon: "Marafon rejimi",
-  videos: "Video darsliklar",
-  answers: "Barcha testlar javoblari",
-  exam: "Imtihon topshirish"
-};
+import { useSiteLanguage } from "@/app/site-language-provider";
 
 const comingSoonKeys = new Set<string>();
 
 export default function StubPage() {
   const router = useRouter();
+  const { t } = useSiteLanguage();
   const params = useParams<{ key: string }>();
   const key = String(params.key || "");
-  const title = titleMap[key] || "Bo‘lim";
+  const title =
+    key === "topics"
+      ? t("home.topicsTitle")
+      : key === "custom"
+        ? t("home.customTitle")
+        : key === "mistakes"
+          ? t("home.mistakesTitle")
+          : key === "marathon"
+            ? t("home.marathonTitle")
+            : key === "videos"
+              ? t("home.videosTitle")
+              : key === "answers"
+                ? t("home.answersTitle")
+                : key === "exam"
+                  ? t("home.examTitle")
+                  : t("common.noData");
   const comingSoon = comingSoonKeys.has(key);
 
   useEffect(() => {
@@ -35,22 +42,22 @@ export default function StubPage() {
     <section className="view">
       <div className="ticketHeader">
         <button className="btn btn-ghost" type="button" onClick={() => router.push("/app")}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
         <div>
           <div className="h2" style={{ margin: 0 }}>
             {title}
           </div>
-          <div className="muted">{comingSoon ? "Tez kunda ishga tushadi" : "Hozircha demo sahifa"}</div>
+          <div className="muted">{comingSoon ? t("home.menuSoon") : t("home.menuSoonTitle")}</div>
         </div>
       </div>
 
       <div className="card" style={{ padding: 14 }}>
         <div className="comingSoonCard">
-          <div className="comingSoonPill">Tez kunda</div>
+          <div className="comingSoonPill">{t("home.menuSoon")}</div>
           <div className="comingSoonTitle">{title}</div>
           <div className="comingSoonText">
-            {comingSoon ? "Bu bo‘lim hozircha yopiq. Tayyor bo‘lganda avtomatik ochiladi." : "Bu bo‘lim keyinroq to‘ldiriladi."}
+            {comingSoon ? t("home.comingSoonText") : t("home.comingSoonText")}
           </div>
         </div>
       </div>

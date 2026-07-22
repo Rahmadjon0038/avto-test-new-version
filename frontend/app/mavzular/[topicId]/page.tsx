@@ -7,6 +7,8 @@ import { fetchPublicTopic } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
 import PublicTestRunner from "@/app/ui/public-test-runner";
 import { RegisterCta, buildFaqJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
+import { getServerLanguage } from "@/lib/site-language-server";
+import { getTranslation } from "@/lib/site-language";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +16,15 @@ type Params = { params: Promise<{ topicId: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { topicId } = await params;
-  const { topic, status } = await fetchPublicTopic(topicId);
-  const title = topic ? `${topic.title} — testlar va javoblar` : "Mavzu";
+  const lang = await getServerLanguage();
+  const t = (key: string, vars?: Record<string, string | number>) => getTranslation(lang, key, vars);
+  const { topic, status } = await fetchPublicTopic(topicId, lang);
+  const title = topic ? `${topic.title} — ${t("topics.title")}` : t("topics.title");
   return {
     title,
     description: topic
       ? `${topic.title}: ${topic.questions.length} ta savol, to‘g‘ri javoblar va izohlar bilan. Bepul mashq qiling.`
-      : "Mavzu bo‘yicha testlar — savol va javoblar.",
+      : t("topics.title"),
     alternates: { canonical: `/mavzular/${topicId}` },
     robots: status === 403 ? { index: false, follow: true } : undefined,
     openGraph: {
@@ -35,7 +39,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function MavzuDetailPage({ params }: Params) {
   const { topicId } = await params;
-  const { topic, status } = await fetchPublicTopic(topicId);
+  const lang = await getServerLanguage();
+  const t = (key: string, vars?: Record<string, string | number>) => getTranslation(lang, key, vars);
+  const { topic, status } = await fetchPublicTopic(topicId, lang);
 
   if (status === 403) {
     return (
@@ -45,11 +51,11 @@ export default async function MavzuDetailPage({ params }: Params) {
             <div className="publicLockedIcon">
               <Lock className="lucide" aria-hidden="true" />
             </div>
-            <h1 className="publicH1">Bu mavzu yopiq</h1>
+            <h1 className="publicH1">{t("topicDetail.lockedTitle")}</h1>
             <p className="publicLead">
-              Bu mavzu faqat ro‘yxatdan o‘tgan foydalanuvchilar uchun. Birinchi mavzu bepul ochiq —{" "}
+              {t("topicDetail.lockedText")} —{" "}
               <Link href="/mavzular" className="publicInlineLink">
-                bepul mavzuni ko‘rish
+                {t("footer.topics")}
               </Link>
               .
             </p>
@@ -64,8 +70,8 @@ export default async function MavzuDetailPage({ params }: Params) {
 
   const faqJsonLd = buildFaqJsonLd(topic.questions);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Bosh sahifa", url: "/" },
-    { name: "Mavzular", url: "/mavzular" },
+    { name: t("common.back"), url: "/" },
+    { name: t("footer.topics"), url: "/mavzular" },
     { name: topic.title, url: `/mavzular/${topic.id}` }
   ]);
 
@@ -73,7 +79,7 @@ export default async function MavzuDetailPage({ params }: Params) {
     <PublicShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <PublicTestRunner title={topic.title} questions={topic.questions} backHref="/mavzular" backLabel="Mavzular" />
+      <PublicTestRunner title={topic.title} questions={topic.questions} backHref="/mavzular" backLabel={t("footer.topics")} />
       <RegisterCta />
     </PublicShell>
   );

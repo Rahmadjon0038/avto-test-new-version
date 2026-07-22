@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
@@ -245,6 +246,7 @@ export default function MistakesPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("mistakes");
   const handleSettingsChange = useCallback(
@@ -274,8 +276,8 @@ export default function MistakesPage() {
   });
 
   useEffect(() => {
-    if (mistakesQuery.error) toast.error((mistakesQuery.error as any)?.message || "Xatolik");
-  }, [mistakesQuery.error]);
+    if (mistakesQuery.error) toast.error((mistakesQuery.error as any)?.message || t("common.error"));
+  }, [mistakesQuery.error, t]);
 
   const questions = mistakesQuery.data || [];
   const currentQuestions = useMemo(
@@ -319,14 +321,14 @@ export default function MistakesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: nextAnswers })
       }).then(jsonOrError),
-    onError: (error: any) => toast.error(error?.message || "Xatolik"),
+    onError: (error: any) => toast.error(error?.message || t("common.error")),
     onSuccess: async (data: any) => {
       await qc.invalidateQueries({ queryKey: ["mistakes"] });
       if (settings.shuffleQuestions) refreshShuffleSeed();
       setAnswers({});
       setIdx(0);
       setFinishOpen(false);
-      toast.success(`Yakunlandi: ${data?.fixed || 0} ta xato to‘g‘rilandi`);
+      toast.success(`${data?.fixed || 0} ${t("progress.correct", { count: "" }).replace("{count}", "").trim()}`);
     }
   });
 
@@ -339,9 +341,9 @@ export default function MistakesPage() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["mistakes"] });
-      toast.success("Xato o‘chirildi");
+      toast.success(t("mistakes.clear"));
     },
-    onError: (error: any) => toast.error(error?.message || "Xatolik")
+    onError: (error: any) => toast.error(error?.message || t("common.error"))
   });
 
   function scheduleAutoNext(nextIndex: number) {
@@ -380,7 +382,7 @@ export default function MistakesPage() {
   if (mistakesQuery.isLoading) {
     return (
       <section className="view">
-        <div className="muted">Yuklanmoqda...</div>
+        <div className="muted">{t("common.loading")}</div>
       </section>
     );
   }
@@ -390,27 +392,27 @@ export default function MistakesPage() {
       <div className="topicHeader mistakesHeader">
         <div className="topicHeaderLeft">
           <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
-            <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+            <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
           </button>
           <div>
             <div className="h2" style={{ margin: 0 }}>
-              Mening xatolarim
+              {t("mistakes.title")}
             </div>
-            <div className="muted">Xato savollar ro‘yxati va ular ustida alohida mashq qilish rejimi.</div>
+            <div className="muted">{t("mistakes.subtitle")}</div>
           </div>
         </div>
 
         <div className="mistakesHeaderMeta">
           <TestPageSettingsButton settings={settings} onChange={handleSettingsChange} />
-          <span className="badge">{questions.length} ta xato</span>
-          <span className="badge">{currentQuestions.length} ta mashq</span>
+          <span className="badge">{questions.length}</span>
+          <span className="badge">{currentQuestions.length}</span>
         </div>
       </div>
 
       <div className="mistakesTabs">
         <button className={`mistakesTab ${tab === "list" ? "active" : ""}`} type="button" onClick={() => setTab("list")}>
           <List className="lucide" aria-hidden="true" />
-          <span>Mening xatolarim</span>
+          <span>{t("mistakes.listTab")}</span>
           <span className="badge">{questions.length}</span>
         </button>
         <button
@@ -419,7 +421,7 @@ export default function MistakesPage() {
           onClick={() => setTab("practice")}
         >
           <Target className="lucide" aria-hidden="true" />
-          <span>Xatolarim ustida ishlash</span>
+          <span>{t("mistakes.practiceTab")}</span>
           <span className="badge">{questions.length}</span>
         </button>
       </div>
@@ -429,10 +431,10 @@ export default function MistakesPage() {
           {!questions.length ? (
             <div className="card" style={{ padding: 16 }}>
               <div className="h2" style={{ margin: 0 }}>
-                Hozircha xato yo‘q
+                {t("mistakes.empty")}
               </div>
               <div className="muted" style={{ marginTop: 8 }}>
-                Testlarda xato qilgan savollar shu yerga tushadi.
+                {t("mistakes.subtitle")}
               </div>
             </div>
           ) : (
@@ -441,11 +443,11 @@ export default function MistakesPage() {
                 <article className="card answersQuestionCard mistakesQuestionCard" key={question.id || `${question.sourceId}-${index}`}>
                   <div className="answersQuestionCardHead mistakesQuestionCardHead">
                     <div className="answersQuestionCardTitle">{mistakeLabel(question, index)}</div>
-                    <span className="badge">{question.hasImage ? "Rasmli" : "Rasmsiz"}</span>
+                    <span className="badge">{question.hasImage ? t("answers.withImage") : t("answers.withoutImage")}</span>
                     <button
                       className="mistakesDeleteBtn"
                       type="button"
-                      aria-label="Xatoni o‘chirish"
+                      aria-label={t("mistakes.clear")}
                       onClick={() => removeMistakeMutation.mutate(question.id)}
                     >
                       <Trash2 className="lucide" aria-hidden="true" />
@@ -463,13 +465,13 @@ export default function MistakesPage() {
 
                   <div className="mistakesAnswerRow">
                     <div className="mistakesAnswerBox bad">
-                      <div className="mistakesAnswerLabel">Siz belgilagan</div>
+                      <div className="mistakesAnswerLabel">{t("public.correctAnswer")}</div>
                       <div className="mistakesAnswerValue">
-                        {question.wrongAnswer === null ? "—" : question.options[question.wrongAnswer] || "Noma’lum"}
+                        {question.wrongAnswer === null ? "—" : question.options[question.wrongAnswer] || t("common.noData")}
                       </div>
                     </div>
                     <div className="mistakesAnswerBox good">
-                      <div className="mistakesAnswerLabel">To‘g‘ri javob</div>
+                      <div className="mistakesAnswerLabel">{t("public.correctAnswer")}</div>
                       <div className="mistakesAnswerValue">{question.correctAnswer || "—"}</div>
                     </div>
                   </div>
@@ -487,7 +489,7 @@ export default function MistakesPage() {
                         setIdx(nextIndex >= 0 ? nextIndex : 0);
                       }}
                     >
-                      Xatoni mashqda ochish
+                      {t("mistakes.practiceTab")}
                     </button>
                   </div>
                 </article>
@@ -500,10 +502,10 @@ export default function MistakesPage() {
           {!currentQuestions.length ? (
             <div className="card" style={{ padding: 16 }}>
               <div className="h2" style={{ margin: 0 }}>
-                Mashq qilish uchun xato yo‘q
+                {t("mistakes.empty")}
               </div>
               <div className="muted" style={{ marginTop: 8 }}>
-                Avval testlarda xato qiling, keyin shu yerda ishlaysiz.
+                {t("mistakes.subtitle")}
               </div>
             </div>
           ) : (
@@ -536,7 +538,7 @@ export default function MistakesPage() {
 
                       {answers[currentQuestion.id] !== undefined && currentQuestion.explanation ? (
                         <div className="explanation">
-                          <div className="explanationLabel">Izoh</div>
+                          <div className="explanationLabel">{t("public.explanation")}</div>
                           <MarkdownText text={currentQuestion.explanation} />
                         </div>
                       ) : null}
@@ -554,7 +556,7 @@ export default function MistakesPage() {
                       <img
                         className={`qimg ${imageLoading ? "isLoading" : ""}`}
                         src={resolveQuestionImage(currentQuestion.image)}
-                        alt="Savol rasmi"
+                        alt={t("public.explanation")}
                         onLoad={() => setImageLoading(false)}
                         onError={(event) => {
                           const img = event.currentTarget;
@@ -591,7 +593,7 @@ export default function MistakesPage() {
               <div className="topicFooter">
                 <div className="footerLeft">
                   <button className="btn btn-ghost" type="button" onClick={() => setIdx(Math.max(0, idx - 1))} disabled={idx <= 0}>
-                    <ChevronLeft className="lucide" aria-hidden="true" /> Orqaga
+                    <ChevronLeft className="lucide" aria-hidden="true" /> {t("common.back")}
                   </button>
                   <button
                     className="btn btn-ghost"
@@ -599,15 +601,15 @@ export default function MistakesPage() {
                     onClick={() => setIdx(Math.min(currentQuestions.length - 1, idx + 1))}
                     disabled={idx >= currentQuestions.length - 1}
                   >
-                    Keyingi <ChevronRight className="lucide" aria-hidden="true" />
+                    {t("common.next")} <ChevronRight className="lucide" aria-hidden="true" />
                   </button>
                 </div>
                 <div className="footerRight">
                   <button className="btn btn-danger" type="button" onClick={() => setAnswers({})}>
-                    <RotateCcw className="lucide" aria-hidden="true" /> Tozalash
+                    <RotateCcw className="lucide" aria-hidden="true" /> {t("mistakes.clear")}
                   </button>
                   <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(true)}>
-                    <Flag className="lucide" aria-hidden="true" /> Yakunlash
+                    <Flag className="lucide" aria-hidden="true" /> {t("topicDetail.finish")}
                   </button>
                 </div>
               </div>
@@ -621,7 +623,7 @@ export default function MistakesPage() {
           <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
-            <div className="modalTitle">Yakunlash</div>
+            <div className="modalTitle">{t("topicDetail.finishTitle")}</div>
               <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
                 ✕
               </button>
@@ -637,11 +639,11 @@ export default function MistakesPage() {
                   >
                     <div className="resultChartCenter">
                       <div className="resultChartValue">{fixPercent}%</div>
-                      <div className="resultChartLabel">Foiz</div>
+                      <div className="resultChartLabel">{t("progress.title")}</div>
                     </div>
                   </div>
                   <div className="resultSolved">
-                    <div className="muted">Yechilgan</div>
+                    <div className="muted">{t("answers.loaded", { count: answered })}</div>
                     <div className="resultSolvedValue">
                       {correctPlanned}/{currentQuestions.length}
                     </div>
@@ -649,7 +651,7 @@ export default function MistakesPage() {
                 </div>
               </div>
               <button className="btn btn-primary resultCloseBtn" type="button" onClick={() => syncMutation.mutate(answers)} disabled={syncMutation.isPending}>
-                {syncMutation.isPending ? "Saqlanmoqda..." : "Tasdiqlash"}
+                {syncMutation.isPending ? t("common.loading") : t("common.save")}
               </button>
             </div>
           </div>
