@@ -22,6 +22,17 @@ type BuilderQuestion = {
   options: string[];
   correctIndex: number;
   explanation: string;
+  i18n?: Record<
+    string,
+    {
+      text?: string;
+      image?: string;
+      audio?: string;
+      options?: string[];
+      correctIndex?: number;
+      explanation?: string;
+    }
+  >;
 };
 
 type DraftTicket = {
@@ -54,7 +65,8 @@ function cloneQuestion(question: BuilderQuestion): BuilderQuestion {
     audio: String(question.audio || ""),
     options: Array.isArray(question.options) ? question.options.map((option) => String(option || "")) : [],
     correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
-    explanation: String(question.explanation || "")
+    explanation: String(question.explanation || ""),
+    i18n: question.i18n ? JSON.parse(JSON.stringify(question.i18n)) : undefined
   };
 }
 

@@ -15,6 +15,17 @@ type Question = {
   options: string[];
   correctIndex: number;
   explanation: string;
+  i18n?: Record<
+    string,
+    {
+      text?: string;
+      image?: string;
+      audio?: string;
+      options?: string[];
+      correctIndex?: number;
+      explanation?: string;
+    }
+  >;
 };
 
 type AdminTicket = {
@@ -46,7 +57,8 @@ function cloneQuestion(question: Question): Question {
     text: String(question.text || ""),
     options: Array.isArray(question.options) ? question.options.map((option) => String(option || "")) : ["", "", "", ""],
     correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
-    explanation: String(question.explanation || "")
+    explanation: String(question.explanation || ""),
+    i18n: question.i18n ? JSON.parse(JSON.stringify(question.i18n)) : undefined
   };
 }
 
@@ -60,7 +72,8 @@ function normalizeQuestionForSave(question: Question): Question {
     image: String(question.image || "").trim(),
     text: String(question.text || "").trim(),
     explanation: String(question.explanation || "").trim(),
-    options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : []
+    options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [],
+    i18n: question.i18n ? JSON.parse(JSON.stringify(question.i18n)) : undefined
   };
 }
 
