@@ -4260,24 +4260,29 @@ async function handleListVideoLessons(req, res, user, adminView = false) {
 async function readVideoLessonPayload(req) {
   const body = Buffer.isBuffer(req.body) ? null : (req.body && typeof req.body === "object" ? req.body : {});
   const headers = req.headers || {};
-  const headerTitleI18n = parseJsonValue(headers["x-video-title-i18n"], {});
+  const decodeHeaderValue = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  };
+  const headerTitleI18n = parseJsonValue(decodeHeaderValue(headers["x-video-title-i18n"]), {});
   const titleI18n =
     body?.titleI18n ??
     body?.title_i18n ??
     (headerTitleI18n && typeof headerTitleI18n === "object" ? headerTitleI18n : null) ??
-    {
-      uz_latn: headers["x-video-title-uz-latn"],
-      uz_cyrl: headers["x-video-title-uz-cyrl"],
-      ru: headers["x-video-title-ru"]
-    };
+    {};
   return {
     topicId: body?.topicId ?? body?.topic_id ?? headers["x-topic-id"],
-    title: body?.title ?? headers["x-video-title"] ?? headers["x-title"],
+    title: body?.title ?? decodeHeaderValue(headers["x-video-title"]) ?? decodeHeaderValue(headers["x-title"]),
     titleI18n,
     description: body?.description ?? headers["x-video-description"] ?? "",
     category: body?.category ?? headers["x-video-category"] ?? "",
     premiumOnly: body?.premiumOnly ?? body?.premium_only ?? headers["x-premium-only"],
-    fileName: String(headers["x-file-name"] || headers["x-video-file-name"] || "video.mp4"),
+    fileName: decodeHeaderValue(headers["x-file-name"] || headers["x-video-file-name"] || "video.mp4") || "video.mp4",
     contentType: String(headers["content-type"] || "application/octet-stream")
   };
 }

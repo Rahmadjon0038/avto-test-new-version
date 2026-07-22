@@ -126,12 +126,9 @@ export default function AdminVideosPage() {
       xhr.setRequestHeader("x-topic-id", meta.topicId);
       xhr.setRequestHeader(
         "x-video-title-i18n",
-        JSON.stringify(meta.titleI18n || {})
+        encodeURIComponent(JSON.stringify(meta.titleI18n || {}))
       );
-      xhr.setRequestHeader("x-video-title-uz-latn", meta.titleI18n?.uz_latn || "");
-      xhr.setRequestHeader("x-video-title-uz-cyrl", meta.titleI18n?.uz_cyrl || "");
-      xhr.setRequestHeader("x-video-title-ru", meta.titleI18n?.ru || "");
-      xhr.setRequestHeader("x-file-name", file.name || "video.mp4");
+      xhr.setRequestHeader("x-file-name", encodeURIComponent(file.name || "video.mp4"));
       xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
       xhr.upload.onprogress = (event) => {
         if (!event.lengthComputable) return;
