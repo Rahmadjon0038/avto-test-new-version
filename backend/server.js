@@ -293,14 +293,20 @@ function normalizeTicketQuestionRow(row) {
   };
 }
 
-function normalizeTicketSlotQuestion(question, fallbackOrder = 0) {
+function normalizeTicketSlotQuestion(question, fallbackOrder = 0, currentQuestion = null) {
   if (!question || typeof question !== "object") return null;
+  const current = currentQuestion && typeof currentQuestion === "object" ? currentQuestion : null;
   const text = String(question.text || "").trim();
   const image = String(question.image || "").trim();
   const audio = String(question.audio || "").trim();
   const explanation = String(question.explanation || "").trim();
   const options = Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [];
-  const i18n = normalizeQuestionI18n(question.i18n, question);
+  const i18n = normalizeQuestionI18n(
+    question.i18n && Object.keys(parseJsonValue(question.i18n, {})).length
+      ? question.i18n
+      : current?.i18n || {},
+    question
+  );
   const hasContent = Boolean(text || image || audio || explanation || options.some(Boolean) || Object.keys(i18n || {}).length > 0);
   if (!hasContent && !String(question.id || question.questionId || "").trim()) return null;
   return {
@@ -311,19 +317,28 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0) {
     topicSlug: String(question.topicSlug || ""),
     topicTitle: String(question.topicTitle || ""),
     questionIndex: Number(question.questionIndex || 0),
-    text,
-    image,
-    audio,
-    options,
-    correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
-    explanation,
+    text: text || String(current?.text || ""),
+    image: image || String(current?.image || ""),
+    audio: audio || String(current?.audio || ""),
+    options: options.some(Boolean)
+      ? options
+      : Array.isArray(current?.options)
+        ? current.options.map((option) => String(option || "").trim())
+        : [],
+    correctIndex: Number.isFinite(Number(question.correctIndex))
+      ? Number(question.correctIndex)
+      : Number.isFinite(Number(current?.correctIndex))
+        ? Number(current.correctIndex)
+        : 0,
+    explanation: explanation || String(current?.explanation || ""),
     i18n
   };
 }
 
-function normalizeTicketSlotQuestions(value) {
+function normalizeTicketSlotQuestions(value, currentQuestions = null) {
   const raw = Array.isArray(value) ? value : [];
-  return Array.from({ length: 20 }, (_, index) => normalizeTicketSlotQuestion(raw[index], index + 1));
+  const currentSlots = Array.isArray(currentQuestions) ? currentQuestions : [];
+  return Array.from({ length: 20 }, (_, index) => normalizeTicketSlotQuestion(raw[index], index + 1, currentSlots[index] || null));
 }
 
 function buildTicketQuestionQuestion(ticket, questionRow) {
@@ -622,7 +637,10 @@ async function updateTicket(id, input) {
   if (!title) throw new Error("Bilet nomi kiritilishi kerak");
 
   const status = input.status !== undefined ? normalizeTicketStatus(input.status) : normalizeTicketStatus(ticket.status);
-  const questions = input.questions !== undefined ? normalizeTicketSlotQuestions(input.questions) : normalizeTicketSlotQuestions(ticket.questions);
+  const questions =
+    input.questions !== undefined
+      ? normalizeTicketSlotQuestions(input.questions, ticket.questions)
+      : normalizeTicketSlotQuestions(ticket.questions, ticket.questions);
 
   const result = await dbApi.get(
     `
