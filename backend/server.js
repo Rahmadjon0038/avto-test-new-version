@@ -4942,12 +4942,24 @@ app.patch("/api/admin/tickets/:ticketId", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
+    console.log("[admin/tickets PATCH] incoming", {
+      ticketId: String(req.params.ticketId || ""),
+      hasTitleI18n: Boolean(req.body?.titleI18n || req.body?.title_i18n),
+      titleI18nKeys: Object.keys(parseJsonValue(req.body?.titleI18n || req.body?.title_i18n || {}, {})),
+      questionCount: Array.isArray(req.body?.questions) ? req.body.questions.length : null,
+      firstQuestionKeys: Array.isArray(req.body?.questions) && req.body.questions[0] ? Object.keys(req.body.questions[0]) : []
+    });
     const ticket = await updateTicket(String(req.params.ticketId), {
       title: req.body?.title !== undefined ? String(req.body.title || "") : undefined,
       titleI18n: req.body?.titleI18n ?? req.body?.title_i18n,
       questions: Array.isArray(req.body?.questions) ? req.body.questions : undefined,
       status: req.body?.status,
       ticketNumber: req.body?.ticketNumber
+    });
+    console.log("[admin/tickets PATCH] saved", {
+      ticketId: String(req.params.ticketId || ""),
+      titleI18nKeys: Object.keys(parseJsonValue(ticket.titleI18n || {}, {})),
+      firstQuestionI18nKeys: Array.isArray(ticket.questions) && ticket.questions[0] ? Object.keys(parseJsonValue(ticket.questions[0].i18n || {}, {})) : []
     });
     res.json({ ok: true, ticket });
   } catch (e) {
