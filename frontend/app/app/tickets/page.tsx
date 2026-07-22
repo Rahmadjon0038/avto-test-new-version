@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 
 type TicketProgress = {
@@ -31,10 +31,11 @@ type Ticket = {
 export default function TicketsPage() {
   const router = useRouter();
   const { authFetch } = useAuth();
+  const { t, language } = useSiteLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
 
   const ticketsQuery = useQuery({
-    queryKey: ["tickets"],
+    queryKey: ["tickets", language],
     queryFn: async () => {
       const res = await authFetch("/api/tickets");
       const data = (await jsonOrError(res)) as { tickets: Ticket[] };
@@ -51,27 +52,27 @@ export default function TicketsPage() {
     <section className="view">
       <div className="ticketsHeader card">
         <button className="btn btn-ghost btn-sm ticketsBackBtn" type="button" onClick={() => router.push("/app")}>
-          <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
+          <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
         </button>
-        <div className="ticketsHeaderTitle">Biletlar bo‘yicha testlar</div>
+        <div className="ticketsHeaderTitle">{t("tickets.title")}</div>
       </div>
 
       <div className="ticketsGrid">
-        {tickets.map((t) => (
+        {tickets.map((ticket) => (
           <button
-            key={t.id}
+            key={ticket.id}
             className="card ticketCard"
             type="button"
-            onClick={() => router.push(`/app/ticket/${encodeURIComponent(t.id)}`)}
+            onClick={() => router.push(`/app/ticket/${encodeURIComponent(ticket.id)}`)}
           >
-            <div className={`ticketCardBody ${t.progress ? "" : "isEmpty"}`}>
-              <div className="ticketTitle">{t.title}</div>
-              {t.progress ? (
+            <div className={`ticketCardBody ${ticket.progress ? "" : "isEmpty"}`}>
+              <div className="ticketTitle">{ticket.title}</div>
+              {ticket.progress ? (
                 <>
                   <div className="ticketMiniStats">
-                    <span className="ticketMiniStat good">{`${t.progress.correctCount} ta to‘g‘ri`}</span>
-                    <span className="ticketMiniStat bad">{`${t.progress.wrongCount} ta noto‘g‘ri`}</span>
-                    <span className="ticketMiniStat muted">{`${t.progress.unansweredCount} ta belgilanmagan`}</span>
+                    <span className="ticketMiniStat good">{t("progress.correct", { count: ticket.progress.correctCount })}</span>
+                    <span className="ticketMiniStat bad">{t("progress.wrong", { count: ticket.progress.wrongCount })}</span>
+                    <span className="ticketMiniStat muted">{t("progress.unanswered", { count: ticket.progress.unansweredCount })}</span>
                   </div>
                 </>
               ) : null}

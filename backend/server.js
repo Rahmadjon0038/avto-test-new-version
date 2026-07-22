@@ -4828,7 +4828,10 @@ app.patch("/api/admin/tickets/:ticketId", async (req, res) => {
   try {
     const ticket = await updateTicket(String(req.params.ticketId), {
       title: req.body?.title !== undefined ? String(req.body.title || "") : undefined,
-      questions: Array.isArray(req.body?.questions) ? req.body.questions : undefined
+      titleI18n: req.body?.titleI18n ?? req.body?.title_i18n,
+      questions: Array.isArray(req.body?.questions) ? req.body.questions : undefined,
+      status: req.body?.status,
+      ticketNumber: req.body?.ticketNumber
     });
     res.json({ ok: true, ticket });
   } catch (e) {
