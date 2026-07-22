@@ -57,8 +57,8 @@ function resolveFilterLabel(filter: FilterKey) {
   return filter;
 }
 
-function questionKeyLabel(index: number) {
-  return `Savol ${String(index + 1).padStart(2, "0")}`;
+function questionKeyLabel(index: number, t: (key: string, vars?: Record<string, string | number>) => string) {
+  return t("answers.questionLabel", { count: String(index + 1).padStart(2, "0") });
 }
 
 export default function AnswersPage() {
@@ -192,7 +192,7 @@ export default function AnswersPage() {
                 className={`answersFilterToggle ${filterOpen ? "open" : ""}`}
                 type="button"
                 onClick={() => setFilterOpen((open) => !open)}
-                aria-label="Filtr"
+                aria-label={t("answers.filter")}
                 aria-expanded={filterOpen}
               >
                 <Filter className="lucide" aria-hidden="true" />
@@ -200,7 +200,7 @@ export default function AnswersPage() {
               </button>
 
               {filterOpen ? (
-                <div className="answersFilterDropdown" role="menu" aria-label="Filtrlar">
+                <div className="answersFilterDropdown" role="menu" aria-label={t("answers.filter")}>
                   <button
                     className={`answersFilterOption ${filter === "all" ? "active" : ""}`}
                     type="button"
@@ -264,12 +264,12 @@ export default function AnswersPage() {
         </div>
       </div>
 
-      {isLoadingInitial ? <div className="muted">Savollar yuklanmoqda...</div> : null}
+      {isLoadingInitial ? <div className="muted">{t("answers.loading")}</div> : null}
 
       {!isLoadingInitial && questions.length === 0 ? (
         <section className="card answersEmpty">
-          <div className="adminEmptyTitle">Hech narsa topilmadi</div>
-          <div className="adminEmptyText">Tanlangan filtr bo‘yicha savol yo‘q.</div>
+          <div className="adminEmptyTitle">{t("answers.empty")}</div>
+          <div className="adminEmptyText">{t("answers.noItems")}</div>
         </section>
       ) : null}
 
@@ -277,8 +277,8 @@ export default function AnswersPage() {
         {questions.map((question, index) => (
           <article className="card answersQuestionCard" key={question.id || `${question.sourceId}-${index}`}>
             <div className="answersQuestionCardHead">
-              <div className="answersQuestionCardTitle">{questionKeyLabel(index)}</div>
-              <span className="badge">{question.hasImage ? "Rasmli" : "Rasmsiz"}</span>
+              <div className="answersQuestionCardTitle">{questionKeyLabel(index, t)}</div>
+              <span className="badge">{question.hasImage ? t("answers.withImage") : t("answers.withoutImage")}</span>
             </div>
 
             <div className="answersQuestionTextBig">{question.text}</div>
@@ -309,11 +309,11 @@ export default function AnswersPage() {
 
       {answersQuery.hasNextPage ? (
         <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
-          <button className="btn btn-ghost" type="button" onClick={() => answersQuery.fetchNextPage()} disabled={isLoadingMore}>
-            {isLoadingMore ? "Yuklanmoqda..." : "Ko‘proq yuklash"}
-          </button>
-        </div>
-      ) : null}
+            <button className="btn btn-ghost" type="button" onClick={() => answersQuery.fetchNextPage()} disabled={isLoadingMore}>
+            {isLoadingMore ? t("common.loading") : t("answers.loadMore")}
+            </button>
+          </div>
+        ) : null}
     </section>
   );
 }

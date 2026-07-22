@@ -192,8 +192,8 @@ function uzErrorMessage(error: unknown, fallback: string) {
   return message;
 }
 
-function examFinishedToast() {
-  toast.error("Imtihon yakunlangan. Qayta boshlash uchun \"Qayta boshlash\" tugmasini bosing.");
+function examFinishedToast(message: string) {
+  toast.error(message);
 }
 
 function calculateExamResult(
@@ -626,7 +626,7 @@ export default function ExamPage() {
                       disabled={hasAnswered}
                       onClick={() => {
                         if (locked) {
-                          examFinishedToast();
+                          examFinishedToast(t("exam.finished"));
                           return;
                         }
                         if (hasAnswered) return;
@@ -762,10 +762,15 @@ export default function ExamPage() {
 
       {zoomedImage ? (
         <div className="imageLightbox" role="dialog" aria-modal="true" onClick={() => setZoomedImage(null)}>
-          <button className="imageLightboxClose" type="button" onClick={() => setZoomedImage(null)} aria-label="Yopish">
+          <button className="imageLightboxClose" type="button" onClick={() => setZoomedImage(null)} aria-label={t("common.close")}>
             ×
           </button>
-          <img className="imageLightboxImg" src={zoomedImage} alt="Katta rasm" onClick={(event) => event.stopPropagation()} />
+          <img
+            className="imageLightboxImg"
+            src={zoomedImage}
+            alt={currentQuestion?.text || t("common.noData")}
+            onClick={(event) => event.stopPropagation()}
+          />
         </div>
       ) : null}
     </section>

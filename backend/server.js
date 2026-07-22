@@ -3590,16 +3590,33 @@ function buildExamQuestionKey({ kind, sourceId, questionId }) {
   return `${String(kind)}:${String(sourceId)}:${String(questionId)}`;
 }
 
-async function getExamQuestionPool() {
+async function getExamQuestionPool(lang = "") {
   const bank = await getTopicQuestionBankFromDb();
-  return bank.map((item) => ({
-    kind: "topic",
-    sourceId: String(item.topicId),
-    sourceTitle: String(item.topicTitle || ""),
-    questionIndex: Number(item.questionIndex || 0),
-    questionKey: String(item.questionKey || ""),
-    question: item.question
-  }));
+  const normalizedLang = normalizeLanguageCode(lang, "");
+  const topicCache = new Map();
+  const localizedTopics = normalizedLang
+    ? await Promise.all(
+        Array.from(new Set(bank.map((item) => String(item.topicId || "")))).map(async (topicId) => {
+          if (!topicId) return [topicId, null];
+          const topic = await getTopicFromDb(topicId);
+          return [topicId, topic ? localizeTopic(topic, normalizedLang) : null];
+        })
+      )
+    : [];
+  for (const [topicId, topic] of localizedTopics) topicCache.set(String(topicId), topic);
+
+  return bank.map((item) => {
+    const sourceId = String(item.topicId);
+    const localizedTopic = topicCache.get(sourceId);
+    return {
+      kind: "topic",
+      sourceId,
+      sourceTitle: String(localizedTopic?.title || item.topicTitle || ""),
+      questionIndex: Number(item.questionIndex || 0),
+      questionKey: String(item.questionKey || ""),
+      question: normalizedLang ? localizeQuestion(item.question, normalizedLang) : item.question
+    };
+  });
 }
 
 function buildExamQuestionItem(poolItem) {
@@ -3618,8 +3635,8 @@ function getExamQuestionSelectionSize(requestedCount) {
   return normalizeExamCount(requestedCount);
 }
 
-async function selectRandomExamQuestions(count) {
-  const pool = await getExamQuestionPool();
+async function selectRandomExamQuestions(count, lang = "") {
+  const pool = await getExamQuestionPool(lang);
   const desiredCount = getExamQuestionSelectionSize(count);
   if (pool.length < desiredCount) {
     const err = new Error("Imtihon uchun savollar yetarli emas");
@@ -4666,8 +4683,8 @@ function shuffleInPlace(arr) {
   }
 }
 
-async function buildExamSelection(count = 50) {
-  const pool = await getExamQuestionPool();
+async function buildExamSelection(count = 50, lang = "") {
+  const pool = await getExamQuestionPool(lang);
   const desiredCount = normalizeExamCount(count);
   if (pool.length === 0) {
     const error = new Error("Imtihon uchun savol topilmadi");
@@ -4706,9 +4723,10 @@ function serializeExamSessionRow(row) {
 
 app.post("/api/exam/start", requireUser, async (req, res) => {
   const userId = String(req.user.id);
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const examCount = normalizeExamCount(req.body?.count);
   const durationSeconds = getExamDurationSeconds(examCount);
-  const selection = await buildExamSelection(examCount);
+  const selection = await buildExamSelection(examCount, lang);
   const startedAt = new Date().toISOString();
 
   const result = await dbApi.get(
@@ -4761,6 +4779,7 @@ app.post("/api/exam/start", requireUser, async (req, res) => {
 
 app.get("/api/exam", requireUser, async (req, res) => {
   const userId = String(req.user.id);
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const row = await dbApi.get("SELECT * FROM exam_sessions WHERE user_id = ?", [userId]);
   if (!row) return res.json({ exam: null });
 
@@ -4781,7 +4800,7 @@ app.get("/api/exam", requireUser, async (req, res) => {
     sourceId: String(item.sourceId || ""),
     sourceTitle: String(item.sourceTitle || ""),
     questionIndex: Number(item.questionIndex || 0) + 1,
-    ...normalizeAnswerQuestion(item.question)
+    ...normalizeAnswerQuestion(lang ? localizeQuestion(item.question, lang) : item.question)
   }));
 
   const freshTiming = getExamTiming(activeSession);
