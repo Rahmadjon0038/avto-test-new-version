@@ -431,12 +431,27 @@ async function hydrateTicketSlotQuestions(rawQuestions, questionRows = []) {
 
     const bankQuestion = row ? row.question : null;
     let topicQuestion = null;
-    if (row && row.topicId && row.questionId) {
-      const cacheKey = `${row.topicId}:${row.questionId}`;
+    const sourceTopicId = Number(
+      row?.topicId ||
+        rawSlot?.topicId ||
+        bankQuestion?.topicId ||
+        0
+    );
+    const sourceQuestionId = String(
+      row?.questionId ||
+        rawSlot?.questionId ||
+        bankQuestion?.questionId ||
+        bankQuestion?.id ||
+        rawSlot?.id ||
+        ""
+    );
+
+    if (sourceTopicId && sourceQuestionId) {
+      const cacheKey = `${sourceTopicId}:${sourceQuestionId}`;
       if (topicQuestionCache.has(cacheKey)) {
         topicQuestion = topicQuestionCache.get(cacheKey);
       } else {
-        topicQuestion = await getTopicQuestionSnapshot(row.topicId, row.questionId);
+        topicQuestion = await getTopicQuestionSnapshot(sourceTopicId, sourceQuestionId);
         topicQuestionCache.set(cacheKey, topicQuestion);
       }
     }
@@ -735,10 +750,12 @@ async function updateTicket(id, input) {
   if (!title) throw new Error("Bilet nomi kiritilishi kerak");
 
   const status = input.status !== undefined ? normalizeTicketStatus(input.status) : normalizeTicketStatus(ticket.status);
-  const questions =
+  const sourceQuestions =
     input.questions !== undefined
       ? normalizeTicketSlotQuestions(input.questions, ticket.questions)
       : normalizeTicketSlotQuestions(ticket.questions, ticket.questions);
+  const questionRows = await getTicketQuestionsFromDb(id);
+  const questions = await hydrateTicketSlotQuestions(sourceQuestions, questionRows);
 
   const result = await dbApi.get(
     `
