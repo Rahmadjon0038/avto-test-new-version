@@ -335,10 +335,58 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0, currentQuestio
   };
 }
 
-function normalizeTicketSlotQuestions(value, currentQuestions = null) {
+function mergeTicketSlotQuestions(value, currentQuestions = null) {
   const raw = Array.isArray(value) ? value : [];
   const currentSlots = Array.isArray(currentQuestions) ? currentQuestions : [];
-  return Array.from({ length: 20 }, (_, index) => normalizeTicketSlotQuestion(raw[index], index + 1, currentSlots[index] || null));
+  return Array.from({ length: 20 }, (_, index) => {
+    const source = raw[index];
+    const current = currentSlots[index] || null;
+    if ((!source || typeof source !== "object") && !current) return null;
+
+    const next = source && typeof source === "object" ? source : {};
+    const hasSourceI18n = Boolean(next.i18n && Object.keys(parseJsonValue(next.i18n, {})).length);
+    const currentI18n = current?.i18n && typeof current.i18n === "object" ? parseJsonValue(current.i18n, {}) : {};
+    const nextI18n = hasSourceI18n ? parseJsonValue(next.i18n, {}) : currentI18n;
+
+    const text = String(next.text || "").trim() || String(current?.text || "").trim();
+    const image = String(next.image || "").trim() || String(current?.image || "").trim();
+    const audio = String(next.audio || "").trim() || String(current?.audio || "").trim();
+    const explanation = String(next.explanation || "").trim() || String(current?.explanation || "").trim();
+    const options = Array.isArray(next.options) && next.options.some((option) => String(option || "").trim())
+      ? next.options.map((option) => String(option || "").trim())
+      : Array.isArray(current?.options)
+        ? current.options.map((option) => String(option || "").trim())
+        : [];
+    const correctIndex = Number.isFinite(Number(next.correctIndex))
+      ? Number(next.correctIndex)
+      : Number.isFinite(Number(current?.correctIndex))
+        ? Number(current.correctIndex)
+        : 0;
+
+    const questionId = String(next.questionId || next.id || current?.questionId || current?.id || `slot-${index + 1}`);
+    const id = String(next.id || current?.id || questionId || `slot-${index + 1}`);
+
+    return {
+      id,
+      questionId,
+      order: Number.isFinite(Number(next.order)) ? Number(next.order) : Number(index + 1),
+      topicId: Number(next.topicId || current?.topicId || 0),
+      topicSlug: String(next.topicSlug || current?.topicSlug || ""),
+      topicTitle: String(next.topicTitle || current?.topicTitle || ""),
+      questionIndex: Number.isFinite(Number(next.questionIndex)) ? Number(next.questionIndex) : Number(current?.questionIndex || 0),
+      text,
+      image,
+      audio,
+      options,
+      correctIndex,
+      explanation,
+      i18n: nextI18n && Object.keys(nextI18n).length ? nextI18n : {}
+    };
+  });
+}
+
+function normalizeTicketSlotQuestions(value, currentQuestions = null) {
+  return mergeTicketSlotQuestions(value, currentQuestions);
 }
 
 function buildTicketQuestionQuestion(ticket, questionRow) {
