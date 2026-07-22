@@ -182,12 +182,14 @@ function localizeQuestion(question, lang) {
 
   const next = { ...question };
   if (localized.text !== undefined && String(localized.text).trim()) next.text = String(localized.text);
-  if (localized.image !== undefined) next.image = String(localized.image || "");
-  if (localized.audio !== undefined) next.audio = String(localized.audio || "");
-  if (Array.isArray(localized.options) && localized.options.length) {
+  if (localized.image !== undefined && String(localized.image).trim()) next.image = String(localized.image);
+  if (localized.audio !== undefined && String(localized.audio).trim()) next.audio = String(localized.audio);
+  if (Array.isArray(localized.options) && localized.options.some((option) => String(option || "").trim())) {
     next.options = localized.options.map((option) => String(option || "").trim());
   }
-  if (localized.explanation !== undefined) next.explanation = String(localized.explanation || "");
+  if (localized.explanation !== undefined && String(localized.explanation).trim()) {
+    next.explanation = String(localized.explanation);
+  }
   if (Number.isFinite(Number(localized.correctIndex))) next.correctIndex = Number(localized.correctIndex);
   return next;
 }
