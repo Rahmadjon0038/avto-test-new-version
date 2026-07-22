@@ -5455,6 +5455,13 @@ app.post("/api/admin/video-lessons", maybeRawUpload, async (req, res) => {
   try {
     const payload = await readVideoLessonPayload(req);
     const fileBuffer = Buffer.isBuffer(req.body) ? req.body : null;
+    console.log("[admin-video-upload] incoming", {
+      topicId: payload.topicId,
+      fileName: payload.fileName,
+      contentType: payload.contentType,
+      hasFile: Boolean(fileBuffer?.length),
+      titleI18nKeys: Object.keys(parseJsonValue(payload.titleI18n || {}, {}))
+    });
     const video = await createVideoLesson(payload, fileBuffer, payload.contentType);
     res.status(201).json({ ok: true, video: serializeVideoLesson(video, user, true) });
   } catch (e) {
@@ -5474,6 +5481,13 @@ app.post("/api/admin/videos", maybeRawUpload, async (req, res) => {
   try {
     const payload = await readVideoLessonPayload(req);
     const fileBuffer = Buffer.isBuffer(req.body) ? req.body : null;
+    console.log("[admin-video-upload] incoming", {
+      topicId: payload.topicId,
+      fileName: payload.fileName,
+      contentType: payload.contentType,
+      hasFile: Boolean(fileBuffer?.length),
+      titleI18nKeys: Object.keys(parseJsonValue(payload.titleI18n || {}, {}))
+    });
     const video = await createVideoLesson(payload, fileBuffer, payload.contentType);
     res.status(201).json({ ok: true, video: serializeVideoLesson(video, user, true) });
   } catch (e) {
