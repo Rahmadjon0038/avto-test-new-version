@@ -1291,7 +1291,7 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
   if (!topic) throw new Error("Mavzu topilmadi");
 
   const description = next.description || String(topic.description || "").trim();
-  const title = next.title || String(topic.title || "").trim();
+  const fallbackTitle = next.title || String(topic.title || "").trim();
   const category = next.category || String(topic.slug || "").trim();
 
   let bunnyVideoId = String(input?.bunnyVideoId || "").trim();
@@ -1320,7 +1320,7 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
       console.warn("[video-thumbnail]", thumbnailError?.message || thumbnailError);
     }
 
-    const created = await createBunnyVideo({ title, description, category });
+    const created = await createBunnyVideo({ title: fallbackTitle, description, category });
     bunnyVideoId = created.bunnyVideoId;
     try {
       await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
@@ -1339,6 +1339,8 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
   const duration = parseIntegerValue(bunnyVideoInfo?.duration, 0);
   const thumbnail = String(localThumbnailUrl || bunnyVideoInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
   const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
+  const titleI18n = Object.keys(parseJsonValue(next.titleI18n, {})).length ? next.titleI18n : topic.titleI18n || {};
+  const title = next.title || String(titleI18n[DEFAULT_LANGUAGE] || topic.title || "").trim();
 
   const result = await dbApi.get(
     `
@@ -1364,7 +1366,7 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
     [
       next.topicId,
       title,
-      JSON.stringify(next.titleI18n || {}),
+      JSON.stringify(titleI18n || {}),
       description,
       category,
       next.premiumOnly,
@@ -1437,7 +1439,8 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
     }
   }
 
-  const title = next.title || current.title || topic.title;
+  const titleI18n = Object.keys(parseJsonValue(next.titleI18n, {})).length ? next.titleI18n : topic.titleI18n || current.titleI18n || {};
+  const title = next.title || current.title || String(titleI18n[DEFAULT_LANGUAGE] || topic.title || "").trim();
   const description = next.description || current.description || topic.description || "";
   const category = next.category || current.category || topic.slug || "";
   const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
@@ -1467,7 +1470,7 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
     [
       next.topicId,
       title,
-      JSON.stringify(next.titleI18n || {}),
+      JSON.stringify(titleI18n || {}),
       description,
       category,
       next.premiumOnly,
@@ -5309,10 +5312,12 @@ app.get("/api/admin/topics", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const topics = await getTopicsFromDb();
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   res.json({
     topics: topics.map((topic) => ({
       id: topic.id,
-      title: topic.title,
+      title: lang ? String(topic.titleI18n?.[lang] || topic.title || "") : topic.title,
+      titleI18n: topic.titleI18n || {},
       questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0,
       adminMarked: topic.adminMarked === true
     }))

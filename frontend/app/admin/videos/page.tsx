@@ -12,12 +12,19 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { appendLanguageQuery } from "@/lib/site-language";
 import Hls from "hls.js";
 
 type TopicChoice = {
   id: number;
   title: string;
+  titleI18n?: {
+    uz_latn?: string;
+    uz_cyrl?: string;
+    ru?: string;
+  };
   slug?: string;
 };
 
@@ -44,9 +51,11 @@ type VideoLesson = {
 
 type VideoForm = {
   topicId: string;
-  titleUzLatn: string;
-  titleUzCyrl: string;
-  titleRu: string;
+  titleI18n: {
+    uz_latn?: string;
+    uz_cyrl?: string;
+    ru?: string;
+  };
   file: File | null;
 };
 
@@ -58,9 +67,7 @@ type UploadResponse = {
 
 const emptyForm = (): VideoForm => ({
   topicId: "",
-  titleUzLatn: "",
-  titleUzCyrl: "",
-  titleRu: "",
+  titleI18n: {},
   file: null
 });
 
@@ -75,6 +82,7 @@ function formatDuration(totalSeconds: number) {
 export default function AdminVideosPage() {
   const qc = useQueryClient();
   const router = useRouter();
+  const { t, language } = useSiteLanguage();
   const { authFetch, accessToken } = useAuth();
   const backendUploadBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.topshirdi.uz";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -84,18 +92,18 @@ export default function AdminVideosPage() {
   const [saving, setSaving] = useState(false);
 
   const topicsQuery = useQuery({
-    queryKey: ["admin-video-topics"],
+    queryKey: ["admin-video-topics", language],
     queryFn: async () => {
-      const res = await authFetch("/api/admin/topics");
+      const res = await authFetch(appendLanguageQuery("/api/admin/topics", language));
       const data = await jsonOrError(res);
       return Array.isArray(data.topics) ? (data.topics as TopicChoice[]) : [];
     }
   });
 
   const videosQuery = useQuery({
-    queryKey: ["admin-video-lessons"],
+    queryKey: ["admin-video-lessons", language],
     queryFn: async () => {
-      const res = await authFetch("/api/admin/video-lessons");
+      const res = await authFetch(appendLanguageQuery("/api/admin/video-lessons", language));
       const data = await jsonOrError(res);
       return Array.isArray(data.videos) ? (data.videos as VideoLesson[]) : [];
     },
@@ -110,10 +118,6 @@ export default function AdminVideosPage() {
     if (videosQuery.error) toast.error((videosQuery.error as any)?.message || "Xatolik");
   }, [videosQuery.error]);
 
-  useEffect(() => {
-    return undefined;
-  }, []);
-
   const uploadRawVideo = (endpoint: string, file: File, meta: VideoForm) => {
     return new Promise<VideoLesson>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -122,15 +126,11 @@ export default function AdminVideosPage() {
       xhr.setRequestHeader("x-topic-id", meta.topicId);
       xhr.setRequestHeader(
         "x-video-title-i18n",
-        JSON.stringify({
-          uz_latn: meta.titleUzLatn,
-          uz_cyrl: meta.titleUzCyrl,
-          ru: meta.titleRu
-        })
+        JSON.stringify(meta.titleI18n || {})
       );
-      xhr.setRequestHeader("x-video-title-uz-latn", meta.titleUzLatn || "");
-      xhr.setRequestHeader("x-video-title-uz-cyrl", meta.titleUzCyrl || "");
-      xhr.setRequestHeader("x-video-title-ru", meta.titleRu || "");
+      xhr.setRequestHeader("x-video-title-uz-latn", meta.titleI18n?.uz_latn || "");
+      xhr.setRequestHeader("x-video-title-uz-cyrl", meta.titleI18n?.uz_cyrl || "");
+      xhr.setRequestHeader("x-video-title-ru", meta.titleI18n?.ru || "");
       xhr.setRequestHeader("x-file-name", file.name || "video.mp4");
       xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
       xhr.upload.onprogress = (event) => {
@@ -166,7 +166,7 @@ export default function AdminVideosPage() {
   const saveVideo = async () => {
     const topicId = Number(form.topicId);
     if (!topicId) {
-      toast.error("Dars mavzusi tanlang");
+      toast.error(t("common.noData"));
       return;
     }
 
@@ -175,19 +175,19 @@ export default function AdminVideosPage() {
       setUploadProgress(0);
       setSelectedFileName(form.file?.name || "");
       if (!form.file) {
-        throw new Error("Video fayl tanlang");
+        throw new Error(t("common.noData"));
       }
       const uploadedVideo = await uploadRawVideo(`${backendUploadBaseUrl}/api/admin/video-lessons`, form.file, form);
-      qc.setQueryData<VideoLesson[]>(["admin-video-lessons"], (current = []) => {
+      qc.setQueryData<VideoLesson[]>(["admin-video-lessons", language], (current = []) => {
         const next = current.filter((video) => video.id !== uploadedVideo.id);
         return [uploadedVideo, ...next];
       });
 
-      toast.success("Video yuklandi");
+      toast.success(t("common.save"));
       setForm(emptyForm());
       setSelectedFileName("");
       fileInputRef.current && (fileInputRef.current.value = "");
-      await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
+      await qc.invalidateQueries({ queryKey: ["admin-video-lessons", language] });
     } catch (error: any) {
       toast.error(error?.message || "Xatolik");
     } finally {
@@ -206,13 +206,14 @@ export default function AdminVideosPage() {
       if (!res.ok) throw new Error(data?.error || "Video o‘chirilmadi");
       toast.success("Video o‘chirildi");
       setForm(emptyForm());
-      await qc.invalidateQueries({ queryKey: ["admin-video-lessons"] });
+      await qc.invalidateQueries({ queryKey: ["admin-video-lessons", language] });
     } catch (error: any) {
       toast.error(error?.message || "Xatolik");
     }
   };
 
   const videos = videosQuery.data || [];
+  const topicOptions = topicsQuery.data || [];
 
   return (
     <section className="adminSectionPage">
@@ -220,7 +221,11 @@ export default function AdminVideosPage() {
         <button className="btn btn-ghost" type="button" onClick={() => router.push("/admin")}>
           <ArrowLeft className="lucide" aria-hidden="true" /> Orqaga
         </button>
-        <button className="btn btn-ghost" type="button" onClick={() => qc.invalidateQueries({ queryKey: ["admin-video-lessons"] })}>
+        <button
+          className="btn btn-ghost"
+          type="button"
+          onClick={() => qc.invalidateQueries({ queryKey: ["admin-video-lessons", language] })}
+        >
           <RefreshCw className="lucide" aria-hidden="true" /> Yangilash
         </button>
       </div>
@@ -228,11 +233,9 @@ export default function AdminVideosPage() {
       <div className="card adminPanelCard">
         <div className="adminPanelCardHead">
           <div className="adminPanelCardTitle">
-            <Video className="lucide" aria-hidden="true" /> Bunny Stream video yuklash
+            <Video className="lucide" aria-hidden="true" /> {t("videos.adminTitle")}
           </div>
-          <div className="adminPanelCardDesc">
-            Faqat mavzuni tanlaysiz va video faylni yuklaysiz. Sarlavha va boshqa ma’lumotlar mavzudan avtomatik olinadi.
-          </div>
+          <div className="adminPanelCardDesc">{t("videos.adminDesc")}</div>
         </div>
 
         <form
@@ -242,31 +245,26 @@ export default function AdminVideosPage() {
             void saveVideo();
           }}
         >
-          <input
-            className="input"
-            value={form.titleUzLatn}
-            onChange={(event) => setForm((current) => ({ ...current, titleUzLatn: event.target.value }))}
-            placeholder="Video sarlavhasi - O‘zbek lotin"
-          />
-          <input
-            className="input"
-            value={form.titleUzCyrl}
-            onChange={(event) => setForm((current) => ({ ...current, titleUzCyrl: event.target.value }))}
-            placeholder="Видео сарлавҳаси - Ўзбек кирилл"
-          />
-          <input
-            className="input"
-            value={form.titleRu}
-            onChange={(event) => setForm((current) => ({ ...current, titleRu: event.target.value }))}
-            placeholder="Название видео - Русский"
-          />
           <select
             className="input"
             value={form.topicId}
-            onChange={(event) => setForm((current) => ({ ...current, topicId: event.target.value }))}
+            onChange={(event) => {
+              const nextTopicId = event.target.value;
+              const selectedTopic = topicOptions.find((topic) => String(topic.id) === nextTopicId) || null;
+              const fallbackTitle = String(selectedTopic?.title || "").trim();
+              setForm((current) => ({
+                ...current,
+                topicId: nextTopicId,
+                titleI18n: selectedTopic?.titleI18n || {
+                  uz_latn: fallbackTitle,
+                  uz_cyrl: fallbackTitle,
+                  ru: fallbackTitle
+                }
+              }));
+            }}
           >
-            <option value="">Dars / mavzu tanlang</option>
-            {(topicsQuery.data || []).map((topic) => (
+            <option value="">{t("videos.chooseTopic")}</option>
+            {topicOptions.map((topic) => (
               <option key={topic.id} value={topic.id}>
                 {topic.title}
               </option>
@@ -279,15 +277,15 @@ export default function AdminVideosPage() {
                 className="input"
                 type="file"
                 accept="video/mp4,video/*"
-                onChange={(event) => {
-                  const file = event.target.files?.[0] || null;
-                  setSelectedFileName(file?.name || "");
-                  setForm((current) => ({
-                    ...current,
-                    file
-                  }));
-                }}
-              />
+              onChange={(event) => {
+                const file = event.target.files?.[0] || null;
+                setSelectedFileName(file?.name || "");
+                setForm((current) => ({
+                  ...current,
+                  file
+                }));
+              }}
+            />
             <button
               className="btn btn-ghost"
               type="button"
@@ -297,15 +295,19 @@ export default function AdminVideosPage() {
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
             >
-              Yangi video
+              {t("videos.newVideo")}
             </button>
           </div>
 
-          {selectedFileName ? <div className="adminSelectedFile">Tanlangan fayl: {selectedFileName}</div> : null}
+          {selectedFileName ? (
+            <div className="adminSelectedFile">
+              {t("videos.selectedFile")}: {selectedFileName}
+            </div>
+          ) : null}
 
           <div className="adminOptionsToolbar">
             <button className="btn btn-primary" type="submit" disabled={saving || !form.topicId || !form.file}>
-              <Save className="lucide" aria-hidden="true" /> {saving ? "Yuklanmoqda..." : "Saqlash"}
+              <Save className="lucide" aria-hidden="true" /> {saving ? t("common.loading") : t("common.save")}
             </button>
             {uploadProgress > 0 ? (
               <div className="adminUploadProgress">
@@ -315,7 +317,7 @@ export default function AdminVideosPage() {
             ) : saving ? (
               <div className="adminUploadProgress">
                 <div className="adminUploadProgressBar indeterminate" />
-                <span>Yuklanmoqda...</span>
+                <span>{t("common.loading")}</span>
               </div>
             ) : null}
           </div>
@@ -328,7 +330,7 @@ export default function AdminVideosPage() {
             <article key={video.id} className="card adminTopicCard">
               <div className="adminVideoPreview">
                 {video.playbackUrl ? (
-                  <AdminInlinePlayer video={video} />
+                  <AdminInlinePlayer video={video} t={t} />
                 ) : video.videoThumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img className="adminVideoThumb" src={video.videoThumbnail} alt={video.title || video.topicTitle} />
@@ -342,10 +344,10 @@ export default function AdminVideosPage() {
               <div className="adminTopicBody">
                 <div className="adminTopicMeta">
                   <div className="adminTopicTitle adminTopicTitleOneLine">{video.title || video.topicTitle}</div>
-                  <div className="adminPanelCardDesc">{video.description || "Video darsi"}</div>
+                  <div className="adminPanelCardDesc">{video.description || t("videos.itemFallbackDesc")}</div>
                   <div className="adminVideoMetaLine">
                     <span>{formatDuration(video.videoDuration)}</span>
-                    <span>Ochiq</span>
+                    <span>{t("videos.open")}</span>
                   </div>
                 </div>
               </div>
@@ -359,7 +361,7 @@ export default function AdminVideosPage() {
                   }}
                   disabled={saving}
                 >
-                  <Trash2 className="lucide" aria-hidden="true" /> O‘chirish
+                  <Trash2 className="lucide" aria-hidden="true" /> {t("videos.delete")}
                 </button>
               </div>
             </article>
@@ -369,7 +371,7 @@ export default function AdminVideosPage() {
 
       {!videosQuery.isLoading && !videos.length ? (
         <div className="adminEmpty card">
-          <div className="adminEmptyTitle">Hozircha video darslar yo‘q</div>
+          <div className="adminEmptyTitle">{t("videos.noVideos")}</div>
         </div>
       ) : null}
     </section>
@@ -377,9 +379,11 @@ export default function AdminVideosPage() {
 }
 
 function AdminInlinePlayer({
-  video
+  video,
+  t
 }: {
   video: VideoLesson;
+  t: (key: string) => string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -420,7 +424,7 @@ function AdminInlinePlayer({
       />
       {!video.playbackUrl ? (
         <div className="videoPlayerOverlay">
-          <div className="videoPlayerPlaceholderText">Playback URL tayyor emas</div>
+          <div className="videoPlayerPlaceholderText">{t("videos.playbackMissing")}</div>
         </div>
       ) : null}
     </div>

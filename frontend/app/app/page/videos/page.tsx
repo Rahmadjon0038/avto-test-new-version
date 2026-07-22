@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { appendLanguageQuery } from "@/lib/site-language";
 
 type VideoLesson = {
   id: number;
@@ -42,7 +43,7 @@ export default function VideosPage() {
     queryKey: ["video-lessons", language],
     enabled: authReady,
     queryFn: async () => {
-      const res = await authFetch("/api/video-lessons");
+      const res = await authFetch(appendLanguageQuery("/api/video-lessons", language));
       const data = await jsonOrError(res);
       return Array.isArray(data.videos) ? (data.videos as VideoLesson[]) : [];
     }
@@ -62,7 +63,9 @@ export default function VideosPage() {
     setPlayerError("");
     setLoadingPlayback(true);
     try {
-      const res = await authFetch(`/api/video-lessons/${encodeURIComponent(String(video.id))}/playback`);
+      const res = await authFetch(
+        appendLanguageQuery(`/api/video-lessons/${encodeURIComponent(String(video.id))}/playback`, language)
+      );
       const data = await jsonOrError(res);
       if (!res.ok) {
         throw new Error(data?.error || "Playback yuklanmadi");

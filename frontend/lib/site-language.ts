@@ -195,7 +195,18 @@ const translations: Record<LanguageCode, TranslationTree> = {
       retry: "Qayta urinish",
       back: "Orqaga",
       playerLoading: "Video yuklanmoqda...",
-      premium: "Premium"
+      premium: "Premium",
+      adminTitle: "Bunny Stream video yuklash",
+      adminDesc: "Faqat mavzuni tanlaysiz va video faylni yuklaysiz. Sarlavha ham mavzudan avtomatik olinadi.",
+      chooseTopic: "Dars / mavzu tanlang",
+      chooseFile: "Video fayl tanlang",
+      newVideo: "Yangi video",
+      selectedFile: "Tanlangan fayl",
+      open: "Ochiq",
+      delete: "O‘chirish",
+      noVideos: "Hozircha video darslar yo‘q",
+      playbackMissing: "Playback URL tayyor emas",
+      itemFallbackDesc: "Video darsi"
     },
     settings: {
       title: "Test sozlamalari",
@@ -446,7 +457,18 @@ const translations: Record<LanguageCode, TranslationTree> = {
       retry: "Қайта уриниш",
       back: "Орқага",
       playerLoading: "Видео юкланмоқда...",
-      premium: "Премиум"
+      premium: "Премиум",
+      adminTitle: "Bunny Stream видео юклаш",
+      adminDesc: "Фақат мавзуни танлайсиз ва видео файлини юклайсиз. Сарлавҳа ҳам мавзудан автоматик олинади.",
+      chooseTopic: "Дарс / мавзу танланг",
+      chooseFile: "Видео файлини танланг",
+      newVideo: "Янги видео",
+      selectedFile: "Танланган файл",
+      open: "Очиқ",
+      delete: "Ўчириш",
+      noVideos: "Ҳозирча видео дарслар йўқ",
+      playbackMissing: "Playback URL тайёр эмас",
+      itemFallbackDesc: "Видео дарси"
     },
     settings: {
       title: "Тест созламалари",
@@ -701,7 +723,18 @@ const translations: Record<LanguageCode, TranslationTree> = {
       retry: "Повторить",
       back: "Назад",
       playerLoading: "Видео загружается...",
-      premium: "Премиум"
+      premium: "Премиум",
+      adminTitle: "Загрузка видео Bunny Stream",
+      adminDesc: "Достаточно выбрать тему и загрузить видеофайл. Заголовок тоже подставляется из темы автоматически.",
+      chooseTopic: "Выберите урок / тему",
+      chooseFile: "Выберите видеофайл",
+      newVideo: "Новое видео",
+      selectedFile: "Выбранный файл",
+      open: "Открыто",
+      delete: "Удалить",
+      noVideos: "Пока нет видеоуроков",
+      playbackMissing: "Playback URL пока не готов",
+      itemFallbackDesc: "Видеоурок"
     },
     settings: {
       title: "Настройки теста",
