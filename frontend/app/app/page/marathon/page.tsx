@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, Flame } from "lu
 import { Cell, Pie, PieChart } from "recharts";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
+import { appendLanguageQuery } from "@/lib/site-language";
 import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { useTestInteractions } from "@/lib/test-interactions";
@@ -95,7 +96,7 @@ export default function MarathonPage() {
         offset: String(bank.length),
         limit: String(PAGE_SIZE)
       });
-      const res = await authFetch(`/api/answers?${params.toString()}`);
+      const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
       const data = await jsonOrError(res);
       const fetched = Array.isArray(data.questions)
         ? (data.questions as AnswerQuestion[])
@@ -106,7 +107,7 @@ export default function MarathonPage() {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [authFetch, bank.length, hasMoreBank, isLoadingMore]);
+  }, [authFetch, bank.length, hasMoreBank, isLoadingMore, language]);
 
   const loadInitial = useCallback(async () => {
     setIsLoading(true);
@@ -122,7 +123,7 @@ export default function MarathonPage() {
         offset: "0",
         limit: String(PAGE_SIZE)
       });
-      const res = await authFetch(`/api/answers?${params.toString()}`);
+      const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
       const data = await jsonOrError(res);
       const fetched = Array.isArray(data.questions) ? (data.questions as AnswerQuestion[]) : [];
       if (!fetched.length) {

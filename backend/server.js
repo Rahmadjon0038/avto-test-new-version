@@ -4327,12 +4327,13 @@ app.post("/api/custom-test-progress/:testId/reset", requireUser, async (req, res
 
 app.get("/api/answers", requireUser, async (req, res) => {
   const bank = await getTicketQuestionBankFromDb();
+  const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const questions = bank.map((item) =>
     buildAnswerQuestion({
       kind: "ticket",
       id: item.ticketId,
       title: item.ticketTitle,
-      question: item.question,
+      question: localizeQuestion(item.question, lang),
       questionIndex: item.questionIndex
     })
   );

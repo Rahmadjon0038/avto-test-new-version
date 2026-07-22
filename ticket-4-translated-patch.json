@@ -1,0 +1,674 @@
+{
+  "title": "Bilet №4",
+  "titleI18n": {
+    "uz_latn": "Bilet №4",
+    "uz_cyrl": "Билет №4",
+    "ru": "Билет №4"
+  },
+  "ticketNumber": 4,
+  "status": "COMPLETED",
+  "questions": [
+    {
+      "id": "eccee027-5eaa-4528-a0f7-4e7e811c6102",
+      "questionId": "eccee027-5eaa-4528-a0f7-4e7e811c6102",
+      "order": 1,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qattiq ulagich transport vositalari orasida qanchadan ortiq bo‘lmagan masofani ta’minlashi kerak?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "2 m",
+        "3 m",
+        "4 m",
+        "5 m",
+        "6 m"
+      ],
+      "correctIndex": 2,
+      "explanation": "Qattiq ulagich transport vositalari orasida 4 metrdan ortiq bo‘lmagan masofani ta’minlashi kerak.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qattiq ulagich transport vositalari orasida qanchadan ortiq bo‘lmagan masofani ta’minlashi kerak?",
+          "options": ["2 m", "3 m", "4 m", "5 m", "6 m"],
+          "explanation": "Qattiq ulagich transport vositalari orasida 4 metrdan ortiq bo‘lmagan masofani ta’minlashi kerak."
+        },
+        "uz_cyrl": {
+          "text": "Қаттиқ улагич транспорт воситалари орасида қанчадан ортиқ бўлмаган масофани таъминлаши керак?",
+          "options": ["2 м", "3 м", "4 м", "5 м", "6 м"],
+          "explanation": "Қаттиқ улагич транспорт воситалари орасида 4 метрдан ортиқ бўлмаган масофани таъминлаши керак."
+        },
+        "ru": {
+          "text": "Какое расстояние между транспортными средствами должен обеспечивать жесткий буксир?",
+          "options": ["2 м", "3 м", "4 м", "5 м", "6 м"],
+          "explanation": "Жесткая сцепка должна обеспечивать расстояние между транспортными средствами не более 4 метров."
+        }
+      }
+    },
+    {
+      "id": "40d23318-2b52-4624-ad54-b3096fd0fe5c",
+      "questionId": "40d23318-2b52-4624-ad54-b3096fd0fe5c",
+      "order": 2,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Kunduzgi vaqtda yaqinni yorituvchi fara chirog'ini yoqish ogohlantirish ishorasi bo'ladimi?",
+      "image": "",
+      "audio": "",
+      "options": ["Bo'ladi", "Bo'lmaydi"],
+      "correctIndex": 0,
+      "explanation": "Kunduzgi vaqtda transport vositasining harakatlanayotganini yoki manyovr qilmoqchiligini bildirish uchun yaqinni yorituvchi faralarni yoqish qoidalar bo'yicha ogohlantirish ishorasi hisoblanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Kunduzgi vaqtda yaqinni yorituvchi fara chirog'ini yoqish ogohlantirish ishorasi bo'ladimi?",
+          "options": ["Bo'ladi", "Bo'lmaydi"],
+          "explanation": "Kunduzgi vaqtda transport vositasining harakatlanayotganini yoki manyovr qilmoqchiligini bildirish uchun yaqinni yorituvchi faralarni yoqish qoidalar bo'yicha ogohlantirish ishorasi hisoblanadi."
+        },
+        "uz_cyrl": {
+          "text": "Кундузги вақтда яқинни ёритувчи фара чироғини ёқиш огоҳлантириш ишораси бўладими?",
+          "options": ["Бўлади", "Бўлмайди"],
+          "explanation": "Кундузги вақтда транспорт воситасининг ҳаракатланаётганини ёки манёвр қилмоқчилигини билдириш учун яқинни ёритувчи фараларни ёқиш қоидалар бўйича огоҳлантириш ишораси ҳисобланади."
+        },
+        "ru": {
+          "text": "Считается ли включение ближнего света фар днем предупредительным сигналом?",
+          "options": ["Да", "Нет"],
+          "explanation": "Днем включение ближнего света фар для обозначения движения или намерения выполнить маневр по правилам считается предупредительным сигналом."
+        }
+      }
+    },
+    {
+      "id": "e9decd28-0048-466f-9d57-907e3e517e6a",
+      "questionId": "e9decd28-0048-466f-9d57-907e3e517e6a",
+      "order": 3,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Bu joyda quvib o'tishga ruxsat beriladimi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940009245-o2vhwotu.webp",
+      "audio": "",
+      "options": ["Ruxsat etiladi", "Taqiqlanadi", "Agar quvib o'tilayotgan transportning tezligi 40 km/soatdan kam bo'lsa ruxsat etiladi"],
+      "correctIndex": 0,
+      "explanation": "Quvib o'tish taqiqi belgisi ta'siri tugaganidan keyin quvib o'tishga ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu joyda quvib o'tishga ruxsat beriladimi?",
+          "options": ["Ruxsat etiladi", "Taqiqlanadi", "Agar quvib o'tilayotgan transportning tezligi 40 km/soatdan kam bo'lsa ruxsat etiladi"],
+          "explanation": "Quvib o'tish taqiqi belgisi ta'siri tugaganidan keyin quvib o'tishga ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Бу жойда қувиб ўтишга рухсат бериладими?",
+          "options": ["Рухсат этилади", "Тақиқланади", "Агар қувиб ўтилаётган транспортнинг тезлиги 40 км/соатдан кам бўлса рухсат этилади"],
+          "explanation": "Қувиб ўтиш тақиқи белгиси таъсири тугаганидан кейин қувиб ўтишга рухсат этилади."
+        },
+        "ru": {
+          "text": "Разрешен ли здесь обгон?",
+          "options": ["Разрешен", "Запрещен", "Разрешен, если скорость обгоняемого транспортного средства менее 40 км/ч"],
+          "explanation": "После окончания действия знака, запрещающего обгон, обгон разрешается."
+        }
+      }
+    },
+    {
+      "id": "727a2d45-2bf1-41a1-b5c9-26d0037b84b8",
+      "questionId": "727a2d45-2bf1-41a1-b5c9-26d0037b84b8",
+      "order": 4,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi transport vositalariga harakatlanishga ruxsat etiladi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781762457075-696ula6k.webp",
+      "audio": "",
+      "options": ["Yashil, ko'k va qora avtomobillarga", "Qizil, sariq va yashil avtomobillarga", "Yashil, ko'k va qizil avtomobillarga"],
+      "correctIndex": 2,
+      "explanation": "Tartibga soluvchining oʻng qoʻli oldinga uzatilgan holatda: uning chap yonidan kelayotgan transport vositalariga (yashil avtomobilga) barcha yoʻnalishlarda, koʻkragi tomonidan kelayotgan transport vositalariga (koʻk va qizil avtomobillarga) faqat oʻngga burilishga ruxsat beriladi. Orqa va oʻng yonidan kelayotgan qora va sariq avtomobillarga esa harakatlanish taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi transport vositalariga harakatlanishga ruxsat etiladi?",
+          "options": ["Yashil, ko'k va qora avtomobillarga", "Qizil, sariq va yashil avtomobillarga", "Yashil, ko'k va qizil avtomobillarga"],
+          "explanation": "Tartibga soluvchining oʻng qoʻli oldinga uzatilgan holatda: uning chap yonidan kelayotgan transport vositalariga (yashil avtomobilga) barcha yoʻnalishlarda, koʻkragi tomonidan kelayotgan transport vositalariga (koʻk va qizil avtomobillarga) faqat oʻngga burilishga ruxsat beriladi. Orqa va oʻng yonidan kelayotgan qora va sariq avtomobillarga esa harakatlanish taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси транспорт воситаларига ҳаракатланишга рухсат этилади?",
+          "options": ["Яшил, кўк ва қора автомобилларга", "Қизил, сариқ ва яшил автомобилларга", "Яшил, кўк ва қизил автомобилларга"],
+          "explanation": "Тартибга солувчининг ўнг қўли олдинга узатилган ҳолатда: унинг чап ёнидан келаётган транспорт воситаларига (яшил автомобилга) барча йўналишларда, кўкраги томонидан келаётган транспорт воситаларига (кўк ва қизил автомобилларга) фақат ўнгга бурилишга рухсат берилади. Орқа ва ўнг ёнидан келаётган қора ва сариқ автомобилларга эса ҳаракатланиш тақиқланади."
+        },
+        "ru": {
+          "text": "Каким транспортным средствам разрешено движение?",
+          "options": ["Зеленому, синему и черному автомобилям", "Красному, желтому и зеленому автомобилям", "Зеленому, синему и красному автомобилям"],
+          "explanation": "При жесте, когда правая рука регулировщика вытянута вперед, транспортным средствам, приближающимся слева (зеленому автомобилю), разрешено движение во всех направлениях, а транспортным средствам со стороны груди (синему и красному автомобилям) разрешен только поворот направо. Черному и желтому автомобилям со стороны спины и справа движение запрещено."
+        }
+      }
+    },
+    {
+      "id": "a4efc292-3edd-476e-9fd9-d26713f02d9f",
+      "questionId": "a4efc292-3edd-476e-9fd9-d26713f02d9f",
+      "order": 5,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Shatakka olingan avtomobilda odamlarni tashishga ruxsat etiladimi?",
+      "image": "",
+      "audio": "",
+      "options": ["Avtobusda ruxsat etiladi", "Yengil avtomobilda ruxsat etiladi", "Qattiq ulagichda shatakka olingan yuk avtomobili yukxonasida ruxsat etiladi"],
+      "correctIndex": 1,
+      "explanation": "Shatakka olingan yengil avtomobilda odam tashishga ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Shatakka olingan avtomobilda odamlarni tashishga ruxsat etiladimi?",
+          "options": ["Avtobusda ruxsat etiladi", "Yengil avtomobilda ruxsat etiladi", "Qattiq ulagichda shatakka olingan yuk avtomobili yukxonasida ruxsat etiladi"],
+          "explanation": "Shatakka olingan yengil avtomobilda odam tashishga ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Шатакка олинган автомобилга одамларни ташишга рухсат этиладими?",
+          "options": ["Автобусда рухсат этилади", "Енгил автомобилга рухсат этилади", "Қаттиқ улагичда шатакка олинган юк автомобили юкхонасида рухсат этилади"],
+          "explanation": "Шатакка олинган енгил автомобилга одам ташишга рухсат этилади."
+        },
+        "ru": {
+          "text": "Разрешена ли перевозка людей в буксируемом автомобиле?",
+          "options": ["Разрешена в автобусе", "Разрешена в легковом автомобиле", "Разрешена в кузове буксируемого грузового автомобиля на жесткой сцепке"],
+          "explanation": "В буксируемом легковом автомобиле перевозка людей разрешена."
+        }
+      }
+    },
+    {
+      "id": "9d8d6505-5991-40c6-8756-c79daf1c7139",
+      "questionId": "9d8d6505-5991-40c6-8756-c79daf1c7139",
+      "order": 6,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Agar transport vositasi o‘lchamlari kattaligidan yoki boshqa sabablarga ko‘ra chetki holatda burilishni bajara olmagan bo‘lsa, bu qoidadan chetga chiqqan holda burilishga yo‘l qo‘yiladimi?",
+      "image": "",
+      "audio": "",
+      "options": ["Yo‘l qo‘yilmaydi", "Yo‘l qo‘yiladi, agar bu boshqa transport vositalariga xalaqit bermasa, harakat xavfsizligini ta’minlab, talablardan chetga chiqishi mumkin", "Aholi punktidan tashqaridagi yo‘llarda yo‘l qo‘yiladi", "Yo‘l qo‘yiladi, lekin faqat chorrahada emas"],
+      "correctIndex": 1,
+      "explanation": "Katta o‘lchamli transport vositalari yoki boshqa zarur hollarda, xavfsizlikni ta’minlagan va boshqalarga xalaqit bermagan holda qoidalardan chetga chiqishga ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Agar transport vositasi o‘lchamlari kattaligidan yoki boshqa sabablarga ko‘ra chetki holatda burilishni bajara olmagan bo‘lsa, bu qoidadan chetga chiqqan holda burilishga yo‘l qo‘yiladimi?",
+          "options": ["Yo‘l qo‘yilmaydi", "Yo‘l qo‘yiladi, agar bu boshqa transport vositalariga xalaqit bermasa, harakat xavfsizligini ta’minlab, talablardan chetga chiqishi mumkin", "Aholi punktidan tashqaridagi yo‘llarda yo‘l qo‘yiladi", "Yo‘l qo‘yiladi, lekin faqat chorrahada emas"],
+          "explanation": "Katta o‘lchamli transport vositalari yoki boshqa zarur hollarda, xavfsizlikni ta’minlagan va boshqalarga xalaqit bermagan holda qoidalardan chetga chiqishga ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Агар транспорт воситаси ўлчамлари катталигидан ёки бошқа сабабларга кўра четки ҳолатда бурилишни бажара олмаган бўлса, бу қоидалардан четга чиққан ҳолда бурилишга йўл қўйиладими?",
+          "options": ["Йўл қўйилмайди", "Йўл қўйилади, агар бу бошқа транспорт воситаларига халақит бермаса, ҳаракат хавфсизлигини таъминлаб, талаблардан четга чиқиши мумкин", "Аҳоли пунктидан ташқаридаги йўлларда йўл қўйилади", "Йўл қўйилади, лекин фақат чорраҳада эмас"],
+          "explanation": "Катта ўлчамли транспорт воситалари ёки бошқа зарур ҳолларда, хавфсизликни таъминлаган ва бошқаларга халақит бермаган ҳолда қоидалардан четга чиқишга рухсат этилади."
+        },
+        "ru": {
+          "text": "Если транспортное средство из-за своих габаритов или по другим причинам не может выполнить поворот по крайнему положению, разрешается ли отступать от этого правила?",
+          "options": ["Не разрешается", "Разрешается, если это не мешает другим транспортным средствам, обеспечивается безопасность движения и допускается отступление от требований", "Разрешается на дорогах вне населенных пунктов", "Разрешается, но не на перекрестке"],
+          "explanation": "Для крупногабаритных транспортных средств или в иных необходимых случаях допускается отступление от правил при обеспечении безопасности и отсутствии помех другим участникам движения."
+        }
+      }
+    },
+    {
+      "id": "654edcf4-c44d-4e5a-9bd5-803fc5949eb7",
+      "questionId": "654edcf4-c44d-4e5a-9bd5-803fc5949eb7",
+      "order": 7,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Agar g'ildiraklardagi tortish kuchi yo'l bilan tishlashish kuchidan ortiq bo'lsa:",
+      "image": "",
+      "audio": "",
+      "options": ["Yurgizgich o'chib qoladi", "Ulagich detallarining yemirilishi ortadi", "Yetakchi g'ildiraklar o'rnidan jilmay aylanadi"],
+      "correctIndex": 2,
+      "explanation": "Tortish kuchi yo'l bilan ilashish kuchidan ortiq bo'lsa, yetakchi g'ildiraklar sirpanib, o'rnida aylanib qoladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Agar g'ildiraklardagi tortish kuchi yo'l bilan tishlashish kuchidan ortiq bo'lsa:",
+          "options": ["Yurgizgich o'chib qoladi", "Ulagich detallarining yemirilishi ortadi", "Yetakchi g'ildiraklar o'rnidan jilmay aylanadi"],
+          "explanation": "Tortish kuchi yo'l bilan ilashish kuchidan ortiq bo'lsa, yetakchi g'ildiraklar sirpanib, o'rnida aylanib qoladi."
+        },
+        "uz_cyrl": {
+          "text": "Агар ғилдираклардаги тортиш кучи йўл билан тишлашиш кучидан ортиқ бўлса:",
+          "options": ["Юргизгич ўчиб қолади", "Улагич деталларининг емирилиши ортади", "Етакчи ғилдираклар ўрнидан жилмай айланади"],
+          "explanation": "Тортиш кучи йўл билан илaшиш кучидан ортиқ бўлса, етакчи ғилдираклар сирпаниб, ўрнида айланиб қолади."
+        },
+        "ru": {
+          "text": "Если тяговое усилие на колесах превышает силу сцепления с дорогой:",
+          "options": ["Двигатель заглохнет", "Увеличится износ деталей сцепления", "Ведущие колеса будут буксовать"],
+          "explanation": "Если тяговое усилие больше силы сцепления с дорогой, ведущие колеса начинают проскальзывать и вращаться на месте."
+        }
+      }
+    },
+    {
+      "id": "292dc5a6-d062-4c9f-ab1b-8cd728daa37d",
+      "questionId": "292dc5a6-d062-4c9f-ab1b-8cd728daa37d",
+      "order": 8,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Velosipedchilarda trotuarda harakatlanishga ruxsat etiladimi?",
+      "image": "",
+      "audio": "",
+      "options": ["Ruxsat etiladi", "Piyodalar bo‘lmaganda ruxsat etiladi", "Taqiqlanadi"],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Velosipedchilarda trotuarda harakatlanishga ruxsat etiladimi?",
+          "options": ["Ruxsat etiladi", "Piyodalar bo‘lmaganda ruxsat etiladi", "Taqiqlanadi"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Велосипедчиларга тротуарда ҳаракатланишга рухсат этиладими?",
+          "options": ["Рухсат этилади", "Пиёдалар бўлмаганда рухсат этилади", "Тақиқланади"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Разрешено ли велосипедистам движение по тротуару?",
+          "options": ["Разрешено", "Разрешено при отсутствии пешеходов", "Запрещено"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "b1f1ce81-b778-41bc-82b1-bb1241bda4af",
+      "questionId": "b1f1ce81-b778-41bc-82b1-bb1241bda4af",
+      "order": 9,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Harakatlanish kimga ruxsat etilgan?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781762490508-diho90yq.webp",
+      "audio": "",
+      "options": ["Barcha transport vositalariga", "Mototsiklga", "Avtomobil va mototsiklga"],
+      "correctIndex": 1,
+      "explanation": "Tartibga soluvchi haydovchilarga oʻng yonboshi bilan, qoʻllarini yon tomonga uzatgan holda turibdi. Bu ishora uning oʻng va chap yonidan kelayotgan relssiz transport vositalariga toʻgʻriga va oʻngga harakatlanishga ruxsat beradi (tramvayga esa faqat toʻgʻriga). Biroq, koʻk avtomobil va tramvay tartibga soluvchining koʻkragi tomondan yaqinlashayotgani sababli ularga harakatlanish taqiqlanadi. Faqat yon tomondan kelayotgan mototsiklga harakatlanish ruxsat etilgan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Harakatlanish kimga ruxsat etilgan?",
+          "options": ["Barcha transport vositalariga", "Mototsiklga", "Avtomobil va mototsiklga"],
+          "explanation": "Tartibga soluvchi haydovchilarga oʻng yonboshi bilan, qoʻllarini yon tomonga uzatgan holda turibdi. Bu ishora uning oʻng va chap yonidan kelayotgan relssiz transport vositalariga toʻgʻriga va oʻngga harakatlanishga ruxsat beradi (tramvayga esa faqat toʻgʻriga). Biroq, koʻk avtomobil va tramvay tartibga soluvchining koʻkragi tomondan yaqinlashayotgani sababli ularga harakatlanish taqiqlanadi. Faqat yon tomondan kelayotgan mototsiklga harakatlanish ruxsat etilgan."
+        },
+        "uz_cyrl": {
+          "text": "Ҳаракатланиш кимга рухсат этилган?",
+          "options": ["Барча транспорт воситаларига", "Мотоциклга", "Автомобиль ва мотоциклга"],
+          "explanation": "Тартибга солувчи ҳайдовчиларга ўнг ёнбоши билан, қўлларини ён томонга узатган ҳолда турибди. Бу ишора унинг ўнг ва чап ёнидан келаётган релссиз транспорт воситаларига тўғрига ва ўнгга ҳаракатланишга рухсат беради (трамвайга эса фақат тўғрига). Бироқ, кўк автомобиль ва трамвай тартибга солувчининг кўкраги томонидан яқинлашаётгани сабабли уларга ҳаракатланиш тақиқланади. Фақат ён томондан келаётган мотоциклга ҳаракатланиш рухсат этилган."
+        },
+        "ru": {
+          "text": "Кому разрешено движение?",
+          "options": ["Всем транспортным средствам", "Мотоциклу", "Автомобилю и мотоциклу"],
+          "explanation": "Регулировщик стоит правым боком, вытянув руки в стороны. Этот жест разрешает нерельсовым транспортным средствам, приближающимся слева и справа, движение прямо и направо (а трамваю только прямо). Однако синему автомобилю и трамваю, подъезжающим со стороны груди регулировщика, движение запрещено. Разрешено движение только мотоциклу, подъезжающему сбоку."
+        }
+      }
+    },
+    {
+      "id": "3e9098ff-44fe-4ce7-b41f-7ecc91f50681",
+      "questionId": "3e9098ff-44fe-4ce7-b41f-7ecc91f50681",
+      "order": 10,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Oldinda transport vositasi to‘xtab turgan tartibga solinmaydigan piyodalar o‘tish joyiga yaqinlashib kelmoqdasiz. Siz nima qilishingiz kerak?",
+      "image": "",
+      "audio": "",
+      "options": ["Piyodalar o‘tish joyidan o‘tish", "Piyodalar o‘tish joyidan to‘xtamasdan o‘tish, lekin alohida ehtiyotkorlik bilan", "Harakatni davom ettirish, lekin to‘xtab turgan transport vositasi oldida piyodalar yo‘qligiga ishonch hosil qilgan holda", "Albatta to‘xtash, piyodalar paydo bo‘lsa, ularni o‘tkazib yuborish"],
+      "correctIndex": 2,
+      "explanation": "Agar tartibga solinmagan piyodalar o‘tish joyi oldida transport vositasi to‘xtagan yoki tezligini kamaytirgan bo‘lsa, haydovchi faqat oldinda piyodalar yo‘qligiga ishonch hosil qilgandan keyingina harakatni davom ettirishi mumkin.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Oldinda transport vositasi to‘xtab turgan tartibga solinmaydigan piyodalar o‘tish joyiga yaqinlashib kelmoqdasiz. Siz nima qilishingiz kerak?",
+          "options": ["Piyodalar o‘tish joyidan o‘tish", "Piyodalar o‘tish joyidan to‘xtamasdan o‘tish, lekin alohida ehtiyotkorlik bilan", "Harakatni davom ettirish, lekin to‘xtab turgan transport vositasi oldida piyodalar yo‘qligiga ishonch hosil qilgan holda", "Albatta to‘xtash, piyodalar paydo bo‘lsa, ularni o‘tkazib yuborish"],
+          "explanation": "Agar tartibga solinmagan piyodalar o‘tish joyi oldida transport vositasi to‘xtagan yoki tezligini kamaytirgan bo‘lsa, haydovchi faqat oldinda piyodalar yo‘qligiga ishonch hosil qilgandan keyingina harakatni davom ettirishi mumkin."
+        },
+        "uz_cyrl": {
+          "text": "Олдинда транспорт воситаси тўхтаб турган тартибга солинмайдиган пиёдалар ўтиш жойига яқинлашиб келмоқдасиз. Сиз нима қилишиингиз керак?",
+          "options": ["Пиёдалар ўтиш жойидан ўтиш", "Пиёдалар ўтиш жойидан тўхтамасдан ўтиш, лекин алоҳида эҳтиёткорлик билан", "Ҳаракатни давом эттириш, лекин тўхтаб турган транспорт воситаси олдида пиёдалар йўқлигига ишонч ҳосил қилган ҳолда", "Албатта тўхташ, пиёдалар пайдо бўлса, уларни ўтказиб юбориш"],
+          "explanation": "Агар тартибга солинмаган пиёдалар ўтиш жойи олдида транспорт воситаси тўхтаган ёки тезлигини камайтирган бўлса, ҳайдовчи фақат олдинда пиёдалар йўқлигига ишонч ҳосил қилгандан кейингина ҳаракатни давом эттириши мумкин."
+        },
+        "ru": {
+          "text": "Вы подъезжаете к нерегулируемому пешеходному переходу, перед которым остановилось транспортное средство. Что вы должны сделать?",
+          "options": ["Проехать пешеходный переход", "Проехать переход без остановки, но с особой осторожностью", "Продолжить движение, убедившись, что перед стоящим транспортным средством нет пешеходов", "Обязательно остановиться и пропустить пешеходов, если они появятся"],
+          "explanation": "Если перед нерегулируемым пешеходным переходом остановилось или снизило скорость транспортное средство, водитель может продолжить движение только убедившись в отсутствии пешеходов впереди."
+        }
+      }
+    },
+    {
+      "id": "da694451-5764-45c3-b0d8-6e9aedb8607d",
+      "questionId": "da694451-5764-45c3-b0d8-6e9aedb8607d",
+      "order": 11,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qanday hollarda transport vositalaridan foydalanishga ruxsat etiladi?",
+      "image": "",
+      "audio": "",
+      "options": ["Qo‘shaloq shinalar orasiga xavf tug‘diruvchi begona jismlar qisilganda", "Shina o‘lchamlari yoki yuk ko‘tarish qobiliyati transport vositasiga mos kelmasa", "M1, M2, M3 toifali 1-klass avtotransport vositalarining oldingi o‘qiga 1-klassda ta’mirlangan shinalar qo‘yilgan bo‘lsa", "Barcha sanab o‘tilgan hollarda"],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qanday hollarda transport vositalaridan foydalanishga ruxsat etiladi?",
+          "options": ["Qo‘shaloq shinalar orasiga xavf tug‘diruvchi begona jismlar qisilganda", "Shina o‘lchamlari yoki yuk ko‘tarish qobiliyati transport vositasiga mos kelmasa", "M1, M2, M3 toifali 1-klass avtotransport vositalarining oldingi o‘qiga 1-klassda ta’mirlangan shinalar qo‘yilgan bo‘lsa", "Barcha sanab o‘tilgan hollarda"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қандай ҳолларда транспорт воситаларидан фойдаланишга рухсат этилади?",
+          "options": ["Қўшалоқ шиналар орасига хавф туғдирувчи бегона жисмлар қисилганда", "Шина ўлчамлари ёки юк кўтариш қобилияти транспорт воситасига мос келмаса", "M1, M2, M3 тоифали 1-класс автотранспорт воситаларининг олдинги ўқига 1-классда таъмирланган шиналар қўйилган бўлса", "Барча санаб ўтилган ҳолларда"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каких случаях разрешается эксплуатация транспортных средств?",
+          "options": ["Когда между сдвоенными шинами зажаты посторонние предметы, создающие опасность", "Когда размеры шин или их грузоподъемность не соответствуют транспортному средству", "Если на переднюю ось транспортных средств категорий M1, M2, M3 установлены шины, отремонтированные по 1-му классу", "Во всех перечисленных случаях"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "81449f4c-389b-4d86-9dfd-61e678b385d9",
+      "questionId": "81449f4c-389b-4d86-9dfd-61e678b385d9",
+      "order": 12,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qanday hollarda quvib o'tish taqiqlanadi?",
+      "image": "",
+      "audio": "",
+      "options": ["Tartibga solingan chorrahalarda", "Tartibga solinmagan chorrahalardagi asosiy bo'lib hisoblanmaydigan yo'llarda", "Teng ahamiyatga ega bo'lgan chorrahalarda", "Hamma sanab o'tilgan hollarda"],
+      "correctIndex": 3,
+      "explanation": "Sanab o'tilgan barcha holatlarda quvib o'tish taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qanday hollarda quvib o'tish taqiqlanadi?",
+          "options": ["Tartibga solingan chorrahalarda", "Tartibga solinmagan chorrahalardagi asosiy bo'lib hisoblanmaydigan yo'llarda", "Teng ahamiyatga ega bo'lgan chorrahalarda", "Hamma sanab o'tilgan hollarda"],
+          "explanation": "Sanab o'tilgan barcha holatlarda quvib o'tish taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қандай ҳолларда қувиб ўтиш тақиқланади?",
+          "options": ["Тартибга солинган чорраҳаларда", "Тартибга солинмаган чорраҳалардаги асосий бўлиб ҳисобланмайдиган йўлларда", "Тенг аҳамиятга эга бўлган чорраҳаларда", "Ҳамма санаб ўтилган ҳолларда"],
+          "explanation": "Санаб ўтилган барча ҳолатларда қувиб ўтиш тақиқланади."
+        },
+        "ru": {
+          "text": "В каких случаях обгон запрещен?",
+          "options": ["На регулируемых перекрестках", "На второстепенных дорогах на нерегулируемых перекрестках", "На перекрестках равнозначных дорог", "Во всех перечисленных случаях"],
+          "explanation": "Во всех перечисленных случаях обгон запрещен."
+        }
+      }
+    },
+    {
+      "id": "ade6ee4b-ce40-4613-8ba3-4bfa01b8823a",
+      "questionId": "ade6ee4b-ce40-4613-8ba3-4bfa01b8823a",
+      "order": 13,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi belgi «T» simon chorrahada harakatlanish yo‘nalishini ko‘rsatadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780817673862-urrahx1s.png",
+      "audio": "",
+      "options": ["1", "2", "3", "4", "5"],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi «T» simon chorrahada harakatlanish yo‘nalishini ko‘rsatadi?",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги «Т» симон чорраҳада ҳаракатланиш йўналишини кўрсатади?",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой знак указывает направление движения на Т-образном перекрестке?",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "b4425e20-2e38-4ea5-8278-c02474954bc9",
+      "questionId": "b4425e20-2e38-4ea5-8278-c02474954bc9",
+      "order": 14,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Transport vositalari chorrahadan quyidagi tartibda o‘tadilar",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782392298342-6io9ke80.webp",
+      "audio": "",
+      "options": ["Tramvay, avtobus, yengil avtomobil", "Avtobus, yengil avtomobil, tramvay", "Yengil avtomobil, tramvay, avtobus"],
+      "correctIndex": 0,
+      "explanation": "Teng ahamiyatga ega bo‘lgan yo‘llar chorrahasida tramvay qaysi tomonga harakatlanishidan qat'iy nazar, relssiz transport vositalariga nisbatan imtiyozga ega, shuning uchun tramvay birinchi o‘tadi. So‘ngra o‘ng tomonlama xavf (o‘ngdan kelayotgan transportga yo‘l berish) qoidasiga ko‘ra, o‘ng tomonida to‘siq (avtomobil) bo‘lmagan avtobus, oxirida esa yengil avtomobil harakatlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Transport vositalari chorrahadan quyidagi tartibda o‘tadilar",
+          "options": ["Tramvay, avtobus, yengil avtomobil", "Avtobus, yengil avtomobil, tramvay", "Yengil avtomobil, tramvay, avtobus"],
+          "explanation": "Teng ahamiyatga ega bo‘lgan yo‘llar chorrahasida tramvay qaysi tomonga harakatlanishidan qat'i nazar, relssiz transport vositalariga nisbatan imtiyozga ega, shuning uchun tramvay birinchi o‘tadi. So‘ngra o‘ng tomonlama xavf (o‘ngdan kelayotgan transportga yo‘l berish) qoidasiga ko‘ra, o‘ng tomonida to‘siq (avtomobil) bo‘lmagan avtobus, oxirida esa yengil avtomobil harakatlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Транспорт воситалари чорраҳадан қуйидаги тартибда ўтадилар",
+          "options": ["Трамвай, автобус, енгил автомобиль", "Автобус, енгил автомобиль, трамвай", "Енгил автомобиль, трамвай, автобус"],
+          "explanation": "Тенг аҳамиятга эга бўлган йўллар чорраҳасида трамвай қайси томонга ҳаракатланишидан қатъи назар, релссиз транспорт воситаларига нисбатан имтиёзга эга, шунинг учун трамвай биринчи ўтади. Сўнгра ўнг томонлама хавф (ўнгдан келаётган транспортга йўл бериш) қоидасига кўра, ўнг томонида тўсиқ (автомобиль) бўлмаган автобус, охирида эса енгил автомобиль ҳаракатланади."
+        },
+        "ru": {
+          "text": "Транспортные средства проезжают перекресток в следующем порядке:",
+          "options": ["Трамвай, автобус, легковой автомобиль", "Автобус, легковой автомобиль, трамвай", "Легковой автомобиль, трамвай, автобус"],
+          "explanation": "На перекрестке равнозначных дорог трамвай, независимо от направления движения, имеет преимущество перед нерельсовыми транспортными средствами, поэтому проезжает первым. Затем, по правилу помехи справа, следует автобус, у которого справа нет препятствия, и последним движется легковой автомобиль."
+        }
+      }
+    },
+    {
+      "id": "6eb06f63-70e9-4d30-8925-07b0b6541ce0",
+      "questionId": "6eb06f63-70e9-4d30-8925-07b0b6541ce0",
+      "order": 15,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Belgilangan yo‘nalish bo‘yicha harakatlanayotgan yo‘nalishli transport vositalarining haydovchilari piyodalar o‘tish joyidan tashqarida oq hassa bilan ishora berayotgan ko‘zi ojiz piyodalarni o‘tkazib yuborishlari kerakmi?",
+      "image": "",
+      "audio": "",
+      "options": ["Barcha hollarda o‘tkazib yuborishlari kerak", "O‘tkazib yuborishlari kerak emas"],
+      "correctIndex": 0,
+      "explanation": "Oq hassa bilan ishora berayotgan ko‘zi ojiz piyodalarni barcha haydovchilar, jumladan yo‘nalishli transport vositalari haydovchilari ham, piyodalar o‘tish joyidan tashqarida ham o‘tkazib yuborishlari shart.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgilangan yo‘nalish bo‘yicha harakatlanayotgan yo‘nalishli transport vositalarining haydovchilari piyodalar o‘tish joyidan tashqarida oq hassa bilan ishora berayotgan ko‘zi ojiz piyodalarni o‘tkazib yuborishlari kerakmi?",
+          "options": ["Barcha hollarda o‘tkazib yuborishlari kerak", "O‘tkazib yuborishlari kerak emas"],
+          "explanation": "Oq hassa bilan ishora berayotgan ko‘zi ojiz piyodalarni barcha haydovchilar, jumladan yo‘nalishli transport vositalari haydovchilari ham, piyodalar o‘tish joyidan tashqarida ham o‘tkazib yuborishlari shart."
+        },
+        "uz_cyrl": {
+          "text": "Белгиланган йўналиш бўйича ҳаракатланаётган йўналишли транспорт воситалари ҳайдовчилари пиёдалар ўтиш жойидан ташқарида оқ ҳасса билан ишора бераётган кўзи ожиз пиёдаларни ўтказиб юборишлари керакми?",
+          "options": ["Барча ҳолларда ўтказиб юборишлари керак", "Ўтказиб юборишлари керак эмас"],
+          "explanation": "Оқ ҳасса билан ишора бераётган кўзи ожиз пиёдаларни барча ҳайдовчилар, жумладан йўналишли транспорт воситалари ҳайдовчилари ҳам, пиёдалар ўтиш жойидан ташқарида ҳам ўтказиб юборишлари шарт."
+        },
+        "ru": {
+          "text": "Должны ли водители маршрутных транспортных средств, движущиеся по указанному направлению, пропускать незрячих пешеходов, подающих сигнал белой тростью, вне пешеходного перехода?",
+          "options": ["Должны пропускать во всех случаях", "Не должны пропускать"],
+          "explanation": "Незрячих пешеходов, подающих сигнал белой тростью, обязаны пропускать все водители, включая водителей маршрутных транспортных средств, даже вне пешеходного перехода."
+        }
+      }
+    },
+    {
+      "id": "q-1783593056701-16",
+      "questionId": "q-1783593056701-16",
+      "order": 16,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi yo'nalishda harakatlanishga ruxsat etiladi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783594049313-ehh0ijy5.webp",
+      "audio": "",
+      "options": ["Faqat chapga", "To'g'riga va o'ngga", "Faqat o'ngga", "Faqat to'g'riga"],
+      "correctIndex": 0,
+      "explanation": "Chorrahaning o‘ng tomonidagi yo‘lga kirish 'Kirish taqiqlanadi' (3.1) belgisi bilan taqiqlangan. Shu sababli o‘ngga burilish mumkin emas. To‘g‘riga harakatlanish ham yo‘l harakati tashkil etilishiga ko‘ra ruxsat etilmagan. Haydovchiga faqat chapga burilish ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo'nalishda harakatlanishga ruxsat etiladi?",
+          "options": ["Faqat chapga", "To'g'riga va o'ngga", "Faqat o'ngga", "Faqat to'g'riga"],
+          "explanation": "Chorrahaning o‘ng tomonidagi yo‘lga kirish 'Kirish taqiqlanadi' (3.1) belgisi bilan taqiqlangan. Shu sababli o‘ngga burilish mumkin emas. To‘g‘riga harakatlanish ham yo‘l harakati tashkil etilishiga ko‘ra ruxsat etilmagan. Haydovchiga faqat chapga burilish ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси йўналишда ҳаракатланишга рухсат этилади?",
+          "options": ["Фақат чапга", "Тўғрига ва ўнгга", "Фақат ўнгга", "Фақат тўғрига"],
+          "explanation": "Чорраҳанинг ўнг томонидаги йўлга кириш «Кириш тақиқланади» (3.1) белгиси билан тақиқланган. Шу сабабли ўнгга бурилиш мумкин эмас. Тўғрига ҳаракатланиш ҳам йўл ҳаракати ташкил этилишига кўра рухсат этилмаган. Ҳайдовчига фақат чапга бурилиш рухсат этилади."
+        },
+        "ru": {
+          "text": "В каком направлении разрешено движение?",
+          "options": ["Только налево", "Прямо и направо", "Только направо", "Только прямо"],
+          "explanation": "Въезд на дорогу справа от перекрестка запрещен знаком 3.1 «Въезд запрещен». Поэтому поворот направо невозможен. Движение прямо также не разрешено по организации движения. Водителю разрешен только поворот налево."
+        }
+      }
+    },
+    {
+      "id": "d38a3204-d673-4e12-b875-d0b3dcc0b886",
+      "questionId": "d38a3204-d673-4e12-b875-d0b3dcc0b886",
+      "order": 17,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi javobda ruxsat etilgan harakatlanish yo‘nalishlari to‘g‘ri ko‘rsatilgan?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745560772-wdz86gto.webp",
+      "audio": "",
+      "options": ["«V»", "«A»", "«Б»", "«A» va «Б»", "«A» va «V»"],
+      "correctIndex": 3,
+      "explanation": "Vaziyatga ko‘ra A va Б yo‘nalishlarida harakatlanish mumkin, V yo‘nalishida esa taqiq mavjud.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi javobda ruxsat etilgan harakatlanish yo‘nalishlari to‘g‘ri ko‘rsatilgan?",
+          "options": ["«V»", "«A»", "«Б»", "«A» va «Б»", "«A» va «V»"],
+          "explanation": "Vaziyatga ko‘ra A va Б yo‘nalishlarida harakatlanish mumkin, V yo‘nalishida esa taqiq mavjud."
+        },
+        "uz_cyrl": {
+          "text": "Қайси жавобда рухсат этилган ҳаракатланиш йўналишлари тўғри кўрсатилган?",
+          "options": ["«V»", "«A»", "«Б»", "«A» ва «Б»", "«A» ва «V»"],
+          "explanation": "Вазиятга кўра A ва Б йўналишларида ҳаракатланиш мумкин, V йўналишида эса тақиқ мавжуд."
+        },
+        "ru": {
+          "text": "В каком ответе правильно указаны разрешенные направления движения?",
+          "options": ["«V»", "«A»", "«Б»", "«A» и «Б»", "«A» и «V»"],
+          "explanation": "По ситуации движение разрешено в направлениях A и Б, а в направлении V имеется запрет."
+        }
+      }
+    },
+    {
+      "id": "q-1783594056972-18",
+      "questionId": "q-1783594056972-18",
+      "order": 18,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ushbu yo'l belgisi qo'shimcha axborot belgisi bilan nimani bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783594062062-iejld3ub.webp",
+      "audio": "",
+      "options": [
+        "Ruxsat etilgan to'la vazni 3,5 t dan ortiq transport vositalarining to'xtab turish joyi ko'rsatkich qatnov qismining chetida baland to'siq, toshi borligini bildiradi",
+        "Transport vositalarining to'xtab turish joyiga avtomobilni ko'rsatilgan usulda qo'yish taqiqlanadi",
+        "Yengil avtomobillar va mototsikllarni to'xtab turishga qo'yish joyi va usuli"
+      ],
+      "correctIndex": 2,
+      "explanation": "Asosiy 'To'xtab turish joyi' (P) belgisi ostidagi qo'shimcha axborot belgisi transport vositasini qanday usulda joylashtirish kerakligini ko'rsatadi. Ushbu belgi yengil avtomobillar va mototsikllarning yo'l chetiga qisman chiqarilgan holda to'xtab turish usulini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo'l belgisi qo'shimcha axborot belgisi bilan nimani bildiradi?",
+          "options": [
+            "Ruxsat etilgan to'la vazni 3,5 t dan ortiq transport vositalarining to'xtab turish joyi ko'rsatkich qatnov qismining chetida baland to'siq, toshi borligini bildiradi",
+            "Transport vositalarining to'xtab turish joyiga avtomobilni ko'rsatilgan usulda qo'yish taqiqlanadi",
+            "Yengil avtomobillar va mototsikllarni to'xtab turishga qo'yish joyi va usuli"
+          ],
+          "explanation": "Asosiy 'To'xtab turish joyi' (P) belgisi ostidagi qo'shimcha axborot belgisi transport vositasini qanday usulda joylashtirish kerakligini ko'rsatadi. Ushbu belgi yengil avtomobillar va mototsikllarning yo'l chetiga qisman chiqarilgan holda to'xtab turish usulini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу йўл белгиси қўшимча ахборот белгиси билан нимани билдиради?",
+          "options": [
+            "Рухсат этилган тўла вазни 3,5 т дан ортиқ транспорт воситаларининг тўхтаб туриш жойи кўрсаткич қатнов қисмининг четида баланд тўсиқ, тоши борлигини билдиради",
+            "Транспорт воситаларининг тўхтаб туриш жойига автомобилни кўрсатилган усулда қўйиш тақиқланади",
+            "Енгил автомобиллар ва мотоциклларни тўхтаб туришга қўйиш жойи ва усули"
+          ],
+          "explanation": "Асосий «Тўхтаб туриш жойи» (P) белгиси остидаги қўшимча ахборот белгиси транспорт воситасини қандай усулда жойлаштириш кераклигини кўрсатади. Ушбу белги енгил автомобиллар ва мотоциклларнинг йўл четига қисман чиқарилган ҳолда тўхтаб туриш усулини билдиради."
+        },
+        "ru": {
+          "text": "Что означает этот дорожный знак вместе с дополнительным знаком информации?",
+          "options": [
+            "Указывает, что у стоянки транспортных средств с разрешенной максимальной массой более 3,5 т на краю проезжей части имеется высокий бордюр или камень",
+            "Запрещает ставить автомобиль на стоянку указанным способом",
+            "Место и способ стоянки легковых автомобилей и мотоциклов"
+          ],
+          "explanation": "Дополнительный знак под основным знаком «Место стоянки» (P) указывает, каким способом следует разместить транспортное средство. Данный знак обозначает способ стоянки легковых автомобилей и мотоциклов с частичным выездом к краю дороги."
+        }
+      }
+    },
+    {
+      "id": "q-1783594151943-19",
+      "questionId": "q-1783594151943-19",
+      "order": 19,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Transport vositalari chorrahadan quyidagi tartibda o'tadilar:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1784285099445-hy5huux0.webp",
+      "audio": "",
+      "options": ["Mototsikl, tramvay va avtomobil", "Tramvay, mototsikl, avtomobil", "Tramvay va avtomobil, mototsikl"],
+      "correctIndex": 0,
+      "explanation": "Chorrahada barcha transport vositalari teng ahamiyatdagi yo'llarda harakatlanmoqda. Mototsikl o'ng tomonda hech qanday transport vositasi bo'lmagani uchun birinchi bo'lib o'tadi. Tramvay relssiz transport vositalariga nisbatan ustunlikka ega bo'lib, mototsikldan keyin harakatlanadi. Avtomobil esa tramvayga yo'l berib oxirida chorrahadan o'tadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Transport vositalari chorrahadan quyidagi tartibda o'tadilar:",
+          "options": ["Mototsikl, tramvay va avtomobil", "Tramvay, mototsikl, avtomobil", "Tramvay va avtomobil, mototsikl"],
+          "explanation": "Chorrahada barcha transport vositalari teng ahamiyatdagi yo'llarda harakatlanmoqda. Mototsikl o'ng tomonda hech qanday transport vositasi bo'lmagani uchun birinchi bo'lib o'tadi. Tramvay relssiz transport vositalariga nisbatan ustunlikka ega bo'lib, mototsikldan keyin harakatlanadi. Avtomobil esa tramvayga yo'l berib oxirida chorrahadan o'tadi."
+        },
+        "uz_cyrl": {
+          "text": "Транспорт воситалари чорраҳадан қуйидаги тартибда ўтадилар:",
+          "options": ["Мотоцикл, трамвай ва автомобиль", "Трамвай, мотоцикл, автомобиль", "Трамвай ва автомобиль, мотоцикл"],
+          "explanation": "Чорраҳада барча транспорт воситалари тенг аҳамиятдаги йўлларда ҳаракатланмоқда. Мотоцикл ўнг томонда ҳеч қандай транспорт воситаси бўлмагани учун биринчи бўлиб ўтади. Трамвай релссиз транспорт воситаларига нисбатан устунликка эга бўлиб, мотоциклдан кейин ҳаракатланади. Автомобиль эса трамвайга йўл бериб охирида чорраҳадан ўтади."
+        },
+        "ru": {
+          "text": "Транспортные средства проезжают перекресток в следующем порядке:",
+          "options": ["Мотоцикл, трамвай и автомобиль", "Трамвай, мотоцикл, автомобиль", "Трамвай и автомобиль, мотоцикл"],
+          "explanation": "На перекрестке все транспортные средства движутся по дорогам равнозначного значения. Мотоцикл проезжает первым, так как справа от него нет других транспортных средств. Трамвай имеет преимущество перед нерельсовыми транспортными средствами и движется после мотоцикла. Автомобиль уступает трамваю и проезжает последним."
+        }
+      }
+    },
+    {
+      "id": "444ad18c-94f6-45f7-8a50-8e13c76d49b6",
+      "questionId": "444ad18c-94f6-45f7-8a50-8e13c76d49b6",
+      "order": 20,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi javobda yo'lovchilar uchun chiqish va tushish maydonchasi bo'lmagan sharoitdagi joylar to'liq ko'rsatilgan?",
+      "image": "",
+      "audio": "",
+      "options": ["Qatnov qismi yoki trotuar tomonidan", "Trotuar tomonidan", "Yo'l yoqasida yoki qatnov qismi tomonidan", "Trotuarda yoki yo'l yoqasi tomonidan"],
+      "correctIndex": 3,
+      "explanation": "Maxsus chiqish va tushish maydonchalari bo'lmagan taqdirda, yo'lovchilar transport vositasiga trotuar yoki yo'l yoqasi tomonidan chiqishlari va tushishlari shart (image_9f785d.jpg).",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi javobda yo'lovchilar uchun chiqish va tushish maydonchasi bo'lmagan sharoitdagi joylar to'liq ko'rsatilgan?",
+          "options": ["Qatnov qismi yoki trotuar tomonidan", "Trotuar tomonidan", "Yo'l yoqasida yoki qatnov qismi tomonidan", "Trotuarda yoki yo'l yoqasi tomonidan"],
+          "explanation": "Maxsus chiqish va tushish maydonchalari bo'lmagan taqdirda, yo'lovchilar transport vositasiga trotuar yoki yo'l yoqasi tomonidan chiqishlari va tushishlari shart (image_9f785d.jpg)."
+        },
+        "uz_cyrl": {
+          "text": "Қайси жавобда йўловчилар учун чиқиш ва тушиш майдончаси бўлмаган шароитдаги жойлар тўлиқ кўрсатилган?",
+          "options": ["Қатнов қисми ёки тротуар томонидан", "Тротуар томонидан", "Йўл ёқасида ёки қатнов қисми томонидан", "Тротуарда ёки йўл ёқаси томонидан"],
+          "explanation": "Махсус чиқиш ва тушиш майдончалари бўлмаган тақдирда, йўловчилар транспорт воситасига тротуар ёки йўл ёқаси томонидан чиқишлари ва тушишлари шарт (image_9f785d.jpg)."
+        },
+        "ru": {
+          "text": "В каком ответе полностью указаны места, где при отсутствии площадок для посадки и высадки пассажиров разрешено?",
+          "options": ["Со стороны проезжей части или тротуара", "Со стороны тротуара", "Со стороны обочины или проезжей части", "На тротуаре или со стороны обочины"],
+          "explanation": "При отсутствии специальных площадок для посадки и высадки пассажиры должны входить и выходить из транспортного средства со стороны тротуара или обочины (image_9f785d.jpg)."
+        }
+      }
+    }
+  ]
+}

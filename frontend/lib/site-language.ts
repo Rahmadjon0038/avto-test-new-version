@@ -170,7 +170,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       restart: "Qayta boshlash",
       finish: "Yakunlash",
       resultTitle: "Natija",
-      correctLabel: "To‘g‘ri"
+      correctLabel: "To‘g‘ri",
+      summary: "{score} ta to‘g‘ri · {total} ta savol"
     },
     videos: {
       title: "Video darsliklar",
@@ -190,6 +191,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       correct: "{count} ta to‘g‘ri",
       wrong: "{count} ta noto‘g‘ri",
       unanswered: "{count} ta belgilanmagan",
+      questionCounter: "{current}/{total} savol",
       title: "Progres",
       empty: "Natija hali yo‘q"
     },
@@ -405,7 +407,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       restart: "Қайта бошлаш",
       finish: "Якунлаш",
       resultTitle: "Натижа",
-      correctLabel: "Тўғри"
+      correctLabel: "Тўғри",
+      summary: "{score} та тўғри · {total} та савол"
     },
     videos: {
       title: "Видео дарсликлар",
@@ -425,6 +428,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       correct: "{count} та тўғри",
       wrong: "{count} та нотўғри",
       unanswered: "{count} та белгиланмаган",
+      questionCounter: "{current}/{total} савол",
       title: "Прогресс",
       empty: "Натижа ҳали йўқ"
     },
@@ -640,7 +644,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       restart: "Начать заново",
       finish: "Завершить",
       resultTitle: "Результат",
-      correctLabel: "Верно"
+      correctLabel: "Верно",
+      summary: "{score} верных · {total} вопросов"
     },
     videos: {
       title: "Видео уроки",
@@ -660,6 +665,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       correct: "{count} верных",
       wrong: "{count} неверных",
       unanswered: "{count} без ответа",
+      questionCounter: "{current}/{total} вопрос",
       title: "Прогресс",
       empty: "Пока нет результата"
     },

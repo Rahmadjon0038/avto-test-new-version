@@ -273,7 +273,7 @@ export default function TicketPage() {
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
-  const { language } = useSiteLanguage();
+  const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
   const handleSettingsChange = useCallback(
@@ -474,7 +474,7 @@ export default function TicketPage() {
             <div className="h2" style={{ margin: 0 }}>
               {ticket.title}
             </div>
-            <div className="muted">{`Javoblar: ${answered}/${total}`}</div>
+            <div className="muted">{t("progress.questionCounter", { current: idx + 1, total })}</div>
           </div>
         </div>
 

@@ -577,6 +577,7 @@ export default function ExamPage() {
             <div className="h2" style={{ margin: 0 }}>
               {t("exam.title")}
             </div>
+            <div className="muted">{t("progress.questionCounter", { current: idx + 1, total: questions.length })}</div>
           </div>
         </div>
 
@@ -595,9 +596,7 @@ export default function ExamPage() {
             <div className="h2" style={{ margin: 0 }}>
               {completed ? t("exam.resultTitle") : t("common.error")}
             </div>
-            <div className="muted">
-              {exam?.score || 0} ta to‘g‘ri · {questions.length} ta savol
-            </div>
+            <div className="muted">{t("exam.summary", { score: exam?.score || 0, total: questions.length })}</div>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>
             {resetMutation.isPending ? t("common.loading") : t("exam.restart")}

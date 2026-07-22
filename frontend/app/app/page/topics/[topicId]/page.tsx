@@ -299,7 +299,7 @@ export default function TopicPage() {
   const topicId = String(params.topicId || "");
   const qc = useQueryClient();
   const { authFetch, authReady, accessToken } = useAuth();
-  const { language } = useSiteLanguage();
+  const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`topic:${topicId}`);
   const handleSettingsChange = useCallback(
@@ -829,7 +829,7 @@ export default function TopicPage() {
             <div className="h2" style={{ margin: 0 }}>
               {topic.title}
             </div>
-            <div className="muted">{`Javoblar: ${answered}/${total}`}</div>
+            <div className="muted">{t("progress.questionCounter", { current: idx + 1, total })}</div>
           </div>
         </div>
 

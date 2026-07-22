@@ -266,7 +266,7 @@ export default function CustomTestPage() {
   const testId = String(params.testId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
-  const { language } = useSiteLanguage();
+  const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`custom:${testId}`);
   const handleSettingsChange = useCallback(
@@ -482,7 +482,7 @@ export default function CustomTestPage() {
             <div className="h2" style={{ margin: 0 }}>
               {customTest.title}
             </div>
-            <div className="muted">{`Javoblar: ${answered}/${total}`}</div>
+            <div className="muted">{t("progress.questionCounter", { current: idx + 1, total })}</div>
           </div>
         </div>
 
