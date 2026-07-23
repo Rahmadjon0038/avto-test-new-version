@@ -295,6 +295,17 @@ async function initDb(dbApi) {
   await dbApi.run(`CREATE INDEX IF NOT EXISTS video_lessons_topic_id_idx ON video_lessons (topic_id);`);
 
   await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+      id BIGINT PRIMARY KEY DEFAULT 1,
+      config_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await dbApi.run(`ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS config_json JSONB NOT NULL DEFAULT '{}'::jsonb;`);
+  await dbApi.run(`ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
+
+  await dbApi.run(`
     CREATE TABLE IF NOT EXISTS custom_test_progress (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -336,6 +347,14 @@ async function initDb(dbApi) {
         is_admin = TRUE
     `,
     [DEFAULT_ADMIN.full_name, DEFAULT_ADMIN.phone, passwordHash]
+  );
+
+  await dbApi.run(
+    `
+      INSERT INTO app_settings (id, config_json)
+      VALUES (1, '{}'::jsonb)
+      ON CONFLICT (id) DO NOTHING
+    `
   );
 
   console.log(`[admin] default admin ready -> phone: ${DEFAULT_ADMIN.phone}, password: ${DEFAULT_ADMIN.password}`);

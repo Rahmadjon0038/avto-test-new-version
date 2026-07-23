@@ -119,6 +119,7 @@ export default function AuthPage() {
   const { t } = useSiteLanguage();
   const [tab, setTab] = useState<Tab>("login");
   const [authOpen, setAuthOpen] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState("");
   const [phoneRegisterLocal, setPhoneRegisterLocal] = useState("");
   const [passwordRegister, setPasswordRegister] = useState("");
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
@@ -238,6 +239,11 @@ export default function AuthPage() {
     setForgotOpen(false);
   }
 
+  function openAuthWithRedirect(nextTab: Tab = "login", redirectTo = "") {
+    setPendingRedirect(redirectTo);
+    openAuth(nextTab);
+  }
+
   function closeAuth() {
     setAuthOpen(false);
   }
@@ -302,7 +308,8 @@ export default function AuthPage() {
       if (data?.accessToken) setAccessToken(String(data.accessToken));
       if (data?.user) setUser(data.user);
       toast.success(t("auth.loginSuccess"));
-      router.push("/app");
+      router.push(pendingRedirect || "/app");
+      setPendingRedirect("");
     },
     onError: (e: any) => toast.error(e?.message || t("common.error"))
   });
@@ -366,7 +373,7 @@ export default function AuthPage() {
                   <button className="btn btn-primary landingStartBtn" type="button" onClick={() => openAuth()}>
                     {t("auth.enterTests")}
                   </button>
-                  <button className="btn btn-ghost landingVideoBtn" type="button" onClick={() => openAuth()}>
+                  <button className="btn btn-ghost landingVideoBtn" type="button" onClick={() => openAuthWithRedirect("login", "/app/page/videos")}>
                     <PlayCircle className="lucide" aria-hidden="true" />
                     {t("home.videosTitle")}
                   </button>
@@ -438,7 +445,7 @@ export default function AuthPage() {
                     icon={<Video className="lucide" />}
                     title={t("home.videosTitle")}
                     desc={t("home.videosDesc")}
-                    onSelect={() => openAuth()}
+                    onSelect={() => openAuthWithRedirect("login", "/app/page/videos")}
                   />
                 </div>
               </div>

@@ -1900,6 +1900,32 @@ body {
   gap: 14px;
 }
 
+.adminSectionStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.adminStatCard {
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 72%, transparent);
+}
+
+.adminStatLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.adminStatValue {
+  margin-top: 6px;
+  font-size: 24px;
+  font-weight: 1000;
+  letter-spacing: -0.5px;
+}
+
 .adminPanelCardHead {
   display: grid;
   gap: 6px;
@@ -1923,6 +1949,63 @@ body {
 .adminTopicForm {
   display: grid;
   gap: 12px;
+}
+
+.fieldStack {
+  display: grid;
+  gap: 6px;
+}
+
+.fieldLabel {
+  margin: 0;
+}
+
+.adminToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 72%, transparent);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.adminToggleLabel {
+  color: var(--text);
+}
+
+.adminLocaleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.adminLocaleCard {
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 80%, transparent);
+  display: grid;
+  gap: 10px;
+}
+
+.adminLocaleTitle {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.adminFormActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .adminTopicInline {
@@ -4000,6 +4083,22 @@ body {
 }
 
 @media (max-width: 640px) {
+  .adminSectionStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adminLocaleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminFormActions {
+    justify-content: stretch;
+  }
+
+  .adminFormActions .btn {
+    width: 100%;
+  }
+
   .testSettingsOverlay {
     align-items: end;
     place-items: end center;

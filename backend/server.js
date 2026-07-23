@@ -220,6 +220,160 @@ function localizeTicket(ticket, lang) {
   };
 }
 
+const DEFAULT_APP_WARNING_TEXT = {
+  titleI18n: {
+    uz_latn: "Ilovada yangilanishlar mavjud",
+    uz_cyrl: "Иловада янгиланишлар мавжуд",
+    ru: "Доступно обновление приложения"
+  },
+  messageI18n: {
+    uz_latn: "Yangi funksiyalar va pullik rejim ishga tushishi uchun ilovani yangilang.",
+    uz_cyrl: "Янги функциялар ва пуллик режим ишга тушиши учун иловани янгиланг.",
+    ru: "Обновите приложение, чтобы активировать новые функции и платный режим."
+  },
+  actionLabelI18n: {
+    uz_latn: "Yangilash",
+    uz_cyrl: "Янгилаш",
+    ru: "Обновить"
+  }
+};
+
+function normalizeI18nMap(value, fallback = {}) {
+  const source = parseJsonValue(value, {});
+  const normalized = {};
+  for (const lang of SUPPORTED_LANGUAGES) {
+    const raw = source?.[lang];
+    const text = typeof raw === "string" ? raw : String(raw?.text || raw?.title || raw?.value || "").trim();
+    if (text) normalized[lang] = text;
+  }
+  if (!Object.keys(normalized).length) {
+    for (const lang of SUPPORTED_LANGUAGES) {
+      const text = String(fallback?.[lang] || "").trim();
+      if (text) normalized[lang] = text;
+    }
+  }
+  return normalized;
+}
+
+function normalizeAppConfig(value) {
+  const source = parseJsonValue(value, {});
+  const warningSource = parseJsonValue(source.warning, {});
+  return {
+    warningEnabled: source.warningEnabled !== undefined ? Boolean(source.warningEnabled) : false,
+    forceUpdate: Boolean(source.forceUpdate || source.force_update),
+    updateUrl: String(source.updateUrl || source.update_url || "https://topshirdi.uz").trim(),
+    updateUrlAndroid: String(
+      source.updateUrlAndroid ||
+      source.update_url_android ||
+      "https://play.google.com/store/apps/details?id=uz.roadtest.app&hl=en_IE"
+    ).trim(),
+    updateUrlIos: String(
+      source.updateUrlIos ||
+      source.update_url_ios ||
+      "https://apps.apple.com/us/app/topshirdi/id6781198005"
+    ).trim(),
+    syncOnLaunch: source.syncOnLaunch !== false,
+    videoOnlineOnly: source.videoOnlineOnly !== false,
+    audioOfflineCache: source.audioOfflineCache !== false,
+    audioPremiumRequired: Boolean(source.audioPremiumRequired || source.audio_premium_required),
+    videoPremiumRequired: Boolean(source.videoPremiumRequired || source.video_premium_required),
+    warning: {
+      titleI18n: normalizeI18nMap(warningSource.titleI18n, DEFAULT_APP_WARNING_TEXT.titleI18n),
+      messageI18n: normalizeI18nMap(warningSource.messageI18n, DEFAULT_APP_WARNING_TEXT.messageI18n),
+      actionLabelI18n: normalizeI18nMap(warningSource.actionLabelI18n, DEFAULT_APP_WARNING_TEXT.actionLabelI18n)
+    },
+    updatedAt: source.updatedAt || source.updated_at || null
+  };
+}
+
+function buildAppConfigPayload(input = {}) {
+  const normalized = normalizeAppConfig(input);
+  return {
+    warningEnabled: Boolean(normalized.warningEnabled),
+    forceUpdate: Boolean(normalized.forceUpdate),
+    updateUrl: String(normalized.updateUrl || "https://topshirdi.uz").trim(),
+    updateUrlAndroid: String(normalized.updateUrlAndroid || "https://play.google.com/store/apps/details?id=uz.roadtest.app&hl=en_IE").trim(),
+    updateUrlIos: String(normalized.updateUrlIos || "https://apps.apple.com/us/app/topshirdi/id6781198005").trim(),
+    syncOnLaunch: Boolean(normalized.syncOnLaunch),
+    videoOnlineOnly: Boolean(normalized.videoOnlineOnly),
+    audioOfflineCache: Boolean(normalized.audioOfflineCache),
+    audioPremiumRequired: Boolean(normalized.audioPremiumRequired),
+    videoPremiumRequired: Boolean(normalized.videoPremiumRequired),
+    warning: {
+      titleI18n: normalized.warning.titleI18n,
+      messageI18n: normalized.warning.messageI18n,
+      actionLabelI18n: normalized.warning.actionLabelI18n
+    },
+    updatedAt: normalized.updatedAt || null
+  };
+}
+
+async function getAppConfigFromDb() {
+  const row = await dbApi.get("SELECT * FROM app_settings WHERE id = 1");
+  return {
+    ...buildAppConfigPayload(row?.config_json || {}),
+    updatedAt: row?.updated_at ? String(row.updated_at) : null
+  };
+}
+
+async function saveAppConfigToDb(nextConfig) {
+  const payload = buildAppConfigPayload(nextConfig);
+  const row = await dbApi.get(
+    `
+      INSERT INTO app_settings (id, config_json, created_at, updated_at)
+      VALUES (1, ?::jsonb, NOW(), NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        config_json = EXCLUDED.config_json,
+        updated_at = NOW()
+      RETURNING *
+    `,
+    [JSON.stringify(payload)]
+  );
+  return {
+    ...buildAppConfigPayload(row?.config_json || payload),
+    updatedAt: row?.updated_at ? String(row.updated_at) : null
+  };
+}
+
+async function buildOfflineManifest(lang = "") {
+  const normalizedLang = normalizeLanguageCode(lang, DEFAULT_LANGUAGE);
+  const [topicStats, ticketStats, customTestStats, videoStats] = await Promise.all([
+    dbApi.get(`SELECT COUNT(*)::int AS count, MAX(updated_at) AS updated_at FROM topics`),
+    dbApi.get(`SELECT COUNT(*)::int AS count, MAX(updated_at) AS updated_at FROM tickets`),
+    dbApi.get(`SELECT COUNT(*)::int AS count, MAX(updated_at) AS updated_at FROM custom_tests`),
+    dbApi.get(`SELECT COUNT(*)::int AS count, MAX(updated_at) AS updated_at FROM video_lessons`)
+  ]);
+
+  return {
+    language: normalizedLang,
+    generatedAt: new Date().toISOString(),
+    sections: {
+      topics: {
+        count: Number(topicStats?.count || 0),
+        updatedAt: topicStats?.updated_at ? String(topicStats.updated_at) : null
+      },
+      tickets: {
+        count: Number(ticketStats?.count || 0),
+        updatedAt: ticketStats?.updated_at ? String(ticketStats.updated_at) : null
+      },
+      customTests: {
+        count: Number(customTestStats?.count || 0),
+        updatedAt: customTestStats?.updated_at ? String(customTestStats.updated_at) : null
+      },
+      videos: {
+        count: Number(videoStats?.count || 0),
+        updatedAt: videoStats?.updated_at ? String(videoStats.updated_at) : null
+      }
+    }
+  };
+  const versionSource = {
+    language: normalizedLang,
+    sections: manifest.sections
+  };
+  manifest.version = crypto.createHash("sha256").update(JSON.stringify(versionSource)).digest("hex").slice(0, 16);
+  return manifest;
+}
+
 async function localizeMistakeRow(row, lang) {
   const question = row?.question && typeof row.question === "object" ? localizeQuestion(row.question, lang) : row?.question || {};
   let sourceTitle = String(row?.source_title || question?.sourceTitle || "").trim();
@@ -4657,6 +4811,46 @@ app.post("/api/topic-progress/:topicId/reset", requireUser, async (req, res) => 
 app.post("/api/browser-token", requireUser, async (req, res) => {
   const token = signAccessToken(req.user.id, Boolean(req.user.is_admin === true || String(req.user.id) === "1"));
   res.json({ ok: true, token });
+});
+
+app.get("/api/public/app-config", async (_req, res) => {
+  const appConfig = await getAppConfigFromDb();
+  res.json({ ok: true, appConfig });
+});
+
+app.get("/api/public/offline-manifest", async (req, res) => {
+  const manifest = await buildOfflineManifest(req.query.lang);
+  const appConfig = await getAppConfigFromDb();
+  res.json({ ok: true, manifest, appConfig });
+});
+
+app.get("/api/admin/app-config", async (req, res) => {
+  const admin = await getAdminFromAccess(req);
+  if (!admin) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  const appConfig = await getAppConfigFromDb();
+  const manifest = await buildOfflineManifest(req.query.lang);
+  res.json({ ok: true, appConfig, manifest });
+});
+
+app.patch("/api/admin/app-config", async (req, res) => {
+  const admin = await getAdminFromAccess(req);
+  if (!admin) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+
+  const saved = await saveAppConfigToDb({
+    warningEnabled: req.body?.warningEnabled,
+    forceUpdate: req.body?.forceUpdate,
+    updateUrl: req.body?.updateUrl,
+    updateUrlAndroid: req.body?.updateUrlAndroid,
+    updateUrlIos: req.body?.updateUrlIos,
+    syncOnLaunch: req.body?.syncOnLaunch,
+    videoOnlineOnly: req.body?.videoOnlineOnly,
+    audioOfflineCache: req.body?.audioOfflineCache,
+    audioPremiumRequired: req.body?.audioPremiumRequired,
+    videoPremiumRequired: req.body?.videoPremiumRequired,
+    warning: req.body?.warning
+  });
+
+  res.json({ ok: true, appConfig: saved });
 });
 
 app.get("/api/tickets", requireUser, async (req, res) => {
