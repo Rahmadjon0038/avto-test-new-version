@@ -114,6 +114,19 @@ function parseJsonValue(value, fallback) {
   return fallback;
 }
 
+function parseBoolean(value, fallback = false) {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return fallback;
+    if (["true", "1", "yes", "on"].includes(normalized)) return true;
+    if (["false", "0", "no", "off"].includes(normalized)) return false;
+  }
+  return Boolean(value);
+}
+
 const SUPPORTED_LANGUAGES = ["uz_latn", "uz_cyrl", "ru"];
 const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES);
 const DEFAULT_LANGUAGE = "uz_latn";
@@ -273,8 +286,8 @@ function normalizeAppConfig(value) {
   const source = parseJsonValue(value, {});
   const warningSource = parseJsonValue(source.warning, {});
   return {
-    warningEnabled: source.warningEnabled !== undefined ? Boolean(source.warningEnabled) : false,
-    forceUpdate: Boolean(source.forceUpdate || source.force_update),
+    warningEnabled: parseBoolean(source.warningEnabled, false),
+    forceUpdate: parseBoolean(source.forceUpdate ?? source.force_update, false),
     updateUrl: String(source.updateUrl || source.update_url || "https://topshirdi.uz").trim(),
     updateUrlAndroid: String(
       source.updateUrlAndroid ||
@@ -286,11 +299,11 @@ function normalizeAppConfig(value) {
       source.update_url_ios ||
       "https://apps.apple.com/us/app/topshirdi/id6781198005"
     ).trim(),
-    syncOnLaunch: source.syncOnLaunch !== false,
-    videoOnlineOnly: source.videoOnlineOnly !== false,
-    audioOfflineCache: source.audioOfflineCache !== false,
-    audioPremiumRequired: Boolean(source.audioPremiumRequired || source.audio_premium_required),
-    videoPremiumRequired: Boolean(source.videoPremiumRequired || source.video_premium_required),
+    syncOnLaunch: parseBoolean(source.syncOnLaunch, true),
+    videoOnlineOnly: parseBoolean(source.videoOnlineOnly, true),
+    audioOfflineCache: parseBoolean(source.audioOfflineCache, true),
+    audioPremiumRequired: parseBoolean(source.audioPremiumRequired ?? source.audio_premium_required, false),
+    videoPremiumRequired: parseBoolean(source.videoPremiumRequired ?? source.video_premium_required, false),
     warning: {
       titleI18n: normalizeI18nMap(warningSource.titleI18n, DEFAULT_APP_WARNING_TEXT.titleI18n),
       messageI18n: sanitizeWarningMessageI18n(warningSource.messageI18n),

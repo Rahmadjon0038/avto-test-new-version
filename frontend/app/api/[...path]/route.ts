@@ -31,6 +31,7 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path?: s
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("transfer-encoding");
     responseHeaders.delete("content-length");
+    responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
     if (response.ok) {
       return new Response(response.body, {
@@ -45,7 +46,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path?: s
       {
         status: response.status,
         headers: {
-          "content-type": response.headers.get("content-type") || "application/json"
+          "content-type": response.headers.get("content-type") || "application/json",
+          "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate"
         }
       }
     );
@@ -59,6 +61,8 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path?: s
   }
 }
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const GET = proxy;
 export const POST = proxy;
 export const PUT = proxy;

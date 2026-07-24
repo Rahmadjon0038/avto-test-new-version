@@ -90,21 +90,34 @@ function readI18n(value: any, fallback: I18nText): I18nText {
   };
 }
 
+function readBool(value: any, fallback = false) {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return fallback;
+    if (["true", "1", "yes", "on"].includes(normalized)) return true;
+    if (["false", "0", "no", "off"].includes(normalized)) return false;
+  }
+  return Boolean(value);
+}
+
 function readConfig(value: any): AppConfig {
   const fallback = emptyConfig();
   const source = value && typeof value === "object" ? value : {};
   const warning = source.warning && typeof source.warning === "object" ? source.warning : {};
   return {
-    warningEnabled: source.warningEnabled !== false,
-    forceUpdate: Boolean(source.forceUpdate),
+    warningEnabled: readBool(source.warningEnabled, false),
+    forceUpdate: readBool(source.forceUpdate, false),
     updateUrl: String(source.updateUrl || fallback.updateUrl),
     updateUrlAndroid: String(source.updateUrlAndroid || fallback.updateUrlAndroid),
     updateUrlIos: String(source.updateUrlIos || fallback.updateUrlIos),
-    syncOnLaunch: source.syncOnLaunch !== false,
-    videoOnlineOnly: source.videoOnlineOnly !== false,
-    audioOfflineCache: source.audioOfflineCache !== false,
-    audioPremiumRequired: Boolean(source.audioPremiumRequired),
-    videoPremiumRequired: Boolean(source.videoPremiumRequired),
+    syncOnLaunch: readBool(source.syncOnLaunch, true),
+    videoOnlineOnly: readBool(source.videoOnlineOnly, true),
+    audioOfflineCache: readBool(source.audioOfflineCache, true),
+    audioPremiumRequired: readBool(source.audioPremiumRequired, false),
+    videoPremiumRequired: readBool(source.videoPremiumRequired, false),
     warning: {
       titleI18n: readI18n(warning.titleI18n, fallback.warning.titleI18n),
       messageI18n: readI18n(warning.messageI18n, fallback.warning.messageI18n),
