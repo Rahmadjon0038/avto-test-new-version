@@ -104,7 +104,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const requestPath = `${basePath}?${params.toString()}`;
       const headers = new Headers(init?.headers);
       if (token) headers.set("authorization", `Bearer ${token}`);
-      let res = await fetch(requestPath, { ...init, headers });
+      const method = String(init?.method || "GET").toUpperCase();
+      let res = await fetch(requestPath, {
+        ...init,
+        headers,
+        cache: method === "GET" ? "no-store" : init?.cache,
+      });
 
       if (res.status !== 401) return res;
 
@@ -113,7 +118,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!refreshed) return res;
       const headers2 = new Headers(init?.headers);
       headers2.set("authorization", `Bearer ${refreshed}`);
-      res = await fetch(requestPath, { ...init, headers: headers2 });
+      res = await fetch(requestPath, {
+        ...init,
+        headers: headers2,
+        cache: method === "GET" ? "no-store" : init?.cache,
+      });
       return res;
     },
     [refresh]

@@ -4830,12 +4830,14 @@ app.post("/api/browser-token", requireUser, async (req, res) => {
 
 app.get("/api/public/app-config", async (_req, res) => {
   const appConfig = await getAppConfigFromDb();
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.json({ ok: true, appConfig });
 });
 
 app.get("/api/public/offline-manifest", async (req, res) => {
   const manifest = await buildOfflineManifest(req.query.lang);
   const appConfig = await getAppConfigFromDb();
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.json({ ok: true, manifest, appConfig });
 });
 
@@ -4844,6 +4846,7 @@ app.get("/api/admin/app-config", async (req, res) => {
   if (!admin) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const appConfig = await getAppConfigFromDb();
   const manifest = await buildOfflineManifest(req.query.lang);
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.json({ ok: true, appConfig, manifest });
 });
 
@@ -4865,6 +4868,7 @@ app.patch("/api/admin/app-config", async (req, res) => {
     warning: req.body?.warning
   });
 
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.json({ ok: true, appConfig: saved });
 });
 
