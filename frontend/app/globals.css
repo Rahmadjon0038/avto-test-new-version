@@ -1977,6 +1977,39 @@ body {
   color: var(--text);
 }
 
+.adminFieldRow {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 72%, transparent);
+}
+
+.adminTextInput {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, #000 14%);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+}
+
+.adminTextInput::placeholder {
+  color: color-mix(in srgb, var(--muted) 70%, #ffffff 30%);
+  font-weight: 600;
+}
+
+.adminTextInput:focus {
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
 .adminLocaleGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

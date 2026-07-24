@@ -8,10 +8,14 @@ import { jsonOrError } from "@/lib/api-authed";
 
 type AppConfig = {
   forceUpdate: boolean;
+  minAppVersionAndroid: string;
+  minAppVersionIos: string;
 };
 
 const emptyConfig = (): AppConfig => ({
   forceUpdate: false,
+  minAppVersionAndroid: "",
+  minAppVersionIos: "",
 });
 
 function readBool(value: any, fallback = false) {
@@ -31,6 +35,10 @@ function readConfig(value: any): AppConfig {
   const source = value && typeof value === "object" ? value : {};
   return {
     forceUpdate: readBool(source.forceUpdate, false),
+    minAppVersionAndroid:
+      typeof source.minAppVersionAndroid === "string" ? source.minAppVersionAndroid : "",
+    minAppVersionIos:
+      typeof source.minAppVersionIos === "string" ? source.minAppVersionIos : "",
   };
 }
 
@@ -66,6 +74,8 @@ export default function AdminHomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           forceUpdate: config.forceUpdate,
+          minAppVersionAndroid: config.minAppVersionAndroid,
+          minAppVersionIos: config.minAppVersionIos,
         }),
       });
       const data = await jsonOrError(res);
@@ -98,6 +108,38 @@ export default function AdminHomePage() {
               checked={config.forceUpdate}
               onChange={(event) =>
                 setConfig((current) => ({ ...current, forceUpdate: event.target.checked }))
+              }
+            />
+          </label>
+
+          <label className="adminFieldRow">
+            <span className="adminToggleLabel">Android minimum versiya</span>
+            <input
+              className="adminTextInput"
+              type="text"
+              value={config.minAppVersionAndroid}
+              placeholder="Masalan: 1.0.0+12"
+              onChange={(event) =>
+                setConfig((current) => ({
+                  ...current,
+                  minAppVersionAndroid: event.target.value,
+                }))
+              }
+            />
+          </label>
+
+          <label className="adminFieldRow">
+            <span className="adminToggleLabel">iOS minimum versiya</span>
+            <input
+              className="adminTextInput"
+              type="text"
+              value={config.minAppVersionIos}
+              placeholder="Masalan: 1.0.0+12"
+              onChange={(event) =>
+                setConfig((current) => ({
+                  ...current,
+                  minAppVersionIos: event.target.value,
+                }))
               }
             />
           </label>

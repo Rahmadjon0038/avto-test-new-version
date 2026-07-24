@@ -288,6 +288,12 @@ function normalizeAppConfig(value) {
   return {
     warningEnabled: parseBoolean(source.warningEnabled, false),
     forceUpdate: parseBoolean(source.forceUpdate ?? source.force_update, false),
+    minAppVersionAndroid: String(
+      source.minAppVersionAndroid || source.min_app_version_android || ""
+    ).trim(),
+    minAppVersionIos: String(
+      source.minAppVersionIos || source.min_app_version_ios || ""
+    ).trim(),
     updateUrl: String(source.updateUrl || source.update_url || "https://topshirdi.uz").trim(),
     updateUrlAndroid: String(
       source.updateUrlAndroid ||
@@ -318,6 +324,8 @@ function buildAppConfigPayload(input = {}) {
   return {
     warningEnabled: Boolean(normalized.warningEnabled),
     forceUpdate: Boolean(normalized.forceUpdate),
+    minAppVersionAndroid: String(normalized.minAppVersionAndroid || "").trim(),
+    minAppVersionIos: String(normalized.minAppVersionIos || "").trim(),
     updateUrl: String(normalized.updateUrl || "https://topshirdi.uz").trim(),
     updateUrlAndroid: String(normalized.updateUrlAndroid || "https://play.google.com/store/apps/details?id=uz.roadtest.app&hl=en_IE").trim(),
     updateUrlIos: String(normalized.updateUrlIos || "https://apps.apple.com/us/app/topshirdi/id6781198005").trim(),
@@ -4879,6 +4887,8 @@ app.patch("/api/admin/app-config", async (req, res) => {
   const saved = await saveAppConfigToDb({
     warningEnabled: req.body?.warningEnabled,
     forceUpdate: req.body?.forceUpdate,
+    minAppVersionAndroid: req.body?.minAppVersionAndroid,
+    minAppVersionIos: req.body?.minAppVersionIos,
     updateUrl: req.body?.updateUrl,
     updateUrlAndroid: req.body?.updateUrlAndroid,
     updateUrlIos: req.body?.updateUrlIos,
