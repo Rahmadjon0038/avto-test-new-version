@@ -190,6 +190,7 @@ export default function AdminHomePage() {
       setConfig(readConfig(data.appConfig));
       toast.success("Saqlandi");
       await queryClient.invalidateQueries();
+      await loadConfig();
     } catch (error: any) {
       toast.error(error?.message || "Saqlab bo‘lmadi");
     } finally {
