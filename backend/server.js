@@ -227,9 +227,9 @@ const DEFAULT_APP_WARNING_TEXT = {
     ru: "Доступно обновление приложения"
   },
   messageI18n: {
-    uz_latn: "Yangi funksiyalar va pullik rejim ishga tushishi uchun ilovani yangilang.",
-    uz_cyrl: "Янги функциялар ва пуллик режим ишга тушиши учун иловани янгиланг.",
-    ru: "Обновите приложение, чтобы активировать новые функции и платный режим."
+    uz_latn: "Yangi funksiyalar qo‘shildi. Ilovani yangilang.",
+    uz_cyrl: "Янги функциялар қўшилди. Иловани янгиланг.",
+    ru: "Добавлены новые функции. Обновите приложение."
   },
   actionLabelI18n: {
     uz_latn: "Yangilash",
@@ -237,6 +237,20 @@ const DEFAULT_APP_WARNING_TEXT = {
     ru: "Обновить"
   }
 };
+
+function sanitizeWarningMessageI18n(value) {
+  const normalized = normalizeI18nMap(value, DEFAULT_APP_WARNING_TEXT.messageI18n);
+  const neutral = DEFAULT_APP_WARNING_TEXT.messageI18n;
+  const blockedPattern = /(pullik|paid|платн|to['’]?lov|оплат)/i;
+  for (const lang of SUPPORTED_LANGUAGES) {
+    const text = String(normalized[lang] || "").trim();
+    if (!text) continue;
+    if (blockedPattern.test(text)) {
+      normalized[lang] = neutral[lang] || text;
+    }
+  }
+  return normalized;
+}
 
 function normalizeI18nMap(value, fallback = {}) {
   const source = parseJsonValue(value, {});
@@ -279,7 +293,7 @@ function normalizeAppConfig(value) {
     videoPremiumRequired: Boolean(source.videoPremiumRequired || source.video_premium_required),
     warning: {
       titleI18n: normalizeI18nMap(warningSource.titleI18n, DEFAULT_APP_WARNING_TEXT.titleI18n),
-      messageI18n: normalizeI18nMap(warningSource.messageI18n, DEFAULT_APP_WARNING_TEXT.messageI18n),
+      messageI18n: sanitizeWarningMessageI18n(warningSource.messageI18n),
       actionLabelI18n: normalizeI18nMap(warningSource.actionLabelI18n, DEFAULT_APP_WARNING_TEXT.actionLabelI18n)
     },
     updatedAt: source.updatedAt || source.updated_at || null
@@ -4278,6 +4292,7 @@ app.get("/api/topics", async (req, res) => {
       id: topic.id,
       title: lang ? String(topic.titleI18n?.[lang] || topic.title || "") : topic.title,
       completed: completedMap.get(String(topic.id)) || false
+      ,questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0
     }))
   });
 });
