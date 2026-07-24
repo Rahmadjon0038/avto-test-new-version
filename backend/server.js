@@ -344,7 +344,16 @@ async function getAppConfigFromDb() {
 }
 
 async function saveAppConfigToDb(nextConfig) {
-  const payload = buildAppConfigPayload(nextConfig);
+  const current = await dbApi.get("SELECT * FROM app_settings WHERE id = 1");
+  const mergedInput = {
+    ...(current?.config_json || {}),
+    ...(nextConfig || {}),
+    warning: {
+      ...parseJsonValue(current?.config_json?.warning, {}),
+      ...parseJsonValue(nextConfig?.warning, {})
+    }
+  };
+  const payload = buildAppConfigPayload(mergedInput);
   const row = await dbApi.get(
     `
       INSERT INTO app_settings (id, config_json, created_at, updated_at)
