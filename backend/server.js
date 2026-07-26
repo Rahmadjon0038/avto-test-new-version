@@ -1168,7 +1168,7 @@ const BUNNY_LIBRARY_ID = String(process.env.BUNNY_LIBRARY_ID || "").trim();
 const BUNNY_CDN_HOSTNAME = String(process.env.BUNNY_CDN_HOSTNAME || "").trim();
 const BUNNY_API_KEY = String(process.env.BUNNY_API_KEY || "").trim();
 const BUNNY_API_BASE_URL = String(process.env.BUNNY_API_BASE_URL || "https://video.bunnycdn.com").replace(/\/+$/, "");
-const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || "http://127.0.0.1:4001").replace(/\/+$/, "");
+const PUBLIC_API_BASE_URL = String(process.env.PUBLIC_API_BASE_URL || process.env.BACKEND_URL || "https://api.topshirdi.uz").replace(/\/+$/, "");
 
 function normalizeVideoStatus(value, fallback = "processing") {
   const raw = String(value || fallback || "").trim().toLowerCase();
@@ -1216,7 +1216,8 @@ function normalizeVideoLessonRow(row) {
   const title = String(row.title || row.topic_title || "").trim();
   const titleI18n = normalizeTitleI18n(row.title_i18n, title);
   const topicTitleI18n = normalizeTitleI18n(row.topic_title_i18n, row.topic_title || title);
-  const playbackUrl = String(row.playback_url || buildBunnyPlaybackUrl(bunnyVideoId) || "").trim();
+  const playbackUrlRaw = String(row.playback_url || buildBunnyPlaybackUrl(bunnyVideoId) || "").trim();
+  const playbackUrlIsHls = /\.m3u8(\?|$)/i.test(playbackUrlRaw);
   const thumbnailUrl = String(row.video_thumbnail || buildBunnyThumbnailUrl(bunnyVideoId) || "").trim();
   const status = normalizeVideoStatus(
     row.video_status || (bunnyVideoId ? "processing" : "failed"),
@@ -1240,7 +1241,9 @@ function normalizeVideoLessonRow(row) {
     videoDuration: parseIntegerValue(row.video_duration, 0),
     videoThumbnail: thumbnailUrl ? buildProxiedMediaUrl(thumbnailUrl, "image") : "",
     thumbnailUrl: thumbnailUrl ? buildProxiedMediaUrl(thumbnailUrl, "image") : "",
-    playbackUrl: playbackUrl ? buildProxiedMediaUrl(playbackUrl, "video-stream") : "",
+    playbackUrl: playbackUrlRaw
+      ? (playbackUrlIsHls ? buildProxiedMediaUrl(playbackUrlRaw, "video-stream") : playbackUrlRaw)
+      : "",
     createdAt: row.created_at ? String(row.created_at) : undefined,
     updatedAt: row.updated_at ? String(row.updated_at) : undefined
   };
