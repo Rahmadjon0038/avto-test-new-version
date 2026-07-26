@@ -4740,6 +4740,45 @@ app.post("/api/mistakes/progress", requireUser, async (req, res) => {
   res.json({ ok: true, fixed, remaining: Number(remaining?.count || 0) });
 });
 
+app.post("/api/mistakes/sync", requireUser, async (req, res) => {
+  const userId = String(req.user.id);
+  const source = req.body?.question;
+  const wrongAnswer = req.body?.wrongAnswer;
+
+  if (!source || typeof source !== "object") {
+    return res.status(400).json({ error: "Savol ma'lumoti kerak" });
+  }
+
+  const kind = String(req.body?.kind || source.kind || "ticket").trim() || "ticket";
+  const sourceId = String(req.body?.sourceId || source.sourceId || source.topicId || source.ticketId || "").trim();
+  const sourceTitle = String(req.body?.sourceTitle || source.sourceTitle || source.topicTitle || source.ticketTitle || "").trim();
+  const questionIndex = Number.isFinite(Number(req.body?.questionIndex))
+    ? Number(req.body.questionIndex)
+    : Number(source.questionIndex || 0);
+
+  const normalizedQuestion = buildMistakeQuestion({
+    kind,
+    id: sourceId,
+    title: sourceTitle,
+    question: source,
+    questionIndex,
+    wrongAnswer
+  });
+
+  if (Number(wrongAnswer) === Number(normalizedQuestion.correctIndex)) {
+    await deleteUserMistake(userId, normalizedQuestion.id);
+  } else {
+    await upsertUserMistake({
+      userId,
+      question: normalizedQuestion,
+      wrongAnswer
+    });
+  }
+
+  const remaining = await dbApi.get("SELECT COUNT(*)::int AS count FROM user_mistakes WHERE user_id = ?", [userId]);
+  res.json({ ok: true, remaining: Number(remaining?.count || 0) });
+});
+
 app.get("/api/topic-progress/:topicId", requireUser, async (req, res) => {
   const userId = String(req.user.id);
   const topicId = String(req.params.topicId);
