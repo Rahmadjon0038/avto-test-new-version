@@ -383,26 +383,35 @@ function AdminInlinePlayer({
   t: (key: string) => string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
   useEffect(() => {
     const element = videoRef.current;
     if (!element || !video.playbackUrl) return undefined;
 
-    let hls: Hls | null = null;
+    const isHlsSource = video.playbackUrl.toLowerCase().includes(".m3u8");
 
-    if (Hls.isSupported()) {
-      hls = new Hls({
+    hlsRef.current?.destroy();
+    hlsRef.current = null;
+
+    if (isHlsSource && Hls.isSupported()) {
+      const hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: false
+        lowLatencyMode: false,
+        backBufferLength: 90
       });
+      hlsRef.current = hls;
       hls.loadSource(video.playbackUrl);
       hls.attachMedia(element);
-    } else if (element.canPlayType("application/vnd.apple.mpegurl")) {
+    } else if (isHlsSource && element.canPlayType("application/vnd.apple.mpegurl")) {
+      element.src = video.playbackUrl;
+    } else {
       element.src = video.playbackUrl;
     }
 
     return () => {
-      hls?.destroy();
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
       element.pause();
       element.removeAttribute("src");
       element.load();

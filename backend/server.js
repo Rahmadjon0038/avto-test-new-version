@@ -3882,27 +3882,27 @@ function buildExamQuestionKey({ kind, sourceId, questionId }) {
 }
 
 async function getExamQuestionPool(lang = "") {
-  const bank = await getTopicQuestionBankFromDb();
+  const bank = await getTicketQuestionBankFromDb();
   const normalizedLang = normalizeLanguageCode(lang, "");
-  const topicCache = new Map();
-  const localizedTopics = normalizedLang
+  const ticketCache = new Map();
+  const localizedTickets = normalizedLang
     ? await Promise.all(
-        Array.from(new Set(bank.map((item) => String(item.topicId || "")))).map(async (topicId) => {
-          if (!topicId) return [topicId, null];
-          const topic = await getTopicFromDb(topicId);
-          return [topicId, topic ? localizeTopic(topic, normalizedLang) : null];
+        Array.from(new Set(bank.map((item) => String(item.ticketId || "")))).map(async (ticketId) => {
+          if (!ticketId) return [ticketId, null];
+          const ticket = await getTicketFromDb(ticketId);
+          return [ticketId, ticket ? localizeTicket(ticket, normalizedLang) : null];
         })
       )
     : [];
-  for (const [topicId, topic] of localizedTopics) topicCache.set(String(topicId), topic);
+  for (const [ticketId, ticket] of localizedTickets) ticketCache.set(String(ticketId), ticket);
 
   return bank.map((item) => {
-    const sourceId = String(item.topicId);
-    const localizedTopic = topicCache.get(sourceId);
+    const sourceId = String(item.ticketId);
+    const localizedTicket = ticketCache.get(sourceId);
     return {
-      kind: "topic",
+      kind: "ticket",
       sourceId,
-      sourceTitle: String(localizedTopic?.title || item.topicTitle || ""),
+      sourceTitle: String(localizedTicket?.title || item.ticketTitle || ""),
       questionIndex: Number(item.questionIndex || 0),
       questionKey: String(item.questionKey || ""),
       question: normalizedLang ? localizeQuestion(item.question, normalizedLang) : item.question
