@@ -109,54 +109,62 @@ export default function VideosPage() {
 
       {videos.length ? (
         <div className="videoLessonsGrid">
-          {videos.map((video) => (
-            <article
-              key={video.id}
-              className={`videoLessonCard ${selectedVideoId === video.id ? "active" : ""}`}
-              onClick={() => void loadPlayback(video)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  void loadPlayback(video);
-                }
-              }}
-            >
-              <div className="videoLessonFrameWrap">
-                {selectedVideoId === video.id ? (
-                  <BunnyHlsPlayer
-                    key={`${video.id}-${retrySeed}`}
-                    src={playbackUrl}
-                    loading={loadingPlayback}
-                    error={playerError}
-                    onRetry={() => void loadPlayback(video)}
-                    onStarted={handlePlayerStarted}
-                    poster={video.videoThumbnail || ""}
-                    t={t}
-                  />
-                ) : (
-                  <div
-                    className={`videoLessonThumb ${video.videoThumbnail ? "videoLessonThumbImage" : "videoLessonThumbFallback"}`}
-                    style={video.videoThumbnail ? { backgroundImage: `url(${video.videoThumbnail})` } : undefined}
-                    aria-hidden="true"
-                  >
-                    {!video.videoThumbnail ? <Video className="lucide" aria-hidden="true" /> : null}
-                  </div>
-                )}
-                {selectedVideoId !== video.id ? (
-                  <>
-                    <div className="videoLessonPlay">
-                      <Play className="lucide" aria-hidden="true" />
+          {videos.map((video) => {
+            const isActive = selectedVideoId === video.id;
+            return (
+              <article
+                key={video.id}
+                className={`videoLessonCard ${isActive ? "active" : ""}`}
+                onClick={isActive ? undefined : () => void loadPlayback(video)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (!isActive && (event.key === "Enter" || event.key === " ")) {
+                    void loadPlayback(video);
+                  }
+                }}
+              >
+                <div className="videoLessonFrameWrap">
+                  {isActive ? (
+                    <BunnyHlsPlayer
+                      key={`${video.id}-${retrySeed}`}
+                      src={playbackUrl}
+                      loading={loadingPlayback}
+                      error={playerError}
+                      onRetry={() => void loadPlayback(video)}
+                      onReady={handlePlayerStarted}
+                      onPlayerError={(message) => {
+                        setLoadingPlayback(false);
+                        setPlayerError(message);
+                        toast.error(message);
+                      }}
+                      poster={video.videoThumbnail || ""}
+                      t={t}
+                    />
+                  ) : (
+                    <div
+                      className={`videoLessonThumb ${video.videoThumbnail ? "videoLessonThumbImage" : "videoLessonThumbFallback"}`}
+                      style={video.videoThumbnail ? { backgroundImage: `url(${video.videoThumbnail})` } : undefined}
+                      aria-hidden="true"
+                    >
+                      {!video.videoThumbnail ? <Video className="lucide" aria-hidden="true" /> : null}
                     </div>
-                    {video.premiumOnly ? <span className="videoLessonPremium">{t("videos.premium")}</span> : null}
-                  </>
-                ) : null}
-              </div>
-              <div className="videoLessonBody">
-                <h3 className="videoLessonTitle">{video.title || video.topicTitle}</h3>
-              </div>
-            </article>
-          ))}
+                  )}
+                  {selectedVideoId !== video.id ? (
+                    <>
+                      <div className="videoLessonPlay">
+                        <Play className="lucide" aria-hidden="true" />
+                      </div>
+                      {video.premiumOnly ? <span className="videoLessonPremium">{t("videos.premium")}</span> : null}
+                    </>
+                  ) : null}
+                </div>
+                <div className="videoLessonBody">
+                  <h3 className="videoLessonTitle">{video.title || video.topicTitle}</h3>
+                </div>
+              </article>
+            );
+          })}
         </div>
       ) : videosQuery.isLoading ? null : (
         <div className="card" style={{ padding: 16 }}>
@@ -172,7 +180,8 @@ function BunnyHlsPlayer({
   loading,
   error,
   onRetry,
-  onStarted,
+  onReady,
+  onPlayerError,
   poster = "",
   t
 }: {
@@ -180,7 +189,8 @@ function BunnyHlsPlayer({
   loading: boolean;
   error: string;
   onRetry: () => void;
-  onStarted: () => void;
+  onReady: () => void;
+  onPlayerError: (message: string) => void;
   poster?: string;
   t: (key: string) => string;
 }) {
@@ -190,8 +200,15 @@ function BunnyHlsPlayer({
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
+    let settled = false;
+    let timeoutId: number | null = null;
+    const isHlsSource = src.toLowerCase().includes(".m3u8");
 
     const cleanup = () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
       hlsRef.current?.destroy();
       hlsRef.current = null;
       video.pause();
@@ -199,7 +216,31 @@ function BunnyHlsPlayer({
       video.load();
     };
 
-    if (Hls.isSupported()) {
+    const handleReady = () => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      onReady();
+    };
+
+    const handleError = () => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      onPlayerError("Video ijro etilmadi");
+    };
+
+    timeoutId = window.setTimeout(() => {
+      handleError();
+    }, 15000);
+
+    if (isHlsSource && Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
@@ -209,21 +250,39 @@ function BunnyHlsPlayer({
       hls.loadSource(src);
       hls.attachMedia(video);
       hls.once(Hls.Events.MANIFEST_PARSED, () => {
-        void video.play().then(onStarted).catch(onStarted);
+        handleReady();
+        void video.play().catch(() => {});
       });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data?.fatal) {
+          handleError();
+        }
+      });
+    } else if (isHlsSource && video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
       const handleCanPlay = () => {
-        void video.play().then(onStarted).catch(onStarted);
+        handleReady();
+        void video.play().catch(() => {});
+        video.removeEventListener("canplay", handleCanPlay);
+      };
+      video.addEventListener("canplay", handleCanPlay, { once: true });
+    } else {
+      video.src = src;
+      const handleCanPlay = () => {
+        handleReady();
+        void video.play().catch(() => {});
         video.removeEventListener("canplay", handleCanPlay);
       };
       video.addEventListener("canplay", handleCanPlay, { once: true });
     }
 
+    video.onerror = handleError;
+
     return () => {
+      video.onerror = null;
       cleanup();
     };
-  }, [src, onStarted]);
+  }, [src, onPlayerError, onReady]);
 
   return (
     <div className="videoPlayerWrap">

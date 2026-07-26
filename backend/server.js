@@ -1495,6 +1495,7 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
   let bunnyVideoId = String(input?.bunnyVideoId || "").trim();
   let bunnyVideoInfo = null;
   let localThumbnailUrl = "";
+  let localPlaybackUrl = "";
   if (!bunnyVideoId) {
     if (!fileBuffer || !Buffer.isBuffer(fileBuffer) || !fileBuffer.length) {
       throw new Error("Video fayl yuborilishi kerak");
@@ -1529,14 +1530,20 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
       }
     } catch (error) {
       await deleteBunnyVideo(bunnyVideoId);
-      throw error;
+      const localVideo = await uploadVideoToR2({
+        buffer: fileBuffer,
+        fileName: String(input?.fileName || "video.mp4"),
+        contentType
+      });
+      bunnyVideoId = "";
+      localPlaybackUrl = localVideo.url;
     }
   }
 
-  const status = normalizeVideoStatus(bunnyVideoInfo?.status || "processing", "processing");
+  const status = localPlaybackUrl ? "ready" : normalizeVideoStatus(bunnyVideoInfo?.status || "processing", "processing");
   const duration = parseIntegerValue(bunnyVideoInfo?.duration, 0);
   const thumbnail = String(localThumbnailUrl || bunnyVideoInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
-  const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
+  const playbackUrl = localPlaybackUrl || buildBunnyPlaybackUrl(bunnyVideoId);
   const titleI18n = Object.keys(parseJsonValue(next.titleI18n, {})).length ? next.titleI18n : topic.titleI18n || {};
   const title = next.title || String(titleI18n[DEFAULT_LANGUAGE] || topic.title || "").trim();
 
@@ -1594,6 +1601,7 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
   let bunnyVideoId = current.bunnyVideoId;
   let bunnyInfo = null;
   let localThumbnailUrl = "";
+  let localPlaybackUrl = "";
   if (fileBuffer && Buffer.isBuffer(fileBuffer) && fileBuffer.length) {
     try {
       const thumbnailBuffer = await generateVideoThumbnail(fileBuffer, String(input?.fileName || next.fileName || "video.mp4"), contentType);
@@ -1633,7 +1641,13 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
       if (bunnyVideoId && bunnyVideoId !== current.bunnyVideoId) {
         await deleteBunnyVideo(bunnyVideoId);
       }
-      throw error;
+      const localVideo = await uploadVideoToR2({
+        buffer: fileBuffer,
+        fileName: String(input?.fileName || next.fileName || "video.mp4"),
+        contentType
+      });
+      bunnyVideoId = "";
+      localPlaybackUrl = localVideo.url;
     }
   }
 
@@ -1641,9 +1655,11 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
   const title = next.title || current.title || String(titleI18n[DEFAULT_LANGUAGE] || topic.title || "").trim();
   const description = next.description || current.description || topic.description || "";
   const category = next.category || current.category || topic.slug || "";
-  const playbackUrl = buildBunnyPlaybackUrl(bunnyVideoId);
+  const playbackUrl = localPlaybackUrl || buildBunnyPlaybackUrl(bunnyVideoId);
   const thumbnail = String(localThumbnailUrl || current.videoThumbnail || bunnyInfo?.thumbnail || buildBunnyThumbnailUrl(bunnyVideoId)).trim();
-  const status = normalizeVideoStatus(bunnyInfo?.status || current.videoStatus || (bunnyVideoId ? "processing" : "failed"));
+  const status = localPlaybackUrl
+    ? "ready"
+    : normalizeVideoStatus(bunnyInfo?.status || current.videoStatus || (bunnyVideoId ? "processing" : "failed"));
   const duration = parseIntegerValue(bunnyInfo?.duration, current.videoDuration);
 
   const result = await dbApi.get(
@@ -4057,6 +4073,38 @@ function getAudioExtensionFromFile(file) {
   if (mimeType.startsWith("audio/mpeg")) return "mp3";
   if (mimeType.startsWith("audio/wav")) return "wav";
   return "";
+}
+
+function getVideoExtensionFromFile(file) {
+  const filename = String(file?.name || "");
+  const fromName = filename.includes(".") ? filename.split(".").pop() : "";
+  const ext = String(fromName || "").toLowerCase();
+  if (["mp4", "m4v", "webm", "mov"].includes(ext)) return ext === "m4v" ? "mp4" : ext;
+  const mimeType = String(file?.type || "").toLowerCase();
+  if (mimeType.startsWith("video/mp4")) return "mp4";
+  if (mimeType.startsWith("video/webm")) return "webm";
+  if (mimeType.startsWith("video/quicktime")) return "mov";
+  return "mp4";
+}
+
+async function uploadVideoToR2({ buffer, fileName = "video.mp4", contentType = "video/mp4" }) {
+  const bucket = getR2BucketName();
+  if (!bucket) throw new Error("R2 bucket sozlanmagan");
+  const extension = getVideoExtensionFromFile({ name: fileName, type: contentType });
+  const fileKey = createMediaFileKey("videos", extension || "mp4");
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: fileKey,
+      Body: buffer,
+      ContentType: contentType || "video/mp4"
+    })
+  );
+  return {
+    key: fileKey,
+    url: buildR2PublicUrl(fileKey),
+    contentType: contentType || "video/mp4"
+  };
 }
 
 async function respondWithAuthUser(req, res, user) {
