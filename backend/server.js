@@ -137,6 +137,20 @@ function normalizeLanguageCode(value, fallback = DEFAULT_LANGUAGE) {
   return SUPPORTED_LANGUAGE_SET.has(raw) ? raw : fallback;
 }
 
+function getLanguageFallbackOrder(lang) {
+  const normalized = normalizeLanguageCode(lang, "");
+  if (!normalized) return [];
+  const order = [normalized];
+  if (normalized === "ru") {
+    order.push("uz_cyrl", "uz_latn");
+  } else if (normalized === "uz_cyrl") {
+    order.push("ru", "uz_latn");
+  } else {
+    order.push("uz_cyrl", "ru");
+  }
+  return Array.from(new Set(order));
+}
+
 function normalizeTitleI18n(value, fallbackTitle = "") {
   const source = parseJsonValue(value, {});
   const normalized = {};
@@ -190,7 +204,10 @@ function hasQuestionI18n(value) {
 function localizeQuestion(question, lang) {
   const normalizedLang = normalizeLanguageCode(lang, "");
   if (!normalizedLang || !question || typeof question !== "object") return question;
-  const localized = parseJsonValue(question.i18n, {})?.[normalizedLang];
+  const i18n = parseJsonValue(question.i18n, {});
+  const localized = getLanguageFallbackOrder(normalizedLang)
+    .map((candidate) => i18n?.[candidate])
+    .find((candidate) => candidate && typeof candidate === "object") || null;
   if (!localized || typeof localized !== "object") return question;
 
   const next = { ...question };
@@ -214,7 +231,9 @@ function localizeQuestions(questions, lang) {
 function localizeTopic(topic, lang) {
   const normalizedLang = normalizeLanguageCode(lang, "");
   if (!normalizedLang || !topic || typeof topic !== "object") return topic;
-  const title = String(topic.title_i18n?.[normalizedLang] || "").trim();
+  const title = getLanguageFallbackOrder(normalizedLang)
+    .map((candidate) => String(topic.title_i18n?.[candidate] || "").trim())
+    .find(Boolean) || "";
   return {
     ...topic,
     title: title || topic.title,
@@ -225,7 +244,9 @@ function localizeTopic(topic, lang) {
 function localizeTicket(ticket, lang) {
   const normalizedLang = normalizeLanguageCode(lang, "");
   if (!normalizedLang || !ticket || typeof ticket !== "object") return ticket;
-  const title = String(ticket.title_i18n?.[normalizedLang] || "").trim();
+  const title = getLanguageFallbackOrder(normalizedLang)
+    .map((candidate) => String(ticket.title_i18n?.[candidate] || "").trim())
+    .find(Boolean) || "";
   return {
     ...ticket,
     title: title || ticket.title,
