@@ -4313,16 +4313,39 @@ app.get("/api/topics", async (req, res) => {
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const topics = await getTopicsFromDb();
   let completedMap = new Map();
+  let progressMap = new Map();
   if (user) {
-    const rows = await dbApi.all("SELECT ticket_id, completed FROM test_progress WHERE user_id = ?", [String(user.id)]);
+    const rows = await dbApi.all(
+      "SELECT ticket_id, answers, completed, score, updated_at FROM test_progress WHERE user_id = ?",
+      [String(user.id)]
+    );
     completedMap = new Map(rows.map((row) => [String(row.ticket_id), row.completed === true]));
+    progressMap = new Map(rows.map((row) => [String(row.ticket_id), row]));
   }
   res.json({
     topics: topics.map((topic) => ({
       id: topic.id,
       title: lang ? String(topic.titleI18n?.[lang] || topic.title || "") : topic.title,
-      completed: completedMap.get(String(topic.id)) || false
-      ,questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0
+      completed: completedMap.get(String(topic.id)) || false,
+      questionCount: Array.isArray(topic.questions) ? topic.questions.length : 0,
+      progress: (() => {
+        const row = progressMap.get(String(topic.id));
+        if (!row) return null;
+        let answers = {};
+        try {
+          answers = JSON.parse(row.answers || "{}");
+        } catch {
+          answers = {};
+        }
+        return {
+          topicId: String(topic.id),
+          answers,
+          completed: !!row.completed,
+          score: Number(row.score || 0),
+          updatedAt: row.updated_at ? String(row.updated_at) : null,
+          ...calculateTicketProgressStats(topic, answers)
+        };
+      })()
     }))
   });
 });
