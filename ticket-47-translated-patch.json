@@ -1,0 +1,1176 @@
+{
+  "title": "Bilet №47",
+  "titleI18n": {
+    "uz_latn": "Bilet №47",
+    "uz_cyrl": "Билет №47",
+    "ru": "Билет №47"
+  },
+  "ticketNumber": 47,
+  "status": "COMPLETED",
+  "questions": [
+    {
+      "id": "e787915b-e343-4aba-8a17-cfacb0ab0d67",
+      "questionId": "e787915b-e343-4aba-8a17-cfacb0ab0d67",
+      "order": 1,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Rasmda ko'rsatilgan chorraha- ...",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781774688851-uydfxxf4.webp",
+      "audio": "",
+      "options": [
+        "Tartibga solinmagan, teng ahamiyatga ega bo'lmagan yo'llar kesishgan chorraha",
+        "Tartibga solinmagan, teng ahamiyatga ega bo'lgan yo'llar kesishgan chorraha",
+        "Tartibga solingan chorraha"
+      ],
+      "correctIndex": 2,
+      "explanation": "Chorrahada harakatni tartibga soluvchi (regulyator) turibdi. Agar chorrahada svetofor ishlayotgan bo'lsa yoki tartibga soluvchi bo'lsa, bunday chorraha tartibga solingan chorraha hisoblanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Rasmda ko'rsatilgan chorraha- ...",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Tartibga solinmagan, teng ahamiyatga ega bo'lmagan yo'llar kesishgan chorraha",
+            "Tartibga solinmagan, teng ahamiyatga ega bo'lgan yo'llar kesishgan chorraha",
+            "Tartibga solingan chorraha"
+          ],
+          "correctIndex": 2,
+          "explanation": "Chorrahada harakatni tartibga soluvchi (regulyator) turibdi. Agar chorrahada svetofor ishlayotgan bo'lsa yoki tartibga soluvchi bo'lsa, bunday chorraha tartibga solingan chorraha hisoblanadi."
+        },
+        "uz_cyrl": {
+          "text": "Расмда кўрсатилган чорраҳа- ...",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Тартибга солинмаган, тенг аҳамиятга ега бўлмаган йўллар кесишган чорраҳа",
+            "Тартибга солинмаган, тенг аҳамиятга ега бўлган йўллар кесишган чорраҳа",
+            "Тартибга солинган чорраҳа"
+          ],
+          "correctIndex": 2,
+          "explanation": "Чорраҳада ҳаракатни тартибга солувчи (регулятор) турибди. Агар чорраҳада светофор ишлаётган бўлса ёки тартибга солувчи бўлса, бундаy чорраҳа тартибга солинган чорраҳа ҳисобланади."
+        },
+        "ru": {
+          "text": "На изображённом перекрёстке...",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Нерегулируемый перекрёсток неравнозначных дорог",
+            "Нерегулируемый перекрёсток равнозначных дорог",
+            "Регулируемый перекрёсток"
+          ],
+          "correctIndex": 2,
+          "explanation": "На перекрёстке работает регулировщик, поэтому это регулируемый перекрёсток."
+        }
+      }
+    },
+    {
+      "id": "1da20b24-a1b1-43c8-925b-95d48451c6c6",
+      "questionId": "1da20b24-a1b1-43c8-925b-95d48451c6c6",
+      "order": 2,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Rasmda ko'rsatilgan chorraha- ...",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781774709918-yosp6qqd.webp",
+      "audio": "",
+      "options": [
+        "Tartibga solinmagan, teng ahamiyatga ega bo'lmagan yo'llar kesishgan chorraha",
+        "Tartibga solinmagan, teng ahamiyatga ega bo'lgan yo'llar kesishgan chorraha",
+        "Tartibga solingan chorraha"
+      ],
+      "correctIndex": 0,
+      "explanation": "Chorrahada svetoforlar yoki tartibga soluvchi yo'q, lekin imtiyoz belgilari o'rnatilgan (Sariq romsimon 'Asosiy yo'l' belgisi va 'STOP' belgisi). Shuning uchun bu chorraha tartibga solinmagan, teng ahamiyatga ega bo'lmagan yo'llar kesishgan chorraha deyiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Rasmda ko'rsatilgan chorraha- ...",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Tartibga solinmagan, teng ahamiyatga ega bo'lmagan yo'llar kesishgan chorraha",
+            "Tartibga solinmagan, teng ahamiyatga ega bo'lgan yo'llar kesishgan chorraha",
+            "Tartibga solingan chorraha"
+          ],
+          "correctIndex": 0,
+          "explanation": "Chorrahada svetoforlar yoki tartibga soluvchi yo'q, lekin imtiyoz belgilari o'rnatilgan (Sariq romsimon 'Asosiy yo'l' belgisi va 'STOP' belgisi). Shuning uchun bu chorraha tartibga solinmagan, teng ahamiyatga ega bo'lmagan yo'llar kesishgan chorraha deyiladi."
+        },
+        "uz_cyrl": {
+          "text": "Расмда кўрсатилган чорраҳа- ...",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Тартибга солинмаган, тенг аҳамиятга ега бўлмаган йўллар кесишган чорраҳа",
+            "Тартибга солинмаган, тенг аҳамиятга ега бўлган йўллар кесишган чорраҳа",
+            "Тартибга солинган чорраҳа"
+          ],
+          "correctIndex": 0,
+          "explanation": "Чорраҳада светофорлар ёки тартибга солувчи йўқ, лекин имтиёz белгилари ўрнатилган (Сариқ ромсимон 'Асосиy йўл' белгиси ва 'СТОП' белгиси). Шунинг учун бу чорраҳа тартибга солинмаган, тенг аҳамиятга ега бўлмаган йўллар кесишган чорраҳа деyилади."
+        },
+        "ru": {
+          "text": "На изображённом перекрёстке...",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Нерегулируемый перекрёсток неравнозначных дорог",
+            "Нерегулируемый перекрёсток равнозначных дорог",
+            "Регулируемый перекрёсток"
+          ],
+          "correctIndex": 0,
+          "explanation": "Здесь нет светофора и регулировщика, но есть знаки приоритета, поэтому перекрёсток нерегулируемый и неравнозначный."
+        }
+      }
+    },
+    {
+      "id": "45a16d7e-fc90-4b12-91d5-c70db0686f14",
+      "questionId": "45a16d7e-fc90-4b12-91d5-c70db0686f14",
+      "order": 3,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ushbu qo'shimcha axborot yo'l belgisi bildiradi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940000217-cuf93p3d.webp",
+      "audio": "",
+      "options": [
+        "Belgi ta'siri oralig'ida to'xtagan transport vositalari majburiy evakuasiya qilinishini ko'rsatadi",
+        "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish ruxsat etilganligini bildiradi",
+        "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish taqiqlanganligini bildiradi"
+      ],
+      "correctIndex": 0,
+      "explanation": "Evakuator tasviri tushirilgan qo‘shimcha belgi ushbu hududda qoidani buzib to‘xtagan transport vositalari majburiy evakuatsiya qilinishini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo'shimcha axborot yo'l belgisi bildiradi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Belgi ta'siri oralig'ida to'xtagan transport vositalari majburiy evakuasiya qilinishini ko'rsatadi",
+            "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish ruxsat etilganligini bildiradi",
+            "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish taqiqlanganligini bildiradi"
+          ],
+          "correctIndex": 0,
+          "explanation": "Evakuator tasviri tushirilgan qo‘shimcha belgi ushbu hududda qoidani buzib to‘xtagan transport vositalari majburiy evakuatsiya qilinishini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот йўл белгиси билдиради:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Белги та'сири оралиғида тўхтаган транспорт воситалари мажбуриy евакуасия қилинишини кўрсатади",
+            "Белги та'сир оралиғида тўхтаган транспорт воситаларини евакуасия қилиш рухсат етилганлигини билдиради",
+            "Белги та'сир оралиғида тўхтаган транспорт воситаларини евакуасия қилиш тақиқланганлигини билдиради"
+          ],
+          "correctIndex": 0,
+          "explanation": "Евакуатор тасвири туширилган қўшимча белги ушбу ҳудудда қоидани буzиб тўхтаган транспорт воситалари мажбуриy евакуация қилинишини билдиради."
+        },
+        "ru": {
+          "text": "Что обозначает данный дополнительный дорожный знак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Принудительная эвакуация транспортных средств, остановившихся в зоне действия знака",
+            "Разрешение эвакуировать транспортные средства, остановившиеся в зоне действия знака",
+            "Запрет эвакуации транспортных средств, остановившихся в зоне действия знака"
+          ],
+          "correctIndex": 0,
+          "explanation": "Знак с изображением эвакуатора означает принудительную эвакуацию неправильно припаркованных машин."
+        }
+      }
+    },
+    {
+      "id": "ce56eb8d-5e14-4a29-8af2-2ef4511af770",
+      "questionId": "ce56eb8d-5e14-4a29-8af2-2ef4511af770",
+      "order": 4,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi belgi ikkinchi darajali yo‘l bilan tutashuvni bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781755050476-o5drl4pn.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "correctIndex": 1,
+      "explanation": "2-belgi asosiy yo'lga o'ng yoki chap tomondan ikkinchi darajali yo'l tutashishini anglatadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi ikkinchi darajali yo‘l bilan tutashuvni bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "correctIndex": 1,
+          "explanation": "2-belgi asosiy yo'lga o'ng yoki chap tomondan ikkinchi darajali yo'l tutashishini anglatadi."
+        },
+        "uz_cyrl": {
+          "text": "Қаyси белги иккинчи даражали йўл билан туташувни билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "correctIndex": 1,
+          "explanation": "2-белги асосиy йўлга ўнг ёки чап томондан иккинчи даражали йўл туташишини англатади."
+        },
+        "ru": {
+          "text": "Какой знак обозначает примыкание второстепенной дороги?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "correctIndex": 1,
+          "explanation": "Знак 2 обозначает примыкание второстепенной дороги справа или слева к главной дороге."
+        }
+      }
+    },
+    {
+      "id": "q-1784192848581-5",
+      "questionId": "q-1784192848581-5",
+      "order": 5,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi yo'l belgilari yo'lning tor qismida haydovchiga ustunlik beradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1784192874582-ybau0xqf.webp",
+      "audio": "",
+      "options": [
+        "B",
+        "A va B",
+        "Б va В",
+        "Б va Г"
+      ],
+      "correctIndex": 3,
+      "explanation": "To‘g‘ri javob — B va V. B belgisi (tik ko‘tarilish) yo‘lning tor qismida ustunlik bermaydi, u faqat tik ko‘tarilish haqida ogohlantiradi. V belgisi (qizil va qora strelkali doira) haydovchining qarama-qarshi yo‘nalishdagi transport vositalariga yo‘l berishi kerakligini bildiradi. G belgisi (ko‘k fondagi oq va qizil strelkalar) esa haydovchining yo‘lning tor qismida ustunlikka ega ekanligini bildiradi. Shuning uchun ustunlik bilan bog‘liq belgilar — V va G",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo'l belgilari yo'lning tor qismida haydovchiga ustunlik beradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "B",
+            "A va B",
+            "Б va В",
+            "Б va Г"
+          ],
+          "correctIndex": 3,
+          "explanation": "To‘g‘ri javob — B va V. B belgisi (tik ko‘tarilish) yo‘lning tor qismida ustunlik bermaydi, u faqat tik ko‘tarilish haqida ogohlantiradi. V belgisi (qizil va qora strelkali doira) haydovchining qarama-qarshi yo‘nalishdagi transport vositalariga yo‘l berishi kerakligini bildiradi. G belgisi (ko‘k fondagi oq va qizil strelkalar) esa haydovchining yo‘lning tor qismida ustunlikka ega ekanligini bildiradi. Shuning uchun ustunlik bilan bog‘liq belgilar — V va G"
+        },
+        "uz_cyrl": {
+          "text": "Қаyси йўл белгилари йўлнинг тор қисмида ҳаyдовчига устунлик беради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Б",
+            "А ва Б",
+            "Б ва В",
+            "Б ва Г"
+          ],
+          "correctIndex": 3,
+          "explanation": "Тўғри жавоб — Б ва В. Б белгиси (тик кўтарилиш) йўлнинг тор қисмида устунлик бермаyди, у фақат тик кўтарилиш ҳақида огоҳлантиради. В белгиси (қиzил ва қора стрелкали доира) ҳаyдовчининг қарама-қарши йўналишдаги транспорт воситаларига йўл бериши кераклигини билдиради. Г белгиси (кўк фондаги оқ ва қиzил стрелкалар) еса ҳаyдовчининг йўлнинг тор қисмида устунликка ега еканлигини билдиради. Шунинг учун устунлик билан боғлиқ белгилар — В ва Г"
+        },
+        "ru": {
+          "text": "Какие дорожные знаки дают преимущество на узком участке дороги?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "B",
+            "A и B",
+            "Б и В",
+            "Б и Г"
+          ],
+          "correctIndex": 3,
+          "explanation": "Знаки Б и Г обозначают, кто имеет преимущество на узком участке дороги."
+        }
+      }
+    },
+    {
+      "id": "21c5ec63-9b8c-4adf-b21b-06d116d2bb7f",
+      "questionId": "21c5ec63-9b8c-4adf-b21b-06d116d2bb7f",
+      "order": 6,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Turar joy dahalarida qanday eng katta tezlikda harakatlanishga ruxsat etiladi:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "5 km/soat",
+        "40 km/soat",
+        "30 km/soat",
+        "20 km/soat"
+      ],
+      "correctIndex": 3,
+      "explanation": "Yo‘l harakati qoidalariga muvofiq, turar joy dahalari (haddan tashqari ko‘p piyodalar va bolalar bo‘lishi sababli) hamda hovli ichidagi hududlarda transport vositalarining harakatlanish tezligi soatiga 20 kilometrdan oshishi taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Turar joy dahalarida qanday eng katta tezlikda harakatlanishga ruxsat etiladi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "5 km/soat",
+            "40 km/soat",
+            "30 km/soat",
+            "20 km/soat"
+          ],
+          "correctIndex": 3,
+          "explanation": "Yo‘l harakati qoidalariga muvofiq, turar joy dahalari (haddan tashqari ko‘p piyodalar va bolalar bo‘lishi sababli) hamda hovli ichidagi hududlarda transport vositalarining harakatlanish tezligi soatiga 20 kilometrdan oshishi taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Турар жоy даҳаларида қандаy енг катта теzликда ҳаракатланишга рухсат етилади:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "5 км/соат",
+            "40 км/соат",
+            "30 км/соат",
+            "20 км/соат"
+          ],
+          "correctIndex": 3,
+          "explanation": "Йўл ҳаракати қоидаларига мувофиқ, турар жоy даҳалари (ҳаддан ташқари кўп пиёдалар ва болалар бўлиши сабабли) ҳамда ҳовли ичидаги ҳудудларда транспорт воситаларининг ҳаракатланиш теzлиги соатига 20 километрдан ошиши тақиқланади."
+        },
+        "ru": {
+          "text": "Какова максимально разрешённая скорость движения в жилой зоне?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "5 км/ч",
+            "40 км/ч",
+            "30 км/ч",
+            "20 км/ч"
+          ],
+          "correctIndex": 3,
+          "explanation": "В жилой зоне и во дворовой территории скорость не должна превышать 20 км/ч."
+        }
+      }
+    },
+    {
+      "id": "d9e8f9ca-2002-41f7-9d3c-fd7ce4e13389",
+      "questionId": "d9e8f9ca-2002-41f7-9d3c-fd7ce4e13389",
+      "order": 7,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi rasmda ajratuvchi mintaqa ko'rsatilgan?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783179166508-07wo3hbu.webp",
+      "audio": "",
+      "options": [
+        "A",
+        "Б",
+        "A va Б",
+        "Hech qaysida"
+      ],
+      "correctIndex": 3,
+      "explanation": "Ajratuvchi mintaqa — yo'lning yonma-yon joylashgan qatnov qismlarini ajratadigan, konstruktiv ravishda ajratilgan (masalan, maysazor, maxsus to'siqlar) va transport vositalari harakatlanishi yoki to'xtashi uchun mo'ljallanmagan elementidir. Rasm A da yo'l chiziqlari (yo'naltiruvchi orolcha), rasm Б da esa oddiy qo'shaloq yotiq chiziq va chekka qismlar ko'rsatilgan, ya'ni hech birida haqiqiy ajratuvchi mintaqa mavjud emas.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi rasmda ajratuvchi mintaqa ko'rsatilgan?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "Б",
+            "A va Б",
+            "Hech qaysida"
+          ],
+          "correctIndex": 3,
+          "explanation": "Ajratuvchi mintaqa — yo'lning yonma-yon joylashgan qatnov qismlarini ajratadigan, konstruktiv ravishda ajratilgan (masalan, maysazor, maxsus to'siqlar) va transport vositalari harakatlanishi yoki to'xtashi uchun mo'ljallanmagan elementidir. Rasm A da yo'l chiziqlari (yo'naltiruvchi orolcha), rasm Б da esa oddiy qo'shaloq yotiq chiziq va chekka qismlar ko'rsatilgan, ya'ni hech birida haqiqiy ajratuvchi mintaqa mavjud emas."
+        },
+        "uz_cyrl": {
+          "text": "Қаyси расмда ажратувчи минтақа кўрсатилган?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А",
+            "Б",
+            "А ва Б",
+            "Ҳеч қаyсида"
+          ],
+          "correctIndex": 3,
+          "explanation": "Ажратувчи минтақа — йўлнинг ёнма-ён жоyлашган қатнов қисмларини ажратадиган, конструктив равишда ажратилган (масалан, маyсаzор, махсус тўсиқлар) ва транспорт воситалари ҳаракатланиши ёки тўхташи учун мўлжалланмаган елементидир. Расм А да йўл чиzиқлари (йўналтирувчи оролча), расм Б да еса оддиy қўшалоқ ётиқ чиzиқ ва чекка қисмлар кўрсатилган, я'ни ҳеч бирида ҳақиқиy ажратувчи минтақа мавжуд емас."
+        },
+        "ru": {
+          "text": "На каком рисунке показана разделительная полоса?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "Б",
+            "A и Б",
+            "Ни на одном"
+          ],
+          "correctIndex": 3,
+          "explanation": "На рисунках нет конструктивно выделенной разделительной полосы."
+        }
+      }
+    },
+    {
+      "id": "276a24ab-191a-4561-8fd7-bb1d703daeb1",
+      "questionId": "276a24ab-191a-4561-8fd7-bb1d703daeb1",
+      "order": 8,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi belgilar axborot-ishora belgilari hisoblanadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782816050992-l8pvkxud.webp",
+      "audio": "",
+      "options": [
+        "1 va 2",
+        "3 va 4",
+        "2 va 3",
+        "1 va 4"
+      ],
+      "correctIndex": 2,
+      "explanation": "2 va 3-raqamli belgilar axborot-ishora belgilari bo'lib, haydovchiga foydali ma'lumotlarni yetkazadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgilar axborot-ishora belgilari hisoblanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1 va 2",
+            "3 va 4",
+            "2 va 3",
+            "1 va 4"
+          ],
+          "correctIndex": 2,
+          "explanation": "2 va 3-raqamli belgilar axborot-ishora belgilari bo'lib, haydovchiga foydali ma'lumotlarni yetkazadi."
+        },
+        "uz_cyrl": {
+          "text": "Қаyси белгилар ахборот-ишора белгилари ҳисобланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1 ва 2",
+            "3 ва 4",
+            "2 ва 3",
+            "1 ва 4"
+          ],
+          "correctIndex": 2,
+          "explanation": "2 ва 3-рақамли белгилар ахборот-ишора белгилари бўлиб, ҳаyдовчига фоyдали ма'лумотларни еткаzади."
+        },
+        "ru": {
+          "text": "Какие знаки являются информационно-указательными?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1 и 2",
+            "3 и 4",
+            "2 и 3",
+            "1 и 4"
+          ],
+          "correctIndex": 2,
+          "explanation": "Информационно-указательными являются знаки 2 и 3."
+        }
+      }
+    },
+    {
+      "id": "a995de20-105b-4f4d-afce-ffe6e60550ea",
+      "questionId": "a995de20-105b-4f4d-afce-ffe6e60550ea",
+      "order": 9,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Yo'nalishli bo'lmagan transport vositalari “A” xarfi bilan belgilangan o'ng bo'lakda qaysi holatlarda harakatlanishlari mumkin?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781782611783-y1v0mq8g.webp",
+      "audio": "",
+      "options": [
+        "O'nga burilishda",
+        "Yo'lovchilarni chiqarish va tushirishda",
+        "Yuqoridagi barcha xolatlarda agarda yo'nalishli transport vositalariga xalaqit bermasa"
+      ],
+      "correctIndex": 2,
+      "explanation": "Yo'nalishli transport vositalari uchun ajratilgan o'ng bo'lak uzuq-uzuq chiziq bilan ajratilgan bo'lsa, oddiy transport vositalariga ham o'ngga burilish oldidan, ham yo'nalishli transportlarga xalaqit bermasdan yo'lovchi mindirish/tushirish maqsadida ushbu bo'lakka kirishga ruxsat beriladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yo'nalishli bo'lmagan transport vositalari “A” xarfi bilan belgilangan o'ng bo'lakda qaysi holatlarda harakatlanishlari mumkin?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "O'nga burilishda",
+            "Yo'lovchilarni chiqarish va tushirishda",
+            "Yuqoridagi barcha xolatlarda agarda yo'nalishli transport vositalariga xalaqit bermasa"
+          ],
+          "correctIndex": 2,
+          "explanation": "Yo'nalishli transport vositalari uchun ajratilgan o'ng bo'lak uzuq-uzuq chiziq bilan ajratilgan bo'lsa, oddiy transport vositalariga ham o'ngga burilish oldidan, ham yo'nalishli transportlarga xalaqit bermasdan yo'lovchi mindirish/tushirish maqsadida ushbu bo'lakka kirishga ruxsat beriladi."
+        },
+        "uz_cyrl": {
+          "text": "Йўналишли бўлмаган транспорт воситалари “А” харфи билан белгиланган ўнг бўлакда қаyси ҳолатларда ҳаракатланишлари мумкин?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ўнга бурилишда",
+            "Йўловчиларни чиқариш ва туширишда",
+            "Юқоридаги барча холатларда агарда йўналишли транспорт воситаларига халақит бермаса"
+          ],
+          "correctIndex": 2,
+          "explanation": "Йўналишли транспорт воситалари учун ажратилган ўнг бўлак уzуқ-уzуқ чиzиқ билан ажратилган бўлса, оддиy транспорт воситаларига ҳам ўнгга бурилиш олдидан, ҳам йўналишли транспортларга халақит бермасдан йўловчи миндириш/тушириш мақсадида ушбу бўлакка киришга рухсат берилади."
+        },
+        "ru": {
+          "text": "В каких случаях безрельсовые транспортные средства могут двигаться по правой полосе, обозначенной буквой «A»?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "При повороте направо",
+            "При посадке и высадке пассажиров",
+            "Во всех перечисленных случаях, если не мешают маршрутным ТС"
+          ],
+          "correctIndex": 2,
+          "explanation": "Если полоса выделена для маршрутных транспортных средств, другие машины могут заезжать туда при повороте направо, а также для посадки и высадки пассажиров, не создавая помех."
+        }
+      }
+    },
+    {
+      "id": "6250b0b1-309d-4749-9044-feec3323ff91",
+      "questionId": "6250b0b1-309d-4749-9044-feec3323ff91",
+      "order": 10,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Yo‘l to‘sig‘iga chizilgan tik chiziq nimani bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780822753673-99an3rev.png",
+      "audio": "",
+      "options": [
+        "Temir yo‘l kesishmasiga yaqinlashganlik haqida",
+        "Xavfli chorrahaga yaqinlashganlik haqida",
+        "Yo‘lning kichik radiusli burilish, tik nishablik va boshqa xavfli joylarida yo‘l to‘siqlarining yon yuzalarini bildiradi"
+      ],
+      "correctIndex": 2,
+      "explanation": "Rasmda xavfli burilish qismidagi to'siqqa chizilgan qora va oq rangli chiziqlar (2.4 yo'l chizig'i) tasvirlangan. Ushbu chiziq yo'lning kichik radiusli burilishlari, tik nishabliklari va boshqa xavfli joylaridagi to'siqlarning yon yuzalarini ko'rsatib, haydovchini ogohlantiradi",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yo‘l to‘sig‘iga chizilgan tik chiziq nimani bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Temir yo‘l kesishmasiga yaqinlashganlik haqida",
+            "Xavfli chorrahaga yaqinlashganlik haqida",
+            "Yo‘lning kichik radiusli burilish, tik nishablik va boshqa xavfli joylarida yo‘l to‘siqlarining yon yuzalarini bildiradi"
+          ],
+          "correctIndex": 2,
+          "explanation": "Rasmda xavfli burilish qismidagi to'siqqa chizilgan qora va oq rangli chiziqlar (2.4 yo'l chizig'i) tasvirlangan. Ushbu chiziq yo'lning kichik radiusli burilishlari, tik nishabliklari va boshqa xavfli joylaridagi to'siqlarning yon yuzalarini ko'rsatib, haydovchini ogohlantiradi"
+        },
+        "uz_cyrl": {
+          "text": "Йўл тўсиғига чиzилган тик чиzиқ нимани билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Темир йўл кесишмасига яқинлашганлик ҳақида",
+            "Хавфли чорраҳага яқинлашганлик ҳақида",
+            "Йўлнинг кичик радиусли бурилиш, тик нишаблик ва бошқа хавфли жоyларида йўл тўсиқларининг ён юzаларини билдиради"
+          ],
+          "correctIndex": 2,
+          "explanation": "Расмда хавфли бурилиш қисмидаги тўсиққа чиzилган қора ва оқ рангли чиzиқлар (2.4 йўл чиzиғи) тасвирланган. Ушбу чиzиқ йўлнинг кичик радиусли бурилишлари, тик нишабликлари ва бошқа хавфли жоyларидаги тўсиқларнинг ён юzаларини кўрсатиб, ҳаyдовчини огоҳлантиради"
+        },
+        "ru": {
+          "text": "Что обозначает вертикальная разметка на дорожном ограждении?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "О приближении к железнодорожному переезду",
+            "О приближении к опасному перекрёстку",
+            "Боковые поверхности ограждений на крутых поворотах, спусках и других опасных местах"
+          ],
+          "correctIndex": 2,
+          "explanation": "Вертикальная разметка обозначает боковые поверхности ограждений на опасных участках дороги."
+        }
+      }
+    },
+    {
+      "id": "9af87447-f740-45f1-a368-c06dd00a6f1e",
+      "questionId": "9af87447-f740-45f1-a368-c06dd00a6f1e",
+      "order": 11,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ushbu yo'l belgisi qanday maqsadda qo'llaniladi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783259892216-xritz7r4.webp",
+      "audio": "",
+      "options": [
+        "Majburiy tarzda tezlikni kamaytirish uchun",
+        "Keskin tormoz berish uchun",
+        "Ehtiyot choralarini ko'rish uchun"
+      ],
+      "correctIndex": 0,
+      "explanation": "Rasmda sun'iy yo'l notekisligi (tezlikni pasaytiruvchi qavariq) belgisi tasvirlangan. U haydovchini tezlikni majburiy ravishda kamaytirishga undaydi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo'l belgisi qanday maqsadda qo'llaniladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Majburiy tarzda tezlikni kamaytirish uchun",
+            "Keskin tormoz berish uchun",
+            "Ehtiyot choralarini ko'rish uchun"
+          ],
+          "correctIndex": 0,
+          "explanation": "Rasmda sun'iy yo'l notekisligi (tezlikni pasaytiruvchi qavariq) belgisi tasvirlangan. U haydovchini tezlikni majburiy ravishda kamaytirishga undaydi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу йўл белгиси қандаy мақсадда қўлланилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Мажбуриy тарzда теzликни камаyтириш учун",
+            "Кескин тормоz бериш учун",
+            "Еҳтиёт чораларини кўриш учун"
+          ],
+          "correctIndex": 0,
+          "explanation": "Расмда сун'иy йўл нотекислиги (теzликни пасаyтирувчи қавариқ) белгиси тасвирланган. У ҳаyдовчини теzликни мажбуриy равишда камаyтиришга ундаyди."
+        },
+        "ru": {
+          "text": "Для какой цели применяется данный дорожный знак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Для принудительного снижения скорости",
+            "Для резкого торможения",
+            "Для принятия мер осторожности"
+          ],
+          "correctIndex": 0,
+          "explanation": "Это знак искусственной неровности, который заставляет водителя снизить скорость."
+        }
+      }
+    },
+    {
+      "id": "15218261-dc28-4401-8f0b-6af2a94869d8",
+      "questionId": "15218261-dc28-4401-8f0b-6af2a94869d8",
+      "order": 12,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi belgi yo‘lning kichik radiusli burilish joyiga yaqinlashayotganlik haqida ogohlantiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780819562813-rtqetgkv.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "correctIndex": 4,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi yo‘lning kichik radiusli burilish joyiga yaqinlashayotganlik haqida ogohlantiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "correctIndex": 4,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қаyси белги йўлнинг кичик радиусли бурилиш жоyига яқинлашаётганлик ҳақида огоҳлантиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "correctIndex": 4,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой знак предупреждает о приближении к участку дороги с малым радиусом поворота?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "correctIndex": 4,
+          "explanation": "Правильный знак показывает приближение к крутому повороту с малым радиусом."
+        }
+      }
+    },
+    {
+      "id": "79911cf4-b4c7-46c9-b1f6-c6f52b85310c",
+      "questionId": "79911cf4-b4c7-46c9-b1f6-c6f52b85310c",
+      "order": 13,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Mototsikl haydovchisi qo'lini yuqoriga ko'tarib nima haqida axborot berayapti?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1784193150660-9j332zcs.webp",
+      "audio": "",
+      "options": [
+        "Harakatni davom ettirish haqida",
+        "O'nga burilmoqchi ekanligi haqida",
+        "To'xtash haqida"
+      ],
+      "correctIndex": 2,
+      "explanation": "3-rasmdagi mototsiklchi qoʻlini tik yuqoriga koʻtarib turibdi. Har qanday transport vositasi haydovchisi tomonidan chap yoki oʻng qoʻlni tik yuqoriga koʻtarish — toʻxtash ishorasini (tormoz chiroqlari ishlamayotganligini) bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Mototsikl haydovchisi qo'lini yuqoriga ko'tarib nima haqida axborot berayapti?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Harakatni davom ettirish haqida",
+            "O'nga burilmoqchi ekanligi haqida",
+            "To'xtash haqida"
+          ],
+          "correctIndex": 2,
+          "explanation": "3-rasmdagi mototsiklchi qoʻlini tik yuqoriga koʻtarib turibdi. Har qanday transport vositasi haydovchisi tomonidan chap yoki oʻng qoʻlni tik yuqoriga koʻtarish — toʻxtash ishorasini (tormoz chiroqlari ishlamayotganligini) bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Мотоцикл ҳаyдовчиси қўлини юқорига кўтариб нима ҳақида ахборот бераяпти?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ҳаракатни давом еттириш ҳақида",
+            "Ўнга бурилмоқчи еканлиги ҳақида",
+            "Тўхташ ҳақида"
+          ],
+          "correctIndex": 2,
+          "explanation": "3-расмдаги мотоциклчи қўлини тик юқорига кўтариб турибди. Ҳар қандаy транспорт воситаси ҳаyдовчиси томонидан чап ёки ўнг қўлни тик юқорига кўтариш — тўхташ ишорасини (тормоz чироқлари ишламаётганлигини) билдиради."
+        },
+        "ru": {
+          "text": "Что сообщает водитель мотоцикла, подняв руку вверх?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "О продолжении движения",
+            "О намерении повернуть направо",
+            "Об остановке"
+          ],
+          "correctIndex": 2,
+          "explanation": "Поднятая вверх рука означает сигнал остановки."
+        }
+      }
+    },
+    {
+      "id": "1b4eb833-806c-483a-9c42-ace24413d5cf",
+      "questionId": "1b4eb833-806c-483a-9c42-ace24413d5cf",
+      "order": 14,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ko‘k avtomobil chorraxani kesib o‘tadi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783181431655-gd0tkxoe.webp",
+      "audio": "",
+      "options": [
+        "Birinchi bo‘lib",
+        "Ikkinchi bo‘lib",
+        "Oxirgi bo‘lib"
+      ],
+      "correctIndex": 2,
+      "explanation": "Ko‘k avtomobil qarshisida 5.22 'Yo‘l bering' belgisi turibdi, demak u ikkinchi darajali yo‘lda. Bosh yo‘lda tramvay va yashil avtomobil harakatlanmoqda, ular chorrahadan birinchi bo‘lib o‘tish huquqiga ega. Ikkinchi darajali yo‘ldagi qizil avtomobil ham ko‘k avtomobilga nisbatan o‘ng tomonda joylashgani uchun ustunlikka ega. Shu sababli, ko‘k avtomobil barcha transport vositalariga yo‘l berib, chorrahani oxirgi bo‘lib kesib o‘tadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko‘k avtomobil chorraxani kesib o‘tadi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Birinchi bo‘lib",
+            "Ikkinchi bo‘lib",
+            "Oxirgi bo‘lib"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ko‘k avtomobil qarshisida 5.22 'Yo‘l bering' belgisi turibdi, demak u ikkinchi darajali yo‘lda. Bosh yo‘lda tramvay va yashil avtomobil harakatlanmoqda, ular chorrahadan birinchi bo‘lib o‘tish huquqiga ega. Ikkinchi darajali yo‘ldagi qizil avtomobil ham ko‘k avtomobilga nisbatan o‘ng tomonda joylashgani uchun ustunlikka ega. Shu sababli, ko‘k avtomobil barcha transport vositalariga yo‘l berib, chorrahani oxirgi bo‘lib kesib o‘tadi."
+        },
+        "uz_cyrl": {
+          "text": "Кўк автомобил чоррахани кесиб ўтади:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Биринчи бўлиб",
+            "Иккинчи бўлиб",
+            "Охирги бўлиб"
+          ],
+          "correctIndex": 2,
+          "explanation": "Кўк автомобил қаршисида 5.22 'Йўл беринғ белгиси турибди, демак у иккинчи даражали йўлда. Бош йўлда трамваy ва яшил автомобил ҳаракатланмоқда, улар чорраҳадан биринчи бўлиб ўтиш ҳуқуқига ега. Иккинчи даражали йўлдаги қиzил автомобил ҳам кўк автомобилга нисбатан ўнг томонда жоyлашгани учун устунликка ега. Шу сабабли, кўк автомобил барча транспорт воситаларига йўл бериб, чорраҳани охирги бўлиб кесиб ўтади."
+        },
+        "ru": {
+          "text": "Синий автомобиль проедет перекрёсток:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Первым",
+            "Вторым",
+            "Последним"
+          ],
+          "correctIndex": 2,
+          "explanation": "Синий автомобиль находится на второстепенной дороге и пропускает всех остальных."
+        }
+      }
+    },
+    {
+      "id": "53635e9a-7cde-4164-b237-5f87f7e90181",
+      "questionId": "53635e9a-7cde-4164-b237-5f87f7e90181",
+      "order": 15,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Avtomobil haydovchisi qayrilib olmoqchi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781762550947-unxeuc18.webp",
+      "audio": "",
+      "options": [
+        "Chorrahadan birinchi bo'lib o'tadi",
+        "Tramvayga yo'l berib qayrilib oladi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tartibga soluvchi oʻng qoʻlini oldinga uzatib, chap yonboshi bilan turibdi. Ushbu ishora koʻk avtomobilga qayrilib olishga, tramvayga esa chapga burilishga ruxsat beradi (ikkisiga ham ruxsat bor). Bunday teng huquqli vaziyatda tramvay relssiz transport vositasi (avtomobil) oldida imtiyozga ega boʻladi, shuning uchun avtomobil haydovchisi tramvayni oʻtkazib yuborishi shart.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Avtomobil haydovchisi qayrilib olmoqchi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Chorrahadan birinchi bo'lib o'tadi",
+            "Tramvayga yo'l berib qayrilib oladi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Tartibga soluvchi oʻng qoʻlini oldinga uzatib, chap yonboshi bilan turibdi. Ushbu ishora koʻk avtomobilga qayrilib olishga, tramvayga esa chapga burilishga ruxsat beradi (ikkisiga ham ruxsat bor). Bunday teng huquqli vaziyatda tramvay relssiz transport vositasi (avtomobil) oldida imtiyozga ega boʻladi, shuning uchun avtomobil haydovchisi tramvayni oʻtkazib yuborishi shart."
+        },
+        "uz_cyrl": {
+          "text": "Автомобил ҳаyдовчиси қаyрилиб олмоқчи:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Чорраҳадан биринчи бўлиб ўтади",
+            "Трамваyга йўл бериб қаyрилиб олади"
+          ],
+          "correctIndex": 1,
+          "explanation": "Тартибга солувчи ўнг қўлини олдинга уzатиб, чап ёнбоши билан турибди. Ушбу ишора кўк автомобилга қаyрилиб олишга, трамваyга еса чапга бурилишга рухсат беради (иккисига ҳам рухсат бор). Бундаy тенг ҳуқуқли ваzиятда трамваy релссиz транспорт воситаси (автомобил) олдида имтиёzга ега бўлади, шунинг учун автомобил ҳаyдовчиси трамваyни ўткаzиб юбориши шарт."
+        },
+        "ru": {
+          "text": "Водитель автомобиля хочет выполнить разворот:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Проедет перекрёсток первым",
+            "Уступит трамваю и выполнит разворот"
+          ],
+          "correctIndex": 1,
+          "explanation": "В данной ситуации автомобиль должен уступить трамваю."
+        }
+      }
+    },
+    {
+      "id": "c6dea738-5a91-488e-8404-19f2c54c8154",
+      "questionId": "c6dea738-5a91-488e-8404-19f2c54c8154",
+      "order": 16,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Aylanma harakatlanish chorrahasida:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Harakatlanayotgan transport vositalari aylanaga kirib kelayotgan transport vositalariga nisbatan ustunlikka (imtiyozga) ega",
+        "Harakatlanayotgan transport vositalariga nisbatan aylanaga kirib kelayotgan transport vositalari ustunlikka (imtiyozga) ega"
+      ],
+      "correctIndex": 0,
+      "explanation": "Yo'l harakati qoidalariga ko'ra, aylanma harakat chorrahasida aylanma ichida bo'lgan transport vositalari aylanaga kirib kelayotgan vositalarga nisbatan har doim ustunlikka ega bo'ladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Aylanma harakatlanish chorrahasida:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Harakatlanayotgan transport vositalari aylanaga kirib kelayotgan transport vositalariga nisbatan ustunlikka (imtiyozga) ega",
+            "Harakatlanayotgan transport vositalariga nisbatan aylanaga kirib kelayotgan transport vositalari ustunlikka (imtiyozga) ega"
+          ],
+          "correctIndex": 0,
+          "explanation": "Yo'l harakati qoidalariga ko'ra, aylanma harakat chorrahasida aylanma ichida bo'lgan transport vositalari aylanaga kirib kelayotgan vositalarga nisbatan har doim ustunlikka ega bo'ladi."
+        },
+        "uz_cyrl": {
+          "text": "Аyланма ҳаракатланиш чорраҳасида:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ҳаракатланаётган транспорт воситалари аyланага кириб келаётган транспорт воситаларига нисбатан устунликка (имтиёzга) ега",
+            "Ҳаракатланаётган транспорт воситаларига нисбатан аyланага кириб келаётган транспорт воситалари устунликка (имтиёzга) ега"
+          ],
+          "correctIndex": 0,
+          "explanation": "Йўл ҳаракати қоидаларига кўра, аyланма ҳаракат чорраҳасида аyланма ичида бўлган транспорт воситалари аyланага кириб келаётган воситаларга нисбатан ҳар доим устунликка ега бўлади."
+        },
+        "ru": {
+          "text": "На круговом перекрёстке:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Транспортные средства, движущиеся по кругу, имеют преимущество перед въезжающими",
+            "Въезжающие на круг транспортные средства имеют преимущество перед движущимися по кругу"
+          ],
+          "correctIndex": 0,
+          "explanation": "На круговом перекрёстке преимущество у тех, кто уже движется по кругу."
+        }
+      }
+    },
+    {
+      "id": "ef5d5edc-1b12-4ec5-a796-6836a22d2553",
+      "questionId": "ef5d5edc-1b12-4ec5-a796-6836a22d2553",
+      "order": 17,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ushbu qo‘shimcha axborot yo‘l belgisi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940188140-l3nxa7k1.webp",
+      "audio": "",
+      "options": [
+        "Obyektgacha bo‘lgan masofani bildiradi",
+        "Belgining ta’sir oralig‘ini bildiradi"
+      ],
+      "correctIndex": 0,
+      "explanation": "Belgi ma’lum obyekt yoki yo‘l belgisigacha bo‘lgan masofani ko‘rsatadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo‘shimcha axborot yo‘l belgisi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Obyektgacha bo‘lgan masofani bildiradi",
+            "Belgining ta’sir oralig‘ini bildiradi"
+          ],
+          "correctIndex": 0,
+          "explanation": "Belgi ma’lum obyekt yoki yo‘l belgisigacha bo‘lgan masofani ko‘rsatadi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот йўл белгиси:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Обектгача бўлган масофани билдиради",
+            "Белгининг та'сир оралиғини билдиради"
+          ],
+          "correctIndex": 0,
+          "explanation": "Белги ма'лум обект ёки йўл белгисигача бўлган масофани кўрсатади."
+        },
+        "ru": {
+          "text": "Данный дополнительный дорожный знак:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Указывает расстояние до объекта",
+            "Указывает зону действия знака"
+          ],
+          "correctIndex": 0,
+          "explanation": "Знак показывает расстояние до объекта или дорожного знака."
+        }
+      }
+    },
+    {
+      "id": "b67ac569-dd7f-41de-b7b0-6524d087099c",
+      "questionId": "b67ac569-dd7f-41de-b7b0-6524d087099c",
+      "order": 18,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Yo'lning xavfli burilishlarida oldingi uzatmali avtomobilning orqa o'qi yon tomonga sirpanganda siz qanday harakat qilasiz?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Gaz berishni kamaytirib rul chambaragi bilan boshqaruvni barqarorlashtirasiz",
+        "Tormozlab turib rul chambaragini sirpangan tomonga burasiz",
+        "Gaz pedalini ohista bosib avtomobilni rul chambaragini to'g'rilab avtomobilni sirpanishdan olib chiqib ketasiz",
+        "Gaz pedalini ko'proq bosib rul chambaragini o'zgartirmasdan sirpanishdan olib chiqasiz"
+      ],
+      "correctIndex": 2,
+      "explanation": "Oldingi uzatmali avtomobilda orqa qism sirpanganda gazni ravon bosib, rulni to'g'ri boshqarish orqali avtomobilni barqaror holatga qaytarish tavsiya etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yo'lning xavfli burilishlarida oldingi uzatmali avtomobilning orqa o'qi yon tomonga sirpanganda siz qanday harakat qilasiz?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Gaz berishni kamaytirib rul chambaragi bilan boshqaruvni barqarorlashtirasiz",
+            "Tormozlab turib rul chambaragini sirpangan tomonga burasiz",
+            "Gaz pedalini ohista bosib avtomobilni rul chambaragini to'g'rilab avtomobilni sirpanishdan olib chiqib ketasiz",
+            "Gaz pedalini ko'proq bosib rul chambaragini o'zgartirmasdan sirpanishdan olib chiqasiz"
+          ],
+          "correctIndex": 2,
+          "explanation": "Oldingi uzatmali avtomobilda orqa qism sirpanganda gazni ravon bosib, rulni to'g'ri boshqarish orqali avtomobilni barqaror holatga qaytarish tavsiya etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Йўлнинг хавфли бурилишларида олдинги уzатмали автомобилнинг орқа ўқи ён томонга сирпанганда сиz қандаy ҳаракат қиласиz?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Гаz беришни камаyтириб рул чамбараги билан бошқарувни барқарорлаштирасиz",
+            "Тормоzлаб туриб рул чамбарагини сирпанган томонга бурасиz",
+            "Гаz педалини оҳиста босиб автомобилни рул чамбарагини тўғрилаб автомобилни сирпанишдан олиб чиқиб кетасиz",
+            "Гаz педалини кўпроқ босиб рул чамбарагини ўzгартирмасдан сирпанишдан олиб чиқасиz"
+          ],
+          "correctIndex": 2,
+          "explanation": "Олдинги уzатмали автомобилда орқа қисм сирпанганда гаzни равон босиб, рулни тўғри бошқариш орқали автомобилни барқарор ҳолатга қаyтариш тавсия етилади."
+        },
+        "ru": {
+          "text": "Если на опасных поворотах задняя ось переднеприводного автомобиля пошла в занос, как следует действовать?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Уменьшить подачу газа и стабилизировать автомобиль рулём",
+            "Тормозить и поворачивать рулём в сторону заноса",
+            "Плавно нажать на газ и вывести автомобиль из заноса, выровняв руль",
+            "Сильнее нажать на газ и не менять положение руля"
+          ],
+          "correctIndex": 2,
+          "explanation": "Нужно плавно добавить газ и выровнять рулевое колесо, чтобы вернуть автомобиль в устойчивое состояние."
+        }
+      }
+    },
+    {
+      "id": "09974f8b-761e-494d-85b7-0164229adb1d",
+      "questionId": "09974f8b-761e-494d-85b7-0164229adb1d",
+      "order": 19,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Agar avtomobilning o‘ng g‘ildiraklari nam qoplamali yo‘l yoqasiga chiqib qolsa, tavsiya etiladi:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Avtomobilni tormozlash va to‘liq to‘xtatish",
+        "Avtomobilni tormozlab, yo‘lning harakat qismiga ohista ravon burish",
+        "Avtomobilni tormozlamasdan yo‘lning harakat qismiga ohista ravon burish"
+      ],
+      "correctIndex": 2,
+      "explanation": "Agar avtomobilning o‘ng g‘ildiraklari nam yo‘l yoqasiga chiqib qolsa, keskin tormozlash tavsiya etilmaydi. Bu avtomobilning sirpanishiga yoki boshqaruvni yo‘qotishga olib kelishi mumkin. Rulni keskin burmasdan, avtomobilni tormozlamasdan yo‘lning harakat qismiga ohista va ravon qaytarish eng xavfsiz usul hisoblanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Agar avtomobilning o‘ng g‘ildiraklari nam qoplamali yo‘l yoqasiga chiqib qolsa, tavsiya etiladi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Avtomobilni tormozlash va to‘liq to‘xtatish",
+            "Avtomobilni tormozlab, yo‘lning harakat qismiga ohista ravon burish",
+            "Avtomobilni tormozlamasdan yo‘lning harakat qismiga ohista ravon burish"
+          ],
+          "correctIndex": 2,
+          "explanation": "Agar avtomobilning o‘ng g‘ildiraklari nam yo‘l yoqasiga chiqib qolsa, keskin tormozlash tavsiya etilmaydi. Bu avtomobilning sirpanishiga yoki boshqaruvni yo‘qotishga olib kelishi mumkin. Rulni keskin burmasdan, avtomobilni tormozlamasdan yo‘lning harakat qismiga ohista va ravon qaytarish eng xavfsiz usul hisoblanadi."
+        },
+        "uz_cyrl": {
+          "text": "Агар автомобилнинг ўнг ғилдираклари нам қопламали йўл ёқасига чиқиб қолса, тавсия етилади:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Автомобилни тормоzлаш ва тўлиқ тўхтатиш",
+            "Автомобилни тормоzлаб, йўлнинг ҳаракат қисмига оҳиста равон буриш",
+            "Автомобилни тормоzламасдан йўлнинг ҳаракат қисмига оҳиста равон буриш"
+          ],
+          "correctIndex": 2,
+          "explanation": "Агар автомобилнинг ўнг ғилдираклари нам йўл ёқасига чиқиб қолса, кескин тормоzлаш тавсия етилмаyди. Бу автомобилнинг сирпанишига ёки бошқарувни йўқотишга олиб келиши мумкин. Рулни кескин бурмасдан, автомобилни тормоzламасдан йўлнинг ҳаракат қисмига оҳиста ва равон қаyтариш енг хавфсиz усул ҳисобланади."
+        },
+        "ru": {
+          "text": "Если правые колёса автомобиля съехали на мокрую обочину, рекомендуется:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Затормозить и полностью остановиться",
+            "Затормозить и плавно вернуться на проезжую часть",
+            "Не тормозя, плавно вернуться на проезжую часть"
+          ],
+          "correctIndex": 2,
+          "explanation": "В такой ситуации нельзя резко тормозить; нужно без торможения плавно вернуться на проезжую часть."
+        }
+      }
+    },
+    {
+      "id": "8bfc3d82-6cfc-4919-89b4-0a14c2e18f93",
+      "questionId": "8bfc3d82-6cfc-4919-89b4-0a14c2e18f93",
+      "order": 20,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Avtomobilning antiblokirovka tizimi (ABS) burilishda sirpanish va yonga siljishni oldini oladimi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Avtomobilni faqat sirpanish ehtimolining oldini oladi",
+        "Avtomobilni faqat yonga siljish ehtimolining oldini oladi",
+        "Avtomobilning sirpanish va yonga tomonga sirpanishini oldini olmaydi"
+      ],
+      "correctIndex": 2,
+      "explanation": "ABS g'ildiraklarning bloklanishini oldini oladi, ammo burilishdagi sirpanish yoki yonga siljishni to'liq bartaraf etmaydi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Avtomobilning antiblokirovka tizimi (ABS) burilishda sirpanish va yonga siljishni oldini oladimi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Avtomobilni faqat sirpanish ehtimolining oldini oladi",
+            "Avtomobilni faqat yonga siljish ehtimolining oldini oladi",
+            "Avtomobilning sirpanish va yonga tomonga sirpanishini oldini olmaydi"
+          ],
+          "correctIndex": 2,
+          "explanation": "ABS g'ildiraklarning bloklanishini oldini oladi, ammo burilishdagi sirpanish yoki yonga siljishni to'liq bartaraf etmaydi."
+        },
+        "uz_cyrl": {
+          "text": "Автомобилнинг антиблокировка тиzими (АБС) бурилишда сирпаниш ва ёнга силжишни олдини оладими?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Автомобилни фақат сирпаниш еҳтимолининг олдини олади",
+            "Автомобилни фақат ёнга силжиш еҳтимолининг олдини олади",
+            "Автомобилнинг сирпаниш ва ёнга томонга сирпанишини олдини олмаyди"
+          ],
+          "correctIndex": 2,
+          "explanation": "АБС ғилдиракларнинг блокланишини олдини олади, аммо бурилишдаги сирпаниш ёки ёнга силжишни тўлиқ бартараф етмаyди."
+        },
+        "ru": {
+          "text": "Предотвращает ли антиблокировочная система (ABS) скольжение и боковой занос в повороте?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Предотвращает только вероятность скольжения",
+            "Предотвращает только вероятность бокового заноса",
+            "Не предотвращает скольжение и боковой занос"
+          ],
+          "correctIndex": 2,
+          "explanation": "ABS предотвращает блокировку колёс, но не устраняет полностью скольжение или занос в повороте."
+        }
+      }
+    }
+  ]
+}

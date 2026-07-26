@@ -1,0 +1,1168 @@
+{
+  "title": "Bilet №37",
+  "titleI18n": {
+    "uz_latn": "Bilet №37",
+    "uz_cyrl": "Билет №37",
+    "ru": "Билет №37"
+  },
+  "ticketNumber": 37,
+  "status": "COMPLETED",
+  "questions": [
+    {
+      "id": "a067027a-af97-4964-878d-831950210eea",
+      "questionId": "topic:112:a067027a-af97-4964-878d-831950210eea",
+      "order": 1,
+      "topicId": 112,
+      "topicSlug": "svetofor-ishoralari",
+      "topicTitle": "Svetofor ishoralari",
+      "questionIndex": 1,
+      "text": "Svetafor ishoralari qaysi guruh yo‘l belgilarini bekor qiladi (miltillovchi sariq ishoradan tashqari)?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Imtiyoz belgilari",
+        "Taqiqlovchi belgilar",
+        "Buyuruvchi belgilar",
+        "Barcha sanab o‘tilganlari"
+      ],
+      "correctIndex": 0,
+      "explanation": "Svetofor ishoralari (miltillovchi sariqdan tashqari) imtiyoz belgilari talablarini bekor qiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Svetafor ishoralari qaysi guruh yo‘l belgilarini bekor qiladi (miltillovchi sariq ishoradan tashqari)?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Imtiyoz belgilari",
+            "Taqiqlovchi belgilar",
+            "Buyuruvchi belgilar",
+            "Barcha sanab o‘tilganlari"
+          ],
+          "correctIndex": 0,
+          "explanation": "Svetofor ishoralari (miltillovchi sariqdan tashqari) imtiyoz belgilari talablarini bekor qiladi."
+        },
+        "uz_cyrl": {
+          "text": "Светафор ишоралари қайси гуруҳ ё‘л белгиларини бекор қилади (милтилловчи сариқ ишорадан ташқари)?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Имтиёз белгилари",
+            "Тақиқловчи белгилар",
+            "Буюрувчи белгилар",
+            "Барча санаб ўтилганлари"
+          ],
+          "correctIndex": 0,
+          "explanation": "Светофор ишоралари (милтилловчи сариқдан ташқари) имтиёз белгилари талабларини бекор қилади."
+        },
+        "ru": {
+          "text": "Требования какой группы дорожных знаков отменяют сигналы светофора, кроме мигающего жёлтого?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Знаков приоритета",
+            "Запрещающих знаков",
+            "Предписывающих знаков",
+            "Всех перечисленных"
+          ],
+          "correctIndex": 0,
+          "explanation": "Сигналы работающего светофора отменяют требования знаков приоритета."
+        }
+      }
+    },
+    {
+      "id": "80b20c0e-8879-49a2-9f0c-79023c1c6d7a",
+      "questionId": "topic:114:80b20c0e-8879-49a2-9f0c-79023c1c6d7a",
+      "order": 2,
+      "topicId": 114,
+      "topicSlug": "ogohlantiruvchi-va-avariya-xavf-xatar-ishoralari",
+      "topicTitle": "Ogohlantiruvchi va avariya (xavf-xatar) ishoralari",
+      "questionIndex": 1,
+      "text": "Kunning yorug' vaqtida aholi punktlarida quvib o'tilayotgan transport vositasi haydovchisining etaborini jalb qilish uchun mumkin:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Tovush signalidan foydalanish",
+        "Faqat yaqinni yorituvchi chiroqni uzoqni yorituvchi chiroqqa qisqa muddat orasida o'tkazish bilan ishora berish",
+        "Faqat birgalikda yorug'lik ishoralari bilan birga tovush signallarini qo'llash",
+        "Sanab o'tilganlarning barchasidan foydalanish"
+      ],
+      "correctIndex": 1,
+      "explanation": "Aholi punktlarida yo'l-transport hodisasining oldini olish holatlaridan tashqari vaqtlarda tovush signalidan foydalanish taqiqlanadi. Shu sababli, kunning yorug' vaqtida aholi punktida quvib o'tishda chiroqlarni yaqindan uzoqqa qisqa muddatli o'tkazish orqali ogohlantirish ishorasini berish kerak.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Kunning yorug' vaqtida aholi punktlarida quvib o'tilayotgan transport vositasi haydovchisining etaborini jalb qilish uchun mumkin:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Tovush signalidan foydalanish",
+            "Faqat yaqinni yorituvchi chiroqni uzoqni yorituvchi chiroqqa qisqa muddat orasida o'tkazish bilan ishora berish",
+            "Faqat birgalikda yorug'lik ishoralari bilan birga tovush signallarini qo'llash",
+            "Sanab o'tilganlarning barchasidan foydalanish"
+          ],
+          "correctIndex": 1,
+          "explanation": "Aholi punktlarida yo'l-transport hodisasining oldini olish holatlaridan tashqari vaqtlarda tovush signalidan foydalanish taqiqlanadi. Shu sababli, kunning yorug' vaqtida aholi punktida quvib o'tishda chiroqlarni yaqindan uzoqqa qisqa muddatli o'tkazish orqali ogohlantirish ishorasini berish kerak."
+        },
+        "uz_cyrl": {
+          "text": "Куннинг ёруғ вақтида аҳоли пунктларида қувиб ўтилаётган транспорт воситаси ҳайдовчисининг эътиборини жалб қилиш учун мумкин:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Товуш сигналидан фойдаланиш",
+            "Фақат яқинни ёритувчи чироқни узоқни ёритувчи чироққа қисқа муддат ичида ўтказиш билан ишора бериш",
+            "Фақат биргаликда ёруғлик ишоралари билан бирга товуш сигналларини қўллаш",
+            "Санаб ўтилганларнинг барчасидан фойдаланиш"
+          ],
+          "correctIndex": 1,
+          "explanation": "Аҳоли пунктларида йўл-транспорт ҳодисасининг олдини олиш ҳолатларидан ташқари вақтларда товуш сигналидан фойдаланиш тақиқланади. Шу сабабли, куннинг ёруғ вақтида аҳоли пунктида қувиб ўтишда чироқларни яқиндан узоққа қисқа муддатли ўтказиш орқали огоҳлантириш ишорасини бериш керак."
+        },
+        "ru": {
+          "text": "В светлое время суток в населённых пунктах для привлечения внимания водителя обгоняемого транспортного средства можно:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Использовать звуковой сигнал",
+            "Подать сигнал кратковременным переключением с ближнего света на дальний",
+            "Использовать только звуковой сигнал вместе со световыми сигналами",
+            "Использовать всё перечисленное"
+          ],
+          "correctIndex": 1,
+          "explanation": "В населённых пунктах звуковой сигнал запрещён, кроме случаев предотвращения ДТП. Поэтому днём при обгоне следует предупреждать кратковременным переключением света с ближнего на дальний."
+        }
+      }
+    },
+    {
+      "id": "6a66049d-a3d2-4bd2-bb10-cce5b4ed9770",
+      "questionId": "topic:114:6a66049d-a3d2-4bd2-bb10-cce5b4ed9770",
+      "order": 3,
+      "topicId": 114,
+      "topicSlug": "ogohlantiruvchi-va-avariya-xavf-xatar-ishoralari",
+      "topicTitle": "Ogohlantiruvchi va avariya (xavf-xatar) ishoralari",
+      "questionIndex": 7,
+      "text": "Ko'rsatilgan belgilardan qaysi biri yo'lning ko'rinish masofasi cheklangan joylarda majburan to'xtagan transport vositalarini belgilash uchun qo'llaniladi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781763945582-m4ii5wxf.webp",
+      "audio": "",
+      "options": [
+        "«A»",
+        "«B»",
+        "«В»"
+      ],
+      "correctIndex": 0,
+      "explanation": "«A» belgisi majburiy to'xtash belgisidir (qizil uchburchak shaklida). Yo'lning ko'rinishi cheklangan yoki xavfli qismlarida transport vositasi majburiy to'xtab qolganda, boshqa haydovchilarni ogohlantirish uchun aynan shu belgi mashina orqasiga qo'yiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko'rsatilgan belgilardan qaysi biri yo'lning ko'rinish masofasi cheklangan joylarda majburan to'xtagan transport vositalarini belgilash uchun qo'llaniladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "«A»",
+            "«B»",
+            "«В»"
+          ],
+          "correctIndex": 0,
+          "explanation": "«A» belgisi majburiy to'xtash belgisidir (qizil uchburchak shaklida). Yo'lning ko'rinishi cheklangan yoki xavfli qismlarida transport vositasi majburiy to'xtab qolganda, boshqa haydovchilarni ogohlantirish uchun aynan shu belgi mashina orqasiga qo'yiladi."
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган белгилардан қайси бири ёълнинг кўриниш масофаси чекланган жойларда мажбуран тўхтаган транспорт воситаларини белгилаш учун қўлланилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "«А»",
+            "«Б»",
+            "«В»"
+          ],
+          "correctIndex": 0,
+          "explanation": "«А» белгиси мажбурий тўхташ белгисидир (қизил учбурчак шаклида). Ёълнинг кўриниши чекланган ёки хавфли қисмларида транспорт воситаси мажбурий тўхтаб қолганда, бошқа ҳайдовчиларни огоҳлантириш учун айнан шу белги машина орқасига қўйилади."
+        },
+        "ru": {
+          "text": "Какой знак используется для обозначения транспортного средства, вынужденно остановившегося в месте с ограниченной видимостью?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "«A»",
+            "«B»",
+            "«В»"
+          ],
+          "correctIndex": 0,
+          "explanation": "Знак «A» — знак аварийной остановки. Его устанавливают позади транспортного средства при вынужденной остановке."
+        }
+      }
+    },
+    {
+      "id": "aba6bd54-7c69-458e-92f4-69e4a9bb4c3f",
+      "questionId": "topic:100:aba6bd54-7c69-458e-92f4-69e4a9bb4c3f",
+      "order": 4,
+      "topicId": 100,
+      "topicSlug": "haydovchilarning-umumiy-vazifalari",
+      "topicTitle": "Haydovchilarning umumiy vazifalari",
+      "questionIndex": 1,
+      "text": "Haydovchiga transport vositasini boshqarish vaqtida telefondan foydalanishga ruxsat etiladimi?",
+      "image": "",
+      "audio": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/audios/1781681279478-ulc7y1g6.m4a",
+      "options": [
+        "Ruxsat etiladi",
+        "Qo‘lni ishlatmasdan texnik vosilalardan foydalanish gaplashishga ruxsat etiladi",
+        "20 km/soat tezlikda harakatlanayotganda ruxsat etiladi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Haydovchiga transport vositasini boshqarayotgan vaqtda telefonni qo‘lda ushlab foydalanishga ruxsat etilmaydi. Chunki bu haydovchining diqqatini yo‘ldan chalg‘itib, yo‘l-transport hodisasi xavfini oshiradi. Faqat qo‘lni ishlatmasdan gaplashish imkonini beruvchi texnik vositalar (hands-free, Bluetooth va boshqalar) orqali muloqot qilishga ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Haydovchiga transport vositasini boshqarish vaqtida telefondan foydalanishga ruxsat etiladimi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ruxsat etiladi",
+            "Qo‘lni ishlatmasdan texnik vosilalardan foydalanish gaplashishga ruxsat etiladi",
+            "20 km/soat tezlikda harakatlanayotganda ruxsat etiladi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Haydovchiga transport vositasini boshqarayotgan vaqtda telefonni qo‘lda ushlab foydalanishga ruxsat etilmaydi. Chunki bu haydovchining diqqatini yo‘ldan chalg‘itib, yo‘l-transport hodisasi xavfini oshiradi. Faqat qo‘lni ishlatmasdan gaplashish imkonini beruvchi texnik vositalar (hands-free, Bluetooth va boshqalar) orqali muloqot qilishga ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Ҳайдовчига транспорт воситасини бошқариш вақтида телефондан фойдаланишга рухсат этиладими?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Рухсат этилади",
+            "Қўлни ишлатмасдан гаплашиш имконини берувчи техник воситалардан фойдаланишга рухсат этилади",
+            "20 км/соат тезликда ҳаракатланаётганда рухсат этилади"
+          ],
+          "correctIndex": 1,
+          "explanation": "Ҳайдовчига транспорт воситасини бошқараётган вақтда телефонни қўлда ушлаб фойдаланишга рухсат этилмайди. Чунки бу ҳайдовчининг диққатини йўлдан чалғитиб, йўл-транспорт ҳодисаси хавфини оширади. Фақат қўлни ишлатмасдан гаплашиш имконини берувчи техник воситалар (hands-free, Bluetooth ва бошқалар) орқали мулоқот қилишга рухсат этилади."
+        },
+        "ru": {
+          "text": "Разрешается ли водителю пользоваться телефоном во время управления транспортным средством?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Разрешается",
+            "Разрешается разговаривать с использованием технических средств, позволяющих не занимать руки",
+            "Разрешается при движении со скоростью 20 км/ч"
+          ],
+          "correctIndex": 1,
+          "explanation": "Во время управления транспортным средством водителю запрещается пользоваться телефоном, держа его в руке, поскольку это отвлекает внимание от дороги и повышает риск ДТП. Разрешается общение только с помощью устройств, позволяющих не занимать руки, например hands-free или Bluetooth."
+        }
+      }
+    },
+    {
+      "id": "9609d62d-5298-44fd-8bd6-8e316a0d4104",
+      "questionId": "topic:107:9609d62d-5298-44fd-8bd6-8e316a0d4104",
+      "order": 5,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 14,
+      "text": "Ushbu belgi axborot beradi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782815950822-6gy8zhg8.webp",
+      "audio": "",
+      "options": [
+        "Siz o'ngga yoki chapga burilishingiz kerakligini ko'rsatadi",
+        "Reversiv harakatlanish yo'liga chiqish haqida",
+        "Chorrahadan o'ngga va chapga bir tomonlama harakat tashkil qilingan"
+      ],
+      "correctIndex": 1,
+      "explanation": "Belgi reversiv harakat tashkil etilgan yo'lga chiqishni bildiradi. Bunday yo'lda ayrim bo'laklarning harakat yo'nalishi o'zgarib turishi mumkin.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu belgi axborot beradi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Siz o'ngga yoki chapga burilishingiz kerakligini ko'rsatadi",
+            "Reversiv harakatlanish yo'liga chiqish haqida",
+            "Chorrahadan o'ngga va chapga bir tomonlama harakat tashkil qilingan"
+          ],
+          "correctIndex": 1,
+          "explanation": "Belgi reversiv harakat tashkil etilgan yo'lga chiqishni bildiradi. Bunday yo'lda ayrim bo'laklarning harakat yo'nalishi o'zgarib turishi mumkin."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу белги ахборот беради:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Сиз ўнгга ёки чапга бурилишингиз кераклигини кўрсатади",
+            "Реверсив ҳаракатланиш ёълига чиқиш ҳақида",
+            "Чорраҳадан ўнгга ва чапга бир томонлама ҳаракат ташкил қилинган"
+          ],
+          "correctIndex": 1,
+          "explanation": "Белги реверсив ҳаракат ташкил етилган ёълга чиқишни билдиради. Бундай ёълда айрим бўлакларнинг ҳаракат ёъналиши ўзгариб туриши мумкин."
+        },
+        "ru": {
+          "text": "Этот знак информирует:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "О необходимости повернуть направо или налево",
+            "О выезде на дорогу с реверсивным движением",
+            "О том, что на перекрёстке направо и налево организовано одностороннее движение"
+          ],
+          "correctIndex": 1,
+          "explanation": "Знак обозначает выезд на дорогу с реверсивным движением."
+        }
+      }
+    },
+    {
+      "id": "de8bb054-ecbd-4bda-87f4-2cc9ba8a35ab",
+      "questionId": "topic:139:de8bb054-ecbd-4bda-87f4-2cc9ba8a35ab",
+      "order": 6,
+      "topicId": 139,
+      "topicSlug": "harakat-xavfsizligi-asoslari",
+      "topicTitle": "Harakat xavfsizligi asoslari",
+      "questionIndex": 10,
+      "text": "Agar avtomobil antiblokirovkali (ABS) tormoz tizimi bilan jihozlangan bo'lsa keskin tormoz berishni qanday amalga oshirish kerak?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Tormoz tepkisini uzub-uzub bosish yo'li bilan",
+        "Tormoz tepkisini oxirigacha bosish va avtomobilni to'liq to'xtaguncha tepkini qo'yib yubormaslik",
+        "To'xtab turish tormozi tizimini qo'llash yo'li bilan"
+      ],
+      "correctIndex": 1,
+      "explanation": "ABS tizimi g'ildiraklarning bloklanishiga yo'l qo'ymaydi. Shuning uchun favqulodda tormozlashda tormoz tepkisini oxirigacha bosib, avtomobil to'liq to'xtaguncha qo'yib yubormaslik kerak.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Agar avtomobil antiblokirovkali (ABS) tormoz tizimi bilan jihozlangan bo'lsa keskin tormoz berishni qanday amalga oshirish kerak?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Tormoz tepkisini uzub-uzub bosish yo'li bilan",
+            "Tormoz tepkisini oxirigacha bosish va avtomobilni to'liq to'xtaguncha tepkini qo'yib yubormaslik",
+            "To'xtab turish tormozi tizimini qo'llash yo'li bilan"
+          ],
+          "correctIndex": 1,
+          "explanation": "ABS tizimi g'ildiraklarning bloklanishiga yo'l qo'ymaydi. Shuning uchun favqulodda tormozlashda tormoz tepkisini oxirigacha bosib, avtomobil to'liq to'xtaguncha qo'yib yubormaslik kerak."
+        },
+        "uz_cyrl": {
+          "text": "Агар автомобил антиблокировкали (АБС) тормоз тизими билан жиҳозланган бўлса кескин тормоз беришни қандай амалга ошириш керак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Тормоз тепкисини узуб-узуб босиш ёъли билан",
+            "Тормоз тепкисини охиригача босиш ва автомобилни тўлиқ тўхтагунча тепкини қўйиб юбормаслик",
+            "Тўхтаб туриш тормози тизимини қўллаш ёъли билан"
+          ],
+          "correctIndex": 1,
+          "explanation": "АБС тизими ғилдиракларнинг блокланишига ёъл қўймайди. Шунинг учун фавқулодда тормозлашда тормоз тепкисини охиригача босиб, автомобил тўлиқ тўхтагунча қўйиб юбормаслик керак."
+        },
+        "ru": {
+          "text": "Как выполнить экстренное торможение на автомобиле с ABS?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Нажимать тормоз прерывисто",
+            "Нажать тормоз до упора и удерживать до полной остановки",
+            "Использовать стояночный тормоз"
+          ],
+          "correctIndex": 1,
+          "explanation": "ABS предотвращает блокировку колёс, поэтому педаль нужно нажать полностью и удерживать."
+        }
+      }
+    },
+    {
+      "id": "380da05b-cd2c-4e0e-a537-5945a476ab46",
+      "questionId": "topic:106:380da05b-cd2c-4e0e-a537-5945a476ab46",
+      "order": 7,
+      "topicId": 106,
+      "topicSlug": "buyuruvchi-belgilar",
+      "topicTitle": "Buyuruvchi belgilar",
+      "questionIndex": 13,
+      "text": "Qaysi yo‘nalishda harakatlanishni davom ettirishingiz mumkin?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781757949613-4s1zuxsy.webp",
+      "audio": "",
+      "options": [
+        "Faqat chapga",
+        "Chapga va orqaga qayrilib olishga",
+        "O‘ngga, chapga va orqaga qayrilib olishga"
+      ],
+      "correctIndex": 2,
+      "explanation": "Belgi to‘g‘riga harakatlanishni taqiqlab, chapga, o‘ngga yoki qayrilib olishga ruxsat beradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo‘nalishda harakatlanishni davom ettirishingiz mumkin?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat chapga",
+            "Chapga va orqaga qayrilib olishga",
+            "O‘ngga, chapga va orqaga qayrilib olishga"
+          ],
+          "correctIndex": 2,
+          "explanation": "Belgi to‘g‘riga harakatlanishni taqiqlab, chapga, o‘ngga yoki qayrilib olishga ruxsat beradi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси ё‘налишда ҳаракатланишни давом еттиришингиз мумкин?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат чапга",
+            "Чапга ва орқага қайрилиб олишга",
+            "Ўнгга, чапга ва орқага қайрилиб олишга"
+          ],
+          "correctIndex": 2,
+          "explanation": "Белги тўғрига ҳаракатланишни тақиқлаб, чапга, ўнгга ёки қайрилиб олишга рухсат беради."
+        },
+        "ru": {
+          "text": "В каком направлении вы можете продолжить движение?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только налево",
+            "Налево и на разворот",
+            "Направо, налево и на разворот"
+          ],
+          "correctIndex": 2,
+          "explanation": "Знак запрещает движение прямо, но разрешает поворот направо, налево и разворот."
+        }
+      }
+    },
+    {
+      "id": "128063cf-1d68-41c9-8549-71d933dc999a",
+      "questionId": "topic:116:128063cf-1d68-41c9-8549-71d933dc999a",
+      "order": 8,
+      "topicId": 116,
+      "topicSlug": "yo-lning-qatnov-qismida-transport-vositalarining-joylashuvi",
+      "topicTitle": "Yo‘lning qatnov qismida transport vositalarining joylashuvi",
+      "questionIndex": 12,
+      "text": "Yo‘l harakati qoidalari bo‘yicha «yonlama oraliq masofa»ni ko‘rsating:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782389249681-vi4kcvtn.webp",
+      "audio": "",
+      "options": [
+        "Faqat «A»",
+        "Faqat «B»",
+        "Faqat «V»",
+        "«A» va «B»"
+      ],
+      "correctIndex": 3,
+      "explanation": "Rasmda A va B belgilarining ikkalasi ham transport vositalari orasidagi yonlama oraliq masofani bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yo‘l harakati qoidalari bo‘yicha «yonlama oraliq masofa»ni ko‘rsating:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat «A»",
+            "Faqat «B»",
+            "Faqat «V»",
+            "«A» va «B»"
+          ],
+          "correctIndex": 3,
+          "explanation": "Rasmda A va B belgilarining ikkalasi ham transport vositalari orasidagi yonlama oraliq masofani bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Ё‘л ҳаракати қоидалари бўйича «ёнлама оралиқ масофа»ни кўрсатинг:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат «А»",
+            "Фақат «Б»",
+            "Фақат «В»",
+            "«А» ва «Б»"
+          ],
+          "correctIndex": 3,
+          "explanation": "Расмда А ва Б белгиларининг иккаласи ҳам транспорт воситалари орасидаги ёнлама оралиқ масофани билдиради."
+        },
+        "ru": {
+          "text": "Что на рисунке является боковым интервалом?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только A",
+            "Только B",
+            "Только V",
+            "A и B"
+          ],
+          "correctIndex": 3,
+          "explanation": "Расстояния A и B показывают боковой интервал между транспортными средствами."
+        }
+      }
+    },
+    {
+      "id": "d8016996-6cf2-47df-82c7-a5d0951b8f04",
+      "questionId": "topic:131:d8016996-6cf2-47df-82c7-a5d0951b8f04",
+      "order": 9,
+      "topicId": 131,
+      "topicSlug": "tashqi-yoritish-asboblaridan-foydalanish",
+      "topicTitle": "Tashqi yoritish asboblaridan foydalanish",
+      "questionIndex": 11,
+      "text": "Tumanga qarshi chiroqlar va orqa tumanga qarshi chiroqlar birga yoqilishi mumkin?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Cheklangan ko'rinish sharoitida",
+        "Etarlicha ko'rinmaslik sharoitida"
+      ],
+      "correctIndex": 1,
+      "explanation": "Orqa tumanga qarshi chiroqlardan faqat etarlicha ko'rinmaslik sharoitida (tuman, qor, yomg'ir kabilar tufayli ko'rinish 300 metrdan kam bo'lganda) tumanga qarshi old chiroqlar bilan birga foydalanishga ruxsat beriladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Tumanga qarshi chiroqlar va orqa tumanga qarshi chiroqlar birga yoqilishi mumkin?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Cheklangan ko'rinish sharoitida",
+            "Etarlicha ko'rinmaslik sharoitida"
+          ],
+          "correctIndex": 1,
+          "explanation": "Orqa tumanga qarshi chiroqlardan faqat etarlicha ko'rinmaslik sharoitida (tuman, qor, yomg'ir kabilar tufayli ko'rinish 300 metrdan kam bo'lganda) tumanga qarshi old chiroqlar bilan birga foydalanishga ruxsat beriladi."
+        },
+        "uz_cyrl": {
+          "text": "Туманга қарши чироқлар ва орқа туманга қарши чироқлар бирга ёқилиши мумкин?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Чекланган кўриниш шароитида",
+            "Етарлича кўринмаслик шароитида"
+          ],
+          "correctIndex": 1,
+          "explanation": "Орқа туманга қарши чироқлардан фақат етарлича кўринмаслик шароитида (туман, қор, ёмғир кабилар туфайли кўриниш 300 метрдан кам бўлганда) туманга қарши олд чироқлар билан бирга фойдаланишга рухсат берилади."
+        },
+        "ru": {
+          "text": "Когда можно одновременно использовать передние и задние противотуманные фонари?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "В условиях ограниченной видимости",
+            "В условиях недостаточной видимости"
+          ],
+          "correctIndex": 1,
+          "explanation": "Задние противотуманные фонари допускается использовать только в условиях недостаточной видимости."
+        }
+      }
+    },
+    {
+      "id": "274bf6be-6ec3-4d91-954f-c5cd2185e5e1",
+      "questionId": "topic:138:274bf6be-6ec3-4d91-954f-c5cd2185e5e1",
+      "order": 10,
+      "topicId": 138,
+      "topicSlug": "transport-vositalaridan-foydalanishni-taqiqlovchi-shartlar",
+      "topicTitle": "Transport vositalaridan foydalanishni taqiqlovchi shartlar",
+      "questionIndex": 17,
+      "text": "M3 toifadagi avtotransport vositalarining boshqaruv qurilmasidagi qanday eng katta lyuft yig‘indisiga yo‘l qo‘yiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "10°",
+        "20°",
+        "25°"
+      ],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "M3 toifadagi avtotransport vositalarining boshqaruv qurilmasidagi qanday eng katta lyuft yig‘indisiga yo‘l qo‘yiladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "10°",
+            "20°",
+            "25°"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "М3 тоифадаги автотранспорт воситаларининг бошқарув қурилмасидаги қандай енг катта люфт йиғиндисига ё‘л қўйилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "10°",
+            "20°",
+            "25°"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой максимальный суммарный люфт допускается в рулевом управлении транспортных средств категории M3?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "10°",
+            "20°",
+            "25°"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "ab78a961-9656-4e25-b29c-fc76057d48a7",
+      "questionId": "topic:138:ab78a961-9656-4e25-b29c-fc76057d48a7",
+      "order": 11,
+      "topicId": 138,
+      "topicSlug": "transport-vositalaridan-foydalanishni-taqiqlovchi-shartlar",
+      "topicTitle": "Transport vositalaridan foydalanishni taqiqlovchi shartlar",
+      "questionIndex": 19,
+      "text": "Qaysi hollarda transport vositasidan foydalanish taqiqlanadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Yonilg‘i darajasini ko‘rsatish qurilmasi ishlamaydi",
+        "O‘t oldirish tizimi nosoz",
+        "Dvigatel qiyinchilik bilan ishga tushadi",
+        "Tovush signallari ishlamaydi"
+      ],
+      "correctIndex": 3,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi hollarda transport vositasidan foydalanish taqiqlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yonilg‘i darajasini ko‘rsatish qurilmasi ishlamaydi",
+            "O‘t oldirish tizimi nosoz",
+            "Dvigatel qiyinchilik bilan ishga tushadi",
+            "Tovush signallari ishlamaydi"
+          ],
+          "correctIndex": 3,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси ҳолларда транспорт воситасидан фойдаланиш тақиқланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ёнилғи даражасини кўрсатиш қурилмаси ишламайди",
+            "Ўт олдириш тизими носоз",
+            "Двигател қийинчилик билан ишга тушади",
+            "Товуш сигналлари ишламайди"
+          ],
+          "correctIndex": 3,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каком случае эксплуатация транспортного средства запрещается?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Не работает указатель уровня топлива",
+            "Неисправна система зажигания",
+            "Двигатель запускается с трудом",
+            "Не работает звуковой сигнал"
+          ],
+          "correctIndex": 3,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "2715b7bd-ae59-44ad-af7e-e33431478f26",
+      "questionId": "topic:117:2715b7bd-ae59-44ad-af7e-e33431478f26",
+      "order": 12,
+      "topicId": 117,
+      "topicSlug": "harakatlanish-tezligi",
+      "topicTitle": "Harakatlanish tezligi",
+      "questionIndex": 15,
+      "text": "108 km/soat tezlikda harakatlanayotgan transport vositasi 1 sekundda qancha masofani bosib o‘tadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "15 m",
+        "25 m",
+        "30 m"
+      ],
+      "correctIndex": 2,
+      "explanation": "Tezlikni m/s ga o‘tkazish uchun 108 ni 3.6 ga bo‘lamiz: 108 / 3.6 = 30 m/s. Demak, transport vositasi 1 soniyada roppa-rosa 30 metr masofani bosib o‘tadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "108 km/soat tezlikda harakatlanayotgan transport vositasi 1 sekundda qancha masofani bosib o‘tadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "15 m",
+            "25 m",
+            "30 m"
+          ],
+          "correctIndex": 2,
+          "explanation": "Tezlikni m/s ga o‘tkazish uchun 108 ni 3.6 ga bo‘lamiz: 108 / 3.6 = 30 m/s. Demak, transport vositasi 1 soniyada roppa-rosa 30 metr masofani bosib o‘tadi."
+        },
+        "uz_cyrl": {
+          "text": "108 км/соат тезликда ҳаракатланаётган транспорт воситаси 1 секундда қанча масофани босиб ўтади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "15 м",
+            "25 м",
+            "30 м"
+          ],
+          "correctIndex": 2,
+          "explanation": "Тезликни м/с га ўтказиш учун 108 ни 3.6 га бўламиз: 108 / 3.6 = 30 м/с. Демак, транспорт воситаси 1 сонияда роппа-роса 30 метр масофани босиб ўтади."
+        },
+        "ru": {
+          "text": "Какое расстояние проходит транспортное средство за 1 секунду при скорости 108 км/ч?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "15 м",
+            "25 м",
+            "30 м"
+          ],
+          "correctIndex": 2,
+          "explanation": "108 км/ч = 30 м/с, поэтому за секунду транспортное средство проходит 30 метров."
+        }
+      }
+    },
+    {
+      "id": "04c759de-e990-4899-8b6b-74139f83830d",
+      "questionId": "topic:109:04c759de-e990-4899-8b6b-74139f83830d",
+      "order": 13,
+      "topicId": 109,
+      "topicSlug": "qo-shimcha-axborot-belgilari",
+      "topicTitle": "Qo‘shimcha axborot belgilari",
+      "questionIndex": 24,
+      "text": "Sizga ruxsat etilgan to‘la vazni 3,5 tonnadan ortiq yuk avtomobilida harakatlanish:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940116388-k6dj5h6z.webp",
+      "audio": "",
+      "options": [
+        "Faqat to‘g‘riga",
+        "To‘g‘riga va o‘ngga",
+        "Barcha yo‘nalishlarda"
+      ],
+      "correctIndex": 0,
+      "explanation": "Belgi yuk avtomobillari uchun faqat to‘g‘ri yo‘nalishda harakatlanishga ruxsat beradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Sizga ruxsat etilgan to‘la vazni 3,5 tonnadan ortiq yuk avtomobilida harakatlanish:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat to‘g‘riga",
+            "To‘g‘riga va o‘ngga",
+            "Barcha yo‘nalishlarda"
+          ],
+          "correctIndex": 0,
+          "explanation": "Belgi yuk avtomobillari uchun faqat to‘g‘ri yo‘nalishda harakatlanishga ruxsat beradi."
+        },
+        "uz_cyrl": {
+          "text": "Сизга рухсат этилган тўла вазни 3,5 тоннадан ортиқ юк автомобилида ҳаракатланиш:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат тўғрига",
+            "Тўғрига ва ўнгга",
+            "Барча йўналишларда"
+          ],
+          "correctIndex": 0,
+          "explanation": "Белги юк автомобиллари учун фақат тўғри йўналишда ҳаракатланишга рухсат беради."
+        },
+        "ru": {
+          "text": "Движение грузового автомобиля с разрешённой максимальной массой более 3,5 т:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только прямо",
+            "Прямо и направо",
+            "Во всех направлениях"
+          ],
+          "correctIndex": 0,
+          "explanation": "Знак разрешает грузовым автомобилям движение только прямо."
+        }
+      }
+    },
+    {
+      "id": "3ee17885-3309-4608-86bd-e348e2a5dfc7",
+      "questionId": "topic:103:3ee17885-3309-4608-86bd-e348e2a5dfc7",
+      "order": 14,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 2,
+      "text": "Ushbu yo‘l belgisi chorrahaga yaqinlashayotganlik to‘g‘risida ogohlantiradi, bunda Siz:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780815052715-abbb4vxf.png",
+      "audio": "",
+      "options": [
+        "Birinchi bo‘lib o‘tish huquqiga egasiz",
+        "Kesib o‘tayotgan yo‘ldagi transport vositalariga yo‘l berishingiz kerak",
+        "Faqatgina o‘ng tomondan yaqinlashib kelayotgan transport vositalariga yo‘l berishingiz kerak"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo‘l belgisi chorrahaga yaqinlashayotganlik to‘g‘risida ogohlantiradi, bunda Siz:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Birinchi bo‘lib o‘tish huquqiga egasiz",
+            "Kesib o‘tayotgan yo‘ldagi transport vositalariga yo‘l berishingiz kerak",
+            "Faqatgina o‘ng tomondan yaqinlashib kelayotgan transport vositalariga yo‘l berishingiz kerak"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Ушбу йўл белгиси чорраҳага яқинлашаётганлик тўғрисида огоҳлантиради, бунда Сиз:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Биринчи бўлиб ўтиш ҳуқуқига егансиз",
+            "Кесиб ўтаётган йўлдаги транспорт воситаларига йўл беришиңиз керак",
+            "Фақатгина ўнг томондан яқинлашиб келаётган транспорт воситаларига йўл беришиңиз керак"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Данный дорожный знак предупреждает о приближении к перекрёстку, при этом вы должны:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Иметь право проехать первым",
+            "Уступить транспортным средствам на пересекаемой дороге",
+            "Уступить только транспортным средствам, приближающимся справа"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "568fe25e-a862-4487-afbd-f3d2c49d4db4",
+      "questionId": "topic:117:568fe25e-a862-4487-afbd-f3d2c49d4db4",
+      "order": 15,
+      "topicId": 117,
+      "topicSlug": "harakatlanish-tezligi",
+      "topicTitle": "Harakatlanish tezligi",
+      "questionIndex": 24,
+      "text": "72 km/soat tezlikda harakatlanayotgan transport vositasi 1 sekundda qancha masofani bosib o'tadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "15 m",
+        "20 m",
+        "25 m"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tezlikni km/soatdan m/s ga o'tkazish uchun uni 3.6 ga bo'lish kerak: 72 / 3.6 = 20 m/s. Demak, transport vositasi 1 sekundda 20 metr masofani bosib o'tadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "72 km/soat tezlikda harakatlanayotgan transport vositasi 1 sekundda qancha masofani bosib o'tadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "15 m",
+            "20 m",
+            "25 m"
+          ],
+          "correctIndex": 1,
+          "explanation": "Tezlikni km/soatdan m/s ga o'tkazish uchun uni 3.6 ga bo'lish kerak: 72 / 3.6 = 20 m/s. Demak, transport vositasi 1 sekundda 20 metr masofani bosib o'tadi."
+        },
+        "uz_cyrl": {
+          "text": "72 км/соат тезликда ҳаракатланаётган транспорт воситаси 1 секундда қанча масофани босиб ўтади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "15 м",
+            "20 м",
+            "25 м"
+          ],
+          "correctIndex": 1,
+          "explanation": "Тезликни км/соатдан м/с га ўтказиш учун уни 3.6 га бўлиш керак: 72 / 3.6 = 20 м/с. Демак, транспорт воситаси 1 секундда 20 метр масофани босиб ўтади."
+        },
+        "ru": {
+          "text": "Какое расстояние проходит транспортное средство за 1 секунду при скорости 72 км/ч?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "15 м",
+            "20 м",
+            "25 м"
+          ],
+          "correctIndex": 1,
+          "explanation": "72 км/ч = 20 м/с, значит за секунду транспортное средство проходит 20 метров."
+        }
+      }
+    },
+    {
+      "id": "0a74e234-a2a8-4882-b9ac-6e2d72539d5d",
+      "questionId": "topic:110:0a74e234-a2a8-4882-b9ac-6e2d72539d5d",
+      "order": 16,
+      "topicId": 110,
+      "topicSlug": "yotiq-chiziqlar",
+      "topicTitle": "Yotiq chiziqlar",
+      "questionIndex": 54,
+      "text": "Ushbu yo'l chizig'i sizga qanday manyovr bajarishni taqiqlaydi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751499859-3y7x2bln.webp",
+      "audio": "",
+      "options": [
+        "Qayralib olishni",
+        "Quvib o'tishni",
+        "Aylanib o'tishni",
+        "Sanab o'tilgan barcha manevrlarga ruxsat beriladi"
+      ],
+      "correctIndex": 3,
+      "explanation": "Yo'l o'rtasida chizilgan oddiy uzuq-uzuq chiziq (1.5 chizig'i) harakatlanish bo'laklarini ajratib turadi. Bu chiziqni bosib o'tish, quvib o'tish, aylanib o'tish yoki qayrilib olish harakatlarini bajarish mutlaqo taqiqlanmagan, ya'ni sanab o'tilgan barcha manyovrlarga ruxsat beriladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo'l chizig'i sizga qanday manyovr bajarishni taqiqlaydi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Qayralib olishni",
+            "Quvib o'tishni",
+            "Aylanib o'tishni",
+            "Sanab o'tilgan barcha manevrlarga ruxsat beriladi"
+          ],
+          "correctIndex": 3,
+          "explanation": "Yo'l o'rtasida chizilgan oddiy uzuq-uzuq chiziq (1.5 chizig'i) harakatlanish bo'laklarini ajratib turadi. Bu chiziqni bosib o'tish, quvib o'tish, aylanib o'tish yoki qayrilib olish harakatlarini bajarish mutlaqo taqiqlanmagan, ya'ni sanab o'tilgan barcha manyovrlarga ruxsat beriladi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу ёъл чизиғи сизга қандай манёвр бажаришни тақиқлайди?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Қайралиб олишни",
+            "Қувиб ўтишни",
+            "Айланиб ўтишни",
+            "Санаб ўтилган барча маневрларга рухсат берилади"
+          ],
+          "correctIndex": 3,
+          "explanation": "Ёъл ўртасида чизилган оддий узуқ-узуқ чизиқ (1.5 чизиғи) ҳаракатланиш бўлакларини ажратиб туради. Бу чизиқни босиб ўтиш, қувиб ўтиш, айланиб ўтиш ёки қайрилиб олиш ҳаракатларини бажариш мутлақо тақиқланмаган, яъни санаб ўтилган барча манёврларга рухсат берилади."
+        },
+        "ru": {
+          "text": "Какой манёвр запрещает эта дорожная разметка?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Разворот",
+            "Обгон",
+            "Объезд",
+            "Все перечисленные манёвры разрешены"
+          ],
+          "correctIndex": 3,
+          "explanation": "Обычная прерывистая линия 1.5 не запрещает перечисленные манёвры."
+        }
+      }
+    },
+    {
+      "id": "53e4b813-627e-4c0c-8f50-ea739e732311",
+      "questionId": "topic:105:53e4b813-627e-4c0c-8f50-ea739e732311",
+      "order": 17,
+      "topicId": 105,
+      "topicSlug": "taqiqlovchi-belgilar",
+      "topicTitle": "Taqiqlovchi belgilar",
+      "questionIndex": 53,
+      "text": "Shatakka olib harakatlanishingiz mumkin:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745540504-1cfjhk2f.webp",
+      "audio": "",
+      "options": [
+        "Faqat «A» yo‘nalishi bo‘yicha",
+        "Faqat «Б» yo‘nalish bo‘yicha",
+        "Ko‘rsatilgan barcha yo‘nalish bo‘yicha"
+      ],
+      "correctIndex": 0,
+      "explanation": "Shatakka olingan transport vositasi bilan faqat A yo‘nalishi bo‘yicha harakatlanishga ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Shatakka olib harakatlanishingiz mumkin:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat «A» yo‘nalishi bo‘yicha",
+            "Faqat «Б» yo‘nalish bo‘yicha",
+            "Ko‘rsatilgan barcha yo‘nalish bo‘yicha"
+          ],
+          "correctIndex": 0,
+          "explanation": "Shatakka olingan transport vositasi bilan faqat A yo‘nalishi bo‘yicha harakatlanishga ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Шатакка олиб ҳаракатланишингиз мумкин:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат «А» йўналиши бўйича",
+            "Фақат «Б» йўналиш бўйича",
+            "Кўрсатилган барча йўналиш бўйича"
+          ],
+          "correctIndex": 0,
+          "explanation": "Шатакка олинган транспорт воситаси билан фақат А йўналиши бўйича ҳаракатланишга рухсат етилади."
+        },
+        "ru": {
+          "text": "Вы можете двигаться с буксируемым транспортным средством:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только по направлению «A»",
+            "Только по направлению «Б»",
+            "По всем указанным направлениям"
+          ],
+          "correctIndex": 0,
+          "explanation": "С буксируемым транспортным средством разрешено движение только по направлению A."
+        }
+      }
+    },
+    {
+      "id": "d6b4e577-dbbd-4e2f-86c7-be917bfd25ec",
+      "questionId": "topic:115:d6b4e577-dbbd-4e2f-86c7-be917bfd25ec",
+      "order": 18,
+      "topicId": 115,
+      "topicSlug": "harakatlanishni-boshlash-manyovr-qilish",
+      "topicTitle": "Harakatlanishni boshlash, manyovr qilish",
+      "questionIndex": 65,
+      "text": "Ushbu ko'rsatilgan vaziyatda sizga hovliga orqa bilan kirib qayrilib olishga ruxsat beriladimi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782986001072-n8ddzd56.webp",
+      "audio": "",
+      "options": [
+        "Har qanday hollarda ruxsat beriladi",
+        "Ruxsat beriladi agarda bunda harakatning boshqa ishtirokchilariga halaqit berilmasa",
+        "Taqiqlanadi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Orqa bilan hovliga kirish boshqa harakat ishtirokchilariga halaqit bermasa ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu ko'rsatilgan vaziyatda sizga hovliga orqa bilan kirib qayrilib olishga ruxsat beriladimi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Har qanday hollarda ruxsat beriladi",
+            "Ruxsat beriladi agarda bunda harakatning boshqa ishtirokchilariga halaqit berilmasa",
+            "Taqiqlanadi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Orqa bilan hovliga kirish boshqa harakat ishtirokchilariga halaqit bermasa ruxsat etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу кўрсатилган вазиятда сизга ҳовлига орқа билан кириб қайрилиб олишга рухсат бериладими?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ҳар қандай ҳолларда рухсат берилади",
+            "Рухсат берилади агарда бунда ҳаракатнинг бошқа иштирокчиларига ҳалақит берилмаса",
+            "Тақиқланади"
+          ],
+          "correctIndex": 1,
+          "explanation": "Орқа билан ҳовлига кириш бошқа ҳаракат иштирокчиларига ҳалақит бермаса рухсат етилади."
+        },
+        "ru": {
+          "text": "Разрешено ли, заехав задним ходом во двор, выполнить разворот?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Разрешено всегда",
+            "Разрешено, если не создаются помехи другим участникам",
+            "Запрещено"
+          ],
+          "correctIndex": 1,
+          "explanation": "Такой манёвр разрешён, если он не создаёт помех."
+        }
+      }
+    },
+    {
+      "id": "b4af7db7-ecee-453b-89d7-674a3825bd73",
+      "questionId": "topic:107:b4af7db7-ecee-453b-89d7-674a3825bd73",
+      "order": 19,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 47,
+      "text": "Ko'rsatilgan qaysi belgi reversiv harakat boshlanishi haqida axborot beradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782816170775-31fr0l6l.webp",
+      "audio": "",
+      "options": [
+        "«A»",
+        "«B»",
+        "«V»"
+      ],
+      "correctIndex": 2,
+      "explanation": "«V» belgisi reversiv harakat boshlanishini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko'rsatilgan qaysi belgi reversiv harakat boshlanishi haqida axborot beradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "«A»",
+            "«B»",
+            "«V»"
+          ],
+          "correctIndex": 2,
+          "explanation": "«V» belgisi reversiv harakat boshlanishini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган қайси белги реверсив ҳаракат бошланиши ҳақида ахборот беради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "«А»",
+            "«Б»",
+            "«В»"
+          ],
+          "correctIndex": 2,
+          "explanation": "«В» белгиси реверсив ҳаракат бошланишини билдиради."
+        },
+        "ru": {
+          "text": "Какой из показанных знаков информирует о начале реверсивного движения?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "«A»",
+            "«B»",
+            "«V»"
+          ],
+          "correctIndex": 2,
+          "explanation": "Знак «V» обозначает начало реверсивного движения."
+        }
+      }
+    },
+    {
+      "id": "0c8a52aa-94ef-4dd5-8902-20d862d0ff12",
+      "questionId": "topic:110:0c8a52aa-94ef-4dd5-8902-20d862d0ff12",
+      "order": 20,
+      "topicId": 110,
+      "topicSlug": "yotiq-chiziqlar",
+      "topicTitle": "Yotiq chiziqlar",
+      "questionIndex": 65,
+      "text": "Haydovchi chapga burilishda qaysi yo‘nalish bo‘yicha qoidani buzmoqda?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751556963-b0bgnect.webp",
+      "audio": "",
+      "options": [
+        "Faqat «A» yo‘nalishi bo‘yicha",
+        "Faqat «B» yo‘nalishi bo‘yicha",
+        "Ko‘rsatilgan barcha yo‘nalish bo‘yicha"
+      ],
+      "correctIndex": 2,
+      "explanation": "Chorrahada o‘rnatilgan 5.15.1 «Bo‘laklar bo‘yicha harakatlanish yo‘nalishi» yo‘l belgisi talabiga ko‘ra, qizil avtomobil turgan eng chekka o‘ng bo‘lakdan faqat o‘ngga burilishga ruxsat berilgan. Ushbu chekka o‘ng bo‘lakdan chapga burilish mutlaqo taqiqlanadi. Shuning uchun haydovchi «A» va «B» yo‘nalishlarining ikkalasida ham qoidani buzgan hisoblanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Haydovchi chapga burilishda qaysi yo‘nalish bo‘yicha qoidani buzmoqda?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat «A» yo‘nalishi bo‘yicha",
+            "Faqat «B» yo‘nalishi bo‘yicha",
+            "Ko‘rsatilgan barcha yo‘nalish bo‘yicha"
+          ],
+          "correctIndex": 2,
+          "explanation": "Chorrahada o‘rnatilgan 5.15.1 «Bo‘laklar bo‘yicha harakatlanish yo‘nalishi» yo‘l belgisi talabiga ko‘ra, qizil avtomobil turgan eng chekka o‘ng bo‘lakdan faqat o‘ngga burilishga ruxsat berilgan. Ushbu chekka o‘ng bo‘lakdan chapga burilish mutlaqo taqiqlanadi. Shuning uchun haydovchi «A» va «B» yo‘nalishlarining ikkalasida ham qoidani buzgan hisoblanadi."
+        },
+        "uz_cyrl": {
+          "text": "Ҳайдовчи чапга бурилишда қайси ё‘налиш бўйича қоидани бузмоқда?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат «А» ё‘налиши бўйича",
+            "Фақат «Б» ё‘налиши бўйича",
+            "Кўрсатилган барча ё‘налиш бўйича"
+          ],
+          "correctIndex": 2,
+          "explanation": "Чорраҳада ўрнатилган 5.15.1 «Бўлаклар бўйича ҳаракатланиш ё‘налиши» ё‘л белгиси талабига кўра, қизил автомобил турган енг чекка ўнг бўлакдан фақат ўнгга бурилишга рухсат берилган. Ушбу чекка ўнг бўлакдан чапга бурилиш мутлақо тақиқланади. Шунинг учун ҳайдовчи «А» ва «Б» ё‘налишларининг иккаласида ҳам қоидани бузган ҳисобланади."
+        },
+        "ru": {
+          "text": "По какой траектории водитель нарушает правила при повороте налево?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только по траектории «A»",
+            "Только по траектории «B»",
+            "По всем показанным траекториям"
+          ],
+          "correctIndex": 2,
+          "explanation": "С крайней правой полосы разрешён только поворот направо, поэтому поворот налево по любой показанной траектории нарушает правила."
+        }
+      }
+    }
+  ]
+}

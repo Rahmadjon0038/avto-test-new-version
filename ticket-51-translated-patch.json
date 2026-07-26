@@ -1,0 +1,1184 @@
+{
+  "title": "Bilet №51",
+  "titleI18n": {
+    "uz_latn": "Bilet №51",
+    "uz_cyrl": "Билет №51",
+    "ru": "Билет №51"
+  },
+  "ticketNumber": 51,
+  "status": "COMPLETED",
+  "questions": [
+    {
+      "id": "2c8a044d-5867-48de-8ed6-c21b36a0b729",
+      "questionId": "topic:105:2c8a044d-5867-48de-8ed6-c21b36a0b729",
+      "order": 1,
+      "topicId": 105,
+      "topicSlug": "taqiqlovchi-belgilar",
+      "topicTitle": "Taqiqlovchi belgilar",
+      "questionIndex": 1,
+      "text": "Mazkur yo‘l belgisi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745099083-z248t6wx.webp",
+      "audio": "",
+      "options": [
+        "Doimiy belgi hisoblanadi",
+        "Vaqtinchalik belgi hisoblanadi",
+        "Mavsumiy belgi hisoblanadi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Sariq fondagi taqiqlovchi yo‘l belgilari vaqtinchalik hisoblanadi va odatda yo‘l ta'mirlash yoki vaqtinchalik harakatni tashkil etishda qo‘llaniladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Mazkur yo‘l belgisi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Doimiy belgi hisoblanadi",
+            "Vaqtinchalik belgi hisoblanadi",
+            "Mavsumiy belgi hisoblanadi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Sariq fondagi taqiqlovchi yo‘l belgilari vaqtinchalik hisoblanadi va odatda yo‘l ta'mirlash yoki vaqtinchalik harakatni tashkil etishda qo‘llaniladi."
+        },
+        "uz_cyrl": {
+          "text": "Мазкур йўл белгиси:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Доимий белги ҳисобланади",
+            "Вақтинчалик белги ҳисобланади",
+            "Мавсумий белги ҳисобланади"
+          ],
+          "correctIndex": 1,
+          "explanation": "Сариқ фондаги тақиқловчи йўл белгилари вақтинчалик ҳисобланади ва одатда йўл таъмирлаш ёки вақтинчалик ҳаракатни ташкил етишда қўлланилади."
+        },
+        "ru": {
+          "text": "Этот дорожный знак:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Является постоянным",
+            "Является временным",
+            "Является сезонным"
+          ],
+          "correctIndex": 1,
+          "explanation": "Запрещающие знаки на жёлтом фоне являются временными и обычно применяются при дорожных работах или временной организации движения."
+        }
+      }
+    },
+    {
+      "id": "2c9c2cf1-1b04-4aa9-9e84-54339c8d900d",
+      "questionId": "topic:116:2c9c2cf1-1b04-4aa9-9e84-54339c8d900d",
+      "order": 2,
+      "topicId": 116,
+      "topicSlug": "yo-lning-qatnov-qismida-transport-vositalarining-joylashuvi",
+      "topicTitle": "Yo‘lning qatnov qismida transport vositalarining joylashuvi",
+      "questionIndex": 2,
+      "text": "Bir yo‘nalishda uch va undan ortiq tasmali har qanday yo‘lda yuk avtomobillariga chetki chap qatorni egallashga ruxsat etiladi:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Quvib o‘tish, chapga burilish va qayrilib olishda",
+        "Quvib o‘tish va aylanib o‘tishda",
+        "Chapga burilish va qayrilib olishda",
+        "Barcha hollarda"
+      ],
+      "correctIndex": 2,
+      "explanation": "Yuk avtomobillari bir yo‘nalishda uch va undan ortiq tasma bo‘lsa, chetki chap tasmani faqat chapga burilish yoki qayrilib olish uchun egallashi mumkin.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bir yo‘nalishda uch va undan ortiq tasmali har qanday yo‘lda yuk avtomobillariga chetki chap qatorni egallashga ruxsat etiladi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Quvib o‘tish, chapga burilish va qayrilib olishda",
+            "Quvib o‘tish va aylanib o‘tishda",
+            "Chapga burilish va qayrilib olishda",
+            "Barcha hollarda"
+          ],
+          "correctIndex": 2,
+          "explanation": "Yuk avtomobillari bir yo‘nalishda uch va undan ortiq tasma bo‘lsa, chetki chap tasmani faqat chapga burilish yoki qayrilib olish uchun egallashi mumkin."
+        },
+        "uz_cyrl": {
+          "text": "Бир ё‘налишда уч ва ундан ортиқ тасмали ҳар қандай ё‘лда юк автомобилларига четки чап қаторни егаллашга рухсат етилади:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Қувиб ўтиш, чапга бурилиш ва қайрилиб олишда",
+            "Қувиб ўтиш ва айланиб ўтишда",
+            "Чапга бурилиш ва қайрилиб олишда",
+            "Барча ҳолларда"
+          ],
+          "correctIndex": 2,
+          "explanation": "Юк автомобиллари бир ё‘налишда уч ва ундан ортиқ тасма бўлса, четки чап тасмани фақат чапга бурилиш ёки қайрилиб олиш учун егаллаши мумкин."
+        },
+        "ru": {
+          "text": "Когда грузовым автомобилям разрешено занимать крайнюю левую полосу на дороге с тремя и более полосами в одном направлении?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "При обгоне, повороте налево и развороте",
+            "При обгоне и объезде",
+            "При повороте налево и развороте",
+            "Во всех случаях"
+          ],
+          "correctIndex": 2,
+          "explanation": "Грузовым автомобилям разрешено занимать крайнюю левую полосу только для поворота налево или разворота."
+        }
+      }
+    },
+    {
+      "id": "c2d46a9a-caf2-4d72-8551-28687664f36c",
+      "questionId": "topic:99:c2d46a9a-caf2-4d72-8551-28687664f36c",
+      "order": 3,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 5,
+      "text": "To'siq deb nimaga aytiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Yo'lning qatnov qismida harakatsiz holda bo'lgan jism",
+        "Tirbandlik tufayli qatnov qismida to'xtab turgan transport vositasi",
+        "Yo'l harakati xavfsizligiga xavf soluvchi har qanday omil"
+      ],
+      "correctIndex": 0,
+      "explanation": "Yo'l harakati qoidalarida 'To'siq' tushunchasiga quyidagicha ta'rif berilgan: harakatlanish bo'lagida bo'lgan, transport vositasining harakatini davom ettirishga imkon bermaydigan nosoz yoki shikastlangan transport vositasi, yo'l qoplamasidagi nuqsonlar, begona buyumlar va shunga o'xshash harakatsiz ob'ektlar to'siq hisoblanadi. Tirbandlik tufayli to'xtab turish esa to'siq hisoblanmaydi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "To'siq deb nimaga aytiladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yo'lning qatnov qismida harakatsiz holda bo'lgan jism",
+            "Tirbandlik tufayli qatnov qismida to'xtab turgan transport vositasi",
+            "Yo'l harakati xavfsizligiga xavf soluvchi har qanday omil"
+          ],
+          "correctIndex": 0,
+          "explanation": "Yo'l harakati qoidalarida 'To'siq' tushunchasiga quyidagicha ta'rif berilgan: harakatlanish bo'lagida bo'lgan, transport vositasining harakatini davom ettirishga imkon bermaydigan nosoz yoki shikastlangan transport vositasi, yo'l qoplamasidagi nuqsonlar, begona buyumlar va shunga o'xshash harakatsiz ob'ektlar to'siq hisoblanadi. Tirbandlik tufayli to'xtab turish esa to'siq hisoblanmaydi."
+        },
+        "uz_cyrl": {
+          "text": "Тўсиқ деб нимага айтилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ёълнинг қатнов қисмида ҳаракатсиз ҳолда бўлган жисм",
+            "Тирбандлик туфайли қатнов қисмида тўхтаб турган транспорт воситаси",
+            "Ёъл ҳаракати хавфсизлигига хавф солувчи ҳар қандай омил"
+          ],
+          "correctIndex": 0,
+          "explanation": "Ёъл ҳаракати қоидаларида ъТўсиқъ тушунчасига қуйидагича таъриф берилган: ҳаракатланиш бўлагида бўлган, транспорт воситасининг ҳаракатини давом еттиришга имкон бермайдиган носоз ёки шикастланган транспорт воситаси, йўл қопламасидаги нуқсонлар, бегона буюмлар ва шунга ўхшаш ҳаракатсиз объектлар тўсиқ ҳисобланади. Тирбандлик туфайли тўхтаб туриш еса тўсиқ ҳисобланмайди."
+        },
+        "ru": {
+          "text": "Что называется препятствием?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Неподвижный объект на проезжей части дороги",
+            "Транспортное средство, остановившееся на проезжей части из-за затора",
+            "Любой фактор, создающий угрозу безопасности дорожного движения"
+          ],
+          "correctIndex": 0,
+          "explanation": "Препятствием считается находящийся на полосе движения неподвижный объект, который не позволяет продолжить движение: неисправное или повреждённое транспортное средство, дефект покрытия, посторонний предмет и тому подобное. Остановка из-за затора препятствием не считается."
+        }
+      }
+    },
+    {
+      "id": "3e0bd2a0-6cbb-4c2b-a5f6-c27b3afc6b87",
+      "questionId": "topic:134:3e0bd2a0-6cbb-4c2b-a5f6-c27b3afc6b87",
+      "order": 4,
+      "topicId": 134,
+      "topicSlug": "odam-tashish",
+      "topicTitle": "Odam tashish",
+      "questionIndex": 0,
+      "text": "Odam tashish uchun mo‘ljallangan yuk avtomobili yukxonasiga o‘rnatilgan o‘rindiqlar, yukxona pastki qismidan qancha balandlikda mahkamlangan bo‘lishi kerak?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "0,3-0,5 metr",
+        "0,6-0,7 metr",
+        "0,8-0,9 metr"
+      ],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Odam tashish uchun mo‘ljallangan yuk avtomobili yukxonasiga o‘rnatilgan o‘rindiqlar, yukxona pastki qismidan qancha balandlikda mahkamlangan bo‘lishi kerak?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,3-0,5 metr",
+            "0,6-0,7 metr",
+            "0,8-0,9 metr"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Одам ташиш учун мўлжалланган юк автомобили юкхонасига ўрнатилган ўриндиқлар, юкхона пастки қисмидан қанча баландликда маҳкамланган бўлиши керак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,3-0,5 метр",
+            "0,6-0,7 метр",
+            "0,8-0,9 метр"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "На какой высоте от пола кузова должны быть закреплены сиденья грузового автомобиля, предназначенного для перевозки людей?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,3–0,5 м",
+            "0,6–0,7 м",
+            "0,8–0,9 м"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "ab68915d-4c7c-4d2c-b156-58f88806bb6a",
+      "questionId": "topic:99:ab68915d-4c7c-4d2c-b156-58f88806bb6a",
+      "order": 5,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 11,
+      "text": "Quyidagi javoblardan qaysi birida «Yo‘lovchi» atamasining to‘g‘ri ta’rifi ko‘rsatilgan?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Transport vositasidagi barcha shaxslar",
+        "Transport vositasidagi (haydovchidan tashqari) shaxs, shuningdek transport vositasiga kirayotgan (unga chiqib o‘tirayotgan) yoki transport vositasidan chiqayotgan (undan tushayotgan) shaxs",
+        "Har ikkala ta’rif to‘g‘ri"
+      ],
+      "correctIndex": 1,
+      "explanation": "Yo‘lovchi — haydovchidan tashqari transport vositasidagi yoki unga chiqayotgan/tushayotgan shaxs hisoblanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi javoblardan qaysi birida «Yo‘lovchi» atamasining to‘g‘ri ta’rifi ko‘rsatilgan?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Transport vositasidagi barcha shaxslar",
+            "Transport vositasidagi (haydovchidan tashqari) shaxs, shuningdek transport vositasiga kirayotgan (unga chiqib o‘tirayotgan) yoki transport vositasidan chiqayotgan (undan tushayotgan) shaxs",
+            "Har ikkala ta’rif to‘g‘ri"
+          ],
+          "correctIndex": 1,
+          "explanation": "Yo‘lovchi — haydovchidan tashqari transport vositasidagi yoki unga chiqayotgan/tushayotgan shaxs hisoblanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги жавоблардан қайси бирида «Йўловчи» атамасининг тўғри таърифи кўрсатилган?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Транспорт воситасидаги барча шахслар",
+            "Транспорт воситасидаги (ҳайдовчидан ташқари) шахс, шунингдек транспорт воситасига кираётган (унга чиқиб ўтираётган) ёки транспорт воситасидан чиқаётган (ундан тушаётган) шахс",
+            "Ҳар икки таъриф тўғри"
+          ],
+          "correctIndex": 1,
+          "explanation": "Йўловчи — ҳайдовчидан ташқари транспорт воситасидаги ёки унга чиқаётган/тушаётган шахс ҳисобланади."
+        },
+        "ru": {
+          "text": "В каком из ответов правильно дано определение термина «пассажир»?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Все лица, находящиеся в транспортном средстве",
+            "Лицо, находящееся в транспортном средстве (кроме водителя), а также лицо, входящее в транспортное средство или выходящее из него",
+            "Оба определения верны"
+          ],
+          "correctIndex": 1,
+          "explanation": "Пассажир — это лицо, находящееся в транспортном средстве, кроме водителя, либо входящее в него или выходящее из него."
+        }
+      }
+    },
+    {
+      "id": "b93b405a-8e0a-4b11-8f8c-986b9193d2b4",
+      "questionId": "topic:110:b93b405a-8e0a-4b11-8f8c-986b9193d2b4",
+      "order": 6,
+      "topicId": 110,
+      "topicSlug": "yotiq-chiziqlar",
+      "topicTitle": "Yotiq chiziqlar",
+      "questionIndex": 20,
+      "text": "Bu yotiq chiziq bildiradi:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751300687-8334wjcq.webp",
+      "audio": "",
+      "options": [
+        "Ko'rsatilgan yo'nalishlarida xarakakatlanishni taqiqlanadi",
+        "Choraxalarda tasmalar bo'yicha ruxsat etilgan xarakat yo'nalishlarini ko'rsatadi",
+        "Xarakat barcha yo'nalishlarda ruxsat etilgan yo'llarning Kesishmasiga yaqinlashganlikni"
+      ],
+      "correctIndex": 1,
+      "explanation": "Qatnov qismiga chizilgan oq rangli yo‘naltirgich strelkalar (1.18 chizig‘i) choraxaga yaqinlashganda haydovchiga aynan o‘zi turgan bo‘lakdan (tasmadan) qaysi yo‘nalishlarga (to‘g‘riga, o‘ngga yoki chapga) harakatlanish mumkinligini buyuradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu yotiq chiziq bildiradi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ko'rsatilgan yo'nalishlarida xarakakatlanishni taqiqlanadi",
+            "Choraxalarda tasmalar bo'yicha ruxsat etilgan xarakat yo'nalishlarini ko'rsatadi",
+            "Xarakat barcha yo'nalishlarda ruxsat etilgan yo'llarning Kesishmasiga yaqinlashganlikni"
+          ],
+          "correctIndex": 1,
+          "explanation": "Qatnov qismiga chizilgan oq rangli yo‘naltirgich strelkalar (1.18 chizig‘i) choraxaga yaqinlashganda haydovchiga aynan o‘zi turgan bo‘lakdan (tasmadan) qaysi yo‘nalishlarga (to‘g‘riga, o‘ngga yoki chapga) harakatlanish mumkinligini buyuradi."
+        },
+        "uz_cyrl": {
+          "text": "Бу ётиқ чизиқ билдиради:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Кўрсатилган ёъналишларида харакакатланишни тақиқланади",
+            "Чорахаларда тасмалар бўйича рухсат етилган харакат ёъналишларини кўрсатади",
+            "Харакат барча ёъналишларда рухсат етилган ёълларнинг Кесишмасига яқинлашганликни"
+          ],
+          "correctIndex": 1,
+          "explanation": "Қатнов қисмига чизилган оқ рангли ё‘налтиргич стрелкалар (1.18 чизиғи) чорахага яқинлашганда ҳайдовчига айнан ўзи турган бўлакдан (тасмадан) қайси ё‘налишларга (тўғрига, ўнгга ёки чапга) ҳаракатланиш мумкинлигини буюради."
+        },
+        "ru": {
+          "text": "Что обозначает эта горизонтальная разметка?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Запрещает движение в указанных направлениях",
+            "Показывает разрешённые направления движения по полосам на перекрёстке",
+            "Предупреждает о пересечении дорог, где движение разрешено во всех направлениях"
+          ],
+          "correctIndex": 1,
+          "explanation": "Стрелы 1.18 показывают разрешённые направления движения с каждой полосы перед перекрёстком."
+        }
+      }
+    },
+    {
+      "id": "18ac02fa-a96a-4cd1-92fc-59408395807b",
+      "questionId": "topic:119:18ac02fa-a96a-4cd1-92fc-59408395807b",
+      "order": 7,
+      "topicId": 119,
+      "topicSlug": "to-xtash-va-to-xtab-turish",
+      "topicTitle": "To‘xtash va to‘xtab turish",
+      "questionIndex": 28,
+      "text": "Piyodalar o'tish joyiga qancha masofa etmasdan to'xtash va to'xtab turishga ruxsat beriladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "3 metr",
+        "5 metr",
+        "10 metr"
+      ],
+      "correctIndex": 2,
+      "explanation": "Amaldagi qoidalarga binoan, piyodalar o'tish joylariga va ulardan oldin 5 metrdan kam masofa qolganda to'xtash taqiqlanadi. Binobarin, 10 metr masofa qolganda to'xtash va to'xtab turishga to'liq ruxsat beriladi (image_6f723e.jpg).",
+      "i18n": {
+        "uz_latn": {
+          "text": "Piyodalar o'tish joyiga qancha masofa etmasdan to'xtash va to'xtab turishga ruxsat beriladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "3 metr",
+            "5 metr",
+            "10 metr"
+          ],
+          "correctIndex": 2,
+          "explanation": "Amaldagi qoidalarga binoan, piyodalar o'tish joylariga va ulardan oldin 5 metrdan kam masofa qolganda to'xtash taqiqlanadi. Binobarin, 10 metr masofa qolganda to'xtash va to'xtab turishga to'liq ruxsat beriladi (image_6f723e.jpg)."
+        },
+        "uz_cyrl": {
+          "text": "Пиёдалар ўтиш жойига қанча масофа етмасдан тўхташ ва тўхтаб туришга рухсат берилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "3 метр",
+            "5 метр",
+            "10 метр"
+          ],
+          "correctIndex": 2,
+          "explanation": "Амалдаги қоидаларга биноан, пиёдалар ўтиш жойларига ва улардан олдин 5 метрдан кам масофа қолганда тўхташ тақиқланади. Бинобарин, 10 метр масофа қолганда тўхташ ва тўхтаб туришга тўлиқ рухсат берилади (имаге_6ф723е.жпг)."
+        },
+        "ru": {
+          "text": "На каком расстоянии до пешеходного перехода разрешены остановка и стоянка?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "3 м",
+            "5 м",
+            "10 м"
+          ],
+          "correctIndex": 2,
+          "explanation": "При расстоянии 10 метров запретная зона не нарушается."
+        }
+      }
+    },
+    {
+      "id": "61c2e568-711c-48c8-ad11-4fe0fb921ef4",
+      "questionId": "topic:135:61c2e568-711c-48c8-ad11-4fe0fb921ef4",
+      "order": 8,
+      "topicId": 135,
+      "topicSlug": "yuk-tashish",
+      "topicTitle": "Yuk tashish",
+      "questionIndex": 4,
+      "text": "Yengil avtomobilning tom qismiga o‘rnatilgan yukxonasida yukning balandligi (maxsus moslamalar bilan mustahkamlangan holda velosipedlar tashish bundan mustasno) necha metrdan oshmasligi kerak?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "0.5 metr",
+        "1.0 metr",
+        "1.2 metr",
+        "1.5 metr"
+      ],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yengil avtomobilning tom qismiga o‘rnatilgan yukxonasida yukning balandligi (maxsus moslamalar bilan mustahkamlangan holda velosipedlar tashish bundan mustasno) necha metrdan oshmasligi kerak?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0.5 metr",
+            "1.0 metr",
+            "1.2 metr",
+            "1.5 metr"
+          ],
+          "correctIndex": 1,
+          "explanation": "Tom yukxonasidagi yukning balandligi 1 metrдан oshmasligi kerak."
+        },
+        "uz_cyrl": {
+          "text": "Йенгил автомобилнинг том қисмига ўрнатилган юкхонасида юкнинг баландлиги (махсус мосламалар билан мустаҳкамланган ҳолда велосипедлар ташиш бундан мустасно) неча метрдан ошмаслиги керак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0.5 метр",
+            "1.0 метр",
+            "1.2 метр",
+            "1.5 метр"
+          ],
+          "correctIndex": 1,
+          "explanation": "Том юкхонасидаги юкнинг баландлиги 1 метрдан ошмаслиги керак."
+        },
+        "ru": {
+          "text": "На какую высоту может выступать груз на багажнике, установленном на крыше легкового автомобиля (кроме перевозки велосипедов, закреплённых специальными устройствами)?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,5 м",
+            "1,0 м",
+            "1,2 м",
+            "1,5 м"
+          ],
+          "correctIndex": 1,
+          "explanation": "Высота груза на багажнике на крыше не должна превышать 1 м."
+        }
+      }
+    },
+    {
+      "id": "d1ad5cf9-a218-41ee-9132-4fc53bce0200",
+      "questionId": "topic:119:d1ad5cf9-a218-41ee-9132-4fc53bce0200",
+      "order": 9,
+      "topicId": 119,
+      "topicSlug": "to-xtash-va-to-xtab-turish",
+      "topicTitle": "To‘xtash va to‘xtab turish",
+      "questionIndex": 30,
+      "text": "Kesishayotgan qatnov qismi chetiga qanchadan kam masofa qolganda to'xtash taqiqlanadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "40 metr",
+        "45 metr",
+        "30 metr"
+      ],
+      "correctIndex": 2,
+      "explanation": "Qatnov qismlari kesishadigan joylarda (chorrahalarda) va shu kesishayotgan qatnov qismi chetiga 5 metrdan kam masofa qolganda to'xtash taqiqlanadi. Variantlar ichida eng xavfsiz va qoidaga zid bo'lmagan masofa sifatida 30 metr ko'rsatilgan, chunki u 5 metrlik taqiqlovchi zonadan ancha uzoqda joylashgan (image_6f725b.jpg).",
+      "i18n": {
+        "uz_latn": {
+          "text": "Kesishayotgan qatnov qismi chetiga qanchadan kam masofa qolganda to'xtash taqiqlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "40 metr",
+            "45 metr",
+            "30 metr"
+          ],
+          "correctIndex": 2,
+          "explanation": "Qatnov qismlari kesishadigan joylarda (chorrahalarda) va shu kesishayotgan qatnov qismi chetiga 5 metrdan kam masofa qolganda to'xtash taqiqlanadi. Variantlar ichida eng xavfsiz va qoidaga zid bo'lmagan masofa sifatida 30 metr ko'rsatilgan, chunki u 5 metrlik taqiqlovchi zonadan ancha uzoqda joylashgan (image_6f725b.jpg)."
+        },
+        "uz_cyrl": {
+          "text": "Кесишаётган қатнов қисми четига қанчадан кам масофа қолганда тўхташ тақиқланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "40 метр",
+            "45 метр",
+            "30 метр"
+          ],
+          "correctIndex": 2,
+          "explanation": "Қатнов қисмлари кесишадиган жойларда (чорраҳаларда) ва шу кесишаётган қатнов қисми четига 5 метрдан кам масофа қолганда тўхташ тақиқланади. Вариантлар ичида енг хавфсиз ва қоидага зид бўлмаган масофа сифатида 30 метр кўрсатилган, чунки у 5 метрлик тақиқловчи зонадан анча узоқда жойлашган (имаге_6ф725б.жпг)."
+        },
+        "ru": {
+          "text": "Ближе какого расстояния к краю пересекаемой проезжей части остановка запрещена?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "40 м",
+            "45 м",
+            "30 м"
+          ],
+          "correctIndex": 2,
+          "explanation": "Из предложенных вариантов безопасное расстояние — 30 метров."
+        }
+      }
+    },
+      {
+        "id": "67cb5db8-46ad-43a1-84fd-e15660394e01",
+        "questionId": "topic:99:67cb5db8-46ad-43a1-84fd-e15660394e01",
+        "order": 10,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 43,
+      "text": "Bunday vaziyatda siz:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781753083904-ss0ynkw4.webp",
+      "audio": "",
+      "options": [
+        "Birinchi o‘tish huquqiga egaman",
+        "Ro‘paradan kelayotgan avtomobilga yo‘l beraman"
+      ],
+      "correctIndex": 1,
+      "explanation": "Ro‘paradan kelayotgan transport vositasiga yo‘l berish talab etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bunday vaziyatda siz:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Birinchi o‘tish huquqiga egaman",
+            "Ro‘paradan kelayotgan avtomobilga yo‘l beraman"
+          ],
+          "correctIndex": 1,
+          "explanation": "Ro‘paradan kelayotgan transport vositasiga yo‘l berish talab etiladi."
+        },
+        "uz_cyrl": {
+          "text": "Бундай вазиятда сиз:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Биринчи ўтиш ҳуқуқига егаман",
+            "Рўпарадан келаётган автомобилга йўл бераман"
+          ],
+          "correctIndex": 1,
+          "explanation": "Рўпарадан келаётган транспорт воситасига йўл бериш талаб этилади."
+        },
+        "ru": {
+          "text": "В такой ситуации вы:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Имею право проехать первым",
+            "Уступаю дорогу встречному автомобилю"
+          ],
+          "correctIndex": 1,
+          "explanation": "Необходимо уступить дорогу встречному транспортному средству."
+          }
+        }
+      },
+      {
+        "id": "932e294a-5e3f-4aef-8dde-9889735b4d0c",
+        "questionId": "topic:135:932e294a-5e3f-4aef-8dde-9889735b4d0c",
+        "order": 11,
+        "topicId": 135,
+        "topicSlug": "yuk-tashish",
+        "topicTitle": "Yuk tashish",
+        "questionIndex": 8,
+        "text": "Yengil avtomobilning tom qismiga o‘rnatilgan yukxonasida yuk tashishda, yukning uzunligi avtomobilning gabaritidan necha metrdan oshmasa tashishga yo‘l qo‘yiladi?",
+        "image": "",
+        "audio": "",
+        "options": [
+          "2 metr",
+          "1 metr",
+          "1.2 metr",
+          "0.5 metr"
+        ],
+        "correctIndex": 3,
+        "explanation": "",
+        "i18n": {
+          "uz_latn": {
+            "text": "Yengil avtomobilning tom qismiga o‘rnatilgan yukxonasida yuk tashishda, yukning uzunligi avtomobilning gabaritidan necha metrdan oshmasa tashishga yo‘l qo‘yiladi?",
+            "image": "",
+            "audio": "",
+            "options": [
+              "2 metr",
+              "1 metr",
+              "1.2 metr",
+              "0.5 metr"
+            ],
+            "correctIndex": 3,
+            "explanation": ""
+          },
+          "uz_cyrl": {
+            "text": "Йенгил автомобилнинг том қисмига ўрнатилган юкхонасида юк ташишда, юкнинг узунлиги автомобилнинг габаритидан неча метрдан ошмаса ташишга йўл қўйилади?",
+            "image": "",
+            "audio": "",
+            "options": [
+              "2 метр",
+              "1 метр",
+              "1.2 метр",
+              "0.5 метр"
+            ],
+            "correctIndex": 3,
+            "explanation": ""
+          },
+          "ru": {
+            "text": "При перевозке груза на багажнике, установленном на крыше легкового автомобиля, какой длины может быть груз, чтобы перевозка была разрешена?",
+            "image": "",
+            "audio": "",
+            "options": [
+              "2 м",
+              "1 м",
+              "1,2 м",
+              "0,5 м"
+            ],
+            "correctIndex": 3,
+            "explanation": ""
+          }
+        }
+      },
+    {
+      "id": "583537a2-a7be-48f5-ba75-5d4c9b52bbad",
+      "questionId": "topic:99:583537a2-a7be-48f5-ba75-5d4c9b52bbad",
+      "order": 12,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 34,
+      "text": "Quyidagi javoblardan qaysi birida «Xavf»atamasining to'g'ri tarifi ko'rsatilgan?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Yo'l harakati xavfsizligiga xavf soluvchi har qanday omil",
+        "Yo'l harakati qatnashchilarining yo'nalishini o'zgartirishga majbur qiladigan har qanday to'siq",
+        "Yo'l harakati jarayonidan o'sha yo'nalishda va o'sha tezlikda harakatlanishni davom ettirish yo'l transport hodisasi sodir bo'lishiga tahdid soladigan omil"
+      ],
+      "correctIndex": 0,
+      "explanation": "Yo'l harakati qoidalariga muvofiq, harakatlanish jarayonida yo'l harakati xavfsizligiga tahdid soladigan yoki uni xavf ostiga qo'yadigan har qanday tashqi omil yoki to'siq 'Xavf' deb baholanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi javoblardan qaysi birida «Xavf»atamasining to'g'ri tarifi ko'rsatilgan?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yo'l harakati xavfsizligiga xavf soluvchi har qanday omil",
+            "Yo'l harakati qatnashchilarining yo'nalishini o'zgartirishga majbur qiladigan har qanday to'siq",
+            "Yo'l harakati jarayonidan o'sha yo'nalishda va o'sha tezlikda harakatlanishni davom ettirish yo'l transport hodisasi sodir bo'lishiga tahdid soladigan omil"
+          ],
+          "correctIndex": 0,
+          "explanation": "Yo'l harakati qoidalariga muvofiq, harakatlanish jarayonida yo'l harakati xavfsizligiga tahdid soladigan yoki uni xavf ostiga qo'yadigan har qanday tashqi omil yoki to'siq 'Xavf' deb baholanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги жавоблардан қайси бирида «Хавф»атамасининг тўғри тарифи кўрсатилган?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ёъл ҳаракати хавфсизлигига хавф солувчи ҳар қандай омил",
+            "Ёъл ҳаракати қатнашчиларининг йўналишини ўзгартиришга мажбур қиладиган ҳар қандай тўсиқ",
+            "Ёъл ҳаракати жараёнидан ўша йўналишда ва ўша тезликда ҳаракатланишни давом еттириш йўл транспорт ҳодисаси содир бўлишига таҳдид соладиган омил"
+          ],
+          "correctIndex": 0,
+          "explanation": "Ёъл ҳаракати қоидаларига мувофиқ, ҳаракатланиш жараёнида йўл ҳаракати хавфсизлигига таҳдид соладиган ёки уни хавф остига қўядиган ҳар қандай ташқи омил ёки тўсиқ ъХавфъ деб баҳоланади."
+        },
+        "ru": {
+          "text": "В каком из ответов правильно дано определение термина «опасность»?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Любой фактор, создающий угрозу безопасности дорожного движения",
+            "Любое препятствие, вынуждающее участников движения изменить направление",
+            "Фактор, при котором продолжение движения в том же направлении и с той же скоростью создаёт угрозу дорожно-транспортного происшествия"
+          ],
+          "correctIndex": 0,
+          "explanation": "Опасностью считается любой внешний фактор или препятствие, которое в процессе движения создаёт угрозу безопасности дорожного движения или ставит её под риск."
+        }
+      }
+    },
+    {
+      "id": "679d07f7-ac95-434b-aefd-8d96f1e6c2c8",
+      "questionId": "topic:134:679d07f7-ac95-434b-aefd-8d96f1e6c2c8",
+      "order": 13,
+      "topicId": 134,
+      "topicSlug": "odam-tashish",
+      "topicTitle": "Odam tashish",
+      "questionIndex": 11,
+      "text": "Odam tashish uchun mo‘ljallangan yuk avtomobilining yukxonasi bortining balandligi:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "0,7 metrdan kam bo‘lmasligi kerak",
+        "1 metrdan kam bo‘lmasligi kerak",
+        "1,3 metrdan kam bo‘lmasligi kerak",
+        "1,5 metrdan kam bo‘lmasligi kerak"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Odam tashish uchun mo‘ljallangan yuk avtomobilining yukxonasi bortining balandligi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,7 metrdan kam bo‘lmasligi kerak",
+            "1 metrdan kam bo‘lmasligi kerak",
+            "1,3 metrdan kam bo‘lmasligi kerak",
+            "1,5 metrdan kam bo‘lmasligi kerak"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Одам ташиш учун мўлжалланган юк автомобилининг юкхонаси бортининг баландлиги:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,7 метрдан кам бўлмаслиги керак",
+            "1 метрдан кам бўлмаслиги керак",
+            "1,3 метрдан кам бўлмаслиги керак",
+            "1,5 метрдан кам бўлмаслиги керак"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой должна быть высота бортов кузова грузового автомобиля, предназначенного для перевозки людей?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Не менее 0,7 м",
+            "Не менее 1 м",
+            "Не менее 1,3 м",
+            "Не менее 1,5 м"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "44a466a7-6f4e-4e8e-bcff-1c04e8a185b6",
+      "questionId": "topic:119:44a466a7-6f4e-4e8e-bcff-1c04e8a185b6",
+      "order": 14,
+      "topicId": 119,
+      "topicSlug": "to-xtash-va-to-xtab-turish",
+      "topicTitle": "To‘xtash va to‘xtab turish",
+      "questionIndex": 53,
+      "text": "Transport vositalarining qayrilib olishjoylarida va unga etmasdan yoki o'tib qanchadankam masofada to'xtashi taqiqlanadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "40 metr",
+        "45 metr",
+        "30 metr",
+        "50 metr"
+      ],
+      "correctIndex": 2,
+      "explanation": "Yoʻl harakati qoidalariga koʻra, transport vositalarining qayrilib olish joylarida hamda unga yetmasdan yoki oʻtib ketgandan keyin kamida 30 metr masofada toʻxtashi taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Transport vositalarining qayrilib olishjoylarida va unga etmasdan yoki o'tib qanchadankam masofada to'xtashi taqiqlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "40 metr",
+            "45 metr",
+            "30 metr",
+            "50 metr"
+          ],
+          "correctIndex": 2,
+          "explanation": "Yoʻl harakati qoidalariga koʻra, transport vositalarining qayrilib olish joylarida hamda unga yetmasdan yoki oʻtib ketgandan keyin kamida 30 metr masofada toʻxtashi taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Транспорт воситаларининг қайрилиб олишжойларида ва унга етмасдан ёки ўтиб қанчаданкам масофада тўхташи тақиқланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "40 метр",
+            "45 метр",
+            "30 метр",
+            "50 метр"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ёъл ҳаракати қоидаларига кўра, транспорт воситаларининг қайрилиб олиш жойларида ҳамда унга йетмасдан ёки ўтиб кетгандан кейин камида 30 метр масофада тўхташи тақиқланади."
+        },
+        "ru": {
+          "text": "Ближе какого расстояния до места разворота и после него остановка запрещена?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "40 м",
+            "45 м",
+            "30 м",
+            "50 м"
+          ],
+          "correctIndex": 2,
+          "explanation": "Остановка запрещена ближе 30 метров до и после места разворота."
+        }
+      }
+    },
+    {
+      "id": "a9b09720-1f81-4b30-9fc9-946877979046",
+      "questionId": "topic:99:a9b09720-1f81-4b30-9fc9-946877979046",
+      "order": 15,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 41,
+      "text": "Qayta tizilish deb nimaga aytiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Dastlabki harakat yo'nalishini saqlagan holda o'z harakatlanish tasmasidan boshqa harakatlanish qatoriga o'tish",
+        "Qatnov qismining maxsus ajratilgan, 5.35 - 5.37 yo'l belgilari, 1.9 yo'l chizig'i bilan belgilangan va ustida reversiv svetofor o'rnatilgan bo'lagida harakatlanish yo'nalishini qarama-qarshi tomonga o'zgartirish",
+        "Xavf tug'ilganda yo'ldagi boshqa harakat qatnashchilarining harakatlanishiga to'sqinlik qilmaslik uchun haydovchilar tomonidan bajariladigan harakat(manyovr)"
+      ],
+      "correctIndex": 0,
+      "explanation": "Haydovchining dastlabki harakatlanish yo'nalishini o'zgartirmasdan, o'zi ketayotgan tasmadan yon tarafdagi boshqa harakatlanish tasmasiga (qatoriga) o'tishi qayta tizilish (manevr) deb ataladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qayta tizilish deb nimaga aytiladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Dastlabki harakat yo'nalishini saqlagan holda o'z harakatlanish tasmasidan boshqa harakatlanish qatoriga o'tish",
+            "Qatnov qismining maxsus ajratilgan, 5.35 - 5.37 yo'l belgilari, 1.9 yo'l chizig'i bilan belgilangan va ustida reversiv svetofor o'rnatilgan bo'lagida harakatlanish yo'nalishini qarama-qarshi tomonga o'zgartirish",
+            "Xavf tug'ilganda yo'ldagi boshqa harakat qatnashchilarining harakatlanishiga to'sqinlik qilmaslik uchun haydovchilar tomonidan bajariladigan harakat(manyovr)"
+          ],
+          "correctIndex": 0,
+          "explanation": "Haydovchining dastlabki harakatlanish yo'nalishini o'zgartirmasdan, o'zi ketayotgan tasmadan yon tarafdagi boshqa harakatlanish tasmasiga (qatoriga) o'tishi qayta tizilish (manevr) deb ataladi."
+        },
+        "uz_cyrl": {
+          "text": "Қайта тизилиш деб нимага айтилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Дастлабки ҳаракат йўналишини сақлаган ҳолда ўз ҳаракатланиш тасмасидан бошқа ҳаракатланиш қаторига ўтиш",
+            "Қатнов қисмининг махсус ажратилган, 5.35 - 5.37 йўл белгилари, 1.9 йўл чизиғи билан белгиланган ва устида реверсив светофор ўрнатилган бўлагида ҳаракатланиш йўналишини қарама-қарши томонга ўзгартириш",
+            "Хавф туғилганда йўлдаги бошқа ҳаракат қатнашчиларининг ҳаракатланишига тўсқинлик қилмаслик учун ҳайдовчилар томонидан бажариладиган ҳаракат(манёвр)"
+          ],
+          "correctIndex": 0,
+          "explanation": "Ҳайдовчининг дастлабки ҳаракатланиш йўналишини ўзгартирмасдан, ўзи кетаётган тасмадан ён тарафдаги бошқа ҳаракатланиш тасмасига (қаторига) ўтиши қайта тизилиш (маневр) деб аталади."
+        },
+        "ru": {
+          "text": "Что называется перестроением?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Переход с занимаемой полосы на соседнюю полосу без изменения первоначального направления движения",
+            "Изменение направления движения на противоположное на специально выделенной полосе, обозначенной знаками 5.35–5.37, разметкой 1.9 и оборудованной реверсивным светофором",
+            "Манёвр, выполняемый водителем при возникновении опасности, чтобы не препятствовать движению других участников"
+          ],
+          "correctIndex": 0,
+          "explanation": "Перестроение — переход водителя с занимаемой полосы на соседнюю полосу без изменения первоначального направления движения."
+        }
+      }
+    },
+    {
+      "id": "8c76276a-4b79-4d3c-9c82-27642a34240e",
+      "questionId": "topic:117:8c76276a-4b79-4d3c-9c82-27642a34240e",
+      "order": 16,
+      "topicId": 117,
+      "topicSlug": "harakatlanish-tezligi",
+      "topicTitle": "Harakatlanish tezligi",
+      "questionIndex": 26,
+      "text": "Maktab va maktabgacha ta'lim tashkilotlari atrofidagi yo'llarda 300 metrgacha bo'lgan masofada qanday eng yuqori tezlikda harakatlanishga ruxsat etiladi",
+      "image": "",
+      "audio": "",
+      "options": [
+        "20 km/soat",
+        "30 km/soat",
+        "50 km/soat",
+        "60 km/soat"
+      ],
+      "correctIndex": 1,
+      "explanation": "Yo'l harakati qoidalariga kiritilgan talabga binoan, maktab va bog'chalar atrofidagi yo'llarda bolalar xavfsizligini ta'minlash maqsadida eng yuqori harakat tezligi soatiga 30 km qilib belgilangan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Maktab va maktabgacha ta'lim tashkilotlari atrofidagi yo'llarda 300 metrgacha bo'lgan masofada qanday eng yuqori tezlikda harakatlanishga ruxsat etiladi",
+          "image": "",
+          "audio": "",
+          "options": [
+            "20 km/soat",
+            "30 km/soat",
+            "50 km/soat",
+            "60 km/soat"
+          ],
+          "correctIndex": 1,
+          "explanation": "Yo'l harakati qoidalariga kiritilgan talabga binoan, maktab va bog'chalar atrofidagi yo'llarda bolalar xavfsizligini ta'minlash maqsadida eng yuqori harakat tezligi soatiga 30 km qilib belgilangan."
+        },
+        "uz_cyrl": {
+          "text": "Мактаб ва мактабгача таълим ташкилотлари атрофидаги ёълларда 300 метргача бўлган масофада қандай енг юқори тезликда ҳаракатланишга рухсат етилади",
+          "image": "",
+          "audio": "",
+          "options": [
+            "20 км/соат",
+            "30 км/соат",
+            "50 км/соат",
+            "60 км/соат"
+          ],
+          "correctIndex": 1,
+          "explanation": "Ёъл ҳаракати қоидаларига киритилган талабга биноан, мактаб ва боғчалар атрофидаги ёълларда болалар хавфсизлигини таъминлаш мақсадида енг юқори ҳаракат тезлиги соатига 30 км қилиб белгиланган."
+        },
+        "ru": {
+          "text": "Какая максимальная скорость разрешена в радиусе до 300 метров вокруг школ и дошкольных учреждений?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "20 км/ч",
+            "30 км/ч",
+            "50 км/ч",
+            "60 км/ч"
+          ],
+          "correctIndex": 1,
+          "explanation": "В таких зонах максимальная скорость составляет 30 км/ч."
+        }
+      }
+    },
+    {
+      "id": "92684ab9-cd15-44c0-946f-e42d878963e5",
+      "questionId": "topic:99:92684ab9-cd15-44c0-946f-e42d878963e5",
+      "order": 17,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 42,
+      "text": "O'zib ketish deb nimaga aytiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Transport vositasining bir yo'nalishda transport vositasi tezligidan ortiq tezlikda harakatlanishi",
+        "Qarama - qarshi yo'nalishda harakatlanish uchun mo'ljallangan tasmaga chiqib, so'ngra ilgari egallagan qatoriga qaytib o'tish bilan bog'liq bo'lgan harakat",
+        "Kam tezlik bilan qo'shni qatorda harakatlanayotgan bir yoki bir nechta transport vositasidan o'zib ketish"
+      ],
+      "correctIndex": 0,
+      "explanation": "Yo'l harakati qoidalarida o'zib ketish — bir yo'nalishda harakatlanayotgan transport vositasining yonidagi boshqa bir transport vositasi tezligidan yuqoriroq tezlikda harakatlanib, undan oldinga o'tib ketishidir (bunda qarama-qarshi tasmaga chiqilmaydi).",
+      "i18n": {
+        "uz_latn": {
+          "text": "O'zib ketish deb nimaga aytiladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Transport vositasining bir yo'nalishda transport vositasi tezligidan ortiq tezlikda harakatlanishi",
+            "Qarama - qarshi yo'nalishda harakatlanish uchun mo'ljallangan tasmaga chiqib, so'ngra ilgari egallagan qatoriga qaytib o'tish bilan bog'liq bo'lgan harakat",
+            "Kam tezlik bilan qo'shni qatorda harakatlanayotgan bir yoki bir nechta transport vositasidan o'zib ketish"
+          ],
+          "correctIndex": 0,
+          "explanation": "Yo'l harakati qoidalarida o'zib ketish — bir yo'nalishda harakatlanayotgan transport vositasining yonidagi boshqa bir transport vositasi tezligidan yuqoriroq tezlikda harakatlanib, undan oldinga o'tib ketishidir (bunda qarama-qarshi tasmaga chiqilmaydi)."
+        },
+        "uz_cyrl": {
+          "text": "Ўзиб кетиш деб нимага айтилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Транспорт воситасининг бир йўналишда транспорт воситаси тезлигидан ортиқ тезликда ҳаракатланиши",
+            "Қарама - қарши йўналишда ҳаракатланиш учун мўлжалланган тасмага чиқиб, сўнгра илгари егаллаган қаторига қайтиб ўтиш билан боғлиқ бўлган ҳаракат",
+            "Кам тезлик билан қўшни қаторда ҳаракатланаётган бир ёки бир нечта транспорт воситасидан ўзиб кетиш"
+          ],
+          "correctIndex": 0,
+          "explanation": "Ёъл ҳаракати қоидаларида ўзиб кетиш — бир йўналишда ҳаракатланаётган транспорт воситасининг ёнидаги бошқа бир транспорт воситаси тезлигидан юқорироқ тезликда ҳаракатланиб, ундан олдинга ўтиб кетишидир (бунда қарама-қарши тасмага чиқилмайди)."
+        },
+        "ru": {
+          "text": "Что называется опережением?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Движение транспортного средства с большей скоростью, чем скорость другого транспортного средства, движущегося в том же направлении",
+            "Манёвр с выездом на полосу встречного движения и последующим возвращением на ранее занимаемую полосу",
+            "Опережение одного или нескольких транспортных средств, движущихся с меньшей скоростью по соседней полосе"
+          ],
+          "correctIndex": 0,
+          "explanation": "Опережение — движение транспортного средства с большей скоростью, чем скорость другого транспортного средства, движущегося в том же направлении, без выезда на полосу встречного движения."
+        }
+      }
+    },
+    {
+      "id": "5049dbd5-ce59-43b7-aca9-994c9608b979",
+      "questionId": "topic:110:5049dbd5-ce59-43b7-aca9-994c9608b979",
+      "order": 18,
+      "topicId": 110,
+      "topicSlug": "yotiq-chiziqlar",
+      "topicTitle": "Yotiq chiziqlar",
+      "questionIndex": 61,
+      "text": "Oq-qizil (1.14.4 zebra) yo'l chizig'i qandayjoylarda piyodalar o'tish joyini belgilash uchunkiziladi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751533215-3s8rcpyc.webp",
+      "audio": "",
+      "options": [
+        "Piyodalar gavjum bo'lgan joylarda",
+        "Savdo, madaniy-maishiy xizmatko'rsatish binolari oldida",
+        "Maktab va maktabgacha talimmuassasalari oldida",
+        "Barcha javoblar to'g'ri"
+      ],
+      "correctIndex": 2,
+      "explanation": "image_cde6da.png rasmidagi oq va qizil rangli yo'l chizig'i (zebra) haydovchilarning diqqatini ko'proq tortish hamda bolalar xavfsizligini ta'minlash maqsadida bevosita maktab va maktabgacha ta'lim muassasalari oldidagi piyodalar o'tish joylariga chiziladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Oq-qizil (1.14.4 zebra) yo'l chizig'i qandayjoylarda piyodalar o'tish joyini belgilash uchunkiziladi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Piyodalar gavjum bo'lgan joylarda",
+            "Savdo, madaniy-maishiy xizmatko'rsatish binolari oldida",
+            "Maktab va maktabgacha talimmuassasalari oldida",
+            "Barcha javoblar to'g'ri"
+          ],
+          "correctIndex": 2,
+          "explanation": "image_cde6da.png rasmidagi oq va qizil rangli yo'l chizig'i (zebra) haydovchilarning diqqatini ko'proq tortish hamda bolalar xavfsizligini ta'minlash maqsadida bevosita maktab va maktabgacha ta'lim muassasalari oldidagi piyodalar o'tish joylariga chiziladi."
+        },
+        "uz_cyrl": {
+          "text": "Оқ-қизил (1.14.4 зебра) ёъл чизиғи қандайжойларда пиёдалар ўтиш жойини белгилаш учункизилади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Пиёдалар гавжум бўлган жойларда",
+            "Савдо, маданий-маиший хизматкўрсатиш бинолари олдида",
+            "Мактаб ва мактабгача талиммуассасалари олдида",
+            "Барча жавоблар тўғри"
+          ],
+          "correctIndex": 2,
+          "explanation": "имаге_cде6да.пнг расмидаги оқ ва қизил рангли ёъл чизиғи (зебра) ҳайдовчиларнинг диққатини кўпроқ тортиш ҳамда болалар хавфсизлигини таъминлаш мақсадида бевосита мактаб ва мактабгача таълим муассасалари олдидаги пиёдалар ўтиш жойларига чизилади."
+        },
+        "ru": {
+          "text": "Где применяется красно-белая разметка пешеходного перехода 1.14.4?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "В местах большого потока пешеходов",
+            "Перед торговыми и культурно-бытовыми объектами",
+            "Перед школами и дошкольными учреждениями",
+            "Все ответы верны"
+          ],
+          "correctIndex": 2,
+          "explanation": "Красно-белая разметка применяется прежде всего перед школами и дошкольными учреждениями."
+        }
+      }
+    },
+    {
+      "id": "64ca324d-17b3-4a55-a489-72d7e044c7da",
+      "questionId": "topic:134:64ca324d-17b3-4a55-a489-72d7e044c7da",
+      "order": 19,
+      "topicId": 134,
+      "topicSlug": "odam-tashish",
+      "topicTitle": "Odam tashish",
+      "questionIndex": 19,
+      "text": "Odam tashish uchun mo‘ljallangan yuk avtomobili yukxonasi bortlari balandligi:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "0,70 metrdan kam bo‘lmasligi kerak",
+        "1,0 metrdan kam bo‘lmasligi kerak",
+        "1,3 metrdan kam bo‘lmasligi kerak",
+        "1,5 metrdan kam bo‘lmasligi kerak"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Odam tashish uchun mo‘ljallangan yuk avtomobili yukxonasi bortlari balandligi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,70 metrdan kam bo‘lmasligi kerak",
+            "1,0 metrdan kam bo‘lmasligi kerak",
+            "1,3 metrdan kam bo‘lmasligi kerak",
+            "1,5 metrdan kam bo‘lmasligi kerak"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Одам ташиш учун мўлжалланган юк автомобили юкхонаси бортлари баландлиги:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "0,70 метрдан кам бўлмаслиги керак",
+            "1,0 метрдан кам бўлмаслиги керак",
+            "1,3 метрдан кам бўлмаслиги керак",
+            "1,5 метрдан кам бўлмаслиги керак"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой должна быть высота бортов кузова грузового автомобиля, предназначенного для перевозки людей?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Не менее 0,70 м",
+            "Не менее 1,0 м",
+            "Не менее 1,3 м",
+            "Не менее 1,5 м"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "b6d7042d-13e4-431a-91a7-681d15c1dd7c",
+      "questionId": "topic:119:b6d7042d-13e4-431a-91a7-681d15c1dd7c",
+      "order": 20,
+      "topicId": 119,
+      "topicSlug": "to-xtash-va-to-xtab-turish",
+      "topicTitle": "To‘xtash va to‘xtab turish",
+      "questionIndex": 67,
+      "text": "Bekat maydonchalaridan harakatlanish yo'nalishi bo'ylab qanchadan kam masofada (etmasdan va o'tib ketib) to'xtash va to'xtab turish taqiqlanadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "25 metr",
+        "30 metr",
+        "15 metr",
+        "20 metr"
+      ],
+      "correctIndex": 2,
+      "explanation": "Yo‘nalishli transport vositalari (avtobus, yo‘nalishli taksi) bekatlariga yetmasdan va bekatdan o‘tib ketgandan keyin 15 metrdan kam masofada to‘xtash va to‘xtab turish taqiqlanadi. Bu bekatga yaqinlashayotgan jamoat transportiga xalaqit bermaslik uchun ko‘zda tutilgan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bekat maydonchalaridan harakatlanish yo'nalishi bo'ylab qanchadan kam masofada (etmasdan va o'tib ketib) to'xtash va to'xtab turish taqiqlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "25 metr",
+            "30 metr",
+            "15 metr",
+            "20 metr"
+          ],
+          "correctIndex": 2,
+          "explanation": "Yo‘nalishli transport vositalari (avtobus, yo‘nalishli taksi) bekatlariga yetmasdan va bekatdan o‘tib ketgandan keyin 15 metrdan kam masofada to‘xtash va to‘xtab turish taqiqlanadi. Bu bekatga yaqinlashayotgan jamoat transportiga xalaqit bermaslik uchun ko‘zda tutilgan."
+        },
+        "uz_cyrl": {
+          "text": "Бекат майдончаларидан ҳаракатланиш ёъналиши бўйлаб қанчадан кам масофада (етмасдан ва ўтиб кетиб) тўхташ ва тўхтаб туриш тақиқланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "25 метр",
+            "30 метр",
+            "15 метр",
+            "20 метр"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ё‘налишли транспорт воситалари (автобус, ё‘налишли такси) бекатларига йетмасдан ва бекатдан ўтиб кетгандан кейин 15 метрдан кам масофада тўхташ ва тўхтаб туриш тақиқланади. Бу бекатга яқинлашаётган жамоат транспортига халақит бермаслик учун кўзда тутилган."
+        },
+        "ru": {
+          "text": "Ближе какого расстояния до и после остановочной площадки запрещены остановка и стоянка?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "25 м",
+            "30 м",
+            "15 м",
+            "20 м"
+          ],
+          "correctIndex": 2,
+          "explanation": "Запрет действует ближе 15 метров до и после остановки."
+        }
+      }
+    }
+  ]
+}

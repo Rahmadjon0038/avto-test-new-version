@@ -1,0 +1,1204 @@
+{
+  "title": "Bilet №53",
+  "titleI18n": {
+    "uz_latn": "Bilet №53",
+    "uz_cyrl": "Билет №53",
+    "ru": "Билет №53"
+  },
+  "ticketNumber": 53,
+  "status": "COMPLETED",
+  "questions": [
+    {
+      "id": "8819b86e-3861-4117-86f9-c9a10a76dd5f",
+      "questionId": "topic:107:8819b86e-3861-4117-86f9-c9a10a76dd5f",
+      "order": 1,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 2,
+      "text": "Bu belgi nimani bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782815882863-pgg11o1c.webp",
+      "audio": "",
+      "options": [
+        "Oldinda tirbandlik haqida borligidan",
+        "Navbat bilan o'tishni",
+        "Tuxtab turish joyiga borishni"
+      ],
+      "correctIndex": 1,
+      "explanation": "Belgi tor yo'l uchastkasida yoki to'siq yonidan transport vositalarining navbat bilan o'tishini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu belgi nimani bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Oldinda tirbandlik haqida borligidan",
+            "Navbat bilan o'tishni",
+            "Tuxtab turish joyiga borishni"
+          ],
+          "correctIndex": 1,
+          "explanation": "Belgi tor yo'l uchastkasida yoki to'siq yonidan transport vositalarining navbat bilan o'tishini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Бу белги нимани билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Олдинда тирбандлик ҳақида борлигидан",
+            "Навбат билан ўтишни",
+            "Тухтаб туриш жойига боришни"
+          ],
+          "correctIndex": 1,
+          "explanation": "Белги тор ёъл участкасида ёки тўсиқ ёнидан транспорт воситаларининг навбат билан ўтишини билдиради."
+        },
+        "ru": {
+          "text": "Что означает этот знак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "О заторе впереди",
+            "О поочерёдном проезде",
+            "О направлении к месту стоянки"
+          ],
+          "correctIndex": 1,
+          "explanation": "Знак указывает на поочерёдный проезд транспортных средств на узком участке дороги или возле препятствия."
+        }
+      }
+    },
+    {
+      "id": "5b8ac38a-483b-4adf-a4fc-e2f077d4330b",
+      "questionId": "topic:104:5b8ac38a-483b-4adf-a4fc-e2f077d4330b",
+      "order": 2,
+      "topicId": 104,
+      "topicSlug": "imtiyoz-belgilari",
+      "topicTitle": "Imtiyoz belgilari",
+      "questionIndex": 0,
+      "text": "Ogohlantiruvchi belgilarni toping",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781755015387-oagb4am6.webp",
+      "audio": "",
+      "options": [
+        "Hammasi",
+        "1,2,4,5",
+        "4,5"
+      ],
+      "correctIndex": 2,
+      "explanation": "4 va 5-belgilar (Ikki tomonlama harakatlanish va Teng ahamiyatli yo'llar kesishuvi) ogohlantiruvchi belgilar guruhiga kiradi. 1 va 2-belgilar imtiyoz belgilari (Asosiy yo'l bilan ikkinchi darajali yo'l tutashuvi), 3-belgi ham imtiyoz belgisi (Yo'l bering).",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ogohlantiruvchi belgilarni toping",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Hammasi",
+            "1,2,4,5",
+            "4,5"
+          ],
+          "correctIndex": 2,
+          "explanation": "4 va 5-belgilar (Ikki tomonlama harakatlanish va Teng ahamiyatli yo'llar kesishuvi) ogohlantiruvchi belgilar guruhiga kiradi. 1 va 2-belgilar imtiyoz belgilari (Asosiy yo'l bilan ikkinchi darajali yo'l tutashuvi), 3-belgi ham imtiyoz belgisi (Yo'l bering)."
+        },
+        "uz_cyrl": {
+          "text": "Огоҳлантирувчи белгиларни топинг",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ҳаммаси",
+            "1,2,4,5",
+            "4,5"
+          ],
+          "correctIndex": 2,
+          "explanation": "4 ва 5-белгилар (Икки томонлама ҳаракатланиш ва Тенг аҳамиятли ёъллар кесишуви) огоҳлантирувчи белгилар гуруҳига киради. 1 ва 2-белгилар имтиёз белгилари (Асосий ёъл билан иккинчи даражали ёъл туташуви), 3-белги ҳам имтиёз белгиси (Ёъл беринг)."
+        },
+        "ru": {
+          "text": "Найдите предупреждающие знаки.",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Все",
+            "1, 2, 4, 5",
+            "4, 5"
+          ],
+          "correctIndex": 2,
+          "explanation": "Знаки 4 и 5 — «Двустороннее движение» и «Пересечение равнозначных дорог» — относятся к предупреждающим. Знаки 1 и 2 относятся к знакам приоритета, знак 3 — «Уступите дорогу»."
+        }
+      }
+    },
+    {
+      "id": "ebc50d82-c5f6-4f36-9402-147b89bec715",
+      "questionId": "topic:110:ebc50d82-c5f6-4f36-9402-147b89bec715",
+      "order": 3,
+      "topicId": 110,
+      "topicSlug": "yotiq-chiziqlar",
+      "topicTitle": "Yotiq chiziqlar",
+      "questionIndex": 5,
+      "text": "Haydovchi qaysi rasmda qoidani buzmay to‘xtagan?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751043390-c4jko03o.webp",
+      "audio": "",
+      "options": [
+        "Chapdagi rasmda",
+        "O‘ngdagi rasmda",
+        "Har ikkala rasmda"
+      ],
+      "correctIndex": 2,
+      "explanation": "Har ikkala holatda ham avtomobil yo‘l harakati qoidalariga muvofiq to‘xtagan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Haydovchi qaysi rasmda qoidani buzmay to‘xtagan?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Chapdagi rasmda",
+            "O‘ngdagi rasmda",
+            "Har ikkala rasmda"
+          ],
+          "correctIndex": 2,
+          "explanation": "Har ikkala holatda ham avtomobil yo‘l harakati qoidalariga muvofiq to‘xtagan."
+        },
+        "uz_cyrl": {
+          "text": "Ҳайдовчи қайси расмда қоидани бузмай тўхтаган?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Чапдаги расмда",
+            "Ўнгдаги расмда",
+            "Ҳар иккала расмда"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ҳар иккала ҳолатда ҳам автомобил ё‘л ҳаракати қоидаларига мувофиқ тўхтаган."
+        },
+        "ru": {
+          "text": "На каком рисунке водитель остановился без нарушения правил?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "На левом рисунке",
+            "На правом рисунке",
+            "На обоих рисунках"
+          ],
+          "correctIndex": 2,
+          "explanation": "В обоих случаях автомобили остановлены без нарушения правил."
+        }
+      }
+    },
+    {
+      "id": "b8acb740-ca48-45e3-829f-ab6629cafb0b",
+      "questionId": "topic:103:b8acb740-ca48-45e3-829f-ab6629cafb0b",
+      "order": 4,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 4,
+      "text": "Bu yo'l belgisi qanday nomlanadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783259811820-pot5ehy8.webp",
+      "audio": "",
+      "options": [
+        "Piyodalarning yo'l yoqasidan yurishi mumkin bo'lgan hudud",
+        "Piyodalarning qatnov qismidan yurishi mumkin bo'lgan hudud",
+        "Piyodalarning trotuardan yurishi mumkin bo'lgan hudud"
+      ],
+      "correctIndex": 0,
+      "explanation": "Bu belgi piyodalar yo'l yoqasidan yurishi mumkin bo'lgan hududni bildiradi va haydovchilardan piyodalarga nisbatan ehtiyotkor bo'lishni talab qiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu yo'l belgisi qanday nomlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Piyodalarning yo'l yoqasidan yurishi mumkin bo'lgan hudud",
+            "Piyodalarning qatnov qismidan yurishi mumkin bo'lgan hudud",
+            "Piyodalarning trotuardan yurishi mumkin bo'lgan hudud"
+          ],
+          "correctIndex": 0,
+          "explanation": "Bu belgi piyodalar yo'l yoqasidan yurishi mumkin bo'lgan hududni bildiradi va haydovchilardan piyodalarga nisbatan ehtiyotkor bo'lishni talab qiladi."
+        },
+        "uz_cyrl": {
+          "text": "Бу ёъл белгиси қандай номланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Пиёдаларнинг ёъл ёқасидан юриши мумкин бўлган ҳудуд",
+            "Пиёдаларнинг қатнов қисмидан юриши мумкин бўлган ҳудуд",
+            "Пиёдаларнинг тротуардан юриши мумкин бўлган ҳудуд"
+          ],
+          "correctIndex": 0,
+          "explanation": "Бу белги пиёдалар ёъл ёқасидан юриши мумкин бўлган ҳудудни билдиради ва ҳайдовчилардан пиёдаларга нисбатан еҳтиёткор бўлишни талаб қилади."
+        },
+        "ru": {
+          "text": "Как называется этот дорожный знак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Участок, где пешеходы могут двигаться по обочине",
+            "Участок, где пешеходы могут двигаться по проезжей части",
+            "Участок, где пешеходы могут двигаться по тротуару"
+          ],
+          "correctIndex": 0,
+          "explanation": "Знак обозначает участок, где пешеходы могут двигаться по обочине, и требует от водителей повышенной осторожности."
+        }
+      }
+    },
+    {
+      "id": "080dc76c-6b90-43b7-9aec-73161741690c",
+      "questionId": "topic:103:080dc76c-6b90-43b7-9aec-73161741690c",
+      "order": 5,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 1,
+      "text": "Kemiruvchi va sudralim yuruvchi hayvonlar qaysi javobda ko‘rsatilgan?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780815033476-4cttotql.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "1 va 3"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yovvoyi hayvonlar belgisini ko‘rsating:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "2 va 4"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Ёввойи ҳайвонлар белгисини кўрсатинг:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "2 ва 4"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Укажите знак «Дикие животные»:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "2 и 4"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "423cda71-f780-44db-9f7b-4a17bf22d29a",
+      "questionId": "topic:107:423cda71-f780-44db-9f7b-4a17bf22d29a",
+      "order": 6,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 8,
+      "text": "Qaysi belgi «Avtomobillar uchun mo'ljallangan yo'l» deb nomlanadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782815914505-62r32ysl.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correctIndex": 1,
+      "explanation": "2-raqamli ko'k to'rtburchak belgi avtomobillar uchun mo'ljallangan yo'l boshlanganini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi «Avtomobillar uchun mo'ljallangan yo'l» deb nomlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "correctIndex": 1,
+          "explanation": "2-raqamli ko'k to'rtburchak belgi avtomobillar uchun mo'ljallangan yo'l boshlanganini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги «Автомобиллар учун мўлжалланган ёъл» деб номланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "correctIndex": 1,
+          "explanation": "2-рақамли кўк тўртбурчак белги автомобиллар учун мўлжалланган ёъл бошланганини билдиради."
+        },
+        "ru": {
+          "text": "Какой знак называется «Дорога для автомобилей»?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "correctIndex": 1,
+          "explanation": "Синий прямоугольный знак под номером 2 обозначает начало дороги для автомобилей."
+        }
+      }
+    },
+    {
+      "id": "8a932199-fd52-4568-8795-76e6c60a1247",
+      "questionId": "topic:112:8a932199-fd52-4568-8795-76e6c60a1247",
+      "order": 7,
+      "topicId": 112,
+      "topicSlug": "svetofor-ishoralari",
+      "topicTitle": "Svetofor ishoralari",
+      "questionIndex": 6,
+      "text": "Ushbu svetofor tramvayga qaysi yo‘nalishda harakatlanishga ruxsat beradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781942239039-p4jipbo6.webp",
+      "audio": "",
+      "options": [
+        "Faqat to‘g‘riga",
+        "Barcha yo‘nalishlarga",
+        "Barcha yo‘nalishlarda harakatlanish taqiqlanadi"
+      ],
+      "correctIndex": 2,
+      "explanation": "Tramvay svetoforida ruxsat beruvchi oq signallar yonmagan, shuning uchun barcha yo‘nalishlarda harakatlanish taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu svetofor tramvayga qaysi yo‘nalishda harakatlanishga ruxsat beradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat to‘g‘riga",
+            "Barcha yo‘nalishlarga",
+            "Barcha yo‘nalishlarda harakatlanish taqiqlanadi"
+          ],
+          "correctIndex": 2,
+          "explanation": "Tramvay svetoforida ruxsat beruvchi oq signallar yonmagan, shuning uchun barcha yo‘nalishlarda harakatlanish taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу светофор трамвайга қайси ё‘налишда ҳаракатланишга рухсат беради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат тўғрига",
+            "Барча ё‘налишларга",
+            "Барча ё‘налишларда ҳаракатланиш тақиқланади"
+          ],
+          "correctIndex": 2,
+          "explanation": "Трамвай светофорида рухсат берувчи оқ сигналлар ёнмаган, шунинг учун барча ё‘налишларда ҳаракатланиш тақиқланади."
+        },
+        "ru": {
+          "text": "В каком направлении этот светофор разрешает движение трамваю?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только прямо",
+            "Во всех направлениях",
+            "Движение запрещено во всех направлениях"
+          ],
+          "correctIndex": 2,
+          "explanation": "Разрешающие белые сигналы не включены, поэтому движение трамвая запрещено во всех направлениях."
+        }
+      }
+    },
+    {
+      "id": "2bc2a480-2ef0-44b9-981c-bb0401b75c6f",
+      "questionId": "topic:110:2bc2a480-2ef0-44b9-981c-bb0401b75c6f",
+      "order": 8,
+      "topicId": 110,
+      "topicSlug": "yotiq-chiziqlar",
+      "topicTitle": "Yotiq chiziqlar",
+      "questionIndex": 10,
+      "text": "Qaysi haydovchi to‘xtash qoidasini buzdi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751067326-9zmbz2ic.webp",
+      "audio": "",
+      "options": [
+        "Yengil avtomobil",
+        "Yuk avtomobili",
+        "Ikkisi ham buzmadi",
+        "Ikkisi ham buzdi"
+      ],
+      "correctIndex": 3,
+      "explanation": "Har ikkala haydovchi ham STOP belgisi va to‘xtash chizig‘i talablariga rioya qilmagan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi haydovchi to‘xtash qoidasini buzdi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yengil avtomobil",
+            "Yuk avtomobili",
+            "Ikkisi ham buzmadi",
+            "Ikkisi ham buzdi"
+          ],
+          "correctIndex": 3,
+          "explanation": "Har ikkala haydovchi ham STOP belgisi va to‘xtash chizig‘i talablariga rioya qilmagan."
+        },
+        "uz_cyrl": {
+          "text": "Қайси ҳайдовчи тўхташ қоидасини бузди?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Йенгил автомобил",
+            "Юк автомобили",
+            "Иккиси ҳам бузмади",
+            "Иккиси ҳам бузди"
+          ],
+          "correctIndex": 3,
+          "explanation": "Ҳар иккала ҳайдовчи ҳам СТОП белгиси ва тўхташ чизиғи талабларига риоя қилмаган."
+        },
+        "ru": {
+          "text": "Какой водитель нарушил правило остановки?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Водитель легкового автомобиля",
+            "Водитель грузового автомобиля",
+            "Оба не нарушили",
+            "Оба нарушили"
+          ],
+          "correctIndex": 3,
+          "explanation": "Оба водителя не выполнили требования знака STOP и стоп-линии."
+        }
+      }
+    },
+    {
+      "id": "3045fc82-2a56-418c-ba07-3123fa0fc6ce",
+      "questionId": "topic:106:3045fc82-2a56-418c-ba07-3123fa0fc6ce",
+      "order": 9,
+      "topicId": 106,
+      "topicSlug": "buyuruvchi-belgilar",
+      "topicTitle": "Buyuruvchi belgilar",
+      "questionIndex": 11,
+      "text": "Qaysi yo‘nalishda harakatlanish taqiqlanadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781757921493-krrz48q8.webp",
+      "audio": "",
+      "options": [
+        "Faqat chapga",
+        "O‘ngga, chapga va orqaga qayrilib olishga",
+        "Chapga va orqaga qayrilib olishga",
+        "Faqat to‘g‘riga"
+      ],
+      "correctIndex": 3,
+      "explanation": "Belgi faqat o‘ngga va chapga burilishlarga ruxsat beradi. To‘g‘ri yo‘nalishda davom etish esa taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo‘nalishda harakatlanish taqiqlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat chapga",
+            "O‘ngga, chapga va orqaga qayrilib olishga",
+            "Chapga va orqaga qayrilib olishga",
+            "Faqat to‘g‘riga"
+          ],
+          "correctIndex": 3,
+          "explanation": "Belgi faqat o‘ngga va chapga burilishlarga ruxsat beradi. To‘g‘ri yo‘nalishda davom etish esa taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси ё‘налишда ҳаракатланиш тақиқланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат чапга",
+            "Ўнгга, чапга ва орқага қайрилиб олишга",
+            "Чапга ва орқага қайрилиб олишга",
+            "Фақат тўғрига"
+          ],
+          "correctIndex": 3,
+          "explanation": "Белги фақат ўнгга ва чапга бурилишларга рухсат беради. Тўғри ё‘налишда давом етиш еса тақиқланади."
+        },
+        "ru": {
+          "text": "В каком направлении движение запрещено?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только налево",
+            "Направо, налево и на разворот",
+            "Налево и на разворот",
+            "Только прямо"
+          ],
+          "correctIndex": 3,
+          "explanation": "Знак разрешает повороты направо и налево. Движение прямо запрещено."
+        }
+      }
+    },
+    {
+      "id": "5477e078-bcdc-4a62-8c12-9feb1d221055",
+      "questionId": "topic:112:5477e078-bcdc-4a62-8c12-9feb1d221055",
+      "order": 10,
+      "topicId": 112,
+      "topicSlug": "svetofor-ishoralari",
+      "topicTitle": "Svetofor ishoralari",
+      "questionIndex": 13,
+      "text": "Qaysi yo'nalishda harakatlanish taqiqlangan?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781942330713-wofv3mua.webp",
+      "audio": "",
+      "options": [
+        "Faqat to'g'riga va o'ngga",
+        "Faqat chapga",
+        "Faqat chapga va qayrilib olishga",
+        "Faqat qayrilib olishga",
+        "Barcha yo'nalishlarga"
+      ],
+      "correctIndex": 3,
+      "explanation": "Chorrahada o'rnatilgan svetoforning qo'shimcha tarmog'ida chapga burilishga ruxsat beruvchi yashil chiroq yoniq turibdi. Bunday vaziyatda chetki chap bo'lakdan chapga burilishga ruxsat etiladi, biroq maxsus taqiqlovchi belgi yoki chiziqlar mavjudligi sababli aynan qayrilib olish taqiqlangan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo'nalishda harakatlanish taqiqlangan?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Faqat to'g'riga va o'ngga",
+            "Faqat chapga",
+            "Faqat chapga va qayrilib olishga",
+            "Faqat qayrilib olishga",
+            "Barcha yo'nalishlarga"
+          ],
+          "correctIndex": 3,
+          "explanation": "Chorrahada o'rnatilgan svetoforning qo'shimcha tarmog'ida chapga burilishga ruxsat beruvchi yashil chiroq yoniq turibdi. Bunday vaziyatda chetki chap bo'lakdan chapga burilishga ruxsat etiladi, biroq maxsus taqiqlovchi belgi yoki chiziqlar mavjudligi sababli aynan qayrilib olish taqiqlangan."
+        },
+        "uz_cyrl": {
+          "text": "Қайси ёъналишда ҳаракатланиш тақиқланган?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Фақат тўғрига ва ўнгга",
+            "Фақат чапга",
+            "Фақат чапга ва қайрилиб олишга",
+            "Фақат қайрилиб олишга",
+            "Барча ёъналишларга"
+          ],
+          "correctIndex": 3,
+          "explanation": "Чорраҳада ўрнатилган светофорнинг қўшимча тармоғида чапга бурилишга рухсат берувчи яшил чироқ ёниқ турибди. Бундай вазиятда четки чап бўлакдан чапга бурилишга рухсат етилади, бироқ махсус тақиқловчи белги ёки чизиқлар мавжудлиги сабабли айнан қайрилиб олиш тақиқланган."
+        },
+        "ru": {
+          "text": "В каком направлении движение запрещено?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Только прямо и направо",
+            "Только налево",
+            "Только налево и на разворот",
+            "Только на разворот",
+            "Во всех направлениях"
+          ],
+          "correctIndex": 3,
+          "explanation": "Поворот налево разрешён дополнительной секцией, но разворот в этой ситуации запрещён."
+        }
+      }
+    },
+      {
+        "id": "5852b298-d842-4ff0-a978-b0e1f4960b3f",
+        "questionId": "topic:103:5852b298-d842-4ff0-a978-b0e1f4960b3f",
+        "order": 11,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 35,
+      "text": "Yovvoyi hayvonlar belgisini ko‘rsating:",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780819684353-58mo2tn9.webp",
+      "audio": "",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "2 va 4"
+        ],
+        "correctIndex": 1,
+        "explanation": "",
+        "i18n": {
+          "uz_latn": {
+            "text": "Yovvoyi hayvonlar belgisini ko‘rsating:",
+            "image": "",
+            "audio": "",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "2 va 4"
+            ],
+            "correctIndex": 1,
+            "explanation": ""
+          },
+          "uz_cyrl": {
+            "text": "Ёввойи ҳайвонлар белгисини кўрсатинг:",
+            "image": "",
+            "audio": "",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "2 ва 4"
+            ],
+            "correctIndex": 1,
+            "explanation": ""
+          },
+          "ru": {
+            "text": "Укажите знак «Дикие животные»:",
+            "image": "",
+            "audio": "",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "2 и 4"
+            ],
+            "correctIndex": 1,
+            "explanation": ""
+          }
+        }
+      },
+    {
+      "id": "e6707b2e-6857-47de-bdeb-d99c486013e4",
+      "questionId": "topic:105:e6707b2e-6857-47de-bdeb-d99c486013e4",
+      "order": 12,
+      "topicId": 105,
+      "topicSlug": "taqiqlovchi-belgilar",
+      "topicTitle": "Taqiqlovchi belgilar",
+      "questionIndex": 27,
+      "text": "Bu belgi o‘rnatilgan joyda tirkamali yengil avtomobilni harakatlanishga ruxsat beriladimi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745309041-zk84d2m1.webp",
+      "audio": "",
+      "options": [
+        "Ruxsat beriladi agar tirkamaning vazni 750 kg dan oshmasa",
+        "Ruxsat beriladi",
+        "Taqiqlanadi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Rasmda yuk avtomobillari harakatini taqiqlovchi belgi ko‘rsatilgan. Tirkamali yengil avtomobil ushbu taqiq doirasiga kirmaydi va harakatlanishi mumkin.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu belgi o‘rnatilgan joyda tirkamali yengil avtomobilni harakatlanishga ruxsat beriladimi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ruxsat beriladi agar tirkamaning vazni 750 kg dan oshmasa",
+            "Ruxsat beriladi",
+            "Taqiqlanadi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Rasmda yuk avtomobillari harakatini taqiqlovchi belgi ko‘rsatilgan. Tirkamali yengil avtomobil ushbu taqiq doirasiga kirmaydi va harakatlanishi mumkin."
+        },
+        "uz_cyrl": {
+          "text": "Бу белги ўрнатилган жойда тиркамали йенгил автомобилни ҳаракатланишга рухсат бериладими?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Рухсат берилади агар тиркаманинг вазни 750 кг дан ошмаса",
+            "Рухсат берилади",
+            "Тақиқланади"
+          ],
+          "correctIndex": 1,
+          "explanation": "Расмда юк автомобиллари ҳаракатини тақиқловчи белги кўрсатилган. Тиркамали йенгил автомобил ушбу тақиқ доирасига кирмайди ва ҳаракатланиши мумкин."
+        },
+        "ru": {
+          "text": "Разрешено ли движение легкового автомобиля с прицепом в месте установки этого знака?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Разрешено, если масса прицепа не превышает 750 кг",
+            "Разрешено",
+            "Запрещено"
+          ],
+          "correctIndex": 1,
+          "explanation": "Знак запрещает движение грузовых автомобилей. Легковой автомобиль с прицепом под этот запрет не подпадает."
+        }
+      }
+    },
+    {
+      "id": "39b5ed65-b38c-4642-931f-9dc54dbb2bf7",
+      "questionId": "topic:99:39b5ed65-b38c-4642-931f-9dc54dbb2bf7",
+      "order": 13,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 20,
+      "text": "Agar haydovchi o'zi xarakatlanayotgan yo'lning qoplamasini bor- yo'qligini aniklay olmasa ( qorong'i vaqt, loy, qor) va imtiyoz belgilari bo'lmasa )?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783179173643-byg4c5dw.webp",
+      "audio": "",
+      "options": [
+        "O'zini asosiy yo'lda deb hisoblashi kerak",
+        "O'zini ikkinchi darajali yo'lda deb xisoblashi kerak",
+        "Barchasi tugri"
+      ],
+      "correctIndex": 1,
+      "explanation": "Yo'l harakati qoidalariga ko'ra, agar haydovchi noqulay ob-havo (qor, loy) yoki qorong'i vaqt sababli yo'l qoplamasini (asfalt yoki tuproq ekanligini) aniqlay olmasa va chorrahadan oldin imtiyoz belgilari o'rnatilmagan bo'lsa, u xavfsizlikni ta'minlash maqsadida o'zini ikkinchi darajali yo'lda deb hisoblashi shart.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Agar haydovchi o'zi xarakatlanayotgan yo'lning qoplamasini bor- yo'qligini aniklay olmasa ( qorong'i vaqt, loy, qor) va imtiyoz belgilari bo'lmasa )?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "O'zini asosiy yo'lda deb hisoblashi kerak",
+            "O'zini ikkinchi darajali yo'lda deb xisoblashi kerak",
+            "Barchasi tugri"
+          ],
+          "correctIndex": 1,
+          "explanation": "Yo'l harakati qoidalariga ko'ra, agar haydovchi noqulay ob-havo (qor, loy) yoki qorong'i vaqt sababli yo'l qoplamasini (asfalt yoki tuproq ekanligini) aniqlay olmasa va chorrahadan oldin imtiyoz belgilari o'rnatilmagan bo'lsa, u xavfsizlikni ta'minlash maqsadida o'zini ikkinchi darajali yo'lda deb hisoblashi shart."
+        },
+        "uz_cyrl": {
+          "text": "Агар ҳайдовчи ўзи харакатланаётган йўлнинг қопламасини бор- йўқлигини аниклай олмаса ( қоронғи вақт, лой, қор) ва имтиёз белгилари бўлмаса )?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ўзини асосий йўлда деб ҳисоблаши керак",
+            "Ўзини иккинчи даражали йўлда деб хисоблаши керак",
+            "Барчаси тугри"
+          ],
+          "correctIndex": 1,
+          "explanation": "Ёъл ҳаракати қоидаларига кўра, агар ҳайдовчи ноқулай об-ҳаво (қор, лой) ёки қоронғи вақт сабабли йўл қопламасини (асфалт ёки тупроқ еканлигини) аниқлай олмаса ва чорраҳадан олдин имтиёз белгилари ўрнатилмаган бўлса, у хавфсизликни таъминлаш мақсадида ўзини иккинчи даражали йўлда деб ҳисоблаши шарт."
+        },
+        "ru": {
+          "text": "Как должен поступить водитель, если он не может определить наличие покрытия на дороге из-за темноты, грязи или снега и знаки приоритета отсутствуют?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Считать, что он находится на главной дороге",
+            "Считать, что он находится на второстепенной дороге",
+            "Все ответы верны"
+          ],
+          "correctIndex": 1,
+          "explanation": "Если из-за снега, грязи или темноты водитель не может определить тип покрытия и перед перекрёстком нет знаков приоритета, в целях безопасности он обязан считать себя находящимся на второстепенной дороге."
+        }
+      }
+    },
+    {
+      "id": "5399d450-f6d4-4f26-a094-d7dd4203f93a",
+      "questionId": "topic:103:5399d450-f6d4-4f26-a094-d7dd4203f93a",
+      "order": 14,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 8,
+      "text": "Kursatilgan belgilardan qaysi biri bolalar deb nomlanadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780815727988-dffuw30v.png",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3"
+      ],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Kursatilgan belgilardan qaysi biri bolalar deb nomlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган белгилардан қайси бири болалар деб номланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой из показанных знаков называется «Дети»?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "f5aff1c2-517c-4d21-865c-1b83b81426ba",
+      "questionId": "topic:107:f5aff1c2-517c-4d21-865c-1b83b81426ba",
+      "order": 15,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 31,
+      "text": "Belgilardan qaysi biri yer usti avtomobil qo'yish joyini bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782816081686-ym6p8kcq.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3"
+      ],
+      "correctIndex": 0,
+      "explanation": "1-raqamli belgi yer usti avtomobil qo'yish joyini bildiradi. 2 - yopiq avtoturargohni, 3 - elektromobillarni quvvatlash joyiga ega avtoturargohni bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgilardan qaysi biri yer usti avtomobil qo'yish joyini bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3"
+          ],
+          "correctIndex": 0,
+          "explanation": "1-raqamli belgi yer usti avtomobil qo'yish joyini bildiradi. 2 - yopiq avtoturargohni, 3 - elektromobillarni quvvatlash joyiga ega avtoturargohni bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Белгилардан қайси бири йер усти автомобил қўйиш жойини билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3"
+          ],
+          "correctIndex": 0,
+          "explanation": "1-рақамли белги йер усти автомобил қўйиш жойини билдиради. 2 - ёпиқ автотураргоҳни, 3 - електромобилларни қувватлаш жойига ега автотураргоҳни билдиради."
+        },
+        "ru": {
+          "text": "Какой знак обозначает наземную парковку?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3"
+          ],
+          "correctIndex": 0,
+          "explanation": "Знак 1 обозначает наземную парковку. Знак 2 — крытую парковку, знак 3 — парковку с зарядкой для электромобилей."
+        }
+      }
+    },
+    {
+      "id": "9f925481-c56f-4781-8397-77cfd04549df",
+      "questionId": "topic:106:9f925481-c56f-4781-8397-77cfd04549df",
+      "order": 16,
+      "topicId": 106,
+      "topicSlug": "buyuruvchi-belgilar",
+      "topicTitle": "Buyuruvchi belgilar",
+      "questionIndex": 19,
+      "text": "Quyidagi belgilardan qaysi biri yengil avtomobillar harakati deb nomlanadi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781757978510-opr7eabx.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correctIndex": 1,
+      "explanation": "2-raqamli ko‘k doira ichidagi avtomobil tasviri faqat yengil avtomobillar harakati uchun mo‘ljallangan yo‘lni bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi belgilardan qaysi biri yengil avtomobillar harakati deb nomlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "correctIndex": 1,
+          "explanation": "2-raqamli ko‘k doira ichidagi avtomobil tasviri faqat yengil avtomobillar harakati uchun mo‘ljallangan yo‘lni bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги белгилардан қайси бири йенгил автомобиллар ҳаракати деб номланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "correctIndex": 1,
+          "explanation": "2-рақамли кўк доира ичидаги автомобил тасвири фақат йенгил автомобиллар ҳаракати учун мўлжалланган ё‘лни билдиради."
+        },
+        "ru": {
+          "text": "Какой из следующих знаков называется «Движение легковых автомобилей»?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "correctIndex": 1,
+          "explanation": "Знак 2 с изображением автомобиля в синем круге обозначает дорогу для движения легковых автомобилей."
+        }
+      }
+    },
+    {
+      "id": "9d3cf333-8e54-4aa0-956f-bbed4f01d4fc",
+      "questionId": "topic:103:9d3cf333-8e54-4aa0-956f-bbed4f01d4fc",
+      "order": 17,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 4,
+      "text": "Belgilardan qaysi biri qatnov qismi kesishmasi hududini bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780815278063-fbbq83d9.png",
+      "audio": "",
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgilardan qaysi biri qatnov qismi kesishmasi hududini bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "B",
+            "C"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Белгилардан қайси бири қатнов қисми кесишмаси ҳудудини билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А",
+            "Б",
+            "С"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой из знаков обозначает зону пересечения проезжих частей?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "B",
+            "C"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "864ac96d-d15f-4692-9131-39d1fd6ed65d",
+      "questionId": "topic:138:864ac96d-d15f-4692-9131-39d1fd6ed65d",
+      "order": 18,
+      "topicId": 138,
+      "topicSlug": "transport-vositalaridan-foydalanishni-taqiqlovchi-shartlar",
+      "topicTitle": "Transport vositalaridan foydalanishni taqiqlovchi shartlar",
+      "questionIndex": 34,
+      "text": "01.01.1981-yilgacha ishlab chiqarilgan yengil avtomobillar uchun 40 km/soat tezlikda harakatlanishda ishchi tormoz tizimining qanday samaradorlik me’yoriga ruxsat berilgan?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "7,2 m",
+        "12,2 m",
+        "19,5 m",
+        "25 m",
+        "14,5 m"
+      ],
+      "correctIndex": 4,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "01.01.1981-yilgacha ishlab chiqarilgan yengil avtomobillar uchun 40 km/soat tezlikda harakatlanishda ishchi tormoz tizimining qanday samaradorlik me’yoriga ruxsat berilgan?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "7,2 m",
+            "12,2 m",
+            "19,5 m",
+            "25 m",
+            "14,5 m"
+          ],
+          "correctIndex": 4,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "01.01.1981-йилгача ишлаб чиқарилган йенгил автомобиллар учун 40 км/соат тезликда ҳаракатланишда ишчи тормоз тизимининг қандай самарадорлик меъёрига рухсат берилган?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "7,2 м",
+            "12,2 м",
+            "19,5 м",
+            "25 м",
+            "14,5 м"
+          ],
+          "correctIndex": 4,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой тормозной путь допускается для легковых автомобилей, выпущенных до 01.01.1981, при скорости 40 км/ч?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "7,2 м",
+            "12,2 м",
+            "19,5 м",
+            "25 м",
+            "14,5 м"
+          ],
+          "correctIndex": 4,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "615c6044-16a5-4dd7-a443-355be6af44da",
+      "questionId": "topic:101:615c6044-16a5-4dd7-a443-355be6af44da",
+      "order": 19,
+      "topicId": 101,
+      "topicSlug": "piyodalarning-umumiy-vazifalari",
+      "topicTitle": "Piyodalarning umumiy vazifalari",
+      "questionIndex": 9,
+      "text": "Qaysi rasmda piyoda qoidani buzgan holda yo‘lni kesib o‘tyapti?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780812228781-gicqudxv.webp",
+      "audio": "",
+      "options": [
+        "1-2-rasmdagi piyoda",
+        "3-rasmdagi piyoda",
+        "4-rasmdagi piyoda",
+        "Barcha rasmdagi piyoda"
+      ],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi rasmda piyoda qoidani buzgan holda yo‘lni kesib o‘tyapti?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1-2-rasmdagi piyoda",
+            "3-rasmdagi piyoda",
+            "4-rasmdagi piyoda",
+            "Barcha rasmdagi piyoda"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси расмда пиёда қоидани бузган ҳолда йўлни кесиб ўтяпти?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "1-2-расмдаги пиёда",
+            "3-расмдаги пиёда",
+            "4-расмдаги пиёда",
+            "Барча расмдаги пиёда"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "На каком рисунке пешеход переходит дорогу с нарушением правил?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Пешеход на рисунках 1–2",
+            "Пешеход на рисунке 3",
+            "Пешеход на рисунке 4",
+            "Пешеходы на всех рисунках"
+          ],
+          "correctIndex": 1,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "9eeff88a-9aba-44bb-8a3b-57c43688e8b0",
+      "questionId": "topic:101:9eeff88a-9aba-44bb-8a3b-57c43688e8b0",
+      "order": 20,
+      "topicId": 101,
+      "topicSlug": "piyodalarning-umumiy-vazifalari",
+      "topicTitle": "Piyodalarning umumiy vazifalari",
+      "questionIndex": 5,
+      "text": "Qaysi rasmda piyodalar qoidani buzmay harakatlanmoqda?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1780811779973-lr4ksfby.webp",
+      "audio": "",
+      "options": [
+        "Chapdagi rasmda",
+        "O‘ngdagi rasmda",
+        "Ikkala rasmda"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi rasmda piyodalar qoidani buzmay harakatlanmoqda?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Chapdagi rasmda",
+            "O‘ngdagi rasmda",
+            "Ikkala rasmda"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси расмда пиёдалар қоидани бузмай ҳаракатланмоқда?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Чапдаги расмда",
+            "Ўнгдаги расмда",
+            "Иккала расмда"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "На каком рисунке пешеходы движутся без нарушения правил?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "На левом рисунке",
+            "На правом рисунке",
+            "На обоих рисунках"
+          ],
+          "correctIndex": 2,
+          "explanation": ""
+        }
+      }
+    }
+  ]
+}

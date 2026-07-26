@@ -1,0 +1,1128 @@
+{
+  "title": "Bilet №43",
+  "titleI18n": {
+    "uz_latn": "Bilet №43",
+    "uz_cyrl": "Билет №43",
+    "ru": "Билет №43"
+  },
+  "ticketNumber": 43,
+  "status": "COMPLETED",
+  "questions": [
+    {
+      "id": "547cd3fd-223a-4db6-97fc-33b0db971b8b",
+      "questionId": "topic:131:547cd3fd-223a-4db6-97fc-33b0db971b8b",
+      "order": 1,
+      "topicId": 131,
+      "topicSlug": "tashqi-yoritish-asboblaridan-foydalanish",
+      "topicTitle": "Tashqi yoritish asboblaridan foydalanish",
+      "questionIndex": 2,
+      "text": "Tumanga qarshi chiroqlarni qorong'i vaqtda yo'lning yoritilmagan qismlarida uzoqni yorituvchi chiroqlar bilan birga qo'llash mumkinmi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Ha",
+        "Yo'q"
+      ],
+      "correctIndex": 0,
+      "explanation": "Yo'lning yoritilmagan qismlarida qorong'i vaqtda tumanga qarshi faralarni uzoqni (yoki yaqinni) yorituvchi faralar bilan birgalikda yoqishga ruxsat beriladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Tumanga qarshi chiroqlarni qorong'i vaqtda yo'lning yoritilmagan qismlarida uzoqni yorituvchi chiroqlar bilan birga qo'llash mumkinmi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ha",
+            "Yo'q"
+          ],
+          "correctIndex": 0,
+          "explanation": "Yo'lning yoritilmagan qismlarida qorong'i vaqtda tumanga qarshi faralarni uzoqni (yoki yaqinni) yorituvchi faralar bilan birgalikda yoqishga ruxsat beriladi."
+        },
+        "uz_cyrl": {
+          "text": "Туманга қарши чироқларни қоронғи вақтда ёълнинг ёритилмаган қисмларида узоқни ёритувчи чироқлар билан бирга қўллаш мумкинми?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ҳа",
+            "Ёъқ"
+          ],
+          "correctIndex": 0,
+          "explanation": "Ёълнинг ёритилмаган қисмларида қоронғи вақтда туманга қарши фараларни узоқни (ёки яқинни) ёритувчи фаралар билан биргаликда ёқишга рухсат берилади."
+        },
+        "ru": {
+          "text": "Можно ли использовать противотуманные фары вместе с дальним светом на неосвещённых участках дороги в тёмное время суток?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Да",
+            "Нет"
+          ],
+          "correctIndex": 0,
+          "explanation": "На неосвещённых участках дороги противотуманные фары разрешается использовать совместно с дальним или ближним светом."
+        }
+      }
+    },
+    {
+      "id": "862c3895-c144-4889-8ebe-29cc309db8f7",
+      "questionId": "topic:132:862c3895-c144-4889-8ebe-29cc309db8f7",
+      "order": 2,
+      "topicId": 132,
+      "topicSlug": "mexanik-transport-vositalarini-shatakka-olish",
+      "topicTitle": "Mexanik transport vositalarini shatakka olish",
+      "questionIndex": 2,
+      "text": "Qattiq ulagichda shatakka olingan avtobusda yoki trolleybusda odam tashishga ruxsat etiladimi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Taqiqlanadi",
+        "Ruxsat etiladi"
+      ],
+      "correctIndex": 0,
+      "explanation": "Qattiq ulagichda shatakka olingan avtobus yoki trolleybusda odam tashish taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qattiq ulagichda shatakka olingan avtobusda yoki trolleybusda odam tashishga ruxsat etiladimi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Taqiqlanadi",
+            "Ruxsat etiladi"
+          ],
+          "correctIndex": 0,
+          "explanation": "Qattiq ulagichda shatakka olingan avtobus yoki trolleybusda odam tashish taqiqlanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қаттиқ улагичда шатакка олинган автобусда ёки троллейбусда одам ташишга рухсат етиладими?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Тақиқланади",
+            "Рухсат етилади"
+          ],
+          "correctIndex": 0,
+          "explanation": "Қаттиқ улагичда шатакка олинган автобус ёки троллейбусда одам ташиш тақиқланади."
+        },
+        "ru": {
+          "text": "Разрешается ли перевозить людей в буксируемом автобусе или троллейбусе при жёсткой сцепке?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Запрещается",
+            "Разрешается"
+          ],
+          "correctIndex": 0,
+          "explanation": "Перевозка людей в буксируемом автобусе или троллейбусе запрещена."
+        }
+      }
+    },
+    {
+      "id": "d1f4be2f-29d2-4a87-8c07-a0f72e633ac5",
+      "questionId": "topic:107:d1f4be2f-29d2-4a87-8c07-a0f72e633ac5",
+      "order": 3,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 11,
+      "text": "Ushbu belgilardan qaysi biri bir yoki bir necha bo'laklarda harakatlanish yo'nalishi qarama-qarshi tomonga o'zgarishi mumkin bo'lgan yo'l qismining boshlanishini bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782815930983-u3dffqda.webp",
+      "audio": "",
+      "options": [
+        "A",
+        "Б",
+        "В"
+      ],
+      "correctIndex": 2,
+      "explanation": "«В» belgisi reversiv harakat boshlanishini bildiradi. Bu yo'l qismida ayrim bo'laklarning harakat yo'nalishi vaqtga qarab o'zgarishi mumkin.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu belgilardan qaysi biri bir yoki bir necha bo'laklarda harakatlanish yo'nalishi qarama-qarshi tomonga o'zgarishi mumkin bo'lgan yo'l qismining boshlanishini bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "Б",
+            "В"
+          ],
+          "correctIndex": 2,
+          "explanation": "«В» belgisi reversiv harakat boshlanishini bildiradi. Bu yo'l qismida ayrim bo'laklarning harakat yo'nalishi vaqtga qarab o'zgarishi mumkin."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу белгилардан қайси бири бир ёки бир неча бўлакларда ҳаракатланиш ёъналиши қарама-қарши томонга ўзгариши мумкин бўлган ёъл қисмининг бошланишини билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А",
+            "Б",
+            "В"
+          ],
+          "correctIndex": 2,
+          "explanation": "«В» белгиси реверсив ҳаракат бошланишини билдиради. Бу ёъл қисмида айрим бўлакларнинг ҳаракат ёъналиши вақтга қараб ўзгариши мумкин."
+        },
+        "ru": {
+          "text": "Какой из этих знаков обозначает начало участка дороги, на котором направление движения по одной или нескольким полосам может меняться на противоположное?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "Б",
+            "В"
+          ],
+          "correctIndex": 2,
+          "explanation": "Знак «В» обозначает начало реверсивного движения."
+        }
+      }
+    },
+    {
+      "id": "b0671900-033f-44fe-a205-60945159be3e",
+      "questionId": "topic:128:b0671900-033f-44fe-a205-60945159be3e",
+      "order": 4,
+      "topicId": 128,
+      "topicSlug": "turar-joy-dahalarida-harakatlanish",
+      "topicTitle": "Turar joy dahalarida harakatlanish",
+      "questionIndex": 0,
+      "text": "Turar joy dahalaridan chiqishda haydovchilar:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Boshqa harakat qatnashchilariga yo'l berishi kerak",
+        "Boshqa harakat qatnashchilariga nisbatan imtiyozga ega"
+      ],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Turar joy dahalaridan chiqishda haydovchilar:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Boshqa harakat qatnashchilariga yo'l berishi kerak",
+            "Boshqa harakat qatnashchilariga nisbatan imtiyozga ega"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Турар жой даҳаларидан чиқишда ҳайдовчилар:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Бошқа ҳаракат қатнашчиларига йўл бериши керак",
+            "Бошқа ҳаракат қатнашчиларига нисбатан имтиёзга ега"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        },
+        "ru": {
+          "text": "При выезде из жилой зоны водители:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Должны уступить дорогу другим участникам движения",
+            "Имеют преимущество перед другими участниками движения"
+          ],
+          "correctIndex": 0,
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "db44a47e-b938-4a26-bfc8-21bb3255d604",
+      "questionId": "topic:123:db44a47e-b938-4a26-bfc8-21bb3255d604",
+      "order": 5,
+      "topicId": 123,
+      "topicSlug": "tartibga-solinmagan-chorrahalar-teng-ahamiyatli",
+      "topicTitle": "Tartibga solinmagan chorrahalar — teng ahamiyatli",
+      "questionIndex": 9,
+      "text": "Chorrahada qaysi avtomobil yo'l berishi kerak?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782392075936-rvqrxe4h.webp",
+      "audio": "",
+      "options": [
+        "Ko'k avtomobil",
+        "Qizil avtomobil"
+      ],
+      "correctIndex": 1,
+      "explanation": "Bu tartibga solinmagan teng ahamiyatli chorraha bo‘lib, o‘ng qo‘l qoidasi amal qiladi. Qizil avtomobil chapga burilmoqda (chirog‘i yoqilgan) va uning o‘ng tomonida to‘g‘riga harakatlanib kelayotgan ko‘k avtomobil bor. Shuning uchun qizil avtomobil ko‘k avtomobilga yo‘l berishi shart.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Chorrahada qaysi avtomobil yo'l berishi kerak?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ko'k avtomobil",
+            "Qizil avtomobil"
+          ],
+          "correctIndex": 1,
+          "explanation": "Bu tartibga solinmagan teng ahamiyatli chorraha bo‘lib, o‘ng qo‘l qoidasi amal qiladi. Qizil avtomobil chapga burilmoqda (chirog‘i yoqilgan) va uning o‘ng tomonida to‘g‘riga harakatlanib kelayotgan ko‘k avtomobil bor. Shuning uchun qizil avtomobil ko‘k avtomobilga yo‘l berishi shart."
+        },
+        "uz_cyrl": {
+          "text": "Чорраҳада қайси автомобил ёъл бериши керак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Кўк автомобил",
+            "Қизил автомобил"
+          ],
+          "correctIndex": 1,
+          "explanation": "Бу тартибга солинмаган тенг аҳамиятли чорраҳа бўлиб, ўнг қўл қоидаси амал қилади. Қизил автомобил чапга бурилмоқда (чироғи ёқилган) ва унинг ўнг томонида тўғрига ҳаракатланиб келаётган кўк автомобил бор. Шунинг учун қизил автомобил кўк автомобилга ё‘л бериши шарт."
+        },
+        "ru": {
+          "text": "Кто должен уступить дорогу?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Синий автомобиль",
+            "Красный автомобиль"
+          ],
+          "correctIndex": 1,
+          "explanation": "Красный автомобиль поворачивает налево и обязан уступить синему автомобилю, движущемуся прямо."
+        }
+      }
+    },
+    {
+      "id": "f74a168d-38d7-442e-ac55-8e34a8b3ad8c",
+      "questionId": "topic:103:f74a168d-38d7-442e-ac55-8e34a8b3ad8c",
+      "order": 6,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 9,
+      "text": "Ko'rsatilgan qaysi belgi yo'lning o'ta sirpanchiq bo'lgan qismini bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783259839379-89zqz7uz.webp",
+      "audio": "",
+      "options": [
+        "A",
+        "A va Б",
+        "В"
+      ],
+      "correctIndex": 2,
+      "explanation": "V belgisi avtomobilning sirpanish izi orqali yo'lning o'ta sirpanchiq qismini bildiradi va tezlikni pasaytirishni talab qiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko'rsatilgan qaysi belgi yo'lning o'ta sirpanchiq bo'lgan qismini bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "A va Б",
+            "В"
+          ],
+          "correctIndex": 2,
+          "explanation": "V belgisi avtomobilning sirpanish izi orqali yo'lning o'ta sirpanchiq qismini bildiradi va tezlikni pasaytirishni talab qiladi."
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган қайси белги ёълнинг ўта сирпанчиқ бўлган қисмини билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А",
+            "А ва Б",
+            "В"
+          ],
+          "correctIndex": 2,
+          "explanation": "В белгиси автомобилнинг сирпаниш изи орқали ёълнинг ўта сирпанчиқ қисмини билдиради ва тезликни пасайтиришни талаб қилади."
+        },
+        "ru": {
+          "text": "Какой из показанных знаков обозначает особенно скользкий участок дороги?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "A и Б",
+            "В"
+          ],
+          "correctIndex": 2,
+          "explanation": "Знак В с изображением следа заноса автомобиля предупреждает об особенно скользком участке дороги и требует снизить скорость."
+        }
+      }
+    },
+    {
+      "id": "470cb263-48ff-4888-b124-269e37a7c245",
+      "questionId": "topic:107:470cb263-48ff-4888-b124-269e37a7c245",
+      "order": 7,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 19,
+      "text": "Qaysi belgi falokatli holatlar uchun kirish yo'lini bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782816006262-bnv10rs2.webp",
+      "audio": "",
+      "options": [
+        "A va D",
+        "B",
+        "C"
+      ],
+      "correctIndex": 1,
+      "explanation": "«B» belgisi favqulodda (falokatli) holatlar uchun mo'ljallangan kirish yoki chiqish yo'lini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi falokatli holatlar uchun kirish yo'lini bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A va D",
+            "B",
+            "C"
+          ],
+          "correctIndex": 1,
+          "explanation": "«B» belgisi favqulodda (falokatli) holatlar uchun mo'ljallangan kirish yoki chiqish yo'lini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги фалокатли ҳолатлар учун кириш ёълини билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А ва Д",
+            "Б",
+            "С"
+          ],
+          "correctIndex": 1,
+          "explanation": "«Б» белгиси фавқулодда (фалокатли) ҳолатлар учун мўлжалланган кириш ёки чиқиш ёълини билдиради."
+        },
+        "ru": {
+          "text": "Какой знак обозначает въезд для аварийных ситуаций?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A и D",
+            "B",
+            "C"
+          ],
+          "correctIndex": 1,
+          "explanation": "Знак «B» обозначает въезд или выезд, предназначенный для аварийных ситуаций."
+        }
+      }
+    },
+    {
+      "id": "c5272b91-5533-4ea9-99ba-0ac1e348a4ff",
+      "questionId": "topic:115:c5272b91-5533-4ea9-99ba-0ac1e348a4ff",
+      "order": 8,
+      "topicId": 115,
+      "topicSlug": "harakatlanishni-boshlash-manyovr-qilish",
+      "topicTitle": "Harakatlanishni boshlash, manyovr qilish",
+      "questionIndex": 24,
+      "text": "Ushbu holatda qaysi transport vositasi yo‘l berishi kerak?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782985883074-8vds417z.webp",
+      "audio": "",
+      "options": [
+        "Yengil avtomobil",
+        "Yuk avtomobili"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tor yo‘lda qarama-qarshi harakatlanishda yuk avtomobili yo‘l berishi lozim bo‘lgan holat tasvirlangan.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu holatda qaysi transport vositasi yo‘l berishi kerak?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yengil avtomobil",
+            "Yuk avtomobili"
+          ],
+          "correctIndex": 1,
+          "explanation": "Tor yo‘lda qarama-qarshi harakatlanishda yuk avtomobili yo‘l berishi lozim bo‘lgan holat tasvirlangan."
+        },
+        "uz_cyrl": {
+          "text": "Ушбу ҳолатда қайси транспорт воситаси ё‘л бериши керак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Йенгил автомобил",
+            "Юк автомобили"
+          ],
+          "correctIndex": 1,
+          "explanation": "Тор ё‘лда қарама-қарши ҳаракатланишда юк автомобили ё‘л бериши лозим бўлган ҳолат тасвирланган."
+        },
+        "ru": {
+          "text": "Какое транспортное средство должно уступить?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Легковой автомобиль",
+            "Грузовой автомобиль"
+          ],
+          "correctIndex": 1,
+          "explanation": "В данной ситуации уступить должен водитель грузового автомобиля."
+        }
+      }
+    },
+    {
+      "id": "f3f1230b-741a-4036-9369-403ed6b75593",
+      "questionId": "topic:107:f3f1230b-741a-4036-9369-403ed6b75593",
+      "order": 9,
+      "topicId": 107,
+      "topicSlug": "axborot-ko-rsatgich-belgilari",
+      "topicTitle": "Axborot-ko‘rsatgich belgilari",
+      "questionIndex": 24,
+      "text": "Qaysi belgi svetaforning (tartibga soluvchining) taqiqlovchi ishorasida transport vositalari to'xtaydigan joyni bildiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782816045566-y6mxlh8o.webp",
+      "audio": "",
+      "options": [
+        "A",
+        "Б",
+        "В",
+        "Г"
+      ],
+      "correctIndex": 2,
+      "explanation": "«STOP» yozuvi tushirilgan to'xtash chizig'i (3-belgi) svetaforning yoki tartibga soluvchining taqiqlovchi ishorasida transport vositalari to'xtashi kerak bo'lgan joyni bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi svetaforning (tartibga soluvchining) taqiqlovchi ishorasida transport vositalari to'xtaydigan joyni bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "Б",
+            "В",
+            "Г"
+          ],
+          "correctIndex": 2,
+          "explanation": "«STOP» yozuvi tushirilgan to'xtash chizig'i (3-belgi) svetaforning yoki tartibga soluvchining taqiqlovchi ishorasida transport vositalari to'xtashi kerak bo'lgan joyni bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги светафорнинг (тартибга солувчининг) тақиқловчи ишорасида транспорт воситалари тўхтайдиган жойни билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А",
+            "Б",
+            "В",
+            "Г"
+          ],
+          "correctIndex": 2,
+          "explanation": "«СТОП» ёзуви туширилган тўхташ чизиғи (3-белги) светафорнинг ёки тартибга солувчининг тақиқловчи ишорасида транспорт воситалари тўхташи керак бўлган жойни билдиради."
+        },
+        "ru": {
+          "text": "Какой знак обозначает место остановки транспортных средств при запрещающем сигнале светофора или регулировщика?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "Б",
+            "В",
+            "Г"
+          ],
+          "correctIndex": 2,
+          "explanation": "Стоп-линия с надписью STOP, обозначенная вариантом «В», указывает место обязательной остановки."
+        }
+      }
+    },
+    {
+      "id": "48276e88-6e6f-4407-891e-51a5d53c096f",
+      "questionId": "topic:140:48276e88-6e6f-4407-891e-51a5d53c096f",
+      "order": 10,
+      "topicId": 140,
+      "topicSlug": "birinchi-tibbiy-yordam",
+      "topicTitle": "Birinchi tibbiy yordam",
+      "questionIndex": 16,
+      "text": "Venoz qon ketish alomatlarini ko'rsating:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Qon tomirlaridan pushti rangli qon kuchli pulsatsiya bilan otilib chiqadi",
+        "Qon tomirlaridan to'q qizil rangdagi qon sizib oqib chiqadi",
+        "Mayda qon tomirlaridan ichki azolarga qon sizib oqib chiqadi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Venoz qon to'q qizil (to'q yoqut) rangda bo'ladi va jarohatlangan tomirdan pulsatsiyasiz, tekis va uzluksiz oqim shaklida chiqadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Venoz qon ketish alomatlarini ko'rsating:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Qon tomirlaridan pushti rangli qon kuchli pulsatsiya bilan otilib chiqadi",
+            "Qon tomirlaridan to'q qizil rangdagi qon sizib oqib chiqadi",
+            "Mayda qon tomirlaridan ichki azolarga qon sizib oqib chiqadi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Venoz qon to'q qizil (to'q yoqut) rangda bo'ladi va jarohatlangan tomirdan pulsatsiyasiz, tekis va uzluksiz oqim shaklida chiqadi."
+        },
+        "uz_cyrl": {
+          "text": "Веноз қон кетиш аломатларини кўрсатинг:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Қон томирларидан пушти рангли қон кучли пулсатсия билан отилиб чиқади",
+            "Қон томирларидан тўқ қизил рангдаги қон сизиб оқиб чиқади",
+            "Майда қон томирларидан ички азоларга қон сизиб оқиб чиқади"
+          ],
+          "correctIndex": 1,
+          "explanation": "Веноз қон тўқ қизил (тўқ ёқут) рангда бўлади ва жароҳатланган томирдан пулсатсиясиз, текис ва узлуксиз оқим шаклида чиқади."
+        },
+        "ru": {
+          "text": "Каковы признаки венозного кровотечения?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Яркая кровь бьёт пульсирующей струёй",
+            "Тёмно-красная кровь вытекает ровной струёй",
+            "Кровь из мелких сосудов поступает во внутренние органы"
+          ],
+          "correctIndex": 1,
+          "explanation": "Венозная кровь тёмная и вытекает непрерывной непульсирующей струёй."
+        }
+      }
+    },
+    {
+      "id": "1a5e2981-fc7f-4e19-b2cc-ca7119f2212d",
+      "questionId": "topic:103:1a5e2981-fc7f-4e19-b2cc-ca7119f2212d",
+      "order": 11,
+      "topicId": 103,
+      "topicSlug": "ogohlantiruvchi-belgilar",
+      "topicTitle": "Ogohlantiruvchi belgilar",
+      "questionIndex": 15,
+      "text": "Qaysi belgi temir yo'l kesishmasini to'suvchi moslama bilan jihozlanganligi haqida ogohlantiradi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783259872966-9w4czv7e.webp",
+      "audio": "",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctIndex": 2,
+      "explanation": "C belgisi oldinda to'suvchi moslama (shlagbaum) bilan jihozlangan temir yo'l kesishmasi mavjudligini bildiradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi temir yo'l kesishmasini to'suvchi moslama bilan jihozlanganligi haqida ogohlantiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "correctIndex": 2,
+          "explanation": "C belgisi oldinda to'suvchi moslama (shlagbaum) bilan jihozlangan temir yo'l kesishmasi mavjudligini bildiradi."
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги темир ёъл кесишмасини тўсувчи мослама билан жиҳозланганлиги ҳақида огоҳлантиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "А",
+            "Б",
+            "C",
+            "Д"
+          ],
+          "correctIndex": 2,
+          "explanation": "C белгиси олдинда тўсувчи мослама (шлагбаум) билан жиҳозланган темир ёъл кесишмаси мавжудлигини билдиради."
+        },
+        "ru": {
+          "text": "Какой знак предупреждает о железнодорожном переезде, оборудованном заграждающим устройством?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "correctIndex": 2,
+          "explanation": "Знак C предупреждает о расположенном впереди железнодорожном переезде, оборудованном шлагбаумом."
+        }
+      }
+    },
+    {
+      "id": "bcff7952-0444-4f15-a020-86f97dde1d65",
+      "questionId": "topic:116:bcff7952-0444-4f15-a020-86f97dde1d65",
+      "order": 12,
+      "topicId": 116,
+      "topicSlug": "yo-lning-qatnov-qismida-transport-vositalarining-joylashuvi",
+      "topicTitle": "Yo‘lning qatnov qismida transport vositalarining joylashuvi",
+      "questionIndex": 16,
+      "text": "Agar biror-bir to‘siq sababli qarama-qarshi yo‘nalishlarda harakatlanish qiyin bo‘lsa kim yo‘l berishi kerak?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "To‘siq bo‘lmagan tomondagi haydovchi",
+        "To‘siq o‘z tomonida bo‘lgan haydovchi"
+      ],
+      "correctIndex": 1,
+      "explanation": "To‘siq o‘z harakat yo‘nalishida joylashgan haydovchi qarama-qarshi tomondan kelayotgan transport vositasiga yo‘l berishi shart.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Agar biror-bir to‘siq sababli qarama-qarshi yo‘nalishlarda harakatlanish qiyin bo‘lsa kim yo‘l berishi kerak?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "To‘siq bo‘lmagan tomondagi haydovchi",
+            "To‘siq o‘z tomonida bo‘lgan haydovchi"
+          ],
+          "correctIndex": 1,
+          "explanation": "To‘siq o‘z harakat yo‘nalishida joylashgan haydovchi qarama-qarshi tomondan kelayotgan transport vositasiga yo‘l berishi shart."
+        },
+        "uz_cyrl": {
+          "text": "Агар бирор-бир тўсиқ сабабли қарама-қарши ё‘налишларда ҳаракатланиш қийин бўлса ким ё‘л бериши керак?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Тўсиқ бўлмаган томондаги ҳайдовчи",
+            "Тўсиқ ўз томонида бўлган ҳайдовчи"
+          ],
+          "correctIndex": 1,
+          "explanation": "Тўсиқ ўз ҳаракат ё‘налишида жойлашган ҳайдовчи қарама-қарши томондан келаётган транспорт воситасига ё‘л бериши шарт."
+        },
+        "ru": {
+          "text": "Кто должен уступить, если встречный разъезд затруднён из-за препятствия?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Водитель со стороны без препятствия",
+            "Водитель, на стороне которого находится препятствие"
+          ],
+          "correctIndex": 1,
+          "explanation": "Уступает водитель, на стороне которого расположено препятствие."
+        }
+      }
+    },
+    {
+      "id": "93446a49-65a6-4679-b4de-087b1a9f3738",
+      "questionId": "topic:115:93446a49-65a6-4679-b4de-087b1a9f3738",
+      "order": 13,
+      "topicId": 115,
+      "topicSlug": "harakatlanishni-boshlash-manyovr-qilish",
+      "topicTitle": "Harakatlanishni boshlash, manyovr qilish",
+      "questionIndex": 53,
+      "text": "Sekinlashish bo'lagi bo'lgan yo'llarda burilmoqchi bo'lgan haydovchi qachon tezlikni kamaytirishi lozim?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Sekinlashish bo'lagi o'tguncha",
+        "Sekinlashish bo'lagiga o'tgach"
+      ],
+      "correctIndex": 1,
+      "explanation": "Asosiy qatnov qismida emas, sekinlashish bo'lagiga o'tgandan keyin tezlik kamaytiriladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Sekinlashish bo'lagi bo'lgan yo'llarda burilmoqchi bo'lgan haydovchi qachon tezlikni kamaytirishi lozim?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Sekinlashish bo'lagi o'tguncha",
+            "Sekinlashish bo'lagiga o'tgach"
+          ],
+          "correctIndex": 1,
+          "explanation": "Asosiy qatnov qismida emas, sekinlashish bo'lagiga o'tgandan keyin tezlik kamaytiriladi."
+        },
+        "uz_cyrl": {
+          "text": "Секинлашиш бўлаги бўлган ёълларда бурилмоқчи бўлган ҳайдовчи қачон тезликни камайтириши лозим?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Секинлашиш бўлаги ўтгунча",
+            "Секинлашиш бўлагига ўтгач"
+          ],
+          "correctIndex": 1,
+          "explanation": "Асосий қатнов қисмида емас, секинлашиш бўлагига ўтгандан кейин тезлик камайтирилади."
+        },
+        "ru": {
+          "text": "Когда следует снижать скорость при наличии полосы торможения?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "До въезда на полосу торможения",
+            "После въезда на полосу торможения"
+          ],
+          "correctIndex": 1,
+          "explanation": "Скорость снижают после перестроения на полосу торможения."
+        }
+      }
+    },
+    {
+      "id": "7bb3871b-f974-46a7-9ee8-e565c15068c3",
+      "questionId": "topic:139:7bb3871b-f974-46a7-9ee8-e565c15068c3",
+      "order": 14,
+      "topicId": 139,
+      "topicSlug": "harakat-xavfsizligi-asoslari",
+      "topicTitle": "Harakat xavfsizligi asoslari",
+      "questionIndex": 47,
+      "text": "G'ildiraklarni yo'l bilan ilashishi yo'qolganda (kuchli yomg'ir, sel yoki suv toshgan yo'l qismlari) haydovchi:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Tezlikni oshirishi lozim",
+        "Tormoz tepkisini keskin bosish bilan tezlikni kamaytirishi lozim",
+        "Dvigatel bilan tormozlash orqali tezlikni kamaytirishi lozim"
+      ],
+      "correctIndex": 2,
+      "explanation": "Ilashish yo'qolganda keskin tormozlash xavfli. Eng xavfsiz usul — dvigatel bilan sekin tormozlash.",
+      "i18n": {
+        "uz_latn": {
+          "text": "G'ildiraklarni yo'l bilan ilashishi yo'qolganda (kuchli yomg'ir, sel yoki suv toshgan yo'l qismlari) haydovchi:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Tezlikni oshirishi lozim",
+            "Tormoz tepkisini keskin bosish bilan tezlikni kamaytirishi lozim",
+            "Dvigatel bilan tormozlash orqali tezlikni kamaytirishi lozim"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ilashish yo'qolganda keskin tormozlash xavfli. Eng xavfsiz usul — dvigatel bilan sekin tormozlash."
+        },
+        "uz_cyrl": {
+          "text": "Ғилдиракларни ёъл билан илашиши ёъқолганда (кучли ёмғир, сел ёки сув тошган ёъл қисмлари) ҳайдовчи:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Тезликни ошириши лозим",
+            "Тормоз тепкисини кескин босиш билан тезликни камайтириши лозим",
+            "Двигател билан тормозлаш орқали тезликни камайтириши лозим"
+          ],
+          "correctIndex": 2,
+          "explanation": "Илашиш ёъқолганда кескин тормозлаш хавфли. Енг хавфсиз усул — двигател билан секин тормозлаш."
+        },
+        "ru": {
+          "text": "Что делать при потере сцепления колёс с дорогой на залитом участке?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Увеличить скорость",
+            "Резко затормозить",
+            "Снизить скорость торможением двигателем"
+          ],
+          "correctIndex": 2,
+          "explanation": "Самый безопасный способ — плавно снизить скорость двигателем."
+        }
+      }
+    },
+    {
+      "id": "ff06a433-55fe-431d-9f7a-dda12c3cab01",
+      "questionId": "topic:114:ff06a433-55fe-431d-9f7a-dda12c3cab01",
+      "order": 15,
+      "topicId": 114,
+      "topicSlug": "ogohlantiruvchi-va-avariya-xavf-xatar-ishoralari",
+      "topicTitle": "Ogohlantiruvchi va avariya (xavf-xatar) ishoralari",
+      "questionIndex": 18,
+      "text": "Chap qo'lni yonga cho'zish yoki o'ng qo'lni tirsakdan to'g'ri burchak ostida bukib, yuqoriga ko'tarish ishorasi nimani bildiradi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Chapga burilishni yoki qayrilib olishni",
+        "O'ngga burilish yoki qayrilib olishni",
+        "To'xtashni"
+      ],
+      "correctIndex": 0,
+      "explanation": "Chap qoʻlni yon tomonga parallel choʻzish yoki oʻng qoʻlni tirsakdan toʻgʻri burchak shaklida tepaga bukib koʻrsatish — chapga burilish yoki orqaga qayrilib olish manyovrini anglatuvchi ogohlantirish ishorasidir.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Chap qo'lni yonga cho'zish yoki o'ng qo'lni tirsakdan to'g'ri burchak ostida bukib, yuqoriga ko'tarish ishorasi nimani bildiradi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Chapga burilishni yoki qayrilib olishni",
+            "O'ngga burilish yoki qayrilib olishni",
+            "To'xtashni"
+          ],
+          "correctIndex": 0,
+          "explanation": "Chap qoʻlni yon tomonga parallel choʻzish yoki oʻng qoʻlni tirsakdan toʻgʻri burchak shaklida tepaga bukib koʻrsatish — chapga burilish yoki orqaga qayrilib olish manyovrini anglatuvchi ogohlantirish ishorasidir."
+        },
+        "uz_cyrl": {
+          "text": "Чап қўлни ёнга чўзиш ёки ўнг қўлни тирсакдан тўғри бурчак остида букиб, юқорига кўтариш ишораси нимани билдиради?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Чапга бурилишни ёки қайрилиб олишни",
+            "Ўнгга бурилиш ёки қайрилиб олишни",
+            "Тўхташни"
+          ],
+          "correctIndex": 0,
+          "explanation": "Чап қўлни ён томонга параллел чўзиш ёки ўнг қўлни тирсакдан тўғри бурчак шаклида тепага букиб кўрсатиш — чапга бурилиш ёки орқага қайрилиб олиш манёврини англатувчи огоҳлантириш ишорасидир."
+        },
+        "ru": {
+          "text": "Что означает сигнал: левая рука вытянута в сторону либо правая рука согнута в локте вверх под прямым углом?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Поворот налево или разворот",
+            "Поворот направо или разворот",
+            "Остановку"
+          ],
+          "correctIndex": 0,
+          "explanation": "Такой сигнал предупреждает о повороте налево или развороте."
+        }
+      }
+    },
+    {
+      "id": "a59cc93c-320e-4328-9691-f94074419594",
+      "questionId": "topic:99:a59cc93c-320e-4328-9691-f94074419594",
+      "order": 16,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 39,
+      "text": "\"Imtiyoz\" atamasiga tegishli tarifni ko'rsating",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Yo'l harakati qatnashchilariga nisbatan imtiyozi bo'lgan boshqa yo'l harakati qatnashchisining harakat yo'nalishi yoki tezligini o'zgartirishga majbur etishimumkin bo'lgan hollarda harakatni davom mumkin bo'lgan hollarda harakatni davom ettirmasligini yoki boshlamasligini, biror-bir manyovr bajarishi mumkin emasligini bildiruvchi talab",
+        "Mo'ljallangan yo'nalishda boshqa yo'l harakati qatnashchilariga nisbatan oldin harakatlanish huquqi"
+      ],
+      "correctIndex": 1,
+      "explanation": "Yo'l harakatida “Imtiyoz” — haydovchi yoki boshqa yo'l harakati qatnashchisining belgilangan yoki mo'ljallangan yo'nalish bo'yicha boshqalarga nisbatan birinchi bo'lib o'tish (harakatlanish) huquqidir.",
+      "i18n": {
+        "uz_latn": {
+          "text": "\"Imtiyoz\" atamasiga tegishli tarifni ko'rsating",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yo'l harakati qatnashchilariga nisbatan imtiyozi bo'lgan boshqa yo'l harakati qatnashchisining harakat yo'nalishi yoki tezligini o'zgartirishga majbur etishimumkin bo'lgan hollarda harakatni davom mumkin bo'lgan hollarda harakatni davom ettirmasligini yoki boshlamasligini, biror-bir manyovr bajarishi mumkin emasligini bildiruvchi talab",
+            "Mo'ljallangan yo'nalishda boshqa yo'l harakati qatnashchilariga nisbatan oldin harakatlanish huquqi"
+          ],
+          "correctIndex": 1,
+          "explanation": "Yo'l harakatida “Imtiyoz” — haydovchi yoki boshqa yo'l harakati qatnashchisining belgilangan yoki mo'ljallangan yo'nalish bo'yicha boshqalarga nisbatan birinchi bo'lib o'tish (harakatlanish) huquqidir."
+        },
+        "uz_cyrl": {
+          "text": "\"Имтиёз\" атамасига тегишли тарифни кўрсатинг",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ёъл ҳаракати қатнашчиларига нисбатан имтиёзи бўлган бошқа йўл ҳаракати қатнашчисининг ҳаракат йўналиши ёки тезлигини ўзгартиришга мажбур етишимумкин бўлган ҳолларда ҳаракатни давом мумкин бўлган ҳолларда ҳаракатни давом еттирмаслигини ёки бошламаслигини, бирор-бир манёвр бажариши мумкин емаслигини билдирувчи талаб",
+            "Мўлжалланган йўналишда бошқа йўл ҳаракати қатнашчиларига нисбатан олдин ҳаракатланиш ҳуқуқи"
+          ],
+          "correctIndex": 1,
+          "explanation": "Ёъл ҳаракатида “Имтиёз” — ҳайдовчи ёки бошқа йўл ҳаракати қатнашчисининг белгиланган ёки мўлжалланган йўналиш бўйича бошқаларга нисбатан биринчи бўлиб ўтиш (ҳаракатланиш) ҳуқуқидир."
+        },
+        "ru": {
+          "text": "Укажите определение термина «преимущество».",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Требование не начинать, не возобновлять и не продолжать движение либо не выполнять манёвр, если это может вынудить участника движения, имеющего преимущество, изменить направление или скорость",
+            "Право на первоочередное движение по намеченному направлению по отношению к другим участникам дорожного движения"
+          ],
+          "correctIndex": 1,
+          "explanation": "Преимущество — право водителя или другого участника движения первым двигаться в установленном или намеченном направлении по отношению к другим участникам."
+        }
+      }
+    },
+    {
+      "id": "0c2a672e-548c-4d69-af02-8de57ac68ce0",
+      "questionId": "topic:99:0c2a672e-548c-4d69-af02-8de57ac68ce0",
+      "order": 17,
+      "topicId": 99,
+      "topicSlug": "umumiy-qoidalar",
+      "topicTitle": "Umumiy qoidalar",
+      "questionIndex": 40,
+      "text": "Quyidagi izoh qaysi atamaga tegishli? Texnik nuqson, tashilayotgan yuk, haydovchi va yo'lovchining holati, yo'ldagi biror to'siq tufayli xavf yuzaga kelganda yoxud ob-havo sharoitiga bog'liq holda transport vositasi harakatini to'xtatish",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Yo'l transport hodisasi",
+        "Yo'l harakati xavfsizligini taminlash",
+        "Majburiy to'xtash"
+      ],
+      "correctIndex": 2,
+      "explanation": "Yo'l harakati qoidalariga ko'ra, texnik nuqson, tashilayotgan yuk, haydovchi yoki yo'lovchining holati, yo'ldagi biror to'siq yoxud ob-havo sharoiti tufayli harakatlanish xavf tug'dirganda transport vositasi harakatining to'xtatilishi majburiy to'xtash hisoblanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi izoh qaysi atamaga tegishli? Texnik nuqson, tashilayotgan yuk, haydovchi va yo'lovchining holati, yo'ldagi biror to'siq tufayli xavf yuzaga kelganda yoxud ob-havo sharoitiga bog'liq holda transport vositasi harakatini to'xtatish",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Yo'l transport hodisasi",
+            "Yo'l harakati xavfsizligini taminlash",
+            "Majburiy to'xtash"
+          ],
+          "correctIndex": 2,
+          "explanation": "Yo'l harakati qoidalariga ko'ra, texnik nuqson, tashilayotgan yuk, haydovchi yoki yo'lovchining holati, yo'ldagi biror to'siq yoxud ob-havo sharoiti tufayli harakatlanish xavf tug'dirganda transport vositasi harakatining to'xtatilishi majburiy to'xtash hisoblanadi."
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги изоҳ қайси атамага тегишли? Техник нуқсон, ташилаётган юк, ҳайдовчи ва йўловчининг ҳолати, йўлдаги бирор тўсиқ туфайли хавф юзага келганда ёхуд об-ҳаво шароитига боғлиқ ҳолда транспорт воситаси ҳаракатини тўхтатиш",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ёъл транспорт ҳодисаси",
+            "Ёъл ҳаракати хавфсизлигини таминлаш",
+            "Мажбурий тўхташ"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ёъл ҳаракати қоидаларига кўра, техник нуқсон, ташилаётган юк, ҳайдовчи ёки йўловчининг ҳолати, йўлдаги бирор тўсиқ ёхуд об-ҳаво шароити туфайли ҳаракатланиш хавф туғдирганда транспорт воситаси ҳаракатининг тўхтатилиши мажбурий тўхташ ҳисобланади."
+        },
+        "ru": {
+          "text": "К какому термину относится следующее определение? Прекращение движения транспортного средства из-за технической неисправности, перевозимого груза, состояния водителя или пассажира, препятствия на дороге либо погодных условий, создающих опасность.",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Дорожно-транспортное происшествие",
+            "Обеспечение безопасности дорожного движения",
+            "Вынужденная остановка"
+          ],
+          "correctIndex": 2,
+          "explanation": "Прекращение движения транспортного средства из-за технической неисправности, перевозимого груза, состояния водителя или пассажира, препятствия на дороге либо погодных условий, при которых движение становится опасным, считается вынужденной остановкой."
+        }
+      }
+    },
+    {
+      "id": "e1c430fc-3814-4b9c-bd22-6af56e078bb4",
+      "questionId": "topic:139:e1c430fc-3814-4b9c-bd22-6af56e078bb4",
+      "order": 18,
+      "topicId": 139,
+      "topicSlug": "harakat-xavfsizligi-asoslari",
+      "topicTitle": "Harakat xavfsizligi asoslari",
+      "questionIndex": 56,
+      "text": "Avtomobilni qanday boshqarish usuli yonilg'i sarfini tejaydi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Shiddat bilan tezlanish va ohista sekinlashish bilan",
+        "Ohista (ravon) tezlanish va shiddat bilan sekinlashish bilan",
+        "Ohista (ravon) tezlanish va ohista sekinlashish bilan"
+      ],
+      "correctIndex": 2,
+      "explanation": "Ravon tezlanish va ravon sekinlashish yonilg'i sarfini kamaytiradi hamda avtomobilni samaraliroq boshqarishga yordam beradi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Avtomobilni qanday boshqarish usuli yonilg'i sarfini tejaydi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Shiddat bilan tezlanish va ohista sekinlashish bilan",
+            "Ohista (ravon) tezlanish va shiddat bilan sekinlashish bilan",
+            "Ohista (ravon) tezlanish va ohista sekinlashish bilan"
+          ],
+          "correctIndex": 2,
+          "explanation": "Ravon tezlanish va ravon sekinlashish yonilg'i sarfini kamaytiradi hamda avtomobilni samaraliroq boshqarishga yordam beradi."
+        },
+        "uz_cyrl": {
+          "text": "Автомобилни қандай бошқариш усули ёнилғи сарфини тежайди?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Шиддат билан тезланиш ва оҳиста секинлашиш билан",
+            "Оҳиста (равон) тезланиш ва шиддат билан секинлашиш билан",
+            "Оҳиста (равон) тезланиш ва оҳиста секинлашиш билан"
+          ],
+          "correctIndex": 2,
+          "explanation": "Равон тезланиш ва равон секинлашиш ёнилғи сарфини камайтиради ҳамда автомобилни самаралироқ бошқаришга ёрдам беради."
+        },
+        "ru": {
+          "text": "Какой стиль вождения экономит топливо?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Резкий разгон и плавное замедление",
+            "Плавный разгон и резкое замедление",
+            "Плавный разгон и плавное замедление"
+          ],
+          "correctIndex": 2,
+          "explanation": "Равномерный разгон и замедление уменьшают расход топлива."
+        }
+      }
+    },
+    {
+      "id": "a10e61f6-ce4d-4e60-b031-1b8ca8b26acf",
+      "questionId": "topic:140:a10e61f6-ce4d-4e60-b031-1b8ca8b26acf",
+      "order": 19,
+      "topicId": 140,
+      "topicSlug": "birinchi-tibbiy-yordam",
+      "topicTitle": "Birinchi tibbiy yordam",
+      "questionIndex": 31,
+      "text": "Arterial qon kelish alomatlarini ko'rsating",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Qon tomirlaridan pushti rangli kuchli pulsasiya bilan otilib chiqadi",
+        "Qon tomirlaridan to'q qizil rangdagi qon sizib oqib chiqadi",
+        "Mayda qon tomirlaridan ichki azolarga qonning oqib chiqishi kuzatiladi"
+      ],
+      "correctIndex": 0,
+      "explanation": "Arterial qon kislorodga boy bo'lgani uchun och qizil (pushti) rangda bo'ladi va tomir ichidagi yuqori bosim sababli jarohatdan kuchli pulsatsiya bilan otilib (fontan bo'lib) chiqadi. To'q qizil rangda sizib chiqish esa venoz qon ketishiga xosdir.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Arterial qon kelish alomatlarini ko'rsating",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Qon tomirlaridan pushti rangli kuchli pulsasiya bilan otilib chiqadi",
+            "Qon tomirlaridan to'q qizil rangdagi qon sizib oqib chiqadi",
+            "Mayda qon tomirlaridan ichki azolarga qonning oqib chiqishi kuzatiladi"
+          ],
+          "correctIndex": 0,
+          "explanation": "Arterial qon kislorodga boy bo'lgani uchun och qizil (pushti) rangda bo'ladi va tomir ichidagi yuqori bosim sababli jarohatdan kuchli pulsatsiya bilan otilib (fontan bo'lib) chiqadi. To'q qizil rangda sizib chiqish esa venoz qon ketishiga xosdir."
+        },
+        "uz_cyrl": {
+          "text": "Артериал қон келиш аломатларини кўрсатинг",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Қон томирларидан пушти рангли кучли пулсасия билан отилиб чиқади",
+            "Қон томирларидан тўқ қизил рангдаги қон сизиб оқиб чиқади",
+            "Майда қон томирларидан ички азоларга қоннинг оқиб чиқиши кузатилади"
+          ],
+          "correctIndex": 0,
+          "explanation": "Артериал қон кислородга бой бўлгани учун оч қизил (пушти) рангда бўлади ва томир ичидаги юқори босим сабабли жароҳатдан кучли пулсатсия билан отилиб (фонтан бўлиб) чиқади. Тўқ қизил рангда сизиб чиқиш еса веноз қон кетишига хосдир."
+        },
+        "ru": {
+          "text": "Каковы признаки артериального кровотечения?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Ярко-красная кровь бьёт пульсирующей струёй",
+            "Тёмная кровь вытекает ровной струёй",
+            "Кровь поступает во внутренние органы"
+          ],
+          "correctIndex": 0,
+          "explanation": "Артериальная кровь яркая и выбрасывается пульсирующей струёй."
+        }
+      }
+    },
+    {
+      "id": "f0f62166-59f7-4939-9939-0fd2d0af2d73",
+      "questionId": "topic:139:f0f62166-59f7-4939-9939-0fd2d0af2d73",
+      "order": 20,
+      "topicId": 139,
+      "topicSlug": "harakat-xavfsizligi-asoslari",
+      "topicTitle": "Harakat xavfsizligi asoslari",
+      "questionIndex": 68,
+      "text": "Yengil avtomobil tirkamasi burilishda qanday traektoriya bo'yicha harakatlanadi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Burilish markaziga nisbatan avtomobil traektoriyasidan tashqarida",
+        "Avtomobil burilish traektoriyasi bo'yicha",
+        "Burilish markaziga nisbatan avtomobil traektoriyasidan ichkarida"
+      ],
+      "correctIndex": 2,
+      "explanation": "Burilishda tirkama avtomobilga nisbatan ichkiroq traektoriya bo'ylab harakatlanadi. Shu sababli burilishlarda qo'shimcha oraliq qoldirish kerak.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yengil avtomobil tirkamasi burilishda qanday traektoriya bo'yicha harakatlanadi?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Burilish markaziga nisbatan avtomobil traektoriyasidan tashqarida",
+            "Avtomobil burilish traektoriyasi bo'yicha",
+            "Burilish markaziga nisbatan avtomobil traektoriyasidan ichkarida"
+          ],
+          "correctIndex": 2,
+          "explanation": "Burilishda tirkama avtomobilga nisbatan ichkiroq traektoriya bo'ylab harakatlanadi. Shu sababli burilishlarda qo'shimcha oraliq qoldirish kerak."
+        },
+        "uz_cyrl": {
+          "text": "Йенгил автомобил тиркамаси бурилишда қандай траектория бўйича ҳаракатланади?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Бурилиш марказига нисбатан автомобил траекториясидан ташқарида",
+            "Автомобил бурилиш траекторияси бўйича",
+            "Бурилиш марказига нисбатан автомобил траекториясидан ичкарида"
+          ],
+          "correctIndex": 2,
+          "explanation": "Бурилишда тиркама автомобилга нисбатан ичкироқ траектория бўйлаб ҳаракатланади. Шу сабабли бурилишларда қўшимча оралиқ қолдириш керак."
+        },
+        "ru": {
+          "text": "По какой траектории движется прицеп легкового автомобиля в повороте?",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Снаружи траектории автомобиля",
+            "По траектории автомобиля",
+            "Внутри траектории автомобиля"
+          ],
+          "correctIndex": 2,
+          "explanation": "Прицеп проходит поворот по более внутренней траектории."
+        }
+      }
+    }
+  ]
+}
