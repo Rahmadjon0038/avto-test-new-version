@@ -1519,17 +1519,30 @@ async function createVideoLesson(input, fileBuffer = null, contentType = "applic
       console.warn("[video-thumbnail]", thumbnailError?.message || thumbnailError);
     }
 
-    const created = await createBunnyVideo({ title: fallbackTitle, description, category });
-    bunnyVideoId = created.bunnyVideoId;
     try {
-      await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
+      const created = await createBunnyVideo({ title: fallbackTitle, description, category });
+      bunnyVideoId = created.bunnyVideoId;
       try {
-        bunnyVideoInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
-      } catch (_infoError) {
-        bunnyVideoInfo = null;
+        await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
+        try {
+          bunnyVideoInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+        } catch (_infoError) {
+          bunnyVideoInfo = null;
+        }
+      } catch (error) {
+        await deleteBunnyVideo(bunnyVideoId).catch((deleteError) => {
+          console.warn("[video-upload] bunny delete failed", deleteError?.message || deleteError);
+        });
+        const localVideo = await uploadVideoToR2({
+          buffer: fileBuffer,
+          fileName: String(input?.fileName || "video.mp4"),
+          contentType
+        });
+        bunnyVideoId = "";
+        localPlaybackUrl = localVideo.url;
       }
     } catch (error) {
-      await deleteBunnyVideo(bunnyVideoId);
+      console.warn("[video-upload] bunny create failed", error?.message || error);
       const localVideo = await uploadVideoToR2({
         buffer: fileBuffer,
         fileName: String(input?.fileName || "video.mp4"),
@@ -1623,31 +1636,46 @@ async function updateVideoLesson(videoId, input = {}, fileBuffer = null, content
     }
 
     if (!bunnyVideoId) {
-      const created = await createBunnyVideo({
-        title: next.title || current.title,
-        description: next.description || current.description,
-        category: next.category || current.category
-      });
-      bunnyVideoId = created.bunnyVideoId;
-    }
-    try {
-      await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
       try {
-        bunnyInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
-      } catch (_infoError) {
-        bunnyInfo = null;
+        const created = await createBunnyVideo({
+          title: next.title || current.title,
+          description: next.description || current.description,
+          category: next.category || current.category
+        });
+        bunnyVideoId = created.bunnyVideoId;
+      } catch (error) {
+        console.warn("[video-upload] bunny create failed", error?.message || error);
+        const localVideo = await uploadVideoToR2({
+          buffer: fileBuffer,
+          fileName: String(input?.fileName || next.fileName || "video.mp4"),
+          contentType
+        });
+        bunnyVideoId = "";
+        localPlaybackUrl = localVideo.url;
       }
-    } catch (error) {
-      if (bunnyVideoId && bunnyVideoId !== current.bunnyVideoId) {
-        await deleteBunnyVideo(bunnyVideoId);
+    }
+    if (bunnyVideoId) {
+      try {
+        await uploadBunnyVideo({ bunnyVideoId, buffer: fileBuffer, contentType });
+        try {
+          bunnyInfo = normalizeBunnyInfo(await getBunnyVideoInfo(bunnyVideoId), bunnyVideoId);
+        } catch (_infoError) {
+          bunnyInfo = null;
+        }
+      } catch (error) {
+        if (bunnyVideoId && bunnyVideoId !== current.bunnyVideoId) {
+          await deleteBunnyVideo(bunnyVideoId).catch((deleteError) => {
+            console.warn("[video-upload] bunny delete failed", deleteError?.message || deleteError);
+          });
+        }
+        const localVideo = await uploadVideoToR2({
+          buffer: fileBuffer,
+          fileName: String(input?.fileName || next.fileName || "video.mp4"),
+          contentType
+        });
+        bunnyVideoId = "";
+        localPlaybackUrl = localVideo.url;
       }
-      const localVideo = await uploadVideoToR2({
-        buffer: fileBuffer,
-        fileName: String(input?.fileName || next.fileName || "video.mp4"),
-        contentType
-      });
-      bunnyVideoId = "";
-      localPlaybackUrl = localVideo.url;
     }
   }
 
