@@ -392,14 +392,14 @@ export default function AuthPage() {
                   icon={<LayoutGrid className="lucide" />}
                   title={t("home.topicsTitle")}
                   desc={t("home.topicsDesc")}
-                  href="/mavzular"
+                  onSelect={() => openAuth()}
                 />
                 <LandingMenuItem
                   page="tickets"
                   icon={<Tickets className="lucide" />}
                   title={t("home.ticketsTitle")}
                   desc={t("home.ticketsDesc")}
-                  href="/biletlar"
+                  onSelect={() => openAuth()}
                 />
                 <LandingMenuItem
                   page="custom"
