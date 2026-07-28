@@ -54,7 +54,7 @@ export default async function BiletlarPage() {
                 <div className="ticketTitle">{t.title}</div>
               </Link>
             ) : (
-              <Link key={t.id} href="/?auth=register" className="card ticketCard ticketCardLocked">
+              <Link key={t.id} href={`/biletlar?auth=register`} className="card ticketCard ticketCardLocked">
                 <span className="lock" aria-hidden="true">
                   <Lock className="lucide" />
                 </span>

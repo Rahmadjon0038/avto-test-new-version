@@ -1,10 +1,21 @@
-import Link from "next/link";
+"use client";
+
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { resolveQuestionImage, type PublicQuestion } from "@/lib/server-api";
 import { useSiteLanguage } from "@/app/site-language-provider";
 
 export function RegisterCta({ text }: { text?: string }) {
   const { t } = useSiteLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  function openRegister() {
+    const url = new URL(window.location.href);
+    url.searchParams.set("auth", "register");
+    router.replace(`${pathname}?${url.searchParams.toString()}`, { scroll: false });
+  }
+
   return (
     <div className="publicCta">
       <div className="publicCtaMain">
@@ -18,9 +29,9 @@ export function RegisterCta({ text }: { text?: string }) {
           </div>
         </div>
       </div>
-      <Link href="/?auth=register" className="btn btn-primary publicCtaBtn">
+      <button type="button" className="btn btn-primary publicCtaBtn" onClick={openRegister}>
         {t("public.registerCtaButton")} <ArrowRight className="lucide" aria-hidden="true" />
-      </Link>
+      </button>
     </div>
   );
 }

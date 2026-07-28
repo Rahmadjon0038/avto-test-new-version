@@ -1,12 +1,46 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Globe, LogIn } from "lucide-react";
 import { useSiteLanguage } from "@/app/site-language-provider";
+import PublicAuthModal from "@/app/ui/public-auth-modal";
 
 export default function PublicShell({ children }: { children: ReactNode }) {
   const { language, setLanguage, options, t } = useSiteLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "register">("login");
+
+  useEffect(() => {
+    const auth = searchParams.get("auth");
+    if (auth === "login" || auth === "register") {
+      setAuthTab(auth);
+      setAuthOpen(true);
+      return;
+    }
+    setAuthOpen(false);
+  }, [searchParams]);
+
+  function openAuth(nextTab: "login" | "register" = "login") {
+    setAuthTab(nextTab);
+    setAuthOpen(true);
+    const url = new URL(window.location.href);
+    url.searchParams.set("auth", nextTab);
+    router.replace(`${pathname}?${url.searchParams.toString()}`, { scroll: false });
+  }
+
+  function closeAuth() {
+    setAuthOpen(false);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("auth");
+    const query = url.searchParams.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
   return (
     <>
       <header className="navbar">
@@ -33,9 +67,9 @@ export default function PublicShell({ children }: { children: ReactNode }) {
                 </button>
               ))}
             </div>
-            <Link href="/?auth=login" className="btn btn-ghost headerActionBtn">
+            <button type="button" className="btn btn-ghost headerActionBtn" onClick={() => openAuth("login")}>
               <LogIn className="lucide" aria-hidden="true" /> {t("nav.login")}
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -60,6 +94,8 @@ export default function PublicShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+
+      <PublicAuthModal open={authOpen} initialTab={authTab} onClose={closeAuth} />
     </>
   );
 }
