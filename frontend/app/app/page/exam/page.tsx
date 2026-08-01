@@ -248,6 +248,7 @@ export default function ExamPage() {
 
   const examQuery = useQuery({
     queryKey: examQueryKey,
+    enabled: false,
     queryFn: async () => {
       const res = await authFetch("/api/exam");
       const data = await jsonOrError(res);
@@ -393,9 +394,6 @@ export default function ExamPage() {
     onSuccess: async (data: any) => {
       if (data?.exam) {
         qc.setQueryData(examQueryKey, data.exam);
-      } else {
-        await qc.invalidateQueries({ queryKey: examQueryKey });
-        await examQuery.refetch();
       }
       setExamReady(true);
       setIdx(0);
@@ -424,8 +422,6 @@ export default function ExamPage() {
       toast.error(uzErrorMessage(error, t("common.error")));
     },
     onSuccess: async (_data: any, variables) => {
-      await qc.invalidateQueries({ queryKey: examQueryKey });
-      await examQuery.refetch();
       if (variables?.finalize) {
         const serverTotal = Number(_data?.total);
         const serverScore = Number(_data?.score);
@@ -511,14 +507,14 @@ export default function ExamPage() {
       setTimerReady(false);
       void qc.cancelQueries({ queryKey: examQueryKey });
       qc.setQueryData(examQueryKey, null);
-      await qc.invalidateQueries({ queryKey: examQueryKey });
     },
     onError: () => {
       setExamBootstrapping(false);
     },
     onSuccess: () => {
       toast.success(t("exam.restart"));
-      window.location.reload();
+      qc.setQueryData(examQueryKey, null);
+      void startMutation.mutateAsync(20);
     }
   });
 
@@ -551,7 +547,7 @@ export default function ExamPage() {
 
   const showExamLoading =
     !exam &&
-    (examQuery.isLoading || !authReady || startMutation.isPending || resetMutation.isPending || examBootstrapping || !autoStartAttempted);
+    (!authReady || startMutation.isPending || resetMutation.isPending || examBootstrapping || !autoStartAttempted);
 
   if (showExamLoading) {
     return (
