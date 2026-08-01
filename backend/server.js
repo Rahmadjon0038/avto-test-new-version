@@ -826,6 +826,7 @@ async function syncTicketQuestionsFromSlots(ticketId, slots) {
       [String(ticketId), String(question.questionId), index + 1]
     );
   }
+  invalidateTicketQuestionBankCache();
   return normalizedSlots;
 }
 
@@ -836,6 +837,7 @@ async function persistTicketSlotQuestions(ticketId, slots) {
     [JSON.stringify(normalizedSlots), String(ticketId)]
   );
   await syncTicketQuestionsFromSlots(ticketId, normalizedSlots);
+  invalidateTicketQuestionBankCache();
   return getTicketBuilderFromDb(ticketId);
 }
 
@@ -855,7 +857,16 @@ function buildTicketQuestionBankKey(ticketId, questionId) {
   return `ticket:${String(ticketId)}:${String(questionId)}`;
 }
 
+let ticketQuestionBankCache = null;
+
+function invalidateTicketQuestionBankCache() {
+  ticketQuestionBankCache = null;
+}
+
 async function getTicketQuestionBankFromDb() {
+  if (ticketQuestionBankCache) {
+    return ticketQuestionBankCache;
+  }
   const tickets = await getTicketsFromDb();
   const bank = [];
 
@@ -873,6 +884,7 @@ async function getTicketQuestionBankFromDb() {
     }
   }
 
+  ticketQuestionBankCache = bank;
   return bank;
 }
 
@@ -941,6 +953,7 @@ async function renumberTicket(ticketRow, nextNumber) {
   ]);
   await dbApi.run("UPDATE test_progress SET ticket_id = ? WHERE ticket_id = ?", [nextId, currentId]);
   await syncTicketQuestionsFromSlots(nextId, slots);
+  invalidateTicketQuestionBankCache();
   return nextId;
 }
 
@@ -970,6 +983,7 @@ async function createTicket(input) {
   );
 
   await syncTicketQuestionsFromSlots(ticketId, questions);
+  invalidateTicketQuestionBankCache();
 
   return status === "COMPLETED" ? getTicketByIdFromDb(result.id) : getDraftTicketFromDb(result.id);
 }
@@ -984,6 +998,7 @@ async function replaceTicketQuestions(ticketId, questions) {
     [JSON.stringify(normalized), String(ticketId)]
   );
   await syncTicketQuestionsFromSlots(ticketId, normalized);
+  invalidateTicketQuestionBankCache();
 
   return getTicketBuilderFromDb(ticketId);
 }
@@ -1019,6 +1034,7 @@ async function updateTicket(id, input) {
     await syncTicketQuestionsFromSlots(id, questions);
   }
 
+  invalidateTicketQuestionBankCache();
   return normalizeTicketRow(result);
 }
 
@@ -1026,6 +1042,7 @@ async function deleteTicket(id) {
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM tickets WHERE id = ?", [String(id)]);
+  invalidateTicketQuestionBankCache();
 }
 
 async function getDraftTicketFromDb(ticketId = null) {
@@ -4758,15 +4775,6 @@ app.get("/api/answers", requireUser, async (req, res) => {
   const shuffleEnabled = ["1", "true", "yes", "on"].includes(String(req.query.shuffle || "").trim().toLowerCase());
   const shuffleSeed = normalizeShuffleSeed(req.query.seed || req.headers["x-shuffle-seed"] || "", 1);
   const sourceBank = shuffleEnabled ? shuffleWithSeed(bank, shuffleSeed) : bank;
-  const questions = sourceBank.map((item) =>
-    buildAnswerQuestion({
-      kind: "ticket",
-      id: item.ticketId,
-      title: item.ticketTitle,
-      question: localizeQuestion(item.question, lang),
-      questionIndex: item.questionIndex
-    })
-  );
 
   const hasPagingParams =
     req.query.limit !== undefined ||
@@ -4775,6 +4783,15 @@ app.get("/api/answers", requireUser, async (req, res) => {
     req.query.filter !== undefined;
 
   if (!hasPagingParams) {
+    const questions = sourceBank.map((item) =>
+      buildAnswerQuestion({
+        kind: "ticket",
+        id: item.ticketId,
+        title: item.ticketTitle,
+        question: localizeQuestion(item.question, lang),
+        questionIndex: item.questionIndex
+      })
+    );
     return res.json({ questions });
   }
 
@@ -4784,6 +4801,28 @@ app.get("/api/answers", requireUser, async (req, res) => {
   const searchValue = String(req.query.q ?? "").trim().toLowerCase();
   const limit = Number.isFinite(limitValue) ? Math.max(1, Math.min(100, limitValue)) : 40;
   const offset = Number.isFinite(offsetValue) ? Math.max(0, offsetValue) : 0;
+
+  const needsFullScan = filterValue !== "all" || searchValue.length > 0;
+  const pageSource = needsFullScan ? sourceBank : sourceBank.slice(offset, offset + limit);
+  const questions = pageSource.map((item) =>
+    buildAnswerQuestion({
+      kind: "ticket",
+      id: item.ticketId,
+      title: item.ticketTitle,
+      question: localizeQuestion(item.question, lang),
+      questionIndex: item.questionIndex
+    })
+  );
+
+  if (!needsFullScan) {
+    return res.json({
+      questions,
+      total: sourceBank.length,
+      offset,
+      limit,
+      hasMore: offset + questions.length < sourceBank.length
+    });
+  }
 
   let filtered = questions;
   if (filterValue === "with-image") filtered = filtered.filter((question) => question.hasImage);

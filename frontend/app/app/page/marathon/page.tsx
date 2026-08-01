@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, Flame } from "lucide-react";
 import { Cell, Pie, PieChart } from "recharts";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { appendLanguageQuery } from "@/lib/site-language";
@@ -26,14 +27,6 @@ type AnswerQuestion = {
   correctAnswer: string;
   explanation: string;
   hasImage: boolean;
-};
-
-type AnswersPage = {
-  questions: AnswerQuestion[];
-  total: number;
-  offset: number;
-  limit: number;
-  hasMore: boolean;
 };
 
 const PAGE_SIZE = 20;
@@ -65,18 +58,42 @@ export default function MarathonPage() {
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const autoNextTimerRef = useRef<number | null>(null);
 
-  const [bank, setBank] = useState<AnswerQuestion[]>([]);
   const [visibleQuestions, setVisibleQuestions] = useState<AnswerQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextBankIndex, setNextBankIndex] = useState(3);
-  const [hasMoreBank, setHasMoreBank] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
 
+  const bankQuery = useInfiniteQuery({
+    queryKey: ["marathon-bank", language, marathonSeed],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const params = new URLSearchParams({
+        offset: String(pageParam),
+        limit: String(PAGE_SIZE),
+        shuffle: "1",
+        seed: String(marathonSeed)
+      });
+      const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
+      const data = await jsonOrError(res);
+      const fetched = Array.isArray(data.questions) ? (data.questions as AnswerQuestion[]) : [];
+      return {
+        questions: fetched,
+        total: Number(data.total ?? fetched.length),
+        offset: Number(data.offset ?? pageParam),
+        limit: Number(data.limit ?? PAGE_SIZE),
+        hasMore: Boolean(data.hasMore)
+      };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasMore) return undefined;
+      return allPages.reduce((sum, page) => sum + page.questions.length, 0);
+    }
+  });
+
+  const bank = useMemo(() => bankQuery.data?.pages.flatMap((page) => page.questions) ?? [], [bankQuery.data]);
   const currentQuestion = visibleQuestions[currentIndex] ?? null;
 
   const total = visibleQuestions.length;
@@ -90,68 +107,19 @@ export default function MarathonPage() {
     { name: "Qolgan", value: Math.max(total - correctCount, 0) }
   ];
 
-  const loadNextBankPage = useCallback(async (seedValue: number) => {
-    if (isLoadingMore || !hasMoreBank) return [] as AnswerQuestion[];
-    setIsLoadingMore(true);
-    try {
-      const params = new URLSearchParams({
-        offset: String(bank.length),
-        limit: String(PAGE_SIZE),
-        shuffle: "1",
-        seed: String(seedValue)
-      });
-      const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
-      const data = await jsonOrError(res);
-      const fetched = Array.isArray(data.questions)
-        ? (data.questions as AnswerQuestion[])
-        : [];
-      setBank((prev) => [...prev, ...fetched]);
-      setHasMoreBank(Boolean(data.hasMore));
-      return fetched;
-    } finally {
-      setIsLoadingMore(false);
+  useEffect(() => {
+    if (bankQuery.error) {
+      toast.error((bankQuery.error as any)?.message || "Marafon yuklanmadi");
     }
-  }, [authFetch, bank.length, hasMoreBank, isLoadingMore, language]);
+  }, [bankQuery.error]);
 
-  const loadInitial = useCallback(async (seedValue: number) => {
-    setIsLoading(true);
-    setBank([]);
+  useEffect(() => {
     setVisibleQuestions([]);
     setAnswers({});
     setCurrentIndex(0);
     setNextBankIndex(3);
-    setHasMoreBank(true);
-
-    try {
-      const params = new URLSearchParams({
-        offset: "0",
-        limit: String(PAGE_SIZE),
-        shuffle: "1",
-        seed: String(seedValue)
-      });
-      const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
-      const data = await jsonOrError(res);
-      const fetched = Array.isArray(data.questions) ? (data.questions as AnswerQuestion[]) : [];
-      if (!fetched.length) {
-        setBank([]);
-        setVisibleQuestions([]);
-        setHasMoreBank(Boolean(data.hasMore));
-        return;
-      }
-      setBank(fetched);
-      setHasMoreBank(Boolean(data.hasMore));
-      setVisibleQuestions(fetched.slice(0, Math.min(3, fetched.length)));
-      setNextBankIndex(Math.min(3, fetched.length));
-    } catch (error: any) {
-      toast.error(error?.message || "Marafon yuklanmadi");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [authFetch, language]);
-
-  useEffect(() => {
-    void loadInitial(marathonSeed);
-  }, [loadInitial, marathonSeed]);
+    setFinishOpen(false);
+  }, [language, marathonSeed]);
 
   useEffect(() => {
     return () => {
@@ -160,10 +128,12 @@ export default function MarathonPage() {
   }, []);
 
   useEffect(() => {
-    if (!hasMoreBank || isLoadingMore) return;
-    if (bank.length - nextBankIndex > 2) return;
-    void loadNextBankPage(marathonSeed);
-  }, [bank.length, hasMoreBank, isLoadingMore, loadNextBankPage, marathonSeed, nextBankIndex]);
+    if (visibleQuestions.length > 0) return;
+    if (!bank.length) return;
+    const initialCount = Math.min(3, bank.length);
+    setVisibleQuestions(bank.slice(0, initialCount));
+    setNextBankIndex(initialCount);
+  }, [bank, visibleQuestions.length]);
 
   useEffect(() => {
     setImageLoading(Boolean(currentQuestion?.image));
@@ -182,8 +152,10 @@ export default function MarathonPage() {
 
   async function ensureNextQuestionLoaded() {
     if (nextBankIndex < bank.length) return bank[nextBankIndex];
-    const fetched = await loadNextBankPage(marathonSeed);
-    return fetched[0] ?? null;
+    if (!bankQuery.hasNextPage) return null;
+    const result = await bankQuery.fetchNextPage();
+    const nextBank = result.data?.pages.flatMap((page) => page.questions) ?? [];
+    return nextBank[nextBankIndex] ?? null;
   }
 
   function scheduleAutoNext(nextIndex: number) {
@@ -231,7 +203,7 @@ export default function MarathonPage() {
     scrollTargetRef: questionCardRef
   });
 
-  if (isLoading) {
+  if (bankQuery.isLoading && !bank.length) {
     return (
       <section className="view">
         <div className="muted">{t("marathon.loading")}</div>
