@@ -858,9 +858,11 @@ function buildTicketQuestionBankKey(ticketId, questionId) {
 }
 
 let ticketQuestionBankCache = null;
+let generatedCustomTestsCache = new Map();
 
 function invalidateTicketQuestionBankCache() {
   ticketQuestionBankCache = null;
+  generatedCustomTestsCache.clear();
 }
 
 async function getTicketQuestionBankFromDb() {
@@ -1944,11 +1946,16 @@ async function getProgressTicketById(ticketId) {
 }
 
 async function getGeneratedCustomTestsFromDb(lang = "") {
+  const cacheKey = normalizeLanguageCode(lang || "");
+  if (generatedCustomTestsCache.has(cacheKey)) {
+    return generatedCustomTestsCache.get(cacheKey);
+  }
   const bank = await getTicketQuestionBankFromDb();
   const results = [];
   for (let size = 20; size <= bank.length; size += 20) {
     results.push(buildGeneratedCustomTestFromBankSize(bank, size, lang));
   }
+  generatedCustomTestsCache.set(cacheKey, results);
   return results;
 }
 
@@ -1959,9 +1966,8 @@ async function getGeneratedCustomTestByIdFromDb(testId, lang = "") {
   const rawId = Number(match[1]);
   const size = rawId >= 1000 ? rawId - 1000 : rawId;
   if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
-  const bank = await getTicketQuestionBankFromDb();
-  if (size > bank.length) return null;
-  return buildGeneratedCustomTestFromBankSize(bank, size, lang);
+  const tests = await getGeneratedCustomTestsFromDb(lang);
+  return tests.find((test) => Number(test.id) === Number(1000 + size) || Number(test.id) === Number(size)) || null;
 }
 
 async function ensureUniqueTopicSlug(baseSlug, ignoreId = null) {

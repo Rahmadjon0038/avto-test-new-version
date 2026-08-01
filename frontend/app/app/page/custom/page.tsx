@@ -13,7 +13,12 @@ export default function CustomTestsPage() {
   const { t, language } = useSiteLanguage();
   const customTestsQuery = useQuery({
     queryKey: ["custom-tests", language],
-    queryFn: () => fetchCustomTests(language)
+    queryFn: () => fetchCustomTests(language),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false
   });
 
   useEffect(() => {
