@@ -308,8 +308,10 @@ export default function TicketPage() {
   const displayQuestions = useMemo(() => {
     if (!ticketQuestions.length) return ticketQuestions;
     const filledQuestions = ticketQuestions.filter((question): question is Question => Boolean(question));
+    if (!settings.shuffleQuestions) return ticketQuestions;
+
     const shuffledQuestions = shuffleQuestionsWithSeed(filledQuestions, shuffleSeed).map((question) =>
-      settings.shuffleQuestions ? shuffleQuestionOptionsWithSeed(question, shuffleSeed) : question
+      shuffleQuestionOptionsWithSeed(question, shuffleSeed)
     );
 
     let cursor = 0;
