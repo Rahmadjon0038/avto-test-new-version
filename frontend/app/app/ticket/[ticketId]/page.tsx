@@ -14,7 +14,6 @@ import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation"
 import { appendLanguageQuery } from "@/lib/site-language";
 import {
   TestPageSettingsButton,
-  shuffleQuestionOptionsWithSeed,
   shuffleQuestionsWithSeed,
   useShuffleSeed,
   useTestPageSettings
@@ -32,6 +31,7 @@ type Question = {
 };
 
 type Ticket = { id: string; title: string; questions: Array<Question | null> };
+type QuestionOptionView = Question & { optionOrder: number[] };
 
 const FALLBACK_IMAGE = "/default.png";
 
@@ -267,6 +267,60 @@ function MarkdownText({ text }: { text: string }) {
   return <div className="markdownContent">{blocks}</div>;
 }
 
+function shuffleArrayWithSeed<T>(items: T[], seedValue: number) {
+  const result = [...items];
+  let seed = Number.isFinite(seedValue) && seedValue > 0 ? seedValue >>> 0 : 1;
+  const random = () => {
+    seed = (seed + 0x6d2b79f5) >>> 0;
+    let value = seed;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(random() * (index + 1));
+    [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+  }
+
+  return result;
+}
+
+function stableHash(value: string) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return hash >>> 0;
+}
+
+function buildQuestionOptionView(question: Question, seedValue: number, shuffleEnabled: boolean): QuestionOptionView {
+  if (!shuffleEnabled || !Array.isArray(question.options) || question.options.length < 2) {
+    return {
+      ...question,
+      optionOrder: question.options.map((_, index) => index)
+    };
+  }
+
+  const entries = question.options.map((option, index) => ({ option, index }));
+  const shuffled = shuffleArrayWithSeed(entries, seedValue ^ stableHash(question.id));
+  const sameOrder = shuffled.every((entry, index) => entry.index === index);
+  if (sameOrder) {
+    if (shuffled.length === 2) {
+      shuffled.reverse();
+    } else {
+      shuffled.push(shuffled.shift()!);
+    }
+  }
+
+  return {
+    ...question,
+    options: shuffled.map((entry) => entry.option),
+    optionOrder: shuffled.map((entry) => entry.index)
+  };
+}
+
 export default function TicketPage() {
   const router = useRouter();
   const params = useParams<{ ticketId: string }>();
@@ -276,12 +330,16 @@ export default function TicketPage() {
   const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
+  const { seed: optionShuffleSeed, refreshSeed: refreshOptionShuffleSeed } = useShuffleSeed(`ticket-options:${ticketId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
-      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
+      if (next.shuffleQuestions && !settings.shuffleQuestions) {
+        refreshShuffleSeed();
+        refreshOptionShuffleSeed();
+      }
       patchSettings(next);
     },
-    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
+    [patchSettings, refreshOptionShuffleSeed, refreshShuffleSeed, settings.shuffleQuestions]
   );
 
   const [idx, setIdx] = useState(0);
@@ -310,15 +368,17 @@ export default function TicketPage() {
     const filledQuestions = ticketQuestions.filter((question): question is Question => Boolean(question));
     if (!settings.shuffleQuestions) return ticketQuestions;
 
-    const shuffledQuestions = shuffleQuestionsWithSeed(filledQuestions, shuffleSeed).map((question) =>
-      shuffleQuestionOptionsWithSeed(question, shuffleSeed)
-    );
+    const shuffledQuestions = shuffleQuestionsWithSeed(filledQuestions, shuffleSeed);
 
     let cursor = 0;
     return ticketQuestions.map((question) => (question ? shuffledQuestions[cursor++] : null));
   }, [settings.shuffleQuestions, shuffleSeed, ticketQuestions]);
 
   const q = useMemo(() => displayQuestions[idx] ?? null, [displayQuestions, idx]);
+  const viewQuestion = useMemo(
+    () => (q ? buildQuestionOptionView(q, optionShuffleSeed, settings.shuffleQuestions) : null),
+    [optionShuffleSeed, q, settings.shuffleQuestions]
+  );
 
   const progressQuery = useQuery({
     queryKey: ["progress", ticketId, language],
@@ -363,11 +423,12 @@ export default function TicketPage() {
     if (lastLoadedTicketRef.current === ticket.id) return;
     lastLoadedTicketRef.current = ticket.id;
     refreshShuffleSeed();
+    refreshOptionShuffleSeed();
     setIdx(0);
     setAnswers({});
     setFinishOpen(false);
     autoResetRef.current = false;
-  }, [refreshShuffleSeed, ticket?.id]);
+  }, [refreshOptionShuffleSeed, refreshShuffleSeed, ticket?.id]);
 
   const saveMutation = useMutation({
     mutationFn: (nextAnswers: Record<string, number>) =>
@@ -444,6 +505,11 @@ export default function TicketPage() {
     resetMutation.mutate();
   }, [ticket, resetMutation]);
 
+  useEffect(() => {
+    if (!settings.shuffleQuestions) return;
+    refreshOptionShuffleSeed();
+  }, [idx, refreshOptionShuffleSeed, settings.shuffleQuestions]);
+
   const currentAnswered = Boolean(q && answers[q.id] !== undefined);
   useArrowQuestionNavigation({
     enabled: Boolean(q) && !zoomedImage && !finishOpen,
@@ -457,11 +523,13 @@ export default function TicketPage() {
   useTestInteractions({
     enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
     currentIndex: idx,
-    optionCount: q?.options.length || 0,
+    optionCount: viewQuestion?.options.length || 0,
     mode: "function",
     onSelect: (optionIndex) => {
-      if (!q) return;
-      const nextAnswers = { ...answers, [q.id]: optionIndex };
+      if (!q || !viewQuestion) return;
+      const originalIndex = viewQuestion.optionOrder[optionIndex];
+      if (originalIndex === undefined) return;
+      const nextAnswers = { ...answers, [q.id]: originalIndex };
       save(nextAnswers);
       if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
     },
@@ -522,12 +590,14 @@ export default function TicketPage() {
         <div className="qLayout">
           <div className="qRight">
             <div className="options">
-                {q?.options.length ? (
-                  q.options.map((opt, oi) => {
-                  const selected = answers[q.id];
-                  const hasAnswered = selected !== undefined;
-                  const correct = oi === q.correctIndex;
-                  const wrong = hasAnswered && oi === selected && !correct;
+                {viewQuestion?.options.length ? (
+                  viewQuestion.options.map((opt, oi) => {
+                  const selected = answers[q?.id || ""];
+                  const selectedOriginalIndex = selected !== undefined ? selected : undefined;
+                  const originalIndex = viewQuestion.optionOrder[oi];
+                  const hasAnswered = selectedOriginalIndex !== undefined;
+                  const correct = originalIndex === q?.correctIndex;
+                  const wrong = hasAnswered && originalIndex === selectedOriginalIndex && !correct;
                   return (
                     <button
                       key={oi}
@@ -535,7 +605,8 @@ export default function TicketPage() {
                       type="button"
                       disabled={hasAnswered}
                       onClick={() => {
-                        const nextAnswers = { ...answers, [q.id]: oi };
+                        if (!q) return;
+                        const nextAnswers = { ...answers, [q.id]: originalIndex };
                         save(nextAnswers);
                         if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
                       }}

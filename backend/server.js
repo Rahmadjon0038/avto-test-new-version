@@ -4755,7 +4755,10 @@ app.post("/api/custom-test-progress/:testId/reset", requireUser, async (req, res
 app.get("/api/answers", requireUser, async (req, res) => {
   const bank = await getTicketQuestionBankFromDb();
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
-  const questions = bank.map((item) =>
+  const shuffleEnabled = ["1", "true", "yes", "on"].includes(String(req.query.shuffle || "").trim().toLowerCase());
+  const shuffleSeed = normalizeShuffleSeed(req.query.seed || req.headers["x-shuffle-seed"] || "", 1);
+  const sourceBank = shuffleEnabled ? shuffleWithSeed(bank, shuffleSeed) : bank;
+  const questions = sourceBank.map((item) =>
     buildAnswerQuestion({
       kind: "ticket",
       id: item.ticketId,
@@ -5145,6 +5148,34 @@ function shuffleInPlace(arr) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+}
+
+function shuffleWithSeed(items, seedValue) {
+  const result = [...items];
+  let seed = Number.isFinite(Number(seedValue)) && Number(seedValue) > 0 ? Number(seedValue) >>> 0 : 1;
+  const random = () => {
+    seed = (seed + 0x6d2b79f5) >>> 0;
+    let value = seed;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
+function normalizeShuffleSeed(value, fallback = 1) {
+  const raw = String(value || "").trim();
+  if (!raw) return fallback;
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric) && numeric > 0) return numeric >>> 0 || fallback;
+  const hash = crypto.createHash("sha256").update(raw).digest();
+  return hash.readUInt32BE(0) || fallback;
 }
 
 async function buildExamSelection(count = 50, lang = "") {

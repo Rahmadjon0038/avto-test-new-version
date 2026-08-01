@@ -10,6 +10,7 @@ import { useSiteLanguage } from "@/app/site-language-provider";
 import { appendLanguageQuery } from "@/lib/site-language";
 import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
+import { useShuffleSeed } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 
 type AnswerQuestion = {
@@ -60,6 +61,7 @@ export default function MarathonPage() {
   const router = useRouter();
   const { authFetch } = useAuth();
   const { t, language } = useSiteLanguage();
+  const { seed: marathonSeed, refreshSeed: refreshMarathonSeed } = useShuffleSeed("marathon");
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const autoNextTimerRef = useRef<number | null>(null);
 
@@ -88,13 +90,15 @@ export default function MarathonPage() {
     { name: "Qolgan", value: Math.max(total - correctCount, 0) }
   ];
 
-  const loadNextBankPage = useCallback(async () => {
+  const loadNextBankPage = useCallback(async (seedValue: number) => {
     if (isLoadingMore || !hasMoreBank) return [] as AnswerQuestion[];
     setIsLoadingMore(true);
     try {
       const params = new URLSearchParams({
         offset: String(bank.length),
-        limit: String(PAGE_SIZE)
+        limit: String(PAGE_SIZE),
+        shuffle: "1",
+        seed: String(seedValue)
       });
       const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
       const data = await jsonOrError(res);
@@ -109,7 +113,7 @@ export default function MarathonPage() {
     }
   }, [authFetch, bank.length, hasMoreBank, isLoadingMore, language]);
 
-  const loadInitial = useCallback(async () => {
+  const loadInitial = useCallback(async (seedValue: number) => {
     setIsLoading(true);
     setBank([]);
     setVisibleQuestions([]);
@@ -121,7 +125,9 @@ export default function MarathonPage() {
     try {
       const params = new URLSearchParams({
         offset: "0",
-        limit: String(PAGE_SIZE)
+        limit: String(PAGE_SIZE),
+        shuffle: "1",
+        seed: String(seedValue)
       });
       const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
       const data = await jsonOrError(res);
@@ -144,8 +150,8 @@ export default function MarathonPage() {
   }, [authFetch, language]);
 
   useEffect(() => {
-    void loadInitial();
-  }, [loadInitial]);
+    void loadInitial(marathonSeed);
+  }, [loadInitial, marathonSeed]);
 
   useEffect(() => {
     return () => {
@@ -156,8 +162,8 @@ export default function MarathonPage() {
   useEffect(() => {
     if (!hasMoreBank || isLoadingMore) return;
     if (bank.length - nextBankIndex > 2) return;
-    void loadNextBankPage();
-  }, [bank.length, hasMoreBank, isLoadingMore, loadNextBankPage, nextBankIndex]);
+    void loadNextBankPage(marathonSeed);
+  }, [bank.length, hasMoreBank, isLoadingMore, loadNextBankPage, marathonSeed, nextBankIndex]);
 
   useEffect(() => {
     setImageLoading(Boolean(currentQuestion?.image));
@@ -176,7 +182,7 @@ export default function MarathonPage() {
 
   async function ensureNextQuestionLoaded() {
     if (nextBankIndex < bank.length) return bank[nextBankIndex];
-    const fetched = await loadNextBankPage();
+    const fetched = await loadNextBankPage(marathonSeed);
     return fetched[0] ?? null;
   }
 
@@ -274,7 +280,7 @@ export default function MarathonPage() {
           type="button"
           onClick={() => {
             setFinishOpen(false);
-            loadInitial();
+            refreshMarathonSeed();
           }}
         >
           <RotateCcw className="lucide" aria-hidden="true" /> {t("marathon.restart")}

@@ -1519,13 +1519,17 @@ body {
 }
 
 .topicCardCentered .topicNameRow {
+  flex: 1;
   align-items: center;
+  justify-content: center;
   text-align: center;
+  margin-top: 0;
 }
 
 .topicCardCentered .topicName {
   padding-right: 0;
   text-align: center;
+  max-width: 100%;
 }
 
 .topicCardCentered .topicIndex {
@@ -1534,11 +1538,16 @@ body {
 }
 
 .topicCardLarge .topicName {
-  font-size: 24px;
+  font-size: 30px;
+  line-height: 1.05;
 }
 
 .topicCardLarge .topicIndex {
   font-size: 52px;
+}
+
+.topicCardLarge {
+  min-height: 186px;
 }
 
 .topicMeta {

@@ -30,14 +30,14 @@ export default function CustomTestsPage() {
         </button>
       </div>
 
-        <div className="topicsHero card">
-          <div className="topicsHeroIcon">
-            <LayoutGrid className="lucide" aria-hidden="true" />
-          </div>
-          <div>
-            <div className="topicsTitle">{t("custom.title")}</div>
-            <div className="topicsSub">{t("custom.subtitle")}</div>
-          </div>
+      <div className="topicsHero card">
+        <div className="topicsHeroIcon">
+          <LayoutGrid className="lucide" aria-hidden="true" />
+        </div>
+        <div>
+          <div className="topicsTitle">{t("custom.title")}</div>
+          <div className="topicsSub">{t("custom.subtitle")}</div>
+        </div>
       </div>
 
       {customTestsQuery.isLoading ? <div className="muted">{t("custom.loading")}</div> : null}
