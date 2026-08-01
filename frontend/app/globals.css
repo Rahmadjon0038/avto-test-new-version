@@ -5685,14 +5685,6 @@ body {
   height: 16px;
 }
 
-.testSettingsInline {
-  display: none;
-}
-
-.testSettingsInlineHead {
-  display: none;
-}
-
 .testSettingsOverlay {
   position: fixed;
   inset: 0;
@@ -6322,10 +6314,6 @@ body {
 }
 
 @media (max-width: 640px) {
-  .testSettingsInline {
-    display: none !important;
-  }
-
   .testSettingsOverlay {
     align-items: end;
     place-items: end center;
@@ -6351,31 +6339,6 @@ body {
 
   .testSettingsRow {
     padding: 12px;
-  }
-}
-
-@media (min-width: 641px) {
-  .testSettingsTrigger {
-    display: none;
-  }
-
-  .testSettingsInline {
-    display: grid;
-    gap: 8px;
-    width: min(380px, 100%);
-    margin-right: 2px;
-  }
-
-  .testSettingsInlineList {
-    gap: 8px;
-  }
-
-  .testSettingsRow {
-    padding: 12px 14px;
-  }
-
-  .testSettingsOverlay {
-    display: none;
   }
 }
 

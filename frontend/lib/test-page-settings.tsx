@@ -127,26 +127,6 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
 
   return (
     <>
-      <div className={["testSettingsInline", className].filter(Boolean).join(" ")}>
-        <div className="testSettingsInlineHead">{t("settings.title")}</div>
-        <div className="testSettingsList testSettingsInlineList">
-          <ToggleRow
-            title={t("settings.shuffleTitle")}
-            description={t("settings.shuffleDesc")}
-            enabled={settings.shuffleQuestions}
-            onToggle={(next) => onChange({ ...settings, shuffleQuestions: next })}
-            icon={<Shuffle className="lucide" aria-hidden="true" />}
-          />
-          <ToggleRow
-            title={t("settings.autoNextTitle")}
-            description={t("settings.autoNextDesc")}
-            enabled={settings.autoNext}
-            onToggle={(next) => onChange({ ...settings, autoNext: next })}
-            icon={<Sparkles className="lucide" aria-hidden="true" />}
-          />
-        </div>
-      </div>
-
       <button
         className={["testSettingsTrigger", className].filter(Boolean).join(" ")}
         type="button"
@@ -219,6 +199,16 @@ export function shuffleQuestionsWithSeed<T extends { id: string }>(questions: T[
     const randomIndex = Math.floor(random() * (index + 1));
     [items[index], items[randomIndex]] = [items[randomIndex], items[index]];
   }
+
+  const sameOrder = items.every((item, index) => item.id === questions[index]?.id);
+  if (sameOrder && items.length > 1) {
+    if (items.length === 2) {
+      items.reverse();
+    } else {
+      items.push(items.shift()!);
+    }
+  }
+
   return items;
 }
 
@@ -230,8 +220,17 @@ export function shuffleQuestionOptionsWithSeed<T extends { id: string; options: 
     return question;
   }
 
+  const originalEntries = question.options.map((option, index) => ({ option, index }));
   const entries = question.options.map((option, index) => ({ option, index }));
   const shuffled = shuffleArrayWithSeed(entries, seedValue ^ stableHash(question.id));
+  const sameOrder = shuffled.every((entry, index) => entry.index === originalEntries[index]?.index);
+  if (sameOrder) {
+    if (shuffled.length === 2) {
+      shuffled.reverse();
+    } else {
+      shuffled.push(shuffled.shift()!);
+    }
+  }
   const options = shuffled.map((entry) => entry.option);
   const correctIndex = shuffled.findIndex((entry) => entry.index === question.correctIndex);
 

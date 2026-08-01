@@ -278,9 +278,10 @@ export default function TicketPage() {
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
+      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
       patchSettings(next);
     },
-    [patchSettings]
+    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
   );
 
   const [idx, setIdx] = useState(0);
