@@ -44,7 +44,12 @@ export default function CustomTestsPage() {
 
       <div className="topicsGrid">
         {(customTestsQuery.data || []).map((customTest, index) => (
-          <button key={customTest.id} className="topicCard" type="button" onClick={() => router.push(`/app/page/custom/${customTest.id}`)}>
+          <button
+            key={customTest.id}
+            className="topicCard topicCardCentered topicCardLarge"
+            type="button"
+            onClick={() => router.push(`/app/page/custom/${customTest.id}`)}
+          >
             <span className="topicIndex" aria-hidden="true">
               {String(index + 1).padStart(2, "0")}
             </span>

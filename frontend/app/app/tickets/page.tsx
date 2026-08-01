@@ -75,7 +75,7 @@ export default function TicketsPage() {
       </div>
 
       <div className="ticketsGrid">
-        {tickets.map((ticket) => (
+        {tickets.map((ticket, index) => (
           <button
             key={ticket.id}
             className="card ticketCard"
@@ -83,11 +83,15 @@ export default function TicketsPage() {
             onClick={() => router.push(`/app/ticket/${encodeURIComponent(ticket.id)}`)}
           >
             <div className="ticketCardBody isEmpty">
-              <div className="ticketTitle">{ticket.title}</div>
+              <div className="ticketTitle ticketTitleNumbered">{formatTicketLabel(index)}</div>
             </div>
           </button>
         ))}
       </div>
     </section>
   );
+}
+
+function formatTicketLabel(index: number) {
+  return `${index + 1}-bilet`;
 }

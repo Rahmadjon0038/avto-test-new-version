@@ -70,7 +70,7 @@ export default function TopicsPage() {
         {(topicsQuery.data || []).map((topic, index) => (
           <article
             key={topic.id}
-            className={`topicCard ${topic.completed ? "isCompleted" : ""}`}
+            className={`topicCard topicCardCentered ${topic.completed ? "isCompleted" : ""}`}
             role="button"
             tabIndex={0}
             onClick={() => router.push(`/app/page/topics/${topic.id}`)}

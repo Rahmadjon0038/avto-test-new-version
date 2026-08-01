@@ -1518,6 +1518,29 @@ body {
   margin-top: 22px;
 }
 
+.topicCardCentered .topicNameRow {
+  align-items: center;
+  text-align: center;
+}
+
+.topicCardCentered .topicName {
+  padding-right: 0;
+  text-align: center;
+}
+
+.topicCardCentered .topicIndex {
+  right: 16px;
+  bottom: 12px;
+}
+
+.topicCardLarge .topicName {
+  font-size: 24px;
+}
+
+.topicCardLarge .topicIndex {
+  font-size: 52px;
+}
+
 .topicMeta {
   display: inline-flex;
   align-self: flex-start;
@@ -4952,6 +4975,12 @@ body {
   font-weight: 900;
   font-size: 22px;
   line-height: 1.1;
+}
+
+.ticketTitleNumbered {
+  font-size: 24px;
+  letter-spacing: -0.03em;
+  text-transform: capitalize;
 }
 
 .ticketCardBody {
