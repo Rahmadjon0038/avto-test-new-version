@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
-import ProgressStatsBlock from "@/app/ui/progress-stats-block";
 import type { TopicCard } from "../topics-data";
 
 export default function TopicsPage() {
@@ -97,65 +96,10 @@ export default function TopicsPage() {
             </span>
             <div className="topicNameRow">
               <div className="topicName">{topic.title}</div>
-              <TopicProgressPreview topicId={topic.id} />
             </div>
           </article>
         ))}
       </div>
     </section>
-  );
-}
-
-type TopicProgress = {
-  answers?: Record<string, number>;
-  score?: number;
-  completed?: boolean;
-};
-
-function TopicProgressPreview({ topicId }: { topicId: number }) {
-  const { authFetch, authReady } = useAuth();
-  const { language } = useSiteLanguage();
-
-  const topicQuery = useQuery({
-    queryKey: ["topic-card", topicId, language],
-    queryFn: async () => {
-      const res = await authFetch(`/api/topics/${encodeURIComponent(String(topicId))}`);
-      const data = await jsonOrError(res);
-      return data?.topic as TopicCard | null;
-    },
-    enabled: authReady
-  });
-
-  const progressQuery = useQuery({
-    queryKey: ["topic-progress", topicId, language],
-    queryFn: async () => {
-      const res = await authFetch(`/api/topic-progress/${encodeURIComponent(String(topicId))}`);
-      const data = await jsonOrError(res);
-      return (data?.progress || null) as TopicProgress | null;
-    },
-    enabled: authReady
-  });
-
-  if (!authReady || topicQuery.isLoading || progressQuery.isLoading) return null;
-
-  const topic = topicQuery.data;
-  const progress = progressQuery.data;
-  if (!topic || !progress) return null;
-
-  const totalCount = Array.isArray(topic.questions) ? topic.questions.length : 0;
-  if (!totalCount) return null;
-
-  const answeredCount = Object.keys(progress.answers || {}).length;
-  const correctCount = Number(progress.score || 0);
-  const wrongCount = Math.max(0, answeredCount - correctCount);
-  const unansweredCount = Math.max(0, totalCount - answeredCount);
-
-  return (
-    <ProgressStatsBlock
-      correct={correctCount}
-      wrong={wrongCount}
-      unanswered={unansweredCount}
-      className="topicProgressStats"
-    />
   );
 }

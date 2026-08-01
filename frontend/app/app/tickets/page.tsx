@@ -25,7 +25,6 @@ type Ticket = {
   id: string;
   title: string;
   locked: boolean;
-  progress?: TicketProgress | null;
 };
 
 export default function TicketsPage() {
@@ -83,17 +82,8 @@ export default function TicketsPage() {
             type="button"
             onClick={() => router.push(`/app/ticket/${encodeURIComponent(ticket.id)}`)}
           >
-            <div className={`ticketCardBody ${ticket.progress ? "" : "isEmpty"}`}>
+            <div className="ticketCardBody isEmpty">
               <div className="ticketTitle">{ticket.title}</div>
-              {ticket.progress ? (
-                <>
-                  <div className="ticketMiniStats">
-                    <span className="ticketMiniStat good">{t("progress.correct", { count: ticket.progress.correctCount })}</span>
-                    <span className="ticketMiniStat bad">{t("progress.wrong", { count: ticket.progress.wrongCount })}</span>
-                    <span className="ticketMiniStat muted">{t("progress.unanswered", { count: ticket.progress.unansweredCount })}</span>
-                  </div>
-                </>
-              ) : null}
             </div>
           </button>
         ))}
