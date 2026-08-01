@@ -84,7 +84,7 @@ export default function AdminVideosPage() {
   const router = useRouter();
   const { t, language } = useSiteLanguage();
   const { authFetch, accessToken } = useAuth();
-  const backendUploadBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.topshirdi.uz";
+  const backendUploadBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<VideoForm>(() => emptyForm());
   const [selectedFileName, setSelectedFileName] = useState("");

@@ -124,6 +124,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Biletlar bo‘yicha testlar",
       lockedTitle: "Bu bilet yopiq",
       lockedText: "Bu bilet faqat ro‘yxatdan o‘tgan foydalanuvchilar uchun. Birinchi biletlar bepul ochiq.",
+      loading: "Biletlar yuklanmoqda...",
       empty: "Biletlar hozircha mavjud emas."
     },
     custom: {
@@ -390,6 +391,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Билетлар бўйича тестлар",
       lockedTitle: "Бу билет ёпиқ",
       lockedText: "Бу билет фақат рўйхатдан ўтган фойдаланувчилар учун. Биринчи билетлар бепул очиқ.",
+      loading: "Билетлар юкланмоқда...",
       empty: "Билетлар ҳозирча мавжуд эмас."
     },
     custom: {
@@ -652,6 +654,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Тесты по билетам",
       lockedTitle: "Этот билет закрыт",
       lockedText: "Этот билет доступен только зарегистрированным пользователям. Первые билеты открыты бесплатно.",
+      loading: "Загрузка билетов...",
       empty: "Пока нет билетов."
     },
     custom: {

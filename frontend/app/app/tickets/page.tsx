@@ -30,7 +30,7 @@ type Ticket = {
 
 export default function TicketsPage() {
   const router = useRouter();
-  const { authFetch } = useAuth();
+  const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
 
@@ -41,12 +41,29 @@ export default function TicketsPage() {
       const data = (await jsonOrError(res)) as { tickets: Ticket[] };
       setTickets(Array.isArray(data.tickets) ? data.tickets : []);
       return data;
-    }
+    },
+    enabled: authReady
   });
 
   useEffect(() => {
     if (ticketsQuery.error) toast.error((ticketsQuery.error as any)?.message || "Xatolik");
   }, [ticketsQuery.error]);
+
+  if (!authReady || ticketsQuery.isLoading) {
+    return (
+      <section className="view">
+        <div className="examLoadingView">
+          <div className="examLoadingCard">
+            <div className="examLoadingSpinnerWrap">
+              <span className="examLoadingSpinner" />
+            </div>
+            <div className="examLoadingTitle">{t("tickets.loading")}</div>
+            <div className="examLoadingText">{t("common.loading")}</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="view">

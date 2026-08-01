@@ -216,6 +216,7 @@ export default function ExamPage() {
   const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
+  const examQueryKey = ["exam", language] as const;
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("exam");
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
@@ -246,7 +247,7 @@ export default function ExamPage() {
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   const examQuery = useQuery({
-    queryKey: ["exam", language],
+    queryKey: examQueryKey,
     queryFn: async () => {
       const res = await authFetch("/api/exam");
       const data = await jsonOrError(res);
@@ -391,9 +392,9 @@ export default function ExamPage() {
     },
     onSuccess: async (data: any) => {
       if (data?.exam) {
-        qc.setQueryData(["exam"], data.exam);
+        qc.setQueryData(examQueryKey, data.exam);
       } else {
-        await qc.invalidateQueries({ queryKey: ["exam"] });
+        await qc.invalidateQueries({ queryKey: examQueryKey });
         await examQuery.refetch();
       }
       setExamReady(true);
@@ -423,7 +424,7 @@ export default function ExamPage() {
       toast.error(uzErrorMessage(error, t("common.error")));
     },
     onSuccess: async (_data: any, variables) => {
-      await qc.invalidateQueries({ queryKey: ["exam"] });
+      await qc.invalidateQueries({ queryKey: examQueryKey });
       await examQuery.refetch();
       if (variables?.finalize) {
         const serverTotal = Number(_data?.total);
@@ -508,9 +509,9 @@ export default function ExamPage() {
       setAutoStartAttempted(true);
       hasSeenPositiveTimerRef.current = false;
       setTimerReady(false);
-      void qc.cancelQueries({ queryKey: ["exam"] });
-      qc.setQueryData(["exam"], null);
-      await qc.invalidateQueries({ queryKey: ["exam"] });
+      void qc.cancelQueries({ queryKey: examQueryKey });
+      qc.setQueryData(examQueryKey, null);
+      await qc.invalidateQueries({ queryKey: examQueryKey });
     },
     onError: () => {
       setExamBootstrapping(false);
@@ -543,8 +544,8 @@ export default function ExamPage() {
     setSecondsLeft(0);
     setTimerReady(false);
     hasSeenPositiveTimerRef.current = false;
-    void qc.cancelQueries({ queryKey: ["exam"] });
-    qc.setQueryData(["exam"], null);
+    void qc.cancelQueries({ queryKey: examQueryKey });
+    qc.setQueryData(examQueryKey, null);
     startMutation.mutate(20);
   }, [authReady, autoStartAttempted, qc, startMutation]);
 

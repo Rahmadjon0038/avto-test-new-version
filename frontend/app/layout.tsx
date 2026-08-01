@@ -99,8 +99,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const cookieStore = await cookies();
   const lang = normalizeLanguageCode(cookieStore.get(LANGUAGE_COOKIE)?.value || "uz_latn");
   return (
-    <html lang={lang.replace("_", "-")}>
-      <body>
+    <html lang={lang.replace("_", "-")} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}

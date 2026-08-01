@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 const backendUrl =
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://api.topshirdi.uz";
+  "http://localhost:4001";
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   try {

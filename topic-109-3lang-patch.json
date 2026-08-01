@@ -1,0 +1,1868 @@
+{
+  "id": 109,
+  "slug": "qo-shimcha-axborot-belgilari",
+  "title": "Qo‘shimcha axborot belgilari",
+  "titleI18n": {
+    "uz_latn": "Qo‘shimcha axborot belgilari",
+    "uz_cyrl": "Қўшимча ахборот белгилари",
+    "ru": "Знаки дополнительной информации"
+  },
+  "adminMarked": true,
+  "questions": [
+    {
+      "id": "1dfc88de-f243-41ba-a1a3-b9001a53f9f7",
+      "text": "Yengil avtomobilga qaysi yo'nalishlarda harakatlanishga ruxsat etiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939978225-uvns2y6d.webp",
+      "options": [
+        "Faqat to'g'riga",
+        "Faqat o'ngga va chapga",
+        "Istalgan yo'nalishda"
+      ],
+      "explanation": "Belgi qo‘shimcha axborot belgisi bilan yuk avtomobillariga tegishli bo‘lib, yengil avtomobil uchun cheklov mavjud emas. Shu sababli istalgan yo‘nalishda harakatlanishga ruxsat etiladi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Yengil avtomobilga qaysi yo'nalishlarda harakatlanishga ruxsat etiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939978225-uvns2y6d.webp",
+          "options": [
+            "Faqat to'g'riga",
+            "Faqat o'ngga va chapga",
+            "Istalgan yo'nalishda"
+          ],
+          "explanation": "Belgi qo‘shimcha axborot belgisi bilan yuk avtomobillariga tegishli bo‘lib, yengil avtomobil uchun cheklov mavjud emas. Shu sababli istalgan yo‘nalishda harakatlanishga ruxsat etiladi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Ёнгил автомобилга қайси йўналишларда ҳаракатланишга рухсат этилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939978225-uvns2y6d.webp",
+          "options": [
+            "Фақат тўғрига",
+            "Фақат ўнгга ва чапга",
+            "Исталган йўналишда"
+          ],
+          "explanation": "Белги қўшимча ахборот белгиси билан юк автомобилларига тааллуқли бўлиб, енгил автомобиль учун чеклов мавжуд эмас. Шу сабабли исталган йўналишда ҳаракатланишга рухсат этилади.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "По каким направлениям разрешено движение легковому автомобилю?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939978225-uvns2y6d.webp",
+          "options": [
+            "Только прямо",
+            "Только направо и налево",
+            "В любом направлении"
+          ],
+          "explanation": "Этот знак с дополнительной табличкой относится к грузовым автомобилям и не ограничивает легковой автомобиль. Поэтому движение разрешено в любом направлении.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "4c327446-fa50-46dd-a27a-1257900989c1",
+      "text": "Ushbu belgi qaysi moddalarga kiradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939985366-f06c3q44.webp",
+      "options": [
+        "Toksik moddalar",
+        "Organik peroksidlar",
+        "Oksidlovchi moddalar"
+      ],
+      "explanation": "5-sinf xavf belgisi oksidlovchi moddalarni bildiradi. Ular yonishni kuchaytiruvchi xususiyatga ega.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu belgi qaysi moddalarga kiradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939985366-f06c3q44.webp",
+          "options": [
+            "Toksik moddalar",
+            "Organik peroksidlar",
+            "Oksidlovchi moddalar"
+          ],
+          "explanation": "5-sinf xavf belgisi oksidlovchi moddalarni bildiradi. Ular yonishni kuchaytiruvchi xususiyatga ega.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Ушбу белги қайси моддаларга киради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939985366-f06c3q44.webp",
+          "options": [
+            "Токсик моддалар",
+            "Органик пероксидлар",
+            "Оксидловчи моддалар"
+          ],
+          "explanation": "5-синф хавф белгиси оксидловчи моддаларни билдиради. Улар ёнилишни кучайтирувчи хусусиятга эга.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "К каким веществам относится этот знак?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939985366-f06c3q44.webp",
+          "options": [
+            "Токсичные вещества",
+            "Органические пероксиды",
+            "Окисляющие вещества"
+          ],
+          "explanation": "Знак опасности класса 5 обозначает окисляющие вещества. Они обладают свойством усиливать горение.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "c481a26e-24d2-4f08-86bc-afef66c7a5ac",
+      "text": "Ushbu qo'shimcha axborot yo'l belgisi bildiradi:",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939990407-o9wj8e4j.webp",
+      "options": [
+        "Barcha turdagi transport vositalarining to'xtab turish uchun yo'lning qatnov qismida, trotuar yoniga qo'yish usulini",
+        "Yengil avtomobillarning to'xtab turish joyini",
+        "Mexanik transport vositalarining to'xtab turish joyini"
+      ],
+      "explanation": "Qo‘shimcha axborot belgisi transport vositalarini trotuar chetiga qanday usulda joylashtirish kerakligini ko‘rsatadi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo'shimcha axborot yo'l belgisi bildiradi:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939990407-o9wj8e4j.webp",
+          "options": [
+            "Barcha turdagi transport vositalarining to'xtab turish uchun yo'lning qatnov qismida, trotuar yoniga qo'yish usulini",
+            "Yengil avtomobillarning to'xtab turish joyini",
+            "Mexanik transport vositalarining to'xtab turish joyini"
+          ],
+          "explanation": "Qo‘shimcha axborot belgisi transport vositalarini trotuar chetiga qanday usulda joylashtirish kerakligini ko‘rsatadi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот йўл белгиси билдиради:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939990407-o9wj8e4j.webp",
+          "options": [
+            "Барча турдаги транспорт воситаларининг тўхтаб туриш учун йўлнинг қатнов қисмида, тротуар ёнига қўйиш усулини",
+            "Ёнгил автомобилларнинг тўхтаб туриш жойини",
+            "Механик транспорт воситаларининг тўхтаб туриш жойини"
+          ],
+          "explanation": "Қўшимча ахборот белгиси транспорт воситаларини тротуар четига қандай усулда жойлаштириш кераклигини кўрсатади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Что означает этот дополнительный дорожный знак?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939990407-o9wj8e4j.webp",
+          "options": [
+            "Способ постановки всех видов транспортных средств на проезжей части у тротуара",
+            "Место стоянки легковых автомобилей",
+            "Место стоянки механических транспортных средств"
+          ],
+          "explanation": "Дополнительный информационный знак показывает, каким способом нужно размещать транспортные средства у края тротуара.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "b8dcd204-9110-4c91-b96a-d83d4aced9b2",
+      "text": "Qaysi avtomobil haydovchisi svetaforning taqiqlovchi ishorasida to'g'ri to'xtadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939993229-qhexbu8b.webp",
+      "options": [
+        "1-rasmda",
+        "2-rasmda",
+        "Har ikkala rasmda"
+      ],
+      "explanation": "Taqiqlovchi ishorada transport vositasi stop chizig‘i oldida to‘xtashi kerak. Bu talab 2-rasmda bajarilgan.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi avtomobil haydovchisi svetaforning taqiqlovchi ishorasida to'g'ri to'xtadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939993229-qhexbu8b.webp",
+          "options": [
+            "1-rasmda",
+            "2-rasmda",
+            "Har ikkala rasmda"
+          ],
+          "explanation": "Taqiqlovchi ishorada transport vositasi stop chizig‘i oldida to‘xtashi kerak. Bu talab 2-rasmda bajarilgan.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Қайси автомобил ҳайдовчиси светофорнинг тақиқловчи ишорасида тўғри тўхтади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939993229-qhexbu8b.webp",
+          "options": [
+            "1-расмда",
+            "2-расмда",
+            "Ҳар иккала расмда"
+          ],
+          "explanation": "Тақиқловчи ишорада транспорт воситаси стоп чизиғи олдида тўхташи керак. Бу талаб 2-расмда бажарилган.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "На каком рисунке водитель остановился правильно при запрещающем сигнале светофора?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939993229-qhexbu8b.webp",
+          "options": [
+            "На 1-м рисунке",
+            "На 2-м рисунке",
+            "На обоих рисунках"
+          ],
+          "explanation": "При запрещающем сигнале транспортное средство должно остановиться перед стоп-линией. Это выполнено на 2-м рисунке.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "45a16d7e-fc90-4b12-91d5-c70db0686f14",
+      "text": "Ushbu qo'shimcha axborot yo'l belgisi bildiradi:",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940000217-cuf93p3d.webp",
+      "options": [
+        "Belgi ta'siri oralig'ida to'xtagan transport vositalari majburiy evakuasiya qilinishini ko'rsatadi",
+        "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish ruxsat etilganligini bildiradi",
+        "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish taqiqlanganligini bildiradi"
+      ],
+      "explanation": "Evakuator tasviri tushirilgan qo‘shimcha belgi ushbu hududda qoidani buzib to‘xtagan transport vositalari majburiy evakuatsiya qilinishini bildiradi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo'shimcha axborot yo'l belgisi bildiradi:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940000217-cuf93p3d.webp",
+          "options": [
+            "Belgi ta'siri oralig'ida to'xtagan transport vositalari majburiy evakuasiya qilinishini ko'rsatadi",
+            "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish ruxsat etilganligini bildiradi",
+            "Belgi ta'sir oralig'ida to'xtagan transport vositalarini evakuasiya qilish taqiqlanganligini bildiradi"
+          ],
+          "explanation": "Evakuator tasviri tushirilgan qo‘shimcha belgi ushbu hududda qoidani buzib to‘xtagan transport vositalari majburiy evakuatsiya qilinishini bildiradi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот йўл белгиси билдиради:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940000217-cuf93p3d.webp",
+          "options": [
+            "Белги таъсири оралиғида тўхтаган транспорт воситалари мажбурий эвакуация қилинишини кўрсатади",
+            "Белги таъсир оралиғида тўхтаган транспорт воситаларини эвакуация қилиш рухсат этилганлигини билдиради",
+            "Белги таъсир оралиғида тўхтаган транспорт воситаларини эвакуация қилиш тақиқланганлигини билдиради"
+          ],
+          "explanation": "Эвакуатор тасвири туширилган қўшимча белги ушбу ҳудудда қоидани бузиб тўхтаган транспорт воситалари мажбурий эвакуация қилинишини билдиради.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Что означает этот дополнительный дорожный знак?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940000217-cuf93p3d.webp",
+          "options": [
+            "Указывает на принудительную эвакуацию транспортных средств, остановившихся в зоне действия знака",
+            "Разрешает эвакуацию транспортных средств, остановившихся в зоне действия знака",
+            "Запрещает эвакуацию транспортных средств, остановившихся в зоне действия знака"
+          ],
+          "explanation": "Дополнительный знак с изображением эвакуатора означает, что в данной зоне неправильно припаркованные транспортные средства подлежат обязательной эвакуации.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "305786a9-6996-4933-b218-9b8337fbc14d",
+      "text": "Quyidagi belgi tagidagi qo'shimcha axborot belgisi haydovchiga nima haqida xabar beradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939999289-7beogjbn.webp",
+      "options": [
+        "To'xtab turish paytida yurgizgichni o'chirish taqiqlanadi",
+        "Yurgizgichni o'chirish sharti bilan to'xtab turish"
+      ],
+      "explanation": "Qo‘shimcha belgi to‘xtab turishda dvigatelni o‘chirib qo‘yish majburiy ekanligini bildiradi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi belgi tagidagi qo'shimcha axborot belgisi haydovchiga nima haqida xabar beradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939999289-7beogjbn.webp",
+          "options": [
+            "To'xtab turish paytida yurgizgichni o'chirish taqiqlanadi",
+            "Yurgizgichni o'chirish sharti bilan to'xtab turish"
+          ],
+          "explanation": "Qo‘shimcha belgi to‘xtab turishda dvigatelni o‘chirib qo‘yish majburiy ekanligini bildiradi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги белги тагидаги қўшимча ахборот белгиси ҳайдовчига нима ҳақида хабар беради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939999289-7beogjbn.webp",
+          "options": [
+            "Тўхтаб туриш пайтида юргизгични ўчириш тақиқланади",
+            "Юргизгични ўчириш шарти билан тўхтаб туриш"
+          ],
+          "explanation": "Қўшимча белги тўхтаб туришда двигателни ўчириб қўйиш мажбурий эканлигини билдиради.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "Что сообщает водителю дополнительный знак под этим знаком?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781939999289-7beogjbn.webp",
+          "options": [
+            "Во время стоянки запрещается выключать двигатель",
+            "Стоянка при условии выключения двигателя"
+          ],
+          "explanation": "Дополнительный знак означает, что при стоянке двигатель должен быть выключен.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "5b8f5445-ad7a-4359-9340-7b1d7e36c4a7",
+      "text": "Avtomobilning qaysi yo'nalishda harakatlanishiga ruxsat etiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940003727-6bigex9m.webp",
+      "options": [
+        "Chapga va o'ngga",
+        "Faqat to'g'riga",
+        "Barcha yo'nalishlarga"
+      ],
+      "explanation": "Belgi faqat yengil avtomobillarga taalluqli bo‘lib, boshqa yo‘nalishlar uchun cheklov qo‘ymaydi. Shuning uchun barcha yo‘nalishlarga harakatlanish mumkin.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Avtomobilning qaysi yo'nalishda harakatlanishiga ruxsat etiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940003727-6bigex9m.webp",
+          "options": [
+            "Chapga va o'ngga",
+            "Faqat to'g'riga",
+            "Barcha yo'nalishlarga"
+          ],
+          "explanation": "Belgi faqat yengil avtomobillarga taalluqli bo‘lib, boshqa yo‘nalishlar uchun cheklov qo‘ymaydi. Shuning uchun barcha yo‘nalishlarga harakatlanish mumkin.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Автомобилнинг қайси йўналишда ҳаракатланишига рухсат этилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940003727-6bigex9m.webp",
+          "options": [
+            "Чапга ва ўнгга",
+            "Фақат тўғрига",
+            "Барча йўналишларга"
+          ],
+          "explanation": "Белги фақат енгил автомобилларга тааллуқли бўлиб, бошқа йўналишлар учун чеклов қўймайди. Шунинг учун барча йўналишларга ҳаракатланиш мумкин.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "В каком направлении разрешено движение автомобиля?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940003727-6bigex9m.webp",
+          "options": [
+            "Налево и направо",
+            "Только прямо",
+            "Во всех направлениях"
+          ],
+          "explanation": "Знак относится только к легковым автомобилям и не ограничивает движение в других направлениях. Поэтому разрешено движение во всех направлениях.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "e9decd28-0048-466f-9d57-907e3e517e6a",
+      "text": "Bu joyda quvib o'tishga ruxsat beriladimi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940009245-o2vhwotu.webp",
+      "options": [
+        "Ruxsat etiladi",
+        "Taqiqlanadi",
+        "Agar quvib o'tilayotgan transportning tezligi 40 km/soatdan kam bo'lsa ruxsat etiladi"
+      ],
+      "explanation": "Quvib o'tish taqiqi belgisi ta'siri tugaganidan keyin quvib o'tishga ruxsat etiladi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu joyda quvib o'tishga ruxsat beriladimi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940009245-o2vhwotu.webp",
+          "options": [
+            "Ruxsat etiladi",
+            "Taqiqlanadi",
+            "Agar quvib o'tilayotgan transportning tezligi 40 km/soatdan kam bo'lsa ruxsat etiladi"
+          ],
+          "explanation": "Quvib o'tish taqiqi belgisi ta'siri tugaganidan keyin quvib o'tishga ruxsat etiladi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Бу жойда қувиб ўтишга рухсат бериладими?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940009245-o2vhwotu.webp",
+          "options": [
+            "Рухсат этилади",
+            "Тақиқланади",
+            "Агар қувиб ўтилаётган транспортнинг тезлиги 40 км/соатдан кам бўлса рухсат этилади"
+          ],
+          "explanation": "Қувиб ўтиш тақиқи белгиси таъсири тугаганидан кейин қувиб ўтишга рухсат этилади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Разрешён ли здесь обгон?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940009245-o2vhwotu.webp",
+          "options": [
+            "Разрешён",
+            "Запрещён",
+            "Разрешён, если скорость обгоняемого транспортного средства менее 40 км/ч"
+          ],
+          "explanation": "После окончания действия знака, запрещающего обгон, обгон разрешается.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "17193236-35d9-4630-961b-95f3015e210a",
+      "text": "Ushbu yo'l belgisi qanday nomlanadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940011272-tcs8llql.webp",
+      "options": [
+        "Shanba, yakshanba va bayram kunlari",
+        "Hafta kunlari",
+        "Ish kunlari"
+      ],
+      "explanation": "Qizil yulduzsimon belgi shanba, yakshanba va bayram kunlarini bildiradi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo'l belgisi qanday nomlanadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940011272-tcs8llql.webp",
+          "options": [
+            "Shanba, yakshanba va bayram kunlari",
+            "Hafta kunlari",
+            "Ish kunlari"
+          ],
+          "explanation": "Qizil yulduzsimon belgi shanba, yakshanba va bayram kunlarini bildiradi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Ушбу йўл белгиси қандай номланади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940011272-tcs8llql.webp",
+          "options": [
+            "Шанба, якшанба ва байрам кунлари",
+            "Ҳафта кунлари",
+            "Иш кунлари"
+          ],
+          "explanation": "Қизил юлдузсимон белги шанба, якшанба ва байрам кунларини билдиради.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Как называется этот дорожный знак?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940011272-tcs8llql.webp",
+          "options": [
+            "Суббота, воскресенье и праздничные дни",
+            "Дни недели",
+            "Рабочие дни"
+          ],
+          "explanation": "Красный звездообразный знак обозначает субботу, воскресенье и праздничные дни.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "14fcc78a-3725-47cf-adf4-3772b8d9bfd0",
+      "text": "Bu belgilar nimani bildiradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940015371-5jhhv7js.webp",
+      "options": [
+        "«Nogiron» taniqli belgisi bo'lgan avtomobillar uchun 30 m dan keyin to'xtab turish joyiga kelishini",
+        "Motokajavalardan tashqari transport vositalari uchun 30 m li hududdagi to'xtab turish joyini",
+        "«Nogiron» taniqli belgisi bo'lgan motokajava va avtomobillar uchun 30 m li hududdagi to'xtab turish joyini"
+      ],
+      "explanation": "Belgi nogironligi bo‘lgan shaxslar foydalanadigan transport vositalari uchun 30 metr masofadagi to‘xtash joyini bildiradi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu belgilar nimani bildiradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940015371-5jhhv7js.webp",
+          "options": [
+            "«Nogiron» taniqli belgisi bo'lgan avtomobillar uchun 30 m dan keyin to'xtab turish joyiga kelishini",
+            "Motokajavalardan tashqari transport vositalari uchun 30 m li hududdagi to'xtab turish joyini",
+            "«Nogiron» taniqli belgisi bo'lgan motokajava va avtomobillar uchun 30 m li hududdagi to'xtab turish joyini"
+          ],
+          "explanation": "Belgi nogironligi bo‘lgan shaxslar foydalanadigan transport vositalari uchun 30 metr masofadagi to‘xtash joyini bildiradi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Бу белгилар нимани билдиради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940015371-5jhhv7js.webp",
+          "options": [
+            "«Ногирон» танлиғи белгиси бўлган автомобиллар учун 30 м дан кейин тўхтаб туриш жойига келишини",
+            "Мотокажавалардан ташқари транспорт воситалари учун 30 м ли ҳудуддаги тўхтаб туриш жойини",
+            "«Ногирон» танлиғи белгиси бўлган мотокажава ва автомобиллар учун 30 м ли ҳудуддаги тўхтаб туриш жойини"
+          ],
+          "explanation": "Белги ногиронлиги бўлган шахслар фойдаланадиган транспорт воситалари учун 30 метр масофадаги тўхташ жойини билдиради.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Что означают эти знаки?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940015371-5jhhv7js.webp",
+          "options": [
+            "Место стоянки для автомобилей с опознавательным знаком «Инвалид» через 30 м",
+            "Место стоянки в зоне 30 м для транспортных средств, кроме мотоколясок",
+            "Место стоянки в зоне 30 м для мотоколясок и автомобилей с опознавательным знаком «Инвалид»"
+          ],
+          "explanation": "Знак обозначает место стоянки на расстоянии 30 метров для транспортных средств, используемых лицами с инвалидностью.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "8eef4939-ee9d-49b6-8265-3f09d73b61e4",
+      "text": "Ko'rsatilgan qaysi belgilar faqat shu o'rnatilgan bo'lakni o'ziga ta'sir qiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940022037-76myetnm.webp",
+      "options": [
+        "«B» va «V»",
+        "Faqat «B»",
+        "Faqat «A»"
+      ],
+      "explanation": "Pastga yo‘nalgan strelkali qo‘shimcha belgi cheklov faqat aynan o‘rnatilgan joydan boshlanishini bildiradi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko'rsatilgan qaysi belgilar faqat shu o'rnatilgan bo'lakni o'ziga ta'sir qiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940022037-76myetnm.webp",
+          "options": [
+            "«B» va «V»",
+            "Faqat «B»",
+            "Faqat «A»"
+          ],
+          "explanation": "Pastga yo‘nalgan strelkali qo‘shimcha belgi cheklov faqat aynan o‘rnatilgan joydan boshlanishini bildiradi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган қайси белгилар фақат шу ўрнатилган бўлакни ўзига таъсир қилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940022037-76myetnm.webp",
+          "options": [
+            "«Б» ва «В»",
+            "Фақат «Б»",
+            "Фақат «А»"
+          ],
+          "explanation": "Пастга йўналган стрелкали қўшимча белги чеклов фақат айнан ўрнатилган жойдан бошланишини билдиради.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Какие из показанных знаков действуют только на ту полосу, над которой они установлены?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940022037-76myetnm.webp",
+          "options": [
+            "«Б» и «В»",
+            "Только «Б»",
+            "Только «А»"
+          ],
+          "explanation": "Дополнительная табличка со стрелкой вниз означает, что действие ограничения начинается только с места её установки.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "e4f8dda8-fc39-473d-bdf8-b831a6a6f68c",
+      "text": "Bu xavflilik belgisi qanday nomlanadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940025997-8214s67j.webp",
+      "options": [
+        "Oksidlovchi moddalar",
+        "Organik peroksidlar",
+        "Tez alangalanuvchi gazlar va suyuqliklar"
+      ],
+      "explanation": "5.2 raqamli xavflilik belgisi organik peroksidlarni bildiradi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu xavflilik belgisi qanday nomlanadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940025997-8214s67j.webp",
+          "options": [
+            "Oksidlovchi moddalar",
+            "Organik peroksidlar",
+            "Tez alangalanuvchi gazlar va suyuqliklar"
+          ],
+          "explanation": "5.2 raqamli xavflilik belgisi organik peroksidlarni bildiradi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Бу хавфлилик белгиси қандай номланади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940025997-8214s67j.webp",
+          "options": [
+            "Оксидловчи моддалар",
+            "Органик пероксидлар",
+            "Тез алангаланувчи газлар ва суюқликлар"
+          ],
+          "explanation": "5.2 рақамли хавфлилик белгиси органик пероксидларни билдиради.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "Как называется этот знак опасности?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940025997-8214s67j.webp",
+          "options": [
+            "Окисляющие вещества",
+            "Органические пероксиды",
+            "Легковоспламеняющиеся газы и жидкости"
+          ],
+          "explanation": "Знак опасности 5.2 обозначает органические пероксиды.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "4ef910da-f18c-47a9-89c6-63aaa01a8adb",
+      "text": "Qaysi transport vositasiga to'xtash taqiqlangan?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940029566-3uj1ayy4.webp",
+      "options": [
+        "Yengil avtomobil haydovchisi",
+        "Mototsikl haydovchisi",
+        "Yuk avtomobili haydovchisi",
+        "Barcha transport vositalarining haydovchilari"
+      ],
+      "explanation": "Qo‘shimcha belgi taqiq faqat yuk avtomobillariga taalluqli ekanligini bildiradi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi transport vositasiga to'xtash taqiqlangan?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940029566-3uj1ayy4.webp",
+          "options": [
+            "Yengil avtomobil haydovchisi",
+            "Mototsikl haydovchisi",
+            "Yuk avtomobili haydovchisi",
+            "Barcha transport vositalarining haydovchilari"
+          ],
+          "explanation": "Qo‘shimcha belgi taqiq faqat yuk avtomobillariga taalluqli ekanligini bildiradi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Қайси транспорт воситасига тўхташ тақиқланган?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940029566-3uj1ayy4.webp",
+          "options": [
+            "Ёнгил автомобиль ҳайдовчиси",
+            "Мотоцикл ҳайдовчиси",
+            "Юк автомобили ҳайдовчиси",
+            "Барча транспорт воситаларининг ҳайдовчилари"
+          ],
+          "explanation": "Қўшимча белги тақиқ фақат юк автомобилларига тааллуқли эканлигини билдиради.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "К какому транспортному средству запрещена остановка?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940029566-3uj1ayy4.webp",
+          "options": [
+            "Водителю легкового автомобиля",
+            "Водителю мотоцикла",
+            "Водителю грузового автомобиля",
+            "Всем водителям транспортных средств"
+          ],
+          "explanation": "Дополнительная табличка указывает, что запрет относится только к грузовым автомобилям.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "3ef30990-5172-4f17-952e-7b176d98f0fa",
+      "text": "Qaysi avtomobil to'xtash qoidasini buzdi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940034884-8n3gyo1n.webp",
+      "options": [
+        "Yashil avtomobil",
+        "Har ikkisi buzdi",
+        "Har ikkisi ham buzmadi"
+      ],
+      "explanation": "Belgi mototsikllardan tashqari barcha transport vositalariga taalluqli bo‘lib, ikkala avtomobil ham qoidani buzgan.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi avtomobil to'xtash qoidasini buzdi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940034884-8n3gyo1n.webp",
+          "options": [
+            "Yashil avtomobil",
+            "Har ikkisi buzdi",
+            "Har ikkisi ham buzmadi"
+          ],
+          "explanation": "Belgi mototsikllardan tashqari barcha transport vositalariga taalluqli bo‘lib, ikkala avtomobil ham qoidani buzgan.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Қайси автомобиль тўхташ қоидасини бузди?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940034884-8n3gyo1n.webp",
+          "options": [
+            "Яшил автомобиль",
+            "Ҳар иккаласи бузди",
+            "Ҳар иккаласи ҳам бузмади"
+          ],
+          "explanation": "Белги мотоцикллардан ташқари барча транспорт воситаларига тааллуқли бўлиб, иккала автомобиль ҳам қоидани бузган.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "Какой автомобиль нарушил правило стоянки?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940034884-8n3gyo1n.webp",
+          "options": [
+            "Зелёный автомобиль",
+            "Оба нарушили",
+            "Оба не нарушили"
+          ],
+          "explanation": "Знак относится ко всем транспортным средствам, кроме мотоциклов, поэтому оба автомобиля нарушили правило.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "13a1606b-ea4e-42d2-8045-23ac3cb12f1c",
+      "text": "Bu belgilarning ta’sir oralig‘ida qaysi avtomobil uchun to‘xtashga ruxsat etiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940041471-4f4quoi9.webp",
+      "options": [
+        "Qizilga",
+        "Ikkala avtomobilga",
+        "Hech qaysi biriga",
+        "Sariq avtomobilga"
+      ],
+      "explanation": "Qo‘shimcha belgi nogironligi bo‘lgan shaxslar foydalanadigan transport vositalariga istisno tariqasida ruxsat beradi. Rasmda sariq avtomobil shu toifaga kiradi.",
+      "correctIndex": 3,
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu belgilarning ta’sir oralig‘ida qaysi avtomobil uchun to‘xtashga ruxsat etiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940041471-4f4quoi9.webp",
+          "options": [
+            "Qizilga",
+            "Ikkala avtomobilga",
+            "Hech qaysi biriga",
+            "Sariq avtomobilga"
+          ],
+          "explanation": "Qo‘shimcha belgi nogironligi bo‘lgan shaxslar foydalanadigan transport vositalariga istisno tariqasida ruxsat beradi. Rasmda sariq avtomobil shu toifaga kiradi.",
+          "correctIndex": 3
+        },
+        "uz_cyrl": {
+          "text": "Бу белгиларнинг таъсир оралиғида қайси автомобиль учун тўхташга рухсат этилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940041471-4f4quoi9.webp",
+          "options": [
+            "Қизилга",
+            "Иккала автомобилга",
+            "Ҳеч қайси бирига",
+            "Сариқ автомобилга"
+          ],
+          "explanation": "Қўшимча белги ногиронлиги бўлган шахслар фойдаланадиган транспорт воситаларига истисно тариқасида рухсат беради. Расмда сариқ автомобиль шу тоифага киради.",
+          "correctIndex": 3
+        },
+        "ru": {
+          "text": "Для какого автомобиля разрешена остановка в зоне действия этих знаков?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940041471-4f4quoi9.webp",
+          "options": [
+            "Для красного",
+            "Для обоих автомобилей",
+            "Ни для одного",
+            "Для жёлтого автомобиля"
+          ],
+          "explanation": "Дополнительная табличка разрешает исключение для транспортных средств, используемых лицами с инвалидностью. На рисунке жёлтый автомобиль относится именно к этой категории.",
+          "correctIndex": 3
+        }
+      }
+    },
+    {
+      "id": "82f53fd1-68bb-4d18-b733-03c4264be0b1",
+      "text": "Belgilarning ta’siri qaysi transport vositalariga tatbiq etiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940042358-6e5zuv3b.webp",
+      "options": [
+        "Faqat yengil avtomobillarga",
+        "Yengil avtomobillarga va mototsikllarga",
+        "Yengil avtomobillarga va ruxsat etilgan to'la vazni 3,5 t dan kam yoki teng bo'lgan yuk avtomobillariga"
+      ],
+      "explanation": "Yengil avtomobil tasviri tushirilgan qo‘shimcha belgi ta’siri yengil avtomobillar hamda 3,5 tonnagacha bo‘lgan yuk avtomobillariga tatbiq etiladi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgilarning ta’siri qaysi transport vositalariga tatbiq etiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940042358-6e5zuv3b.webp",
+          "options": [
+            "Faqat yengil avtomobillarga",
+            "Yengil avtomobillarga va mototsikllarga",
+            "Yengil avtomobillarga va ruxsat etilgan to'la vazni 3,5 t dan kam yoki teng bo'lgan yuk avtomobillariga"
+          ],
+          "explanation": "Yengil avtomobil tasviri tushirilgan qo‘shimcha belgi ta’siri yengil avtomobillar hamda 3,5 tonnagacha bo‘lgan yuk avtomobillariga tatbiq etiladi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Белгиларнинг таъсири қайси транспорт воситаларига татбиқ этилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940042358-6e5zuv3b.webp",
+          "options": [
+            "Фақат енгил автомобилларга",
+            "Енгил автомобилларга ва мотоциклларга",
+            "Енгил автомобилларга ва рухсат этилган тўла вазни 3,5 т дан кам ёки тенг бўлган юк автомобилларига"
+          ],
+          "explanation": "Енгил автомобиль тасвири туширилган қўшимча белги таъсири енгил автомобиллар ҳамда 3,5 тоннагача бўлган юк автомобилларига татбиқ этилади.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "На какие транспортные средства распространяется действие знаков?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940042358-6e5zuv3b.webp",
+          "options": [
+            "Только на легковые автомобили",
+            "На легковые автомобили и мотоциклы",
+            "На легковые автомобили и грузовые автомобили с разрешённой максимальной массой не более 3,5 т"
+          ],
+          "explanation": "Дополнительная табличка с изображением легкового автомобиля распространяет действие на легковые автомобили и грузовые автомобили массой до 3,5 тонн.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "bd883acb-fa36-4d30-b140-d6bc83c07e2c",
+      "text": "Ushbu qo'shimcha axborot belgisi qaysi yo'l belgisi bilan qo'llaniladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940050180-3lyl5sg5.webp",
+      "options": [
+        "3",
+        "4",
+        "1",
+        "2"
+      ],
+      "explanation": "Elektr transport vositalarini quvvatlash joyini bildiruvchi qo‘shimcha belgi 5.15.4 yo‘l belgisi bilan qo‘llaniladi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo'shimcha axborot belgisi qaysi yo'l belgisi bilan qo'llaniladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940050180-3lyl5sg5.webp",
+          "options": [
+            "3",
+            "4",
+            "1",
+            "2"
+          ],
+          "explanation": "Elektr transport vositalarini quvvatlash joyini bildiruvchi qo‘shimcha belgi 5.15.4 yo‘l belgisi bilan qo‘llaniladi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот белгиси қайси йўл белгиси билан қўлланилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940050180-3lyl5sg5.webp",
+          "options": [
+            "3",
+            "4",
+            "1",
+            "2"
+          ],
+          "explanation": "Электр транспорт воситаларини қувватлаш жойини билдирадиган қўшимча белги 5.15.4 йўл белгиси билан қўлланилади.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "С каким дорожным знаком применяется этот дополнительный знак?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940050180-3lyl5sg5.webp",
+          "options": [
+            "3",
+            "4",
+            "1",
+            "2"
+          ],
+          "explanation": "Дополнительная табличка, обозначающая место зарядки электромобилей, применяется со знаком 5.15.4.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "9866300b-8379-4675-a132-8be5d724c4a8",
+      "text": "Yengil avtomobilda qaysi yo'nalishlarda harakatlanishga ruxsat etiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940065235-bpyg9mjt.webp",
+      "options": [
+        "Faqat to'g'riga",
+        "Faqat o'ngga va chapga",
+        "Istalgan yo'nalishda"
+      ],
+      "explanation": "Belgi faqat yuk avtomobillariga tegishli bo‘lgani sababli yengil avtomobil istalgan yo‘nalishda harakatlanishi mumkin.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Yengil avtomobilda qaysi yo'nalishlarda harakatlanishga ruxsat etiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940065235-bpyg9mjt.webp",
+          "options": [
+            "Faqat to'g'riga",
+            "Faqat o'ngga va chapga",
+            "Istalgan yo'nalishda"
+          ],
+          "explanation": "Belgi faqat yuk avtomobillariga tegishli bo‘lgani sababli yengil avtomobil istalgan yo‘nalishda harakatlanishi mumkin.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Ёнгил автомобилда қайси йўналишларда ҳаракатланишга рухсат этилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940065235-bpyg9mjt.webp",
+          "options": [
+            "Фақат тўғрига",
+            "Фақат ўнгга ва чапга",
+            "Исталган йўналишда"
+          ],
+          "explanation": "Белги фақат юк автомобилларига тегишли бўлгани сабабли енгил автомобиль исталган йўналишда ҳаракатланиши мумкин.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "По каким направлениям разрешено движение легкового автомобиля?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940065235-bpyg9mjt.webp",
+          "options": [
+            "Только прямо",
+            "Только направо и налево",
+            "В любом направлении"
+          ],
+          "explanation": "Знак относится только к грузовым автомобилям, поэтому легковому автомобилю разрешено движение в любом направлении.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "21f0502e-31c4-4c5c-b243-f6f386b7ef1f",
+      "text": "Ko'rsatilgan belgi ostidagi qo'shimcha axborot belgisi qanday maqsadda o'rnatilgan?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+      "options": [
+        "Belgining amal qilish hududida foto va video moslamalaridan foydalanish taqiqlanadi",
+        "DYHXX tomonidan harakat jarayoni foto va video kuzatuvi olingan yo'l qismini bildiradi"
+      ],
+      "explanation": "Kamera tasviri tushirilgan qo‘shimcha belgi ushbu yo‘l qismida foto va video qayd etish vositalari ishlayotganini bildiradi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko'rsatilgan belgi ostidagi qo'shimcha axborot belgisi qanday maqsadda o'rnatilgan?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+          "options": [
+            "Belgining amal qilish hududida foto va video moslamalaridan foydalanish taqiqlanadi",
+            "DYHXX tomonidan harakat jarayoni foto va video kuzatuvi olingan yo'l qismini bildiradi"
+          ],
+          "explanation": "Kamera tasviri tushirilgan qo‘shimcha belgi ushbu yo‘l qismida foto va video qayd etish vositalari ishlayotganini bildiradi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган белги остидаги қўшимча ахборот белгиси қандай мақсадда ўрнатилган?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+          "options": [
+            "Белгининг амал қилиш ҳудудида фото ва видео мосламаларидан фойдаланиш тақиқланади",
+            "ДЙҲХХ томонидан ҳаракат жараёни фото ва видео кузатуви олинган йўл қисмини билдиради"
+          ],
+          "explanation": "Камера тасвири туширилган қўшимча белги ушбу йўл қисмида фото ва видео қайд этиш воситалари ишлаётганини билдиради.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "С какой целью установлен дополнительный знак под указанным знаком?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+          "options": [
+            "В зоне действия знака запрещено пользоваться фото- и видеоустройствами",
+            "Указывает на участок дороги, где ДПС ведёт фото- и видеоконтроль движения"
+          ],
+          "explanation": "Дополнительная табличка с изображением камеры означает, что на данном участке дороги работают средства фото- и видеофиксации.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "1ba2390b-8c5c-4871-a91a-79675af27c0a",
+      "text": "Quyidagi belgilar qaysi yo'nalishda harakatlanishga ruxsat beradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940073499-sqo62vgf.webp",
+      "options": [
+        "Faqat chapga",
+        "Faqat to'g'riga",
+        "Faqat o'ngga",
+        "To'g'riga, o'ngga va qayrilishga"
+      ],
+      "explanation": "Belgi chapga harakatni taqiqlaydi. Shu sababli to‘g‘riga, o‘ngga va qayrilib olishga ruxsat etiladi.",
+      "correctIndex": 3,
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi belgilar qaysi yo'nalishda harakatlanishga ruxsat beradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940073499-sqo62vgf.webp",
+          "options": [
+            "Faqat chapga",
+            "Faqat to'g'riga",
+            "Faqat o'ngga",
+            "To'g'riga, o'ngga va qayrilishga"
+          ],
+          "explanation": "Belgi chapga harakatni taqiqlaydi. Shu sababli to‘g‘riga, o‘ngga va qayrilib olishga ruxsat etiladi.",
+          "correctIndex": 3
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги белгилар қайси йўналишда ҳаракатланишга рухсат беради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940073499-sqo62vgf.webp",
+          "options": [
+            "Фақат чапга",
+            "Фақат тўғрига",
+            "Фақат ўнгга",
+            "Тўғрига, ўнгга ва қайрилишга"
+          ],
+          "explanation": "Белги чапга ҳаракатни тақиқлайди. Шу сабабли тўғрига, ўнгга ва қайрилиб олишга рухсат этилади.",
+          "correctIndex": 3
+        },
+        "ru": {
+          "text": "В каком направлении разрешают движение следующие знаки?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940073499-sqo62vgf.webp",
+          "options": [
+            "Только налево",
+            "Только прямо",
+            "Только направо",
+            "Прямо, направо и на разворот"
+          ],
+          "explanation": "Знак запрещает движение налево. Поэтому разрешено движение прямо, направо и на разворот.",
+          "correctIndex": 3
+        }
+      }
+    },
+    {
+      "id": "f59b68f8-db71-450f-976c-98f1b7e328f8",
+      "text": "Qaysi qo‘shimcha axborot belgilari birga qo‘llanilganda belgilarning ta’sir oralig‘ini ko‘rsatadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940078244-pwxl8dbt.webp",
+      "options": [
+        "Faqat «A»",
+        "Faqat «Б»",
+        "«Б» va «В»"
+      ],
+      "explanation": "«Б» va «В» qo‘shimcha axborot belgilari yo‘l belgisining amal qilish masofasi yoki ta’sir oralig‘ini ko‘rsatadi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi qo‘shimcha axborot belgilari birga qo‘llanilganda belgilarning ta’sir oralig‘ini ko‘rsatadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940078244-pwxl8dbt.webp",
+          "options": [
+            "Faqat «A»",
+            "Faqat «Б»",
+            "«Б» va «В»"
+          ],
+          "explanation": "«Б» va «В» qo‘shimcha axborot belgilari yo‘l belgisining amal qilish masofasi yoki ta’sir oralig‘ini ko‘rsatadi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Қайси қўшимча ахборот белгилари бирга қўлланилганда белгиларнинг таъсир оралиғини кўрсатади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940078244-pwxl8dbt.webp",
+          "options": [
+            "Фақат «А»",
+            "Фақат «Б»",
+            "«Б» ва «В»"
+          ],
+          "explanation": "«Б» ва «В» қўшимча ахборот белгилари йўл белгисининг амал қилиш масофаси ёки таъсир оралиғини кўрсатади.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Какие дополнительные таблички, применяемые вместе, указывают зону действия знака?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940078244-pwxl8dbt.webp",
+          "options": [
+            "Только «А»",
+            "Только «Б»",
+            "«Б» и «В»"
+          ],
+          "explanation": "Дополнительные таблички «Б» и «В» показывают расстояние действия или зону действия дорожного знака.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "2020c2cf-0adc-4133-ae9f-68fdd655ddb4",
+      "text": "Bu belgilar amal qiladigan hududda «Nogiron» taniqli belgisi bilan belgilangan avtomobilga to‘xtashga ruxsat etiladimi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940086904-hkl42r7b.webp",
+      "options": [
+        "Ruxsat etiladi",
+        "Taqiqlanadi"
+      ],
+      "explanation": "Nogironligi bo‘lgan shaxslar boshqarayotgan yoki tashiyotgan transport vositalari uchun istisno qo‘llaniladi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu belgilar amal qiladigan hududda «Nogiron» taniqli belgisi bilan belgilangan avtomobilga to‘xtashga ruxsat etiladimi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940086904-hkl42r7b.webp",
+          "options": [
+            "Ruxsat etiladi",
+            "Taqiqlanadi"
+          ],
+          "explanation": "Nogironligi bo‘lgan shaxslar boshqarayotgan yoki tashiyotgan transport vositalari uchun istisno qo‘llaniladi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Бу белгилар амал қиладиган ҳудудда «Ногирон» танлиғи белгиси билан белгиланган автомобилга тўхташга рухсат этиладими?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940086904-hkl42r7b.webp",
+          "options": [
+            "Рухсат этилади",
+            "Тақиқланади"
+          ],
+          "explanation": "Ногиронлиги бўлган шахслар бошқараётган ёки ташиётган транспорт воситалари учун истисно қўлланилади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Разрешена ли стоянка в зоне действия этих знаков для автомобиля, обозначенного опознавательным знаком «Инвалид»?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940086904-hkl42r7b.webp",
+          "options": [
+            "Разрешена",
+            "Запрещена"
+          ],
+          "explanation": "Для транспортных средств, управляемых или перевозящих лиц с инвалидностью, действует исключение.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "c4cfd513-ec69-4d95-8744-95e82f055677",
+      "text": "Belgilarning qaysi biri ogohlantiruvchi belgilar bilan qayd etilgan xavfli yo‘l qismining uzunligini ko‘rsatadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940091266-yjn7b4ag.webp",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "explanation": "4-raqamli qo‘shimcha axborot belgisi xavfli yo‘l qismining davomiyligini bildiradi.",
+      "correctIndex": 3,
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgilarning qaysi biri ogohlantiruvchi belgilar bilan qayd etilgan xavfli yo‘l qismining uzunligini ko‘rsatadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940091266-yjn7b4ag.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "4-raqamli qo‘shimcha axborot belgisi xavfli yo‘l qismining davomiyligini bildiradi.",
+          "correctIndex": 3
+        },
+        "uz_cyrl": {
+          "text": "Белгиларнинг қайси бири огоҳлантирувчи белгилар билан қайд этилган хавфли йўл қисмининг узунлигини кўрсатади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940091266-yjn7b4ag.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "4-рақамли қўшимча ахборот белгиси хавфли йўл қисмининг давомийлигини билдиради.",
+          "correctIndex": 3
+        },
+        "ru": {
+          "text": "Какой из знаков указывает длину опасного участка дороги, обозначенного предупреждающими знаками?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940091266-yjn7b4ag.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "Дополнительный знак №4 указывает протяжённость опасного участка дороги.",
+          "correctIndex": 3
+        }
+      }
+    },
+    {
+      "id": "40dd5673-fdda-4921-a9cd-a3f6aca24f17",
+      "text": "Qaysi transport vositalarining haydovchilari to‘xtab turish qoidasini buzishdi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940097694-d38ylqi6.webp",
+      "options": ["«A» va «Б»", "Faqat «Г»", "«Б» va «Г»", "«В» va «Г»", "«Б», «В» va «Г»"],
+      "explanation": "Rasmda «Б», «В» va «Г» transport vositalari to‘xtab turish qoidalariga zid ravishda joylashtirilgan.",
+      "correctIndex": 4,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi transport vositalarining haydovchilari to‘xtab turish qoidasini buzishdi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940097694-d38ylqi6.webp",
+          "options": ["«A» va «Б»", "Faqat «Г»", "«Б» va «Г»", "«В» va «Г»", "«Б», «В» va «Г»"],
+          "explanation": "Rasmda «Б», «В» va «Г» transport vositalari to‘xtab turish qoidalariga zid ravishda joylashtirilgan.",
+          "correctIndex": 4
+        },
+        "uz_cyrl": {
+          "text": "Қайси транспорт воситаларининг ҳайдовчилари тўхтаб туриш қоидасини бузишди?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940097694-d38ylqi6.webp",
+          "options": ["«A» ва «Б»", "Фақат «Г»", "«Б» ва «Г»", "«В» ва «Г»", "«Б», «В» ва «Г»"],
+          "explanation": "Расмда «Б», «В» ва «Г» транспорт воситалари тўхтаб туриш қоидаларига зид равишда жойлаштирилган.",
+          "correctIndex": 4
+        },
+        "ru": {
+          "text": "Водители каких транспортных средств нарушили правило стоянки?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940097694-d38ylqi6.webp",
+          "options": ["«A» и «Б»", "Только «Г»", "«Б» и «Г»", "«В» и «Г»", "«Б», «В» и «Г»"],
+          "explanation": "На рисунке транспортные средства «Б», «В» и «Г» размещены с нарушением правил стоянки.",
+          "correctIndex": 4
+        }
+      }
+    },
+    {
+      "id": "04c759de-e990-4899-8b6b-74139f83830d",
+      "text": "Sizga ruxsat etilgan to‘la vazni 3,5 tonnadan ortiq yuk avtomobilida harakatlanish:",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940116388-k6dj5h6z.webp",
+      "options": ["Faqat to‘g‘riga", "To‘g‘riga va o‘ngga", "Barcha yo‘nalishlarda"],
+      "explanation": "Belgi yuk avtomobillari uchun faqat to‘g‘ri yo‘nalishda harakatlanishga ruxsat beradi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Sizga ruxsat etilgan to‘la vazni 3,5 tonnadan ortiq yuk avtomobilida harakatlanish:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940116388-k6dj5h6z.webp",
+          "options": ["Faqat to‘g‘riga", "To‘g‘riga va o‘ngga", "Barcha yo‘nalishlarda"],
+          "explanation": "Belgi yuk avtomobillari uchun faqat to‘g‘ri yo‘nalishda harakatlanishga ruxsat beradi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Сизга рухсат этилган тўла вазни 3,5 тонnадан ортиқ юк автомобилида ҳаракатланиш:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940116388-k6dj5h6z.webp",
+          "options": ["Фақат тўғрига", "Тўғрига ва ўнгга", "Барча йўналишларда"],
+          "explanation": "Белги юк автомобиллари учун фақат тўғри йўналишда ҳаракатланишга рухсат беради.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Движение на грузовом автомобиле с разрешённой максимальной массой более 3,5 т:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940116388-k6dj5h6z.webp",
+          "options": ["Только прямо", "Прямо и направо", "Во всех направлениях"],
+          "explanation": "Знак разрешает грузовым автомобилям движение только прямо.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "b733fde3-51e7-450f-be6b-24c2f5072fb1",
+      "text": "Belgi va uning ostidagi qo‘shimcha axborot belgisi nima haqida ogohlantiradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940115736-4wtndjgw.webp",
+      "options": [
+        "Olib borilayotgan ishlar munosabati bilan yo‘l chetida to‘xtash taqiqlanadi",
+        "Yo‘l yoqasida ta’mirlash ishlari olib borilayotganligi munosabati bilan unga chiqish xavfli",
+        "Yo‘lda ta’mirlash ishlari olib borilayotganida yo‘l chetida to‘xtab turish taqiqlanadi"
+      ],
+      "explanation": "Qo‘shimcha belgi yo‘l chetiga chiqish xavfli ekanligini bildiradi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgi va uning ostidagi qo‘shimcha axborot belgisi nima haqida ogohlantiradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940115736-4wtndjgw.webp",
+          "options": [
+            "Olib borilayotgan ishlar munosabati bilan yo‘l chetida to‘xtash taqiqlanadi",
+            "Yo‘l yoqasida ta’mirlash ishlari olib borilayotganligi munosabati bilan unga chiqish xavfli",
+            "Yo‘lda ta’mirlash ishlari olib borilayotganida yo‘l chetida to‘xtab turish taqiqlanadi"
+          ],
+          "explanation": "Qo‘shimcha belgi yo‘l chetiga chiqish xavfli ekanligini bildiradi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Белги ва унинг остидаги қўшимча ахборот белгиси нима ҳақида огоҳлантиради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940115736-4wtndjgw.webp",
+          "options": [
+            "Олиб борилаётган ишлар муносабати билан йўл четида тўхташ тақиқланади",
+            "Йўл ёқасида таъмирлаш ишлари олиб борилаётганлиги муносабати билан унга чиқиш хавфли",
+            "Йўлда таъмирлаш ишлари олиб борилаётганида йўл четида тўхтаб туриш тақиқланади"
+          ],
+          "explanation": "Қўшимча белги йўл четига чиқиш хавфли эканлигини билдиради.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "О чём предупреждают знак и дополнительная табличка под ним?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940115736-4wtndjgw.webp",
+          "options": [
+            "В связи с работами запрещается остановка у края дороги",
+            "Выезд на обочину опасен из-за дорожных работ",
+            "При дорожных работах запрещена остановка у края дороги"
+          ],
+          "explanation": "Дополнительная табличка сообщает, что выезд на обочину опасен.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "4535997a-0ca3-4786-a024-3fb17f9ce50a",
+      "text": "Qanday hollarda sizga 50 km/soatdan yuqori tezlikda harakatlanish taqiqlangan?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940122743-rqks4p4t.webp",
+      "options": ["Faqat qatnov qismi nam bo‘lsa", "Har qanday holatda ham"],
+      "explanation": "Qo‘shimcha belgi tezlik cheklovi faqat nam qoplamada amal qilishini bildiradi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qanday hollarda sizga 50 km/soatdan yuqori tezlikda harakatlanish taqiqlangan?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940122743-rqks4p4t.webp",
+          "options": ["Faqat qatnov qismi nam bo‘lsa", "Har qanday holatda ham"],
+          "explanation": "Qo‘shimcha belgi tezlik cheklovi faqat nam qoplamada amal qilishini bildiradi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Қандай ҳолларда сизга 50 км/соатдан юқори тезликда ҳаракатланиш тақиқланган?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940122743-rqks4p4t.webp",
+          "options": ["Фақат қатнов қисми нам бўлса", "Ҳар қандай ҳолатда ҳам"],
+          "explanation": "Қўшимча белги тезлик чеклови фақат нам қопламада амал қилишини билдиради.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "В каких случаях вам запрещено движение со скоростью выше 50 км/ч?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940122743-rqks4p4t.webp",
+          "options": ["Только если проезжая часть мокрая", "При любых условиях"],
+          "explanation": "Дополнительная табличка означает, что ограничение скорости действует только на мокром покрытии.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "34178ec3-0d78-4855-a5b5-b6012d95858a",
+      "text": "Ko‘rsatilgan yo‘l belgilaridan qaysi biri faqat yo‘l qoplamasi nam bo‘lganda ta’sir etadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940127699-b2k0s91r.webp",
+      "options": ["Faqat «A»", "Faqat «A» va «Б»", "Barchasi"],
+      "explanation": "«Nam qoplama» qo‘shimcha belgisi bilan birga qo‘llangan cheklov faqat nam yo‘lda amal qiladi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ko‘rsatilgan yo‘l belgilaridan qaysi biri faqat yo‘l qoplamasi nam bo‘lganda ta’sir etadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940127699-b2k0s91r.webp",
+          "options": ["Faqat «A»", "Faqat «A» va «Б»", "Barchasi"],
+          "explanation": "«Nam qoplama» qo‘shimcha belgisi bilan birga qo‘llangan cheklov faqat nam yo‘lda amal qiladi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Кўрсатилган йўл белгиларидан қайси бири фақат йўл қопламаси нам бўлганда таъсир этади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940127699-b2k0s91r.webp",
+          "options": ["Фақат «A»", "Фақат «A» ва «Б»", "Барчалари"],
+          "explanation": "«Нам қоплама» қўшимча белгиси билан бирга қўлланган чеклов фақат нам йўлда амал қилади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Какой из показанных знаков действует только при мокром покрытии дороги?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940127699-b2k0s91r.webp",
+          "options": ["Только «A»", "Только «A» и «Б»", "Все"],
+          "explanation": "Ограничение, применённое вместе с табличкой «Мокрое покрытие», действует только на мокрой дороге.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "6015de71-f4a2-458d-9c36-fb7316754c37",
+      "text": "Bu qo‘shimcha axborot yo‘l belgisi qaysi yo‘l belgisi bilan birgalikda qo‘llaniladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940134155-5bf1xr17.webp",
+      "options": ["A", "B", "C"],
+      "explanation": "Rasmda ko‘rsatilgan qo‘shimcha belgi «B» ogohlantiruvchi belgisi bilan qo‘llaniladi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu qo‘shimcha axborot yo‘l belgisi qaysi yo‘l belgisi bilan birgalikda qo‘llaniladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940134155-5bf1xr17.webp",
+          "options": ["A", "B", "C"],
+          "explanation": "Rasmda ko‘rsatilgan qo‘shimcha belgi «B» ogohlantiruvchi belgisi bilan qo‘llaniladi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Бу қўшимча ахборот йўл белгиси қайси йўл белгиси билан биргаликда қўлланилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940134155-5bf1xr17.webp",
+          "options": ["A", "B", "C"],
+          "explanation": "Расмда кўрсатилган қўшимча белги «Б» огоҳлантирувчи белгиси билан қўлланилади.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "С каким дорожным знаком применяется этот дополнительный знак?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940134155-5bf1xr17.webp",
+          "options": ["A", "B", "C"],
+          "explanation": "Показанная табличка применяется вместе с предупреждающим знаком «Б».",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "4b5345fb-8d99-4613-b0ed-d78449ccbac0",
+      "text": "Qaysi qo‘shimcha axborot belgisi transport vositalarini to‘xtab turish joyiga qo‘yish usulini ko‘rsatadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940173289-5uhrc3uq.webp",
+      "options": ["1", "2", "3", "4", "5"],
+      "explanation": "3-raqamli belgi avtomobilni to‘xtab turish joyiga qanday qo‘yish kerakligini ko‘rsatadi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi qo‘shimcha axborot belgisi transport vositalarini to‘xtab turish joyiga qo‘yish usulini ko‘rsatadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940173289-5uhrc3uq.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "3-raqamli belgi avtomobilni to‘xtab turish joyiga qanday qo‘yish kerakligini ko‘rsatadi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Қайси қўшимча ахборот белгиси транспорт воситаларини тўхтаб туриш жойига қўйиш усулини кўрсатади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940173289-5uhrc3uq.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "3-рақамли белги автомобилни тўхтаб туриш жойига қандай қўйиш кераклигини кўрсатади.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Какая дополнительная табличка показывает способ постановки транспортных средств на стоянку?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940173289-5uhrc3uq.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "Знак №3 показывает, как именно следует поставить автомобиль на стоянку.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "2084044a-3ac7-4046-8ec0-05d65551a45d",
+      "text": "Belgi ostidagi qo‘shimcha axborot belgisi nimani bildiradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940178611-hkbk642m.webp",
+      "options": [
+        "Belgidan birinchi burilishning boshlanishigacha bo‘lgan masofani",
+        "Birinchi burilishdan ikkinchi burilishning boshlanishigacha bo‘lgan masofani",
+        "Yo‘lning xavfli burilishlari bo‘lgan qatnov qismi uzunligini"
+      ],
+      "explanation": "Belgi xavfli burilishlar joylashgan yo‘l qismining uzunligini bildiradi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgi ostidagi qo‘shimcha axborot belgisi nimani bildiradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940178611-hkbk642m.webp",
+          "options": [
+            "Belgidan birinchi burilishning boshlanishigacha bo‘lgan masofani",
+            "Birinchi burilishdan ikkinchi burilishning boshlanishigacha bo‘lgan masofani",
+            "Yo‘lning xavfli burilishlari bo‘lgan qatnov qismi uzunligini"
+          ],
+          "explanation": "Belgi xavfli burilishlar joylashgan yo‘l qismining uzunligini bildiradi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Белги остидаги қўшимча ахборот белгиси нимани билдиради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940178611-hkbk642m.webp",
+          "options": [
+            "Белгидан биринчи бурилишнинг бошланишигача бўлган масофани",
+            "Биринчи бурилишдан иккинчи бурилишнинг бошланишигача бўлган масофани",
+            "Йўлнинг хавфли бурилишлари бўлган қатнов қисми узунлигини"
+          ],
+          "explanation": "Белги хавфли бурилишлар жойлашган йўл қисмининг узунлигини билдиради.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Что означает дополнительная табличка под знаком?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940178611-hkbk642m.webp",
+          "options": [
+            "Расстояние от знака до начала первого поворота",
+            "Расстояние от первого поворота до начала второго поворота",
+            "Протяжённость участка дороги с опасными поворотами"
+          ],
+          "explanation": "Знак указывает длину участка дороги с опасными поворотами.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "92183587-fd2b-45ac-aae6-c1e8590e4e37",
+      "text": "Qaysi belgi bilan xavfli yo‘lning uzunligi ko‘rsatiladi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940182534-nlmepg1o.webp",
+      "options": ["1", "2", "3", "4", "5"],
+      "explanation": "4-raqamli qo‘shimcha axborot belgisi xavfli qism uzunligini bildiradi.",
+      "correctIndex": 3,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi bilan xavfli yo‘lning uzunligi ko‘rsatiladi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940182534-nlmepg1o.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "4-raqamli qo‘shimcha axborot belgisi xavfli qism uzunligini bildiradi.",
+          "correctIndex": 3
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги билан хавфли йўлнинг узунлиги кўрсатилади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940182534-nlmepg1o.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "4-рақамли қўшимча ахборот белгиси хавфли қисм узунлигини билдиради.",
+          "correctIndex": 3
+        },
+        "ru": {
+          "text": "Какая табличка показывает длину опасного участка дороги?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940182534-nlmepg1o.webp",
+          "options": ["1", "2", "3", "4", "5"],
+          "explanation": "Дополнительный знак №4 обозначает длину опасного участка.",
+          "correctIndex": 3
+        }
+      }
+    },
+    {
+      "id": "ef5d5edc-1b12-4ec5-a796-6836a22d2553",
+      "text": "Ushbu qo‘shimcha axborot yo‘l belgisi:",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940188140-l3nxa7k1.webp",
+      "options": [
+        "Obyektgacha bo‘lgan masofani bildiradi",
+        "Belgining ta’sir oralig‘ini bildiradi"
+      ],
+      "explanation": "Belgi ma’lum obyekt yoki yo‘l belgisigacha bo‘lgan masofani ko‘rsatadi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo‘shimcha axborot yo‘l belgisi:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940188140-l3nxa7k1.webp",
+          "options": [
+            "Obyektgacha bo‘lgan masofani bildiradi",
+            "Belgining ta’sir oralig‘ini bildiradi"
+          ],
+          "explanation": "Belgi ma’lum obyekt yoki yo‘l belgisigacha bo‘lgan masofani ko‘rsatadi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот йўл белгиси:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940188140-l3nxa7k1.webp",
+          "options": [
+            "Объектгача бўлган масофани билдиради",
+            "Белгининг таъсир оралиғини билдиради"
+          ],
+          "explanation": "Белги маълум объект ёки йўл белгисигача бўлган масофани кўрсатади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "Этот дополнительный дорожный знак:",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940188140-l3nxa7k1.webp",
+          "options": [
+            "Обозначает расстояние до объекта",
+            "Обозначает зону действия знака"
+          ],
+          "explanation": "Знак показывает расстояние до определённого объекта или дорожного знака.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "8593c64e-6ccc-4665-8545-417dc2620aaa",
+      "text": "Quyidagi yo‘l belgilaridan qaysilari qo‘shimcha axborot belgilari hisoblanadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940193499-n1dw1u01.webp",
+      "options": ["1 va 2 belgilar", "2 va 3 belgilar", "Barcha belgilar"],
+      "explanation": "2 va 3 belgilar qo‘shimcha axborot belgilariga kiradi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Quyidagi yo‘l belgilaridan qaysilari qo‘shimcha axborot belgilari hisoblanadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940193499-n1dw1u01.webp",
+          "options": ["1 va 2 belgilar", "2 va 3 belgilar", "Barcha belgilar"],
+          "explanation": "2 va 3 belgilar qo‘shimcha axborot belgilariga kiradi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Қуйидаги йўл белгиларидан қайсилари қўшимча ахборот белгилари ҳисобланади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940193499-n1dw1u01.webp",
+          "options": ["1 ва 2 белгилар", "2 ва 3 белгилар", "Барча белгилар"],
+          "explanation": "2 ва 3 белгилар қўшимча ахборот белгиларига киради.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "Какие из следующих дорожных знаков являются дополнительными табличками?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940193499-n1dw1u01.webp",
+          "options": ["Знаки 1 и 2", "Знаки 2 и 3", "Все знаки"],
+          "explanation": "Знаки 2 и 3 относятся к дополнительным информационным табличкам.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "6d59e36b-307a-47db-a21b-5d5d41d040c6",
+      "text": "Belgi ostidagi qo‘shimcha axborot belgisi nimani anglatadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940197394-h4nygg42.webp",
+      "options": [
+        "Yo‘lning tor qismi uzunligini",
+        "Belgidan yo‘lning tor qismigacha bo‘lgan masofani",
+        "Tor qismini aylanib o‘tish joyigacha masofani"
+      ],
+      "explanation": "300 m yozuvi tor qism boshlanishigacha bo‘lgan masofani bildiradi.",
+      "correctIndex": 1,
+      "i18n": {
+        "uz_latn": {
+          "text": "Belgi ostidagi qo‘shimcha axborot belgisi nimani anglatadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940197394-h4nygg42.webp",
+          "options": [
+            "Yo‘lning tor qismi uzunligini",
+            "Belgidan yo‘lning tor qismigacha bo‘lgan masofani",
+            "Tor qismini aylanib o‘tish joyigacha masofani"
+          ],
+          "explanation": "300 m yozuvi tor qism boshlanishigacha bo‘lgan masofani bildiradi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Белги остидаги қўшимча ахборот белгиси нимани англатади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940197394-h4nygg42.webp",
+          "options": [
+            "Йўлнинг тор қисми узунлигини",
+            "Белгидан йўлнинг тор қисмигача бўлган масофани",
+            "Тор қисмни айланиб ўтиш жойигача масофани"
+          ],
+          "explanation": "300 м ёзуви тор қисм бошланишигача бўлган масофани билдиради.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "Что означает дополнительная табличка под знаком?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940197394-h4nygg42.webp",
+          "options": [
+            "Длина узкого участка дороги",
+            "Расстояние от знака до узкого участка дороги",
+            "Расстояние до места объезда узкого участка"
+          ],
+          "explanation": "Запись 300 м означает расстояние до начала узкого участка.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "65e3b47f-6e7f-4c26-9a59-336d71e1e735",
+      "text": "Taqiqlovchi belgi tagiga o‘rnatilgan qo‘shimcha axborot belgisi nima maqsadda qo‘yilgan?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940204579-dpgdfyjc.webp",
+      "options": [
+        "Belgidan uning amal qilish hududigacha bo‘lgan oraliqni aniqlash uchun",
+        "Taqiqlovchi belgi amal qilish hududini aniqlash uchun"
+      ],
+      "explanation": "Belgi qachondan boshlab amal qilishini ko‘rsatish uchun qo‘llaniladi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Taqiqlovchi belgi tagiga o‘rnatilgan qo‘shimcha axborot belgisi nima maqsadda qo‘yilgan?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940204579-dpgdfyjc.webp",
+          "options": [
+            "Belgidan uning amal qilish hududigacha bo‘lgan oraliqni aniqlash uchun",
+            "Taqiqlovchi belgi amal qilish hududini aniqlash uchun"
+          ],
+          "explanation": "Belgi qachondan boshlab amal qilishini ko‘rsatish uchun qo‘llaniladi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Тақиқловчи белги тагига ўрнатилган қўшимча ахборот белгиси нима мақсадда қўйилган?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940204579-dpgdfyjc.webp",
+          "options": [
+            "Белгидан унинг амал қилиш ҳудудигача бўлган оралиғини аниқлаш учун",
+            "Тақиқловчи белги амал қилиш ҳудудини аниқлаш учун"
+          ],
+          "explanation": "Белги қачондан бошлаб амал қилишини кўрсатиш учун қўлланилади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "С какой целью установлена дополнительная табличка под запрещающим знаком?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940204579-dpgdfyjc.webp",
+          "options": [
+            "Чтобы определить расстояние от знака до зоны его действия",
+            "Чтобы определить зону действия запрещающего знака"
+          ],
+          "explanation": "Табличка используется, чтобы показать, с какого места знак начинает действовать.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "7091c795-4756-49c5-9516-450cb4e8c911",
+      "text": "Ushbu yo‘l belgisi qo‘shimcha axborot belgisi bilan nimani bildiradi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940208949-wzwwlhgc.webp",
+      "options": [
+        "Ruxsat etilgan to‘la vazni 3,5 t dan ortiq transport vositalarining to‘xtab turish joyi",
+        "Transport vositalarining to‘xtab turish joyiga avtomobilni ko‘rsatilgan usulda qo‘yish taqiqlanadi",
+        "Engil avtomobillar va mototsikllarni to‘xtab turishga qo‘yish joyi va usuli"
+      ],
+      "explanation": "Belgi engil avtomobillar va mototsikllarni ko‘rsatilgan usulda qo‘yishga ruxsat berilganini bildiradi.",
+      "correctIndex": 2,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo‘l belgisi qo‘shimcha axborot belgisi bilan nimani bildiradi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940208949-wzwwlhgc.webp",
+          "options": [
+            "Ruxsat etilgan to‘la vazni 3,5 t dan ortiq transport vositalarining to‘xtab turish joyi",
+            "Transport vositalarining to‘xtab turish joyiga avtomobilni ko‘rsatilgan usulda qo‘yish taqiqlanadi",
+            "Engil avtomobillar va mototsikllarni to‘xtab turishga qo‘yish joyi va usuli"
+          ],
+          "explanation": "Belgi engil avtomobillar va mototsikllarni ko‘rsatilgan usulda qo‘yishga ruxsat berilganini bildiradi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Ушбу йўл белгиси қўшимча ахборот белгиси билан нимани билдиради?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940208949-wzwwlhgc.webp",
+          "options": [
+            "Рухсат этилган тўла вазни 3,5 т дан ортиқ транспорт воситаларининг тўхтаб туриш жойи",
+            "Транспорт воситаларининг тўхтаб туриш жойига автомобилни кўрсатилган усулда қўйиш тақиқланади",
+            "Енгил автомобиллар ва мотоциклларни тўхтаб туришга қўйиш жойи ва усули"
+          ],
+          "explanation": "Белги енгил автомобиллар ва мотоциклларни кўрсатилган усулда қўйишга рухсат берилганини билдиради.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Что означает этот дорожный знак в сочетании с дополнительной табличкой?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940208949-wzwwlhgc.webp",
+          "options": [
+            "Место стоянки транспортных средств с разрешённой максимальной массой более 3,5 т",
+            "Запрещена постановка автомобиля на стоянку указанным способом",
+            "Место и способ стоянки легковых автомобилей и мотоциклов"
+          ],
+          "explanation": "Знак означает, что легковые автомобили и мотоциклы разрешено ставить указанным способом.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "40b278e2-ba7b-4965-9b76-2fc95e604bb4",
+      "text": "Qaysi yo‘nalishda harakatlanish taqiqlanadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940212487-3jwc2esp.webp",
+      "options": [
+        "Chapga va o‘ngga",
+        "To‘g‘riga va orqaga burilish yo‘nalishida",
+        "Faqat to‘g‘riga",
+        "Hamma yo‘nalishlarda"
+      ],
+      "explanation": "Yo‘l belgisi chapga va o‘ngga harakatlanishni taqiqlaydi.",
+      "correctIndex": 0,
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo‘nalishda harakatlanish taqiqlanadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940212487-3jwc2esp.webp",
+          "options": [
+            "Chapga va o‘ngga",
+            "To‘g‘riga va orqaga burilish yo‘nalishida",
+            "Faqat to‘g‘riga",
+            "Hamma yo‘nalishlarda"
+          ],
+          "explanation": "Yo‘l belgisi chapga va o‘ngga harakatlanishni taqiqlaydi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Қайси йўналишда ҳаракатланиш тақиқланади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940212487-3jwc2esp.webp",
+          "options": [
+            "Чапга ва ўнгга",
+            "Тўғрига ва орқага бурилиш йўналишида",
+            "Фақат тўғрига",
+            "Ҳамма йўналишларда"
+          ],
+          "explanation": "Йўл белгиси чапга ва ўнгга ҳаракатланишни тақиқлайди.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "В каком направлении движение запрещено?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940212487-3jwc2esp.webp",
+          "options": [
+            "Налево и направо",
+            "В направлении прямо и разворота",
+            "Только прямо",
+            "Во всех направлениях"
+          ],
+          "explanation": "Дорожный знак запрещает движение налево и направо.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "5f96688b-e9fd-476b-9ecb-25f8a40e37c9",
+      "text": "Ushbu yo‘l belgisi chorrahalarda o‘ngga burilayotgan relessiz transport vositalariga svetoforning qaysi ishorasida harakatlanishga ruxsat etadi?",
+      "audio": "",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940216606-hoxsjj1f.webp",
+      "options": [
+        "Qizil ishora",
+        "Sariq ishora",
+        "Yashil ishora",
+        "Ko‘rsatilgan barchasi"
+      ],
+      "explanation": "Yashil strelka barcha ko‘rsatilgan svetofor ishoralarida o‘ngga burilish imkonini beradi, zarur hollarda yo‘l berish sharti bilan.",
+      "correctIndex": 3,
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu yo‘l belgisi chorrahalarda o‘ngga burilayotgan relessiz transport vositalariga svetoforning qaysi ishorasida harakatlanishga ruxsat etadi?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940216606-hoxsjj1f.webp",
+          "options": [
+            "Qizil ishora",
+            "Sariq ishora",
+            "Yashil ishora",
+            "Ko‘rsatilgan barchasi"
+          ],
+          "explanation": "Yashil strelka barcha ko‘rsatilgan svetofor ishoralarida o‘ngga burilish imkonini beradi, zarur hollarda yo‘l berish sharti bilan.",
+          "correctIndex": 3
+        },
+        "uz_cyrl": {
+          "text": "Ушбу йўл белгиси чорраҳаларда ўнгга бурилаётган релессиз транспорт воситаларига светофорнинг қайси ишорасида ҳаракатланишга рухсат этади?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940216606-hoxsjj1f.webp",
+          "options": [
+            "Қизил ишора",
+            "Сариқ ишора",
+            "Яшил ишора",
+            "Кўрсатилган барчаси"
+          ],
+          "explanation": "Яшил стрелка барча кўрсатилган светофор ишораларида ўнгга бурилиш имконини беради, зарур ҳолларда йўл бериш шарти билан.",
+          "correctIndex": 3
+        },
+        "ru": {
+          "text": "На каком сигнале светофора данный знак разрешает движение безрельсовым транспортным средствам, поворачивающим направо на перекрёстках?",
+          "audio": "",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940216606-hoxsjj1f.webp",
+          "options": [
+            "Красный сигнал",
+            "Жёлтый сигнал",
+            "Зелёный сигнал",
+            "Все перечисленные"
+          ],
+          "explanation": "Зелёная стрелка позволяет поворот направо при всех указанных сигналах светофора, при необходимости уступая дорогу.",
+          "correctIndex": 3
+        }
+      }
+    }
+  ]
+}

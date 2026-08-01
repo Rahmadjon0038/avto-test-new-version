@@ -4,7 +4,7 @@ const path = require("path");
 const backendUrl =
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://api.topshirdi.uz";
+  "http://localhost:4001";
 
 const nextConfig = {
   reactStrictMode: true,
