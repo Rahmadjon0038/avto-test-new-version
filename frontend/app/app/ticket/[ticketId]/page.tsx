@@ -587,7 +587,7 @@ export default function TicketPage() {
       </div>
 
       <div className="qnav">
-        {ticket.questions.map((qq, i) => {
+        {displayQuestions.map((qq, i) => {
           if (!qq) {
             return (
               <button key={`empty-${i}`} className={`qbtn ${i === idx ? "active" : ""} qbtnEmpty`} type="button" onClick={() => setIdx(i)}>
