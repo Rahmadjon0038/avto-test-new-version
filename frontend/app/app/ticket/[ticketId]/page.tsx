@@ -272,19 +272,17 @@ export default function TicketPage() {
   const params = useParams<{ ticketId: string }>();
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
-  const { authFetch } = useAuth();
+  const { authFetch, authReady } = useAuth();
   const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`ticket:${ticketId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
-      if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
       patchSettings(next);
     },
-    [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
+    [patchSettings]
   );
 
-  const [ticket, setTicket] = useState<Ticket | null>(null);
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const autoNextTimerRef = useRef<number | null>(null);
@@ -293,14 +291,24 @@ export default function TicketPage() {
   const [imageLoading, setImageLoading] = useState(true);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const autoResetRef = useRef(false);
+  const lastLoadedTicketRef = useRef<string | null>(null);
+  const ticketQuery = useQuery({
+    queryKey: ["ticket", ticketId, language],
+    queryFn: async () => {
+      const res = await authFetch(appendLanguageQuery(`/api/tickets/${encodeURIComponent(ticketId)}`, language));
+      const data = await jsonOrError(res);
+      return data as { ticket: Ticket | null };
+    },
+    enabled: authReady
+  });
+
+  const ticket = ticketQuery.data?.ticket ?? null;
   const ticketQuestions = useMemo(() => (ticket && Array.isArray(ticket.questions) ? ticket.questions : []), [ticket]);
   const displayQuestions = useMemo(() => {
     if (!ticketQuestions.length) return ticketQuestions;
-    if (!settings.shuffleQuestions) return ticketQuestions;
-
     const filledQuestions = ticketQuestions.filter((question): question is Question => Boolean(question));
     const shuffledQuestions = shuffleQuestionsWithSeed(filledQuestions, shuffleSeed).map((question) =>
-      shuffleQuestionOptionsWithSeed(question, shuffleSeed)
+      settings.shuffleQuestions ? shuffleQuestionOptionsWithSeed(question, shuffleSeed) : question
     );
 
     let cursor = 0;
@@ -309,22 +317,13 @@ export default function TicketPage() {
 
   const q = useMemo(() => displayQuestions[idx] ?? null, [displayQuestions, idx]);
 
-  const ticketQuery = useQuery({
-    queryKey: ["ticket", ticketId, language],
-    queryFn: async () => {
-      const res = await authFetch(appendLanguageQuery(`/api/tickets/${encodeURIComponent(ticketId)}`, language));
-      const data = await jsonOrError(res);
-      setTicket(data.ticket);
-      return data;
-    }
-  });
-
   const progressQuery = useQuery({
     queryKey: ["progress", ticketId, language],
     queryFn: async () => {
       const res = await authFetch(appendLanguageQuery(`/api/progress/${encodeURIComponent(ticketId)}`, language));
       return jsonOrError(res);
-    }
+    },
+    enabled: authReady
   });
 
   useEffect(() => {
@@ -355,6 +354,17 @@ export default function TicketPage() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [zoomedImage]);
+
+  useEffect(() => {
+    if (!ticket?.id) return;
+    if (lastLoadedTicketRef.current === ticket.id) return;
+    lastLoadedTicketRef.current = ticket.id;
+    refreshShuffleSeed();
+    setIdx(0);
+    setAnswers({});
+    setFinishOpen(false);
+    autoResetRef.current = false;
+  }, [refreshShuffleSeed, ticket?.id]);
 
   const saveMutation = useMutation({
     mutationFn: (nextAnswers: Record<string, number>) =>
@@ -455,10 +465,28 @@ export default function TicketPage() {
     scrollTargetRef: questionCardRef
   });
 
+  const isTicketLoading = !authReady || (!ticket && (ticketQuery.isPending || ticketQuery.isLoading || ticketQuery.isFetching));
+
+  if (isTicketLoading) {
+    return (
+      <section className="view">
+        <div className="examLoadingView">
+          <div className="examLoadingCard">
+            <div className="examLoadingSpinnerWrap">
+              <span className="examLoadingSpinner" />
+            </div>
+            <div className="examLoadingTitle">{t("tickets.loading")}</div>
+            <div className="examLoadingText">{t("common.loading")}</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!ticket) {
     return (
       <section className="view">
-        <div className="muted">Yuklanmoqda...</div>
+        <div className="muted">{t("common.error")}</div>
       </section>
     );
   }

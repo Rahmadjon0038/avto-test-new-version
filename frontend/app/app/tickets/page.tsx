@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft } from "lucide-react";
@@ -32,24 +32,25 @@ export default function TicketsPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
-  const [tickets, setTickets] = useState<Ticket[]>([]);
 
   const ticketsQuery = useQuery({
     queryKey: ["tickets", language],
     queryFn: async () => {
       const res = await authFetch("/api/tickets");
-      const data = (await jsonOrError(res)) as { tickets: Ticket[] };
-      setTickets(Array.isArray(data.tickets) ? data.tickets : []);
-      return data;
+      return (await jsonOrError(res)) as { tickets: Ticket[] };
     },
     enabled: authReady
   });
+
+  const tickets = Array.isArray(ticketsQuery.data?.tickets) ? ticketsQuery.data!.tickets : [];
 
   useEffect(() => {
     if (ticketsQuery.error) toast.error((ticketsQuery.error as any)?.message || "Xatolik");
   }, [ticketsQuery.error]);
 
-  if (!authReady || ticketsQuery.isLoading) {
+  const isTicketsLoading = !authReady || (!ticketsQuery.data && (ticketsQuery.isPending || ticketsQuery.isLoading || ticketsQuery.isFetching));
+
+  if (isTicketsLoading) {
     return (
       <section className="view">
         <div className="examLoadingView">

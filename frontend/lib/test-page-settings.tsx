@@ -127,11 +127,31 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
 
   return (
     <>
+      <div className={["testSettingsInline", className].filter(Boolean).join(" ")}>
+        <div className="testSettingsInlineHead">{t("settings.title")}</div>
+        <div className="testSettingsList testSettingsInlineList">
+          <ToggleRow
+            title={t("settings.shuffleTitle")}
+            description={t("settings.shuffleDesc")}
+            enabled={settings.shuffleQuestions}
+            onToggle={(next) => onChange({ ...settings, shuffleQuestions: next })}
+            icon={<Shuffle className="lucide" aria-hidden="true" />}
+          />
+          <ToggleRow
+            title={t("settings.autoNextTitle")}
+            description={t("settings.autoNextDesc")}
+            enabled={settings.autoNext}
+            onToggle={(next) => onChange({ ...settings, autoNext: next })}
+            icon={<Sparkles className="lucide" aria-hidden="true" />}
+          />
+        </div>
+      </div>
+
       <button
         className={["testSettingsTrigger", className].filter(Boolean).join(" ")}
         type="button"
-        title={t("nav.profile")}
-        aria-label={t("nav.profile")}
+        title={t("settings.title")}
+        aria-label={t("settings.title")}
         onClick={() => setOpen(true)}
       >
         <Cog className="lucide" aria-hidden="true" />
@@ -157,7 +177,6 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
                 <X className="lucide" aria-hidden="true" />
               </button>
             </div>
-
             <div className="testSettingsList">
               <ToggleRow
                 title={t("settings.shuffleTitle")}
