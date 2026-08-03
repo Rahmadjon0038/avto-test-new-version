@@ -1,11 +1,11 @@
 {
   "ticket": {
     "id": "26",
-    "title": "Qayta yaratilgan 26",
+    "title": "Bilet №26",
     "titleI18n": {
-      "uz_latn": "Qayta yaratilgan 26",
-      "uz_cyrl": "Қайта яратилган 26",
-      "ru": "Воссозданный 26"
+      "uz_latn": "Bilet №26",
+      "uz_cyrl": "Билет №26",
+      "ru": "Билет №26"
     },
     "ticketNumber": 26,
     "status": "COMPLETED",

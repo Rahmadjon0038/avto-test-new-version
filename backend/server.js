@@ -593,6 +593,38 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0, currentQuestio
   };
 }
 
+function stripQuestionMediaFromI18n(question) {
+  if (!question || typeof question !== "object") return question;
+  const sourceI18n = parseJsonValue(question.i18n, {});
+  if (!sourceI18n || typeof sourceI18n !== "object") {
+    return { ...question, i18n: {} };
+  }
+
+  const cleanedI18n = {};
+  for (const [lang, value] of Object.entries(sourceI18n)) {
+    if (!value || typeof value !== "object") continue;
+    const nextValue = {
+      ...value,
+      image: String(question.image || "").trim() ? String(value.image || "").trim() : "",
+      audio: String(question.audio || "").trim() ? String(value.audio || "").trim() : ""
+    };
+    const hasContent = Boolean(
+      String(nextValue.text || "").trim() ||
+        String(nextValue.image || "").trim() ||
+        String(nextValue.audio || "").trim() ||
+        String(nextValue.explanation || "").trim() ||
+        (Array.isArray(nextValue.options) && nextValue.options.some((option) => String(option || "").trim())) ||
+        Number.isFinite(Number(nextValue.correctIndex))
+    );
+    if (hasContent) cleanedI18n[lang] = nextValue;
+  }
+
+  return {
+    ...question,
+    i18n: cleanedI18n
+  };
+}
+
 function mergeTicketSlotQuestions(value, currentQuestions = null) {
   const raw = Array.isArray(value) ? value : [];
   const currentSlots = Array.isArray(currentQuestions) ? currentQuestions : [];
@@ -1031,8 +1063,8 @@ async function updateTicket(id, input) {
       : normalizeTicketSlotQuestions(ticket.questions, ticket.questions);
   const questions =
     input.questions !== undefined
-      ? sourceQuestions
-      : normalizeTicketSlotQuestions(ticket.questions, ticket.questions);
+      ? sourceQuestions.map((question) => stripQuestionMediaFromI18n(question))
+      : normalizeTicketSlotQuestions(ticket.questions, ticket.questions).map((question) => stripQuestionMediaFromI18n(question));
 
   const result = await dbApi.get(
     `
@@ -3804,7 +3836,9 @@ function buildMistakeQuestion({ kind, id, title, question, questionIndex, wrongA
 }
 
 function calculateTicketProgressStats(ticket, answers = {}) {
-  const questions = Array.isArray(ticket?.questions) ? ticket.questions : [];
+  const questions = Array.isArray(ticket?.questions)
+    ? ticket.questions.filter((question) => question && String(question.id || "").trim())
+    : [];
   let correctCount = 0;
   let answeredCount = 0;
 
@@ -4747,16 +4781,20 @@ app.post("/api/custom-test-progress/:testId", requireUser, async (req, res) => {
   const customTest = await getGeneratedCustomTestByIdFromDb(testId);
   if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
 
+  const questions = Array.isArray(customTest.questions)
+    ? customTest.questions.filter((question) => question && String(question.id || "").trim())
+    : [];
+
   let correct = 0;
   let answeredCount = 0;
-  for (const q of customTest.questions || []) {
+  for (const q of questions) {
     const a = answers[q.id];
     if (a === undefined || a === null) continue;
     answeredCount += 1;
     if (Number(a) === q.correctIndex) correct += 1;
   }
 
-  const completed = answeredCount === customTest.questions.length;
+  const completed = answeredCount === questions.length;
   const nowIso = new Date().toISOString();
 
   await dbApi.run(
@@ -4781,7 +4819,7 @@ app.post("/api/custom-test-progress/:testId", requireUser, async (req, res) => {
     answers
   });
 
-  res.json({ ok: true, completed, score: correct, total: customTest.questions.length });
+  res.json({ ok: true, completed, score: correct, total: questions.length });
 });
 
 app.post("/api/custom-test-progress/:testId/reset", requireUser, async (req, res) => {
@@ -5006,16 +5044,20 @@ app.post("/api/topic-progress/:topicId", requireUser, async (req, res) => {
   const topic = await getTopicFromDb(topicId);
   if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
 
+  const questions = Array.isArray(topic.questions)
+    ? topic.questions.filter((question) => question && String(question.id || "").trim())
+    : [];
+
   let correct = 0;
   let answeredCount = 0;
-  for (const q of topic.questions || []) {
+  for (const q of questions) {
     const a = answers[q.id];
     if (a === undefined || a === null) continue;
     answeredCount += 1;
     if (Number(a) === q.correctIndex) correct += 1;
   }
 
-  const completed = answeredCount === topic.questions.length;
+  const completed = answeredCount === questions.length;
   const nowIso = new Date().toISOString();
 
   await dbApi.run(
@@ -5447,16 +5489,20 @@ app.post("/api/progress/:ticketId", requireUser, async (req, res) => {
   const ticket = await getProgressTicketById(ticketId);
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
 
+  const questions = Array.isArray(ticket.questions)
+    ? ticket.questions.filter((question) => question && String(question.id || "").trim())
+    : [];
+
   let correct = 0;
   let answeredCount = 0;
-  for (const q of ticket.questions) {
+  for (const q of questions) {
     const a = answers[q.id];
     if (a === undefined || a === null) continue;
     answeredCount += 1;
     if (Number(a) === q.correctIndex) correct += 1;
   }
 
-  const completed = answeredCount === ticket.questions.length;
+  const completed = answeredCount === questions.length;
   const nowIso = new Date().toISOString();
 
   await dbApi.run(
@@ -5481,8 +5527,8 @@ app.post("/api/progress/:ticketId", requireUser, async (req, res) => {
     answers
   });
 
-  const stats = calculateTicketProgressStats(ticket, answers);
-  res.json({ ok: true, completed, score: correct, total: ticket.questions.length, ...stats });
+  const stats = calculateTicketProgressStats({ ...ticket, questions }, answers);
+  res.json({ ok: true, completed, score: correct, total: questions.length, ...stats });
 });
 
 app.post("/api/progress/:ticketId/reset", requireUser, async (req, res) => {
