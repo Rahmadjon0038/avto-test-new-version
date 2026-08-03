@@ -21,9 +21,15 @@ export type PublicTopic = { id: number; slug: string; title: string; questions: 
 export type PublicTicketSummary = { id: string; title: string; free: boolean; questionCount: number };
 export type PublicTopicSummary = { id: number; slug: string; title: string; free: boolean; questionCount: number };
 
-async function getJson(path: string): Promise<{ ok: boolean; status: number; data: any }> {
+async function getJson(
+  path: string,
+  init?: RequestInit
+): Promise<{ ok: boolean; status: number; data: any }> {
   try {
-    const res = await fetch(`${getBackendUrl()}${path}`, { next: { revalidate: 300 } });
+    const res = await fetch(`${getBackendUrl()}${path}`, {
+      next: { revalidate: 300 },
+      ...init
+    });
     const data = await res.json().catch(() => null);
     return { ok: res.ok, status: res.status, data };
   } catch {
@@ -43,7 +49,9 @@ export async function fetchPublicTickets(lang?: string | null): Promise<PublicTi
 }
 
 export async function fetchPublicTicket(id: string, lang?: string | null): Promise<{ ticket: PublicTicket | null; status: number }> {
-  const r = await getJson(appendLanguageQuery(`/api/public/tickets/${encodeURIComponent(id)}`, resolveLang(lang)));
+  const r = await getJson(appendLanguageQuery(`/api/public/tickets/${encodeURIComponent(id)}`, resolveLang(lang)), {
+    cache: "no-store"
+  });
   return { ticket: r.ok ? (r.data?.ticket ?? null) : null, status: r.status };
 }
 
@@ -53,7 +61,9 @@ export async function fetchPublicTopics(lang?: string | null): Promise<PublicTop
 }
 
 export async function fetchPublicTopic(id: string, lang?: string | null): Promise<{ topic: PublicTopic | null; status: number }> {
-  const r = await getJson(appendLanguageQuery(`/api/public/topics/${encodeURIComponent(id)}`, resolveLang(lang)));
+  const r = await getJson(appendLanguageQuery(`/api/public/topics/${encodeURIComponent(id)}`, resolveLang(lang)), {
+    cache: "no-store"
+  });
   return { topic: r.ok ? (r.data?.topic ?? null) : null, status: r.status };
 }
 
