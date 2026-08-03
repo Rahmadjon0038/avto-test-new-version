@@ -254,6 +254,12 @@ function localizeTicket(ticket, lang) {
   };
 }
 
+function setNoStoreHeaders(res) {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+}
+
 const DEFAULT_APP_WARNING_TEXT = {
   titleI18n: {
     uz_latn: "Ilovada yangilanishlar mavjud",
@@ -4477,6 +4483,7 @@ app.get("/api/topics/:topicId", async (req, res) => {
   const topic = await getTopicFromDb(String(req.params.topicId));
   if (!topic) return res.status(404).json({ error: "Mavzu topilmadi" });
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  setNoStoreHeaders(res);
   res.json({ topic: lang ? localizeTopic(topic, lang) : topic });
 });
 
@@ -4490,6 +4497,7 @@ const FREE_TICKET_COUNT = 2;
 app.get("/api/public/topics", async (req, res) => {
   const topics = await getTopicsFromDb();
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  setNoStoreHeaders(res);
   res.json({
     topics: topics.map((topic, index) => ({
       id: topic.id,
@@ -4511,6 +4519,7 @@ app.get("/api/public/topics/:topicId", async (req, res) => {
   }
   const topic = topics[index];
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  setNoStoreHeaders(res);
   res.json({
     topic: lang ? localizeTopic(topic, lang) : {
       id: topic.id,
@@ -4525,6 +4534,7 @@ app.get("/api/public/topics/:topicId", async (req, res) => {
 app.get("/api/public/tickets", async (req, res) => {
   const tickets = await getTicketsFromDb();
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  setNoStoreHeaders(res);
   res.json({
     tickets: tickets.map((ticket, index) => ({
       id: ticket.id,
@@ -4543,6 +4553,7 @@ app.get("/api/public/tickets/:ticketId", async (req, res) => {
     return res.status(403).json({ error: "Bu bilet faqat ro'yxatdan o'tgan foydalanuvchilar uchun" });
   }
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  setNoStoreHeaders(res);
   res.json({
     ticket: lang
       ? localizeTicket(ticket, lang)
@@ -5121,6 +5132,7 @@ app.get("/api/tickets", requireUser, async (req, res) => {
     String(req.user.id)
   ]);
   const progressByTicketId = new Map(progressRows.map((row) => [String(row.ticket_id || ""), row]));
+  setNoStoreHeaders(res);
   res.json({
     tickets: tickets.map((ticket) => ({
       id: ticket.id,
@@ -5154,6 +5166,7 @@ app.get("/api/tickets/:ticketId", requireUser, async (req, res) => {
   const ticket = await getTicketByIdFromDb(String(req.params.ticketId));
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  setNoStoreHeaders(res);
   res.json({ ticket: lang ? localizeTicket(ticket, lang) : ticket, isPro: true });
 });
 
@@ -5541,19 +5554,20 @@ app.patch("/api/admin/tickets/:ticketId", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
+    const payload = req.body?.ticket && typeof req.body.ticket === "object" ? req.body.ticket : req.body || {};
     console.log("[admin/tickets PATCH] incoming", {
       ticketId: String(req.params.ticketId || ""),
-      hasTitleI18n: Boolean(req.body?.titleI18n || req.body?.title_i18n),
-      titleI18nKeys: Object.keys(parseJsonValue(req.body?.titleI18n || req.body?.title_i18n || {}, {})),
-      questionCount: Array.isArray(req.body?.questions) ? req.body.questions.length : null,
-      firstQuestionKeys: Array.isArray(req.body?.questions) && req.body.questions[0] ? Object.keys(req.body.questions[0]) : []
+      hasTitleI18n: Boolean(payload?.titleI18n || payload?.title_i18n),
+      titleI18nKeys: Object.keys(parseJsonValue(payload?.titleI18n || payload?.title_i18n || {}, {})),
+      questionCount: Array.isArray(payload?.questions) ? payload.questions.length : null,
+      firstQuestionKeys: Array.isArray(payload?.questions) && payload.questions[0] ? Object.keys(payload.questions[0]) : []
     });
     const ticket = await updateTicket(String(req.params.ticketId), {
-      title: req.body?.title !== undefined ? String(req.body.title || "") : undefined,
-      titleI18n: req.body?.titleI18n ?? req.body?.title_i18n,
-      questions: Array.isArray(req.body?.questions) ? req.body.questions : undefined,
-      status: req.body?.status,
-      ticketNumber: req.body?.ticketNumber
+      title: payload?.title !== undefined ? String(payload.title || "") : undefined,
+      titleI18n: payload?.titleI18n ?? payload?.title_i18n,
+      questions: Array.isArray(payload?.questions) ? payload.questions : undefined,
+      status: payload?.status,
+      ticketNumber: payload?.ticketNumber
     });
     console.log("[admin/tickets PATCH] saved", {
       ticketId: String(req.params.ticketId || ""),

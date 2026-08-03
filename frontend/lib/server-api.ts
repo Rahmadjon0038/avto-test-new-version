@@ -27,7 +27,7 @@ async function getJson(
 ): Promise<{ ok: boolean; status: number; data: any }> {
   try {
     const res = await fetch(`${getBackendUrl()}${path}`, {
-      next: { revalidate: 300 },
+      cache: "no-store",
       ...init
     });
     const data = await res.json().catch(() => null);

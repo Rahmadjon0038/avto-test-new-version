@@ -29,30 +29,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Transport vositalari chorrahani quyidagi tartibda kesib o'tadiler:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783685844881-b1qsvy7r.webp",
+          "audio": "",
           "options": [
             "Mototsikl, avtomobil, tramvay",
             "Tramvay, avtomobil, motosikl",
             "Tramvay, mototsikl, avtomobil"
           ],
-          "explanation": "Mototsikl birinchi bo'lib o'tadi, keyin avtomobil, oxirida tramvay o'tadi."
+          "explanation": "Mototsikl birinchi bo'lib o'tadi, keyin avtomobil, oxirida tramvay o'tadi.",
+          "correctIndex": 0
         },
         "uz_cyrl": {
           "text": "Транспорт воситалари чорраҳани қуйидаги тартибда кесиб ўтадилар:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783685844881-b1qsvy7r.webp",
+          "audio": "",
           "options": [
             "Мототцикл, автомобил, трамвай",
             "Трамвай, автомобил, мотоцикл",
             "Трамвай, мототцикл, автомобил"
           ],
-          "explanation": "Мототцикл биринчи бўлиб ўтади, кейин автомобил, охирида трамвай ўтади."
+          "explanation": "Мототцикл биринчи бўлиб ўтади, кейин автомобил, охирида трамвай ўтади.",
+          "correctIndex": 0
         },
         "ru": {
           "text": "Транспортные средства проедут перекресток в следующем порядке:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783685844881-b1qsvy7r.webp",
+          "audio": "",
           "options": [
             "Мотоцикл, автомобиль, трамвай",
             "Трамвай, автомобиль, мотоцикл",
             "Трамвай, мотоцикл, автомобиль"
           ],
-          "explanation": "Сначала проезжает мотоцикл, затем автомобиль, а последним проезжает трамвай."
+          "explanation": "Сначала проезжает мотоцикл, затем автомобиль, а последним проезжает трамвай.",
+          "correctIndex": 0
         }
       }
     },
@@ -77,30 +86,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Chorrahani ikkinchi bo‘lib kesib o‘tadi:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782392020067-coi9d72f.webp",
+          "audio": "",
           "options": [
             "Qizil avtomobil",
             "Ko'k avtomobil",
             "Yashil avtomobil"
           ],
-          "explanation": "Yashil avtomobil birinchi bo'lib o'tgach, qizil avtomobil ikkinchi bo'lib harakatlanadi, ko'k avtomobil esa oxirida o'tadi."
+          "explanation": "Yashil avtomobil birinchi bo'lib o'tgach, qizil avtomobil ikkinchi bo'lib harakatlanadi, ko'k avtomobil esa oxirida o'tadi.",
+          "correctIndex": 1
         },
         "uz_cyrl": {
           "text": "Чорраҳани иккинчи бўлиб кесиб ўтади:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782392020067-coi9d72f.webp",
+          "audio": "",
           "options": [
             "Қизил автомобил",
             "Кўк автомобил",
             "Яшил автомобил"
           ],
-          "explanation": "Яшил автомобил биринчи бўлиб ўтгач, қизил автомобил иккинчи бўлиб ҳаракатланади, кўк автомобил эса охирида ўтади."
+          "explanation": "Яшил автомобил биринчи бўлиб ўтгач, қизил автомобил иккинчи бўлиб ҳаракатланади, кўк автомобил эса охирида ўтади.",
+          "correctIndex": 1
         },
         "ru": {
           "text": "Перекресток вторым проедет:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782392020067-coi9d72f.webp",
+          "audio": "",
           "options": [
             "Красный автомобиль",
             "Синий автомобиль",
             "Зеленый автомобиль"
           ],
-          "explanation": "Сначала проезжает зеленый автомобиль, затем вторым движется красный, а синий автомобиль проезжает последним."
+          "explanation": "Сначала проезжает зеленый автомобиль, затем вторым движется красный, а синий автомобиль проезжает последним.",
+          "correctIndex": 1
         }
       }
     },
@@ -127,6 +145,8 @@
       "i18n": {
         "uz_latn": {
           "text": "Ruxsat etilgan harakatlanish yoʻnalishini koʻrsating:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781757704915-l7wjdu3t.webp",
+          "audio": "",
           "options": [
             "Faqat «A»",
             "Faqat «B»",
@@ -134,10 +154,13 @@
             "«A» va «B»",
             "«B» va «V»"
           ],
-          "explanation": "Majburiy belgi bo'yicha faqat to'g'riga (B) yurish hamda o'ng tomondagi hovlilarga kirishga ruxsat etiladi."
+          "explanation": "Majburiy belgi bo'yicha faqat to'g'riga (B) yurish hamda o'ng tomondagi hovlilarga kirishga ruxsat etiladi.",
+          "correctIndex": 3
         },
         "uz_cyrl": {
           "text": "Рухсат этилган ҳаракатланиш йўналишини кўрсатинг:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781757704915-l7wjdu3t.webp",
+          "audio": "",
           "options": [
             "Фақат «A»",
             "Фақат «B»",
@@ -145,10 +168,13 @@
             "«A» ва «B»",
             "«B» ва «V»"
           ],
-          "explanation": "Мажбурий белги бўйича фақат тўғрига (B) юриш ҳамда ўнг томондаги ҳовлиларга киришга рухсат этилади."
+          "explanation": "Мажбурий белги бўйича фақат тўғрига (B) юриш ҳамда ўнг томондаги ҳовлиларга киришга рухсат этилади.",
+          "correctIndex": 3
         },
         "ru": {
           "text": "Укажите разрешенное направление движения:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781757704915-l7wjdu3t.webp",
+          "audio": "",
           "options": [
             "Только «A»",
             "Только «B»",
@@ -156,7 +182,8 @@
             "«A» и «B»",
             "«B» и «V»"
           ],
-          "explanation": "По предписывающему знаку разрешено движение только прямо (B), а также въезд во дворы справа."
+          "explanation": "По предписывающему знаку разрешено движение только прямо (B), а также въезд во дворы справа.",
+          "correctIndex": 3
         }
       }
     },
@@ -182,33 +209,42 @@
       "i18n": {
         "uz_latn": {
           "text": "Transport vositalari sun'iy yoritilgan tunnelda harakatlanayotganda qanday yoritish chiroqlari yoqilishi kerak?",
+          "image": "",
+          "audio": "",
           "options": [
             "Uzoqni yorituvchi chiroqlar",
             "Yaqinni yoki uzoqni yorituvchi chiroqlar",
             "Majburiy to'xtash yoritgichi",
             "Yoritish asboblari yoqilmaydi"
           ],
-          "explanation": "Tunneldan harakatlanayotganda yaqinni yoki uzoqni yorituvchi chiroqlar yoqilgan bo'lishi kerak."
+          "explanation": "Tunneldan harakatlanayotganda yaqinni yoki uzoqni yorituvchi chiroqlar yoqilgan bo'lishi kerak.",
+          "correctIndex": 1
         },
         "uz_cyrl": {
           "text": "Транспорт воситалари сунъий ёритилган туннелда ҳаракатланаётганда қандай ёритиш чироқлари ёқилиши керак?",
+          "image": "",
+          "audio": "",
           "options": [
             "Узоқни ёритувчи чироқлар",
             "Яқинни ёки узоқни ёритувчи чироқлар",
             "Мажбурий тўхташ ёритгичи",
             "Ёритиш асбоблари ёқилмайди"
           ],
-          "explanation": "Туннелда ҳаракатланаётганда яқинни ёки узоқни ёритувчи чироқлар ёқилган бўлиши керак."
+          "explanation": "Туннелда ҳаракатланаётганда яқинни ёки узоқни ёритувчи чироқлар ёқилган бўлиши керак.",
+          "correctIndex": 1
         },
         "ru": {
           "text": "Какие световые приборы должны быть включены при движении транспортных средств в искусственно освещенном тоннеле?",
+          "image": "",
+          "audio": "",
           "options": [
             "Дальний свет фар",
             "Ближний или дальний свет фар",
             "Аварийная световая сигнализация",
             "Световые приборы не включаются"
           ],
-          "explanation": "При движении в тоннеле должны быть включены фары ближнего или дальнего света."
+          "explanation": "При движении в тоннеле должны быть включены фары ближнего или дальнего света.",
+          "correctIndex": 1
         }
       }
     },
@@ -234,33 +270,42 @@
       "i18n": {
         "uz_latn": {
           "text": "Harakatlanish mumkin bo‘lgan yo‘nalish qaysi rasmda ko‘rsatilgan?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745264415-l0jjmwwl.webp",
+          "audio": "",
           "options": [
             "Chapdagi rasmda",
             "Pastdagi rasmda",
             "O‘ngdagi rasmda",
             "O‘rtadagi va o‘ngdagi rasmda"
           ],
-          "explanation": "Belgida faqat chapga burilish taqiqlangan, shuning uchun o'ngdagi rasm to'g'ri."
+          "explanation": "Belgida faqat chapga burilish taqiqlangan, shuning uchun o'ngdagi rasm to'g'ri.",
+          "correctIndex": 2
         },
         "uz_cyrl": {
           "text": "Ҳаракатланиш мумкин бўлган йўналиш қайси расмда кўрсатилган?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745264415-l0jjmwwl.webp",
+          "audio": "",
           "options": [
             "Чапдаги расмда",
             "Пастдаги расмда",
             "Ўнгдаги расмда",
             "Ўртадаги ва ўнгдаги расмда"
           ],
-          "explanation": "Белгида фақат чапга бурилиш тақиқланган, шунинг учун ўнгдаги расм тўғри."
+          "explanation": "Белгида фақат чапга бурилиш тақиқланган, шунинг учун ўнгдаги расм тўғри.",
+          "correctIndex": 2
         },
         "ru": {
           "text": "На каком рисунке показано разрешенное направление движения?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745264415-l0jjmwwl.webp",
+          "audio": "",
           "options": [
             "На левом рисунке",
             "На нижнем рисунке",
             "На правом рисунке",
             "На среднем и правом рисунках"
           ],
-          "explanation": "На знаке запрещен только поворот налево, поэтому правильным является правый рисунок."
+          "explanation": "На знаке запрещен только поворот налево, поэтому правильным является правый рисунок.",
+          "correctIndex": 2
         }
       }
     },
@@ -285,30 +330,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Yo'lning yoritilmagan qismlarida qorong'i vaqtda to'xtaganda gabarit chiroqlari buzuq bo'lsa:",
+          "image": "",
+          "audio": "",
           "options": [
             "Yaqinni yorituvchi faralarni yoqish",
             "O'ngroqqa olish va yaqinni yorituvchi farani yoqish zarur",
             "Transport vositasini yo'ldan tashqariga chiqarish, agar buning iloji bo'lmasa mazkur qoidalar talablariga binoan uni belgilash lozim"
           ],
-          "explanation": "Gabarit chiroqlari nosoz bo'lsa, transport vositasini yo'ldan tashqariga chiqarish yoki belgilash lozim."
+          "explanation": "Gabarit chiroqlari nosoz bo'lsa, transport vositasini yo'ldan tashqariga chiqarish yoki belgilash lozim.",
+          "correctIndex": 2
         },
         "uz_cyrl": {
           "text": "Йўлнинг ёритилмаган қисмларида қоронғи вақтда тўхтаганда габарит чироқлари бузуq бўлса:",
+          "image": "",
+          "audio": "",
           "options": [
             "Яқинни ёритувчи фараларни ёқиш",
             "Ўнгроққа олиш ва яқинни ёритувчи фарани ёқиш зарур",
             "Транспорт воситасини йўлдан ташқарига чиқариш, агар бунing иложи бўлмаса мазкур қоидалар талабларига биноан уни белгилаш лозим"
           ],
-          "explanation": "Габарит чироқлари носоз бўлса, транспорт воситасини йўлдан ташқарига чиқариш ёки белгилаш лозим."
+          "explanation": "Габарит чироқлари носоз бўлса, транспорт воситасини йўлдан ташқарига чиқариш ёки белгилаш лозим.",
+          "correctIndex": 2
         },
         "ru": {
           "text": "Если в темное время суток при остановке на неосвещенном участке дороги неисправны габаритные огни:",
+          "image": "",
+          "audio": "",
           "options": [
             "Включить фары ближнего света",
             "Прижаться правее и включить фару ближнего света",
             "Вывести транспортное средство за пределы дороги, а если это невозможно - обозначить его в соответствии с требованиями правил"
           ],
-          "explanation": "Если габаритные огни неисправны, транспортное средство следует убрать с проезжей части или обозначить."
+          "explanation": "Если габаритные огни неисправны, транспортное средство следует убрать с проезжей части или обозначить.",
+          "correctIndex": 2
         }
       }
     },
@@ -332,27 +386,36 @@
       "i18n": {
         "uz_latn": {
           "text": "Ko'rsatilgan belgi ostidagi qo'shimcha axborot belgisi qanday maqsadda o'rnatilgan?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+          "audio": "",
           "options": [
             "Belgining amal qilish hududida foto va video moslamalaridan foydalanish taqiqlanadi",
             "DYHXX tomonidan harakat jarayoni foto va video kuzatuvi olingan yo'l qismini bildiradi"
           ],
-          "explanation": "Kamera belgisi yo'l qismida foto va video qayd etish mavjudligini bildiradi."
+          "explanation": "Kamera belgisi yo'l qismida foto va video qayd etish mavjudligini bildiradi.",
+          "correctIndex": 1
         },
         "uz_cyrl": {
           "text": "Кўрсатилган белги остидаги қўшимча ахборот белгиси қандай мақсадда ўрнатилган?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+          "audio": "",
           "options": [
             "Белгининг амал қилиш ҳудудида фото ва видео мосламаларидан фойдаланиш тақиқланади",
             "ДЙҲХХ томонидан ҳаракат жараёни фото ва видео кузатуви олинган йўл қисмини билдиради"
           ],
-          "explanation": "Камера белгиси йўл қисмида фото ва видео қайд этиш мавжудлигини билдиради."
+          "explanation": "Камера белгиси йўл қисмида фото ва видео қайд этиш мавжудлигини билдиради.",
+          "correctIndex": 1
         },
         "ru": {
           "text": "С какой целью установлена дополнительная табличка под указанным знаком?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781940067474-rmj991mo.webp",
+          "audio": "",
           "options": [
             "В зоне действия знака запрещено использование фото- и видеоустройств",
             "Обозначает участок дороги, где движение фиксируется фото- и видеонаблюдением ДПС"
           ],
-          "explanation": "Знак с камерой указывает на наличие фото- и видеофиксации на данном участке дороги."
+          "explanation": "Знак с камерой указывает на наличие фото- и видеофиксации на данном участке дороги.",
+          "correctIndex": 1
         }
       }
     },
@@ -377,30 +440,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Yuk tirkamasida odam tashishga ruxsat etiladimi?",
+          "image": "",
+          "audio": "",
           "options": [
             "Taqiqlanadi",
             "Ruxsat beriladi",
             "Faqat yukni kuzatib boruvchi shaxsga ruxsat etiladi"
           ],
-          "explanation": "Yuk tirkamasida odam tashish taqiqlanadi."
+          "explanation": "Yuk tirkamasida odam tashish taqiqlanadi.",
+          "correctIndex": 0
         },
         "uz_cyrl": {
           "text": "Юк тиркамаcида одам ташишга рухсат этиладими?",
+          "image": "",
+          "audio": "",
           "options": [
             "Тақиқланади",
             "Рухсат берилади",
             "Фақат юкни кузатиб борувчи шахсга рухсат этилади"
           ],
-          "explanation": "Юк тиркамаcида одам ташиш тақиқланади."
+          "explanation": "Юк тиркамаcида одам ташиш тақиқланади.",
+          "correctIndex": 0
         },
         "ru": {
           "text": "Разрешается ли перевозить людей в грузовом прицепе?",
+          "image": "",
+          "audio": "",
           "options": [
             "Запрещается",
             "Разрешается",
             "Разрешается только сопровождающему груз лицу"
           ],
-          "explanation": "Перевозка людей в грузовом прицепе запрещена."
+          "explanation": "Перевозка людей в грузовом прицепе запрещена.",
+          "correctIndex": 0
         }
       }
     },
@@ -425,30 +497,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Qo‘shaloq shinalar orasiga begona jismlar tiqilib qolganda transport vositalaridan foydalanishga ruxsat etiladimi?",
+          "image": "",
+          "audio": "",
           "options": [
             "Taqiqlanadi",
             "Mazkur yo‘nalishda ikki va undan ortiq bo‘lak bo‘lganda yo‘lning faqat o‘ng tarafdagi bo‘lagi bo‘ylab harakatlanishga ruxsat etiladi",
             "Ko‘pi bilan 40 km/soat tezlikda harakat qilishga ruxsat etiladi"
           ],
-          "explanation": "Qo‘shaloq shinalar orasiga begona jismlar tiqilib qolsa, foydalanish taqiqlanadi."
+          "explanation": "Qo‘shaloq shinalar orasiga begona jismlar tiqilib qolsa, foydalanish taqiqlanadi.",
+          "correctIndex": 0
         },
         "uz_cyrl": {
           "text": "Қўшалоқ шиналар орасига бегона жисмлар тиқилиб қолганда транспорт воситаларидан фойдаланишга рухсат этиладими?",
+          "image": "",
+          "audio": "",
           "options": [
             "Тақиқланади",
             "Мазкур йўналишда икки ва ундан ортиқ бўлак бўлганда йўлнинг фақат ўнг тарафдаги бўлаги бўйлаб ҳаракатланишга рухсат этилади",
             "Кўпи билан 40 км/соат тезликда ҳаракат қилишга рухсат этилади"
           ],
-          "explanation": "Қўшалоқ шиналар орасига бегона жисмлар тиқилиб қолса, фойдаланиш тақиқланади."
+          "explanation": "Қўшалоқ шиналар орасига бегона жисмлар тиқилиб қолса, фойдаланиш тақиқланади.",
+          "correctIndex": 0
         },
         "ru": {
           "text": "Разрешается ли эксплуатация транспортного средства, если между сдвоенными шинами застряли посторонние предметы?",
+          "image": "",
+          "audio": "",
           "options": [
             "Запрещается",
             "Разрешается двигаться только по правой полосе при наличии двух и более полос в данном направлении",
             "Разрешается движение со скоростью не более 40 км/ч"
           ],
-          "explanation": "Если между сдвоенными шинами застряли посторонние предметы, эксплуатация запрещается."
+          "explanation": "Если между сдвоенными шинами застряли посторонние предметы, эксплуатация запрещается.",
+          "correctIndex": 0
         }
       }
     },
@@ -472,27 +553,36 @@
       "i18n": {
         "uz_latn": {
           "text": "To'xtash yo'li deb nimaga aytiladi?",
+          "image": "",
+          "audio": "",
           "options": [
             "Xavfning haydovchiga ma'lum bo'lgan paytidan tormozlash boshlanguncha avtomobilda o'tilgan masofa",
             "Avtomobilda xavfning haydovchiga ma'lum bo'lgan paytidan boshlab to'la to'xtagunga qadar bosib o'tilgan masofan"
           ],
-          "explanation": "To'xtash yo'li xavfni sezgan paytdan to to'liq to'xtaguncha bosib o'tilgan masofadir."
+          "explanation": "To'xtash yo'li xavfni sezgan paytdan to to'liq to'xtaguncha bosib o'tilgan masofadir.",
+          "correctIndex": 1
         },
         "uz_cyrl": {
           "text": "Тўхташ йўли деб нимага айтилади?",
+          "image": "",
+          "audio": "",
           "options": [
             "Хавфнинг ҳайдовчига маълум бўлган пайтидан тормозлаш бошлангунча автомобилда ўтилган масофа",
             "Автомобилда хавфнинг ҳайдовчига маълум бўлган пайтидан бошлаб тўла тўхтагунга қадар босиб ўтилган масофа"
           ],
-          "explanation": "Тўхташ йўли хавфни сезган пайтдан то тўлиқ тўхтагунча босиб ўтилган масофадир."
+          "explanation": "Тўхташ йўли хавфни сезган пайтдан то тўлиқ тўхтагунча босиб ўтилган масофадир.",
+          "correctIndex": 1
         },
         "ru": {
           "text": "Что называется тормозным путем?",
+          "image": "",
+          "audio": "",
           "options": [
             "Расстояние, пройденное автомобилем с момента, когда опасность стала известна водителю, до начала торможения",
             "Расстояние, пройденное автомобилем с момента, когда опасность стала известна водителю, до полной остановки"
           ],
-          "explanation": "Тормозной путь - это расстояние от момента обнаружения опасности до полной остановки автомобиля."
+          "explanation": "Тормозной путь - это расстояние от момента обнаружения опасности до полной остановки автомобиля.",
+          "correctIndex": 1
         }
       }
     },
@@ -517,30 +607,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Bu yo‘l belgisi:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781758067945-4eu52r4l.webp",
+          "audio": "",
           "options": [
             "Faqat belgida ko‘rsatilgan yoki yuqori tezlikda harakatlanishga ruxsat beradi",
             "Belgida ko‘rsatilgandan ortiq tezlikdagi harakatni taqiqlaydi",
             "Yo‘lning shu qismida tavsiya etilgan harakatlanish tezligini ko‘rsatadi"
           ],
-          "explanation": "Ko‘k fondagi dumaloq belgi eng kam tezlikni bildiradi."
+          "explanation": "Ko‘k fondagi dumaloq belgi eng kam tezlikni bildiradi.",
+          "correctIndex": 0
         },
         "uz_cyrl": {
           "text": "Бу йўл белгиси:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781758067945-4eu52r4l.webp",
+          "audio": "",
           "options": [
             "Фақат белгида кўрсатилган ёки юқори тезликда ҳаракатланишга рухсат беради",
             "Белгида кўрсатилгандан ортиқ тезликдаги ҳаракатни тақиқлайди",
             "Йўлнинг шу қисмида тавсия этилган ҳаракатланиш тезлигини кўрсатади"
           ],
-          "explanation": "Кўк фонли думалоқ белги энг кам тезликни билдиради."
+          "explanation": "Кўк фонли думалоқ белги энг кам тезликни билдиради.",
+          "correctIndex": 0
         },
         "ru": {
           "text": "Этот дорожный знак:",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1781758067945-4eu52r4l.webp",
+          "audio": "",
           "options": [
             "Разрешает движение только с указанной на знаке или более высокой скоростью",
             "Запрещает движение со скоростью выше указанной на знаке",
             "Указывает рекомендуемую скорость движения на данном участке дороги"
           ],
-          "explanation": "Круглый знак на синем фоне обозначает минимальную разрешенную скорость."
+          "explanation": "Круглый знак на синем фоне обозначает минимальную разрешенную скорость.",
+          "correctIndex": 0
         }
       }
     },
@@ -565,30 +664,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Avtomobilda tibbiyot qutichasini qayerda saqlash lozim?",
+          "image": "",
+          "audio": "",
           "options": [
             "Yengil avtomobilning yukxonasida",
             "Tayyorlovchi korxona tomonidan belgilangan joylarda berk holatda",
             "Avtomobilning kuzovida ko'rinadigan joyda"
           ],
-          "explanation": "Tibbiyot qutichasi ishlab chiqaruvchi tomonidan belgilangan joyda saqlanadi."
+          "explanation": "Tibbiyot qutichasi ishlab chiqaruvchi tomonidan belgilangan joyda saqlanadi.",
+          "correctIndex": 1
         },
         "uz_cyrl": {
           "text": "Автомобилда тиббиёт қутичасини қаерда сақлаш лозим?",
+          "image": "",
+          "audio": "",
           "options": [
             "Енгил автомобилнинг юкхонасида",
             "Тайёрловчи корхона томонидан белгиланган жойларда берк ҳолатда",
             "Автомобилнинг кузовида кўринадиган жойда"
           ],
-          "explanation": "Тиббиёт қутичаси ишлаб чиқарувчи томонидан белгиланган жойда сақланади."
+          "explanation": "Тиббиёт қутичаси ишлаб чиқарувчи томонидан белгиланган жойда сақланади.",
+          "correctIndex": 1
         },
         "ru": {
           "text": "Где следует хранить медицинскую аптечку в автомобиле?",
+          "image": "",
+          "audio": "",
           "options": [
             "В багажнике легкового автомобиля",
             "В закрытом состоянии в местах, установленных изготовителем",
             "В кузове автомобиля на видном месте"
           ],
-          "explanation": "Аптечка должна храниться в месте, предусмотренном изготовителем."
+          "explanation": "Аптечка должна храниться в месте, предусмотренном изготовителем.",
+          "correctIndex": 1
         }
       }
     },
@@ -612,27 +720,36 @@
       "i18n": {
         "uz_latn": {
           "text": "Bu joyda to'xtash mumkinmi?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+          "audio": "",
           "options": [
             "Mumkin",
             "Taqiqlangan"
           ],
-          "explanation": "Tramvay yo'llari yonida yoki yo'nalishli transport bekatiga yaqin joyda to'xtash taqiqlanadi."
+          "explanation": "Tramvay yo'llari yonida yoki yo'nalishli transport bekatiga yaqin joyda to'xtash taqiqlanadi.",
+          "correctIndex": 1
         },
         "uz_cyrl": {
           "text": "Бу жойда тўхташ мумкинми?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+          "audio": "",
           "options": [
             "Мумкин",
             "Тақиқланган"
           ],
-          "explanation": "Трамвай йўллари ёнида ёки йўналишли транспорт бекатига яқин жойда тўхташ тақиқланади."
+          "explanation": "Трамвай йўллари ёнида ёки йўналишли транспорт бекатига яқин жойда тўхташ тақиқланади.",
+          "correctIndex": 1
         },
         "ru": {
           "text": "Можно ли остановиться в этом месте?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+          "audio": "",
           "options": [
             "Можно",
             "Запрещено"
           ],
-          "explanation": "Остановка рядом с трамвайными путями или у остановки маршрутного транспорта запрещена."
+          "explanation": "Остановка рядом с трамвайными путями или у остановки маршрутного транспорта запрещена.",
+          "correctIndex": 1
         }
       }
     },
@@ -657,30 +774,39 @@
       "i18n": {
         "uz_latn": {
           "text": "Yo'naltirgichlar bilan ko'rsatilgan yo'nalishlarning qaysi biridan harakat qilish mumkin?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+          "audio": "",
           "options": [
             "Faqat to'g'riga",
             "Chapga va orqaga",
             "To'g'riqa, chapga va orqaga"
           ],
-          "explanation": "Ushbu bo'lakdan faqat to'g'riga harakatlanishga ruxsat etiladi."
+          "explanation": "Ushbu bo'lakdan faqat to'g'riga harakatlanishga ruxsat etiladi.",
+          "correctIndex": 0
         },
         "uz_cyrl": {
           "text": "Йўналтиргичлар билан кўрсатилган йўналишларнинг қайси биридан ҳаракат қилиш мумкин?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+          "audio": "",
           "options": [
             "Фақат тўғрига",
             "Чапга ва орқага",
             "Тўғриқа, чапга ва орқага"
           ],
-          "explanation": "Ушбу бўлакдан фақат тўғрига ҳаракатланишга рухсат этилади."
+          "explanation": "Ушбу бўлакдан фақат тўғрига ҳаракатланишга рухсат этилади.",
+          "correctIndex": 0
         },
         "ru": {
           "text": "По какому из направлений, обозначенных стрелками, можно двигаться?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+          "audio": "",
           "options": [
             "Только прямо",
             "Налево и разворот",
             "Прямо, налево и разворот"
           ],
-          "explanation": "С этой полосы разрешено движение только прямо."
+          "explanation": "С этой полосы разрешено движение только прямо.",
+          "correctIndex": 0
         }
       }
     },
@@ -707,6 +833,8 @@
       "i18n": {
         "uz_latn": {
           "text": "Qaysi belgi oyning juft sonli kunlarda to‘xtab turishni taqiqlaydi?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+          "audio": "",
           "options": [
             "1",
             "2",
@@ -714,10 +842,13 @@
             "4",
             "5"
           ],
-          "explanation": "5-raqamli belgi oyning juft kunlarida to'xtab turishni taqiqlaydi."
+          "explanation": "5-raqamli belgi oyning juft kunlarida to'xtab turishni taqiqlaydi.",
+          "correctIndex": 4
         },
         "uz_cyrl": {
           "text": "Қайси белги ойнинг жуфт сонли кунларда тўхтаб туришни тақиқлайди?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+          "audio": "",
           "options": [
             "1",
             "2",
@@ -725,10 +856,13 @@
             "4",
             "5"
           ],
-          "explanation": "5-рақамли белги ойнинг жуфт кунларида тўхтаб туришни тақиқлайди."
+          "explanation": "5-рақамли белги ойнинг жуфт кунларида тўхтаб туришни тақиқлайди.",
+          "correctIndex": 4
         },
         "ru": {
           "text": "Какой знак запрещает стоянку по четным числам месяца?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+          "audio": "",
           "options": [
             "1",
             "2",
@@ -736,7 +870,8 @@
             "4",
             "5"
           ],
-          "explanation": "Знак №5 запрещает стоянку по четным числам месяца."
+          "explanation": "Знак №5 запрещает стоянку по четным числам месяца.",
+          "correctIndex": 4
         }
       }
     },
@@ -763,6 +898,8 @@
       "i18n": {
         "uz_latn": {
           "text": "Orqa tomondagi tumanga qarshi chiroqlar quyidagi hollarda qo'llanishi mumkin:",
+          "image": "",
+          "audio": "",
           "options": [
             "Kunning qorong'i vaqtida safda harakatlanishda",
             "Tunnellarda harakatlanishda",
@@ -770,10 +907,13 @@
             "Kunning qorong'i vaqtida yuk tushirishda",
             "Barcha sanab o'tilgan hollarda"
           ],
-          "explanation": "Orqa tumanga qarshi chiroqlar faqat yetarlicha ko'rinmaslik sharoitlarida ishlatiladi."
+          "explanation": "Orqa tumanga qarshi chiroqlar faqat yetarlicha ko'rinmaslik sharoitlarida ishlatiladi.",
+          "correctIndex": 2
         },
         "uz_cyrl": {
           "text": "Орқа томондаги туманга қарши чироқлар қуйидаги ҳолларда қўлланиши мумкин:",
+          "image": "",
+          "audio": "",
           "options": [
             "Куннинг қоронғи вақтида сафда ҳаракатланишда",
             "Туннелларда ҳаракатланишда",
@@ -781,10 +921,13 @@
             "Куннинг қоронғи вақтида юк туширишда",
             "Барча санаб ўтилган ҳолларда"
           ],
-          "explanation": "Орқа туманга қарши чироқлар фақат етарлича кўринмаслик шароитларида ишлатилади."
+          "explanation": "Орқа туманга қарши чироқлар фақат етарлича кўринмаслик шароитларида ишлатилади.",
+          "correctIndex": 2
         },
         "ru": {
           "text": "Задние противотуманные фонари могут использоваться в следующих случаях:",
+          "image": "",
+          "audio": "",
           "options": [
             "При движении в колонне в темное время суток",
             "При движении в тоннелях",
@@ -792,7 +935,248 @@
             "При погрузке в темное время суток",
             "Во всех перечисленных случаях"
           ],
-          "explanation": "Задние противотуманные фонари используются только в условиях недостаточной видимости."
+          "explanation": "Задние противотуманные фонари используются только в условиях недостаточной видимости.",
+          "correctIndex": 2
+        }
+      }
+    },
+    {
+      "id": "cbeebd9f-0d71-44ec-a84d-235db2b067b5",
+      "questionId": "cbeebd9f-0d71-44ec-a84d-235db2b067b5",
+      "order": 17,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Bu joyda to'xtash mumkinmi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+      "audio": "",
+      "options": [
+        "Mumkin",
+        "Taqiqlangan"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tramvay yo'llari yonida yoki yo'nalishli transport bekatiga yaqin joyda to'xtash taqiqlanadi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Bu joyda to'xtash mumkinmi?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+          "audio": "",
+          "options": [
+            "Mumkin",
+            "Taqiqlangan"
+          ],
+          "explanation": "Tramvay yo'llari yonida yoki yo'nalishli transport bekatiga yaqin joyda to'xtash taqiqlanadi.",
+          "correctIndex": 1
+        },
+        "uz_cyrl": {
+          "text": "Бу жойда тўхташ мумкинми?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+          "audio": "",
+          "options": [
+            "Мумкин",
+            "Тақиқланган"
+          ],
+          "explanation": "Трамвай йўллари ёнида ёки йўналишли транспорт бекатига яқин жойда тўхташ тақиқланади.",
+          "correctIndex": 1
+        },
+        "ru": {
+          "text": "Можно ли остановиться в этом месте?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1783171708936-49yhk8vh.webp",
+          "audio": "",
+          "options": [
+            "Можно",
+            "Запрещено"
+          ],
+          "explanation": "Остановка рядом с трамвайными путями или у остановки маршрутного транспорта запрещена.",
+          "correctIndex": 1
+        }
+      }
+    },
+    {
+      "id": "d177ab24-3564-4001-8441-8024fcbc11e6",
+      "questionId": "d177ab24-3564-4001-8441-8024fcbc11e6",
+      "order": 18,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Yo'naltirgichlar bilan ko'rsatilgan yo'nalishlarning qaysi biridan harakat qilish mumkin?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+      "audio": "",
+      "options": [
+        "Faqat to'g'riga",
+        "Chapga va orqaga",
+        "To'g'riqa, chapga va orqaga"
+      ],
+      "correctIndex": 0,
+      "explanation": "Ushbu bo'lakdan faqat to'g'riga harakatlanishga ruxsat etiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Yo'naltirgichlar bilan ko'rsatilgan yo'nalishlarning qaysi biridan harakat qilish mumkin?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+          "audio": "",
+          "options": [
+            "Faqat to'g'riga",
+            "Chapga va orqaga",
+            "To'g'riqa, chapga va orqaga"
+          ],
+          "explanation": "Ushbu bo'lakdan faqat to'g'riga harakatlanishga ruxsat etiladi.",
+          "correctIndex": 0
+        },
+        "uz_cyrl": {
+          "text": "Йўналтиргичлар билан кўрсатилган йўналишларнинг қайси биридан ҳаракат қилиш мумкин?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+          "audio": "",
+          "options": [
+            "Фақат тўғрига",
+            "Чапга ва орқага",
+            "Тўғриқа, чапга ва орқага"
+          ],
+          "explanation": "Ушбу бўлакдан фақат тўғрига ҳаракатланишга рухсат этилади.",
+          "correctIndex": 0
+        },
+        "ru": {
+          "text": "По какому из направлений, обозначенных стрелками, можно двигаться?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782751538816-3k2lebzy.webp",
+          "audio": "",
+          "options": [
+            "Только прямо",
+            "Налево и разворот",
+            "Прямо, налево и разворот"
+          ],
+          "explanation": "С этой полосы разрешено движение только прямо.",
+          "correctIndex": 0
+        }
+      }
+    },
+    {
+      "id": "9154e5a5-852d-445e-a766-a8dafe42a669",
+      "questionId": "9154e5a5-852d-445e-a766-a8dafe42a669",
+      "order": 19,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi belgi oyning juft sonli kunlarda to‘xtab turishni taqiqlaydi?",
+      "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+      "audio": "",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "correctIndex": 4,
+      "explanation": "5-raqamli belgi oyning juft kunlarida to'xtab turishni taqiqlaydi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi belgi oyning juft sonli kunlarda to‘xtab turishni taqiqlaydi?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "explanation": "5-raqamli belgi oyning juft kunlarida to'xtab turishni taqiqlaydi.",
+          "correctIndex": 4
+        },
+        "uz_cyrl": {
+          "text": "Қайси белги ойнинг жуфт сонли кунларда тўхтаб туришни тақиқлайди?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "explanation": "5-рақамли белги ойнинг жуфт кунларида тўхтаб туришни тақиқлайди.",
+          "correctIndex": 4
+        },
+        "ru": {
+          "text": "Какой знак запрещает стоянку по четным числам месяца?",
+          "image": "https://pub-d085e4f7392c4a4f81a94c22e67dd72f.r2.dev/images/1782745595391-5uv1ymym.webp",
+          "audio": "",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "explanation": "Знак №5 запрещает стоянку по четным числам месяца.",
+          "correctIndex": 4
+        }
+      }
+    },
+    {
+      "id": "3d78ae68-7d76-4141-8aaa-eda39f399862",
+      "questionId": "3d78ae68-7d76-4141-8aaa-eda39f399862",
+      "order": 20,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Orqa tomondagi tumanga qarshi chiroqlar quyidagi hollarda qo'llanishi mumkin:",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Kunning qorong'i vaqtida safda harakatlanishda",
+        "Tunnellarda harakatlanishda",
+        "Faqat etarli ko'rinmaydigan sharoitlarda",
+        "Kunning qorong'i vaqtida yuk tushirishda",
+        "Barcha sanab o'tilgan hollarda"
+      ],
+      "correctIndex": 2,
+      "explanation": "Orqa tumanga qarshi chiroqlar faqat yetarlicha ko'rinmaslik sharoitlarida ishlatiladi.",
+      "i18n": {
+        "uz_latn": {
+          "text": "Orqa tomondagi tumanga qarshi chiroqlar quyidagi hollarda qo'llanishi mumkin:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Kunning qorong'i vaqtida safda harakatlanishda",
+            "Tunnellarda harakatlanishda",
+            "Faqat etarli ko'rinmaydigan sharoitlarda",
+            "Kunning qorong'i vaqtida yuk tushirishda",
+            "Barcha sanab o'tilgan hollarda"
+          ],
+          "explanation": "Orqa tumanga qarshi chiroqlar faqat yetarlicha ko'rinmaslik sharoitlarida ishlatiladi.",
+          "correctIndex": 2
+        },
+        "uz_cyrl": {
+          "text": "Орқа томондаги туманга қарши чироқлар қуйидаги ҳолларда қўлланиши мумкин:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "Куннинг қоронғи вақтида сафда ҳаракатланишда",
+            "Туннелларда ҳаракатланишда",
+            "Фақат етарли кўринмайдиган шароитларда",
+            "Куннинг қоронғи вақтида юк туширишда",
+            "Барча санаб ўтилган ҳолларда"
+          ],
+          "explanation": "Орқа туманга қарши чироқлар фақат етарлича кўринмаслик шароитларида ишлатилади.",
+          "correctIndex": 2
+        },
+        "ru": {
+          "text": "Задние противотуманные фонари могут использоваться в следующих случаях:",
+          "image": "",
+          "audio": "",
+          "options": [
+            "При движении в колонне в темное время суток",
+            "При движении в тоннелях",
+            "Только в условиях недостаточной видимости",
+            "При погрузке в темное время суток",
+            "Во всех перечисленных случаях"
+          ],
+          "explanation": "Задние противотуманные фонари используются только в условиях недостаточной видимости.",
+          "correctIndex": 2
         }
       }
     }
