@@ -1029,8 +1029,10 @@ async function updateTicket(id, input) {
     input.questions !== undefined
       ? normalizeTicketSlotQuestions(input.questions, ticket.questions)
       : normalizeTicketSlotQuestions(ticket.questions, ticket.questions);
-  const questionRows = await getTicketQuestionsFromDb(id);
-  const questions = await hydrateTicketSlotQuestions(sourceQuestions, questionRows);
+  const questions =
+    input.questions !== undefined
+      ? sourceQuestions
+      : normalizeTicketSlotQuestions(ticket.questions, ticket.questions);
 
   const result = await dbApi.get(
     `
