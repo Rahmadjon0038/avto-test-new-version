@@ -17,7 +17,7 @@ import {
   UserCircle2,
   Wallet
 } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -37,7 +37,8 @@ function getInitials(name: string) {
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { language, setLanguage, options, t } = useSiteLanguage();
-  const { authFetch, setAccessToken, setUser, authReady, accessToken, user } = useAuth();
+  const { authFetch, logout, setAccessToken, setUser, authReady, accessToken, user } = useAuth();
+  const queryClient = useQueryClient();
   const showSubscriptionButton = false;
 
   const [me, setMe] = useState<any>(null);
@@ -66,7 +67,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   const meQuery = useQuery({
-    queryKey: ["me"],
+    queryKey: ["me", accessToken || "anonymous"],
     queryFn: async () => {
       const res = await authFetch("/api/auth/me");
       return jsonOrError(res);
@@ -174,8 +175,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setAccessToken(null);
+      await logout();
+      queryClient.clear();
     },
     onSettled: () => router.replace("/")
   });

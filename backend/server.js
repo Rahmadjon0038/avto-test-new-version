@@ -550,11 +550,15 @@ function normalizeTicketQuestionRow(row) {
 function normalizeTicketSlotQuestion(question, fallbackOrder = 0, currentQuestion = null) {
   if (!question || typeof question !== "object") return null;
   const current = currentQuestion && typeof currentQuestion === "object" ? currentQuestion : null;
+  const hasImage = Object.prototype.hasOwnProperty.call(question, "image");
+  const hasAudio = Object.prototype.hasOwnProperty.call(question, "audio");
+  const hasExplanation = Object.prototype.hasOwnProperty.call(question, "explanation");
+  const hasOptions = Object.prototype.hasOwnProperty.call(question, "options");
   const text = String(question.text || "").trim();
-  const image = String(question.image || "").trim();
-  const audio = String(question.audio || "").trim();
-  const explanation = String(question.explanation || "").trim();
-  const options = Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [];
+  const image = hasImage ? String(question.image || "").trim() : "";
+  const audio = hasAudio ? String(question.audio || "").trim() : "";
+  const explanation = hasExplanation ? String(question.explanation || "").trim() : "";
+  const options = hasOptions && Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [];
   const i18n = normalizeQuestionI18n(
     question.i18n && Object.keys(parseJsonValue(question.i18n, {})).length
       ? question.i18n
@@ -572,8 +576,8 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0, currentQuestio
     topicTitle: String(question.topicTitle || ""),
     questionIndex: Number(question.questionIndex || 0),
     text: text || String(current?.text || ""),
-    image: image || String(current?.image || ""),
-    audio: audio || String(current?.audio || ""),
+    image: hasImage ? image : String(current?.image || ""),
+    audio: hasAudio ? audio : String(current?.audio || ""),
     options: options.some(Boolean)
       ? options
       : Array.isArray(current?.options)
@@ -584,7 +588,7 @@ function normalizeTicketSlotQuestion(question, fallbackOrder = 0, currentQuestio
       : Number.isFinite(Number(current?.correctIndex))
         ? Number(current.correctIndex)
         : 0,
-    explanation: explanation || String(current?.explanation || ""),
+    explanation: hasExplanation ? explanation : String(current?.explanation || ""),
     i18n
   };
 }
