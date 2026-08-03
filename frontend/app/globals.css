@@ -4862,6 +4862,10 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.ticketsGridCompact {
+  gap: 10px;
+}
+
 @media (min-width: 640px) {
   .ticketsGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4962,6 +4966,27 @@ body {
   background: linear-gradient(180deg, color-mix(in srgb, var(--panel2) 65%, transparent), var(--panel));
   color: var(--text);
   text-decoration: none;
+}
+
+.ticketCardCompact {
+  min-height: 112px;
+  padding: 12px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel2) 54%, transparent), color-mix(in srgb, var(--panel) 96%, black));
+}
+
+.ticketCardCompact .ticketCardBody.isEmpty {
+  min-height: 74px;
+}
+
+.ticketCardCompact .ticketTitle {
+  font-size: 18px;
+  line-height: 1.05;
+}
+
+.ticketCardCompact .ticketTitleNumbered {
+  font-size: 18px;
+  letter-spacing: -0.02em;
 }
 
 .ticketCardLocked {

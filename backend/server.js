@@ -1931,7 +1931,8 @@ function chunkArray(items, size) {
 }
 
 function buildGeneratedCustomTestFromBankSize(bank, size, lang = "") {
-  const questions = bank.slice(0, size).map((item) => ({
+  const shuffledBank = shuffleWithSeed(bank, 9000 + size);
+  const questions = shuffledBank.slice(0, size).map((item) => ({
     ...localizeQuestion(item.question, lang),
     id: String(item.questionKey || item.question?.id || ""),
     kind: "ticket",
@@ -3713,28 +3714,39 @@ async function fetchAudioAsM4a(sourceUrl) {
 
 async function getAudioProxyPayload(sourceUrl) {
   const bucket = getR2BucketName();
-  if (!bucket) throw new Error("R2 bucket sozlanmagan");
+  if (bucket) {
+    const key = deriveR2KeyFromPublicUrl(sourceUrl);
+    if (key) {
+      try {
+        const object = await r2.send(
+          new GetObjectCommand({
+            Bucket: bucket,
+            Key: key
+          })
+        );
 
-  const key = deriveR2KeyFromPublicUrl(sourceUrl);
-  if (!key) throw new Error("Audio manzili noto‘g‘ri");
+        const contentType = String(object.ContentType || "").trim();
+        const sourceBuffer = object.Body ? await streamToBuffer(object.Body) : Buffer.alloc(0);
+        if (!sourceBuffer.length) throw new Error("Audio fayli bo‘sh");
 
-  const object = await r2.send(
-    new GetObjectCommand({
-      Bucket: bucket,
-      Key: key
-    })
-  );
+        if (isSupportedPlaybackAudio(contentType, sourceUrl)) {
+          return { buffer: sourceBuffer, contentType: contentType || "audio/mp4" };
+        }
 
-  const contentType = String(object.ContentType || "").trim();
-  const sourceBuffer = object.Body ? await streamToBuffer(object.Body) : Buffer.alloc(0);
-  if (!sourceBuffer.length) throw new Error("Audio fayli bo‘sh");
-
-  if (isSupportedPlaybackAudio(contentType, sourceUrl)) {
-    return { buffer: sourceBuffer, contentType: contentType || "audio/mp4" };
+        const convertedBuffer = await convertAudioToM4a(sourceBuffer, path.basename(key).replace(/\.[^.]+$/, "") || "audio");
+        return { buffer: convertedBuffer, contentType: "audio/mp4" };
+      } catch (error) {
+        console.warn("[audio-proxy] R2 lookup failed, falling back to direct fetch", {
+          url: sourceUrl,
+          error: error?.message || String(error)
+        });
+      }
+    }
   }
 
-  const convertedBuffer = await convertAudioToM4a(sourceBuffer, path.basename(key).replace(/\.[^.]+$/, "") || "audio");
-  return { buffer: convertedBuffer, contentType: "audio/mp4" };
+  const fetched = await fetchAudioAsM4a(sourceUrl);
+  if (!fetched?.buffer?.length) throw new Error("Audio manbadan yuklab bo‘lmadi");
+  return fetched;
 }
 
 function isAllowedAudioType(mimeType) {

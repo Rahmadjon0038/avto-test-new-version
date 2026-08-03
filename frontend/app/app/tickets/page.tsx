@@ -74,12 +74,13 @@ export default function TicketsPage() {
         <div className="ticketsHeaderTitle">{t("tickets.title")}</div>
       </div>
 
-      <div className="ticketsGrid">
+      <div className="ticketsGrid ticketsGridCompact">
         {tickets.map((ticket, index) => (
           <button
             key={ticket.id}
-            className="card ticketCard"
+            className="card ticketCard ticketCardCompact"
             type="button"
+            aria-label={`${formatTicketLabel(index)} ni ochish`}
             onClick={() => router.push(`/app/ticket/${encodeURIComponent(ticket.id)}`)}
           >
             <div className="ticketCardBody isEmpty">
