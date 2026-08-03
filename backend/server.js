@@ -2048,6 +2048,10 @@ async function updateTopic(topicId, input) {
   if (!current) throw new Error("Mavzu topilmadi");
   const next = normalizeTopicInput(input, current.title, current);
   const slug = await ensureUniqueTopicSlug(next.slug, current.id);
+  const questions =
+    input.questions !== undefined
+      ? next.questions.map((question) => stripQuestionMediaFromI18n(question))
+      : normalizeTopicInput(input, current.title, current).questions.map((question) => stripQuestionMediaFromI18n(question));
   const result = await dbApi.get(
     `
       UPDATE topics
@@ -2055,7 +2059,7 @@ async function updateTopic(topicId, input) {
       WHERE id = ?
       RETURNING *
     `,
-    [slug, next.title, JSON.stringify(next.titleI18n), JSON.stringify(next.questions), next.adminMarked, current.id]
+    [slug, next.title, JSON.stringify(next.titleI18n), JSON.stringify(questions), next.adminMarked, current.id]
   );
   await syncTopicQuestionBankFromTopics();
   return normalizeTopicRow(result);
@@ -2199,6 +2203,10 @@ async function updateCustomTest(testId, input) {
   const current = await getCustomTestFromDb(testId);
   if (!current) throw new Error("Test topilmadi");
   const next = normalizeCustomTestInput(input, current.title, current);
+  const questions =
+    input.questions !== undefined
+      ? next.questions.map((question) => stripQuestionMediaFromI18n(question))
+      : next.questions.map((question) => stripQuestionMediaFromI18n(question));
   const result = await dbApi.get(
     `
       UPDATE custom_tests
@@ -2206,7 +2214,7 @@ async function updateCustomTest(testId, input) {
       WHERE id = ?
       RETURNING *
     `,
-    [next.title, JSON.stringify(next.questions), current.id]
+    [next.title, JSON.stringify(questions), current.id]
   );
   return normalizeCustomTestRow(result);
 }

@@ -609,6 +609,16 @@ export default function AdminTopicDetailPage() {
           }
         : prev
     );
+    qc.setQueryData<AdminTopic | undefined>(["admin-topic", topicId], (prev) =>
+      prev
+        ? {
+            ...prev,
+            questions: Array.isArray(prev.questions)
+              ? prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+              : prev.questions
+          }
+        : prev
+    );
 
     setAudioDrafts((prev) => ({
       ...prev,
@@ -681,6 +691,16 @@ export default function AdminTopicDetailPage() {
         delete next[questionId];
         return next;
       });
+      qc.setQueryData<AdminTopic | undefined>(["admin-topic", topicId], (prev) =>
+        prev
+          ? {
+              ...prev,
+              questions: Array.isArray(prev.questions)
+                ? prev.questions.map((question) => (question.id === questionId ? { ...question, audio: "" } : question))
+                : prev.questions
+            }
+          : prev
+      );
       toast.success("Audio o‘chirildi");
       return;
     }
@@ -705,6 +725,17 @@ export default function AdminTopicDetailPage() {
           }
         : prev
     );
+    qc.setQueryData<AdminTopic | undefined>(["admin-topic", topicId], (prev) =>
+      prev
+        ? {
+            ...prev,
+            questions: Array.isArray(prev.questions)
+              ? prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+              : prev.questions
+          }
+        : prev
+    );
+    void qc.invalidateQueries({ queryKey: ["admin-topic", topicId] });
 
     setAudioDrafts((prev) => {
       const next = { ...prev };

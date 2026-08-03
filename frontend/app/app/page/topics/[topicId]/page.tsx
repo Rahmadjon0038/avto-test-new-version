@@ -582,6 +582,17 @@ export default function TopicPage() {
           }
         : prev
     );
+    qc.setQueryData<{ topic: Topic } | undefined>(["topic", topicId, language], (prev) =>
+      prev?.topic
+        ? {
+            ...prev,
+            topic: {
+              ...prev.topic,
+              questions: prev.topic.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+            }
+          }
+        : prev
+    );
 
     setAudioDrafts((prev) => ({
       ...prev,
@@ -662,6 +673,17 @@ export default function TopicPage() {
             }
           : prev
       );
+      qc.setQueryData<{ topic: Topic } | undefined>(["topic", topicId, language], (prev) =>
+        prev?.topic
+          ? {
+              ...prev,
+              topic: {
+                ...prev.topic,
+                questions: prev.topic.questions.map((question) => (question.id === questionId ? { ...question, audio: "" } : question))
+              }
+            }
+          : prev
+      );
       toast.success("Audio o‘chirildi");
       return;
     }
@@ -686,6 +708,18 @@ export default function TopicPage() {
           }
         : prev
     );
+    qc.setQueryData<{ topic: Topic } | undefined>(["topic", topicId, language], (prev) =>
+      prev?.topic
+        ? {
+            ...prev,
+            topic: {
+              ...prev.topic,
+              questions: prev.topic.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
+            }
+          }
+        : prev
+    );
+    void qc.invalidateQueries({ queryKey: ["topic", topicId, language] });
 
     setAudioDrafts((prev) => {
       const next = { ...prev };
