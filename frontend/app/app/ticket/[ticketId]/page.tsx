@@ -358,7 +358,11 @@ export default function TicketPage() {
       const data = await jsonOrError(res);
       return data as { ticket: Ticket | null };
     },
-    enabled: authReady
+    enabled: authReady,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true
   });
 
   const ticket = ticketQuery.data?.ticket ?? null;

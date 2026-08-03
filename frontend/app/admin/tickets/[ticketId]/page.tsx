@@ -6,7 +6,9 @@ import { ArrowLeft, Pencil, Plus, Save, Ticket, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
+import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { broadcastQuerySync } from "@/app/query-provider";
 
 type Question = {
   id: string;
@@ -77,6 +79,24 @@ function normalizeQuestionForSave(question: Question): Question {
   };
 }
 
+function syncQuestionLocale(question: Question, language: string): Question {
+  const normalizedLanguage = String(language || "").trim().toLowerCase();
+  if (!normalizedLanguage) return question;
+  return {
+    ...question,
+    i18n: {
+      [normalizedLanguage]: {
+        text: String(question.text || "").trim(),
+        image: String(question.image || "").trim(),
+        audio: "",
+        options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [],
+        correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
+        explanation: String(question.explanation || "").trim()
+      }
+    }
+  };
+}
+
 async function fileToDataUrl(file: File) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -92,6 +112,7 @@ export default function AdminTicketDetailPage() {
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { language } = useSiteLanguage();
   const [ticket, setTicket] = useState<AdminTicket | null>(null);
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
@@ -141,7 +162,9 @@ export default function AdminTicketDetailPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!ticket) throw new Error("Ticket topilmadi");
-      const normalizedQuestions = ticket.questions.map((question) => (question ? normalizeQuestionForSave(question) : null));
+      const normalizedQuestions = ticket.questions.map((question) =>
+        question ? syncQuestionLocale(normalizeQuestionForSave(question), language) : null
+      );
       for (const question of normalizedQuestions) {
         if (!question) continue;
         if (!question.text) throw new Error("Savol matnini kiriting");
@@ -174,6 +197,8 @@ export default function AdminTicketDetailPage() {
       });
       await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
       await qc.invalidateQueries({ queryKey: ["admin-ticket", ticketId] });
+      broadcastQuerySync({ type: "invalidate", queryKey: ["ticket", ticketId] });
+      broadcastQuerySync({ type: "invalidate", queryKey: ["tickets"] });
       toast.success("Saqlandi");
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")
@@ -189,6 +214,8 @@ export default function AdminTicketDetailPage() {
     onSuccess: async () => {
       toast.success("Bilet o‘chirildi");
       await qc.invalidateQueries({ queryKey: ["admin-tickets"] });
+      broadcastQuerySync({ type: "invalidate", queryKey: ["ticket", ticketId] });
+      broadcastQuerySync({ type: "invalidate", queryKey: ["tickets"] });
       router.push("/admin/tickets");
     },
     onError: (error: any) => toast.error(error?.message || "Xatolik")

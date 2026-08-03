@@ -22,14 +22,16 @@ async function parseJson(res: Response) {
 
 export async function fetchCustomTests(language?: string | null): Promise<CustomTestCard[]> {
   const lang = normalizeLanguageCode(language || getBrowserLanguage());
-  const res = await fetch(appendLanguageQuery("/api/custom-tests", lang));
+  const res = await fetch(appendLanguageQuery("/api/custom-tests", lang), { cache: "no-store" });
   const data = await parseJson(res);
   return Array.isArray(data.customTests) ? data.customTests : [];
 }
 
 export async function fetchCustomTestById(testId: string, language?: string | null): Promise<CustomTestCard | null> {
   const lang = normalizeLanguageCode(language || getBrowserLanguage());
-  const res = await fetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, lang));
+  const res = await fetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, lang), {
+    cache: "no-store"
+  });
   if (res.status === 404) return null;
   const data = await parseJson(res);
   return data?.customTest || null;

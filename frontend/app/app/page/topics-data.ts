@@ -22,14 +22,16 @@ async function parseJson(res: Response) {
 
 export async function fetchTopics(language?: string | null): Promise<TopicCard[]> {
   const lang = normalizeLanguageCode(language || getBrowserLanguage());
-  const res = await fetch(appendLanguageQuery("/api/topics", lang));
+  const res = await fetch(appendLanguageQuery("/api/topics", lang), { cache: "no-store" });
   const data = await parseJson(res);
   return Array.isArray(data.topics) ? data.topics : [];
 }
 
 export async function fetchTopicById(topicId: string, language?: string | null): Promise<TopicCard | null> {
   const lang = normalizeLanguageCode(language || getBrowserLanguage());
-  const res = await fetch(appendLanguageQuery(`/api/topics/${encodeURIComponent(topicId)}`, lang));
+  const res = await fetch(appendLanguageQuery(`/api/topics/${encodeURIComponent(topicId)}`, lang), {
+    cache: "no-store"
+  });
   if (res.status === 404) return null;
   const data = await parseJson(res);
   return data?.topic || null;
