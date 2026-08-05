@@ -487,12 +487,12 @@ function normalizeQuestions(value, currentQuestions = null) {
     .map((question, index) => ({
       id: String(question?.id || `${index + 1}`),
       image: String(
-        question?.image !== undefined && String(question?.image).trim()
+        question?.image !== undefined
           ? question.image
           : currentById.get(String(question?.id || `${index + 1}`))?.image || ""
       ),
       audio: String(
-        question?.audio !== undefined && String(question?.audio).trim()
+        question?.audio !== undefined
           ? question.audio
           : currentById.get(String(question?.id || `${index + 1}`))?.audio || ""
       ),
@@ -512,7 +512,7 @@ function normalizeQuestions(value, currentQuestions = null) {
           ? Number(currentById.get(String(question?.id || `${index + 1}`))?.correctIndex)
           : 0,
       explanation: String(
-        question?.explanation !== undefined && String(question?.explanation).trim()
+        question?.explanation !== undefined
           ? question.explanation
           : currentById.get(String(question?.id || `${index + 1}`))?.explanation || ""
       ),
@@ -638,10 +638,13 @@ function mergeTicketSlotQuestions(value, currentQuestions = null) {
     const currentI18n = current?.i18n && typeof current.i18n === "object" ? parseJsonValue(current.i18n, {}) : {};
     const nextI18n = hasSourceI18n ? parseJsonValue(next.i18n, {}) : currentI18n;
 
+    const hasImage = Object.prototype.hasOwnProperty.call(next, "image");
+    const hasAudio = Object.prototype.hasOwnProperty.call(next, "audio");
+    const hasExplanation = Object.prototype.hasOwnProperty.call(next, "explanation");
     const text = String(next.text || "").trim() || String(current?.text || "").trim();
-    const image = String(next.image || "").trim() || String(current?.image || "").trim();
-    const audio = String(next.audio || "").trim() || String(current?.audio || "").trim();
-    const explanation = String(next.explanation || "").trim() || String(current?.explanation || "").trim();
+    const image = hasImage ? String(next.image || "").trim() : String(current?.image || "").trim();
+    const audio = hasAudio ? String(next.audio || "").trim() : String(current?.audio || "").trim();
+    const explanation = hasExplanation ? String(next.explanation || "").trim() : String(current?.explanation || "").trim();
     const options = Array.isArray(next.options) && next.options.some((option) => String(option || "").trim())
       ? next.options.map((option) => String(option || "").trim())
       : Array.isArray(current?.options)
