@@ -271,8 +271,8 @@ body {
   gap: 6px;
   padding: 6px 10px;
   border-radius: var(--radius);
-  border: 1px solid color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 38%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel));
   color: var(--text);
   font-weight: 900;
   font-size: 12px;
@@ -957,13 +957,13 @@ body {
 }
 
 .answersQuestionCard .option.correct {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 42%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
 }
 
 .answersQuestionCard .option.wrong {
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
-  background: color-mix(in srgb, var(--bad) 36%, var(--panel2));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
 }
 
 .answersAnswer {
@@ -1079,13 +1079,13 @@ body {
 }
 
 .mistakesAnswerBox.good {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 34%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
 }
 
 .mistakesAnswerBox.bad {
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
-  background: color-mix(in srgb, var(--bad) 32%, var(--panel2));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
 }
 
 .mistakesAnswerLabel {
@@ -1114,8 +1114,8 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--bad) 60%, var(--border));
-  background: color-mix(in srgb, var(--bad) 40%, var(--panel2));
+  border: 1px solid color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
   color: var(--bad);
   display: grid;
   place-items: center;
@@ -1123,8 +1123,8 @@ body {
 }
 
 .mistakesDeleteBtn:hover {
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
-  background: color-mix(in srgb, var(--bad) 48%, var(--panel2));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
 }
 
 .mistakesCardActions {
@@ -1443,8 +1443,8 @@ body {
 }
 
 .topicCard.isCompleted {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 32%, var(--panel)), var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 85%, var(--panel)), var(--panel));
 }
 
 .topicCard::before {
@@ -1483,8 +1483,8 @@ body {
 }
 
 .topicCheck.active {
-  background: color-mix(in srgb, var(--ok) 40%, var(--panel2));
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
   color: var(--ok);
 }
 
@@ -2130,8 +2130,8 @@ body {
 }
 
 .adminTopicCard.isMarked {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 30%, var(--panel)), var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ok) 85%, var(--panel)), var(--panel));
 }
 
 .adminTopicCard:hover {
@@ -2182,7 +2182,7 @@ body {
 }
 
 .adminVideoStatus-success {
-  border: 1px solid color-mix(in srgb, var(--ok) 60%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--ok) 85%, var(--border));
 }
 
 .adminVideoStatus-warning {
@@ -2294,8 +2294,8 @@ body {
 }
 
 .adminTopicCheck.active {
-  background: color-mix(in srgb, var(--ok) 40%, var(--panel2));
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
   color: var(--ok);
 }
 
@@ -2362,8 +2362,8 @@ body {
 }
 
 .adminTopicMetaBadgeMarked {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 34%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
   color: var(--text);
 }
 
@@ -2394,8 +2394,8 @@ body {
 }
 
 .badge-success {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 34%, var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel));
   color: var(--text);
 }
 
@@ -4836,11 +4836,11 @@ body {
 }
 
 .toast-success {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
 }
 
 .toast-error {
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
 }
 
 .toast-info {
@@ -5206,13 +5206,13 @@ body {
 }
 
 .progressLineLegendItem.good {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 36%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
 }
 
 .progressLineLegendItem.bad {
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
-  background: color-mix(in srgb, var(--bad) 34%, var(--panel2));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
 }
 
 .progressLineLegendItem.muted {
@@ -5227,16 +5227,16 @@ body {
 }
 
 .ticketResultStat {
-  border: 1px solid color-mix(in srgb, var(--ok) 56%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--ok) 85%, var(--border));
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--ok) 34%, var(--panel2));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
   padding: 12px;
   text-align: center;
 }
 
 .ticketResultStat.bad {
-  border-color: color-mix(in srgb, var(--bad) 58%, var(--border));
-  background: color-mix(in srgb, var(--bad) 34%, var(--panel2));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
 }
 
 .ticketResultStat.mutedStat {
@@ -5307,8 +5307,8 @@ body {
 }
 
 .btn.proActive {
-  background: color-mix(in srgb, var(--ok) 40%, var(--panel));
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
   color: var(--text);
 }
 
@@ -5426,18 +5426,18 @@ body {
 }
 
 .qbtn.answered {
-  background: color-mix(in srgb, var(--ok) 38%, var(--panel));
-  border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
 }
 
 .qbtn.answered.wrong {
-  background: color-mix(in srgb, var(--bad) 38%, var(--panel));
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
 }
 
 .qbtn.answered.correct {
-  background: color-mix(in srgb, var(--ok) 38%, var(--panel));
-  border-color: color-mix(in srgb, var(--ok) 55%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
 }
 
 .qimg {
@@ -5628,13 +5628,13 @@ body {
 }
 
 .option.correct {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
-  background: color-mix(in srgb, var(--ok) 42%, var(--panel2));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
+  background: color-mix(in srgb, var(--ok) 85%, var(--panel2));
 }
 
 .option.wrong {
-  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
-  background: color-mix(in srgb, var(--bad) 36%, var(--panel2));
+  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
+  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
 }
 
 .explanation {
@@ -6238,7 +6238,7 @@ body {
 }
 
 .pill.ok {
-  border-color: color-mix(in srgb, var(--ok) 60%, var(--border));
+  border-color: color-mix(in srgb, var(--ok) 85%, var(--border));
 }
 
 .pill.bad {
@@ -6837,7 +6837,7 @@ body {
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
-  background: color-mix(in srgb, var(--ok) 48%, transparent);
+  background: color-mix(in srgb, var(--ok) 85%, transparent);
   color: var(--text);
 }
 

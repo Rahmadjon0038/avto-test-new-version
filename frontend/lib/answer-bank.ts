@@ -151,21 +151,17 @@ export async function getLocalAnswerBank(): Promise<AnswerQuestion[]> {
   return bank.map((item) => buildAnswerQuestion(item.ticketId, item.ticketTitle, item.question, item.questionIndex));
 }
 
-// Local equivalent of getGeneratedCustomTestsFromDb()'s size list ("Sozlamali testlar").
-export async function getLocalGeneratedCustomTestSizes(): Promise<number[]> {
-  const bank = await getLocalTicketQuestionBank();
+function sizesForBankLength(bankLength: number): number[] {
   const sizes: number[] = [];
-  for (let size = 20; size <= bank.length; size += 20) sizes.push(size);
+  for (let size = 20; size <= bankLength; size += 20) sizes.push(size);
   return sizes;
 }
 
-// Local equivalent of buildGeneratedCustomTestFromBankSize() — must stay a byte-for-byte port
-// (same shuffleQuestionsWithSeed algorithm as the backend's shuffleWithSeed, same 9000+size seed,
+// Pure — takes an already-built bank, does no IndexedDB reads. Must stay a byte-for-byte port of
+// buildGeneratedCustomTestFromBankSize() (same rawShuffleWithSeed algorithm, same 9000+size seed,
 // same slice) so a given generated test id shows the same questions online and offline.
-export async function getLocalGeneratedCustomTest(size: number): Promise<LocalGeneratedCustomTest | null> {
-  if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
-  const bank = await getLocalTicketQuestionBank();
-  if (size > bank.length) return null;
+function buildGeneratedCustomTestFromBank(bank: BankItem[], size: number): LocalGeneratedCustomTest | null {
+  if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0 || size > bank.length) return null;
 
   const shuffled = rawShuffleWithSeed(bank, 9000 + size);
   const questions: LocalGeneratedQuestion[] = shuffled.slice(0, size).map((item) => {
@@ -189,9 +185,29 @@ export async function getLocalGeneratedCustomTest(size: number): Promise<LocalGe
   return { id: 1000 + size, title: `${size} ta`, questions, questionsCount: questions.length };
 }
 
+export async function getLocalGeneratedCustomTest(size: number): Promise<LocalGeneratedCustomTest | null> {
+  const bank = await getLocalTicketQuestionBank();
+  return buildGeneratedCustomTestFromBank(bank, size);
+}
+
 export async function getLocalGeneratedCustomTestById(testId: string | number): Promise<LocalGeneratedCustomTest | null> {
   const raw = Number(testId);
   if (!Number.isFinite(raw)) return null;
   const size = raw >= 1000 ? raw - 1000 : raw;
   return getLocalGeneratedCustomTest(size);
+}
+
+// Builds every generated test in one pass — fetches the ticket bank exactly once instead of once
+// per size, which is what made the "Sozlamali testlar" list page slow (it used to call
+// getLocalGeneratedCustomTest() per size, each rebuilding the whole bank from IndexedDB from
+// scratch).
+export async function getLocalGeneratedCustomTestList(): Promise<LocalGeneratedCustomTest[]> {
+  const bank = await getLocalTicketQuestionBank();
+  const sizes = sizesForBankLength(bank.length);
+  const tests: LocalGeneratedCustomTest[] = [];
+  for (const size of sizes) {
+    const test = buildGeneratedCustomTestFromBank(bank, size);
+    if (test) tests.push(test);
+  }
+  return tests;
 }

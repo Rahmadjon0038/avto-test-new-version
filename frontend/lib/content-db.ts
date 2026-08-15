@@ -239,6 +239,20 @@ export async function putCachedCustomTest(test: CachedCustomTest): Promise<void>
   }
 }
 
+// Batch write for e.g. the full generated "Sozlamali testlar" list — one transaction instead of
+// one per test.
+export async function putCachedCustomTests(tests: CachedCustomTest[]): Promise<void> {
+  const db = await safeDb();
+  if (!db || !tests.length) return;
+  try {
+    const tx = db.transaction("customTests", "readwrite");
+    for (const test of tests) await tx.store.put(test);
+    await tx.done;
+  } catch {
+    // best effort only
+  }
+}
+
 async function setMeta(key: string, value: unknown): Promise<void> {
   const db = await safeDb();
   if (!db) return;
