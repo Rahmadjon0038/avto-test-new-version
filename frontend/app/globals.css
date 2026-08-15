@@ -1811,6 +1811,25 @@ body {
   font-weight: 1000;
 }
 
+.adminPublishBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.adminPublishBtn:disabled {
+  opacity: 0.65;
+}
+
 .adminMain {
   padding: 18px;
 }

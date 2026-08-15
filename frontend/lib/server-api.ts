@@ -67,20 +67,4 @@ export async function fetchPublicTopic(id: string, lang?: string | null): Promis
   return { topic: r.ok ? (r.data?.topic ?? null) : null, status: r.status };
 }
 
-export function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return "/default.png";
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
-}
+export { resolveQuestionImage } from "./question-image";

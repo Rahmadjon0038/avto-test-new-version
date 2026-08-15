@@ -11,6 +11,9 @@ import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
+import { resolveQuestionImage } from "@/lib/question-image";
+import { getCachedExamSnapshot, putCachedExamSnapshot } from "@/lib/content-db";
+import { preloadQuestionImages } from "@/lib/image-preload";
 
 type ExamQuestion = {
   id: string;
@@ -44,24 +47,6 @@ type ExamData = {
 type ModeCount = 20;
 
 const FALLBACK_IMAGE = "/default.png";
-
-function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return FALLBACK_IMAGE;
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // proxy fallback below
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
-}
 
 function isSafeHref(href: string) {
   return /^(https?:\/\/|\/)/i.test(href.trim());
@@ -213,7 +198,8 @@ function calculateExamResult(
 export default function ExamPage() {
   const router = useRouter();
   const qc = useQueryClient();
-  const { authFetch, authReady } = useAuth();
+  const { authFetch, authReady, user } = useAuth();
+  const examUserId = String(user?.id || "anon");
   const { t, language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const examQueryKey = ["exam", language] as const;
@@ -358,6 +344,10 @@ export default function ExamPage() {
   }, [currentQuestion?.id, currentQuestion?.image]);
 
   useEffect(() => {
+    if (questions.length) preloadQuestionImages(questions, idx);
+  }, [questions, idx]);
+
+  useEffect(() => {
     if (!zoomedImage) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setZoomedImage(null);
@@ -394,6 +384,7 @@ export default function ExamPage() {
     onSuccess: async (data: any) => {
       if (data?.exam) {
         qc.setQueryData(examQueryKey, data.exam);
+        putCachedExamSnapshot(examUserId, data.exam).catch(() => {});
       }
       setExamReady(true);
       setIdx(0);
@@ -417,7 +408,12 @@ export default function ExamPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       }).then(jsonOrError),
-    onError: (error: any, variables: { previousAnswers?: Record<string, number> } | undefined) => {
+    onError: (error: any, variables) => {
+      const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+      // A per-answer autosave failing because we're offline shouldn't undo the user's answer —
+      // it stays in local state and the final "finalize" submit (which does need the network) is
+      // what actually needs to succeed. Only revert/notify for real (online) failures.
+      if (isOffline && !variables?.finalize) return;
       if (variables?.previousAnswers) setAnswers(variables.previousAnswers);
       toast.error(uzErrorMessage(error, t("common.error")));
     },
@@ -542,8 +538,20 @@ export default function ExamPage() {
     hasSeenPositiveTimerRef.current = false;
     void qc.cancelQueries({ queryKey: examQueryKey });
     qc.setQueryData(examQueryKey, null);
-    startMutation.mutate(20);
-  }, [authReady, autoStartAttempted, qc, startMutation]);
+
+    // Starting an exam picks a fresh random question set server-side, so it inherently needs a
+    // network round trip — but if that's unreachable (offline) and a previously-started exam was
+    // cached locally, fall back to it read-only so an in-progress attempt survives a reload.
+    startMutation.mutate(20, {
+      onError: async () => {
+        const cached = await getCachedExamSnapshot(examUserId);
+        if (cached) {
+          qc.setQueryData(examQueryKey, cached);
+          setExamReady(true);
+        }
+      }
+    });
+  }, [authReady, autoStartAttempted, examUserId, qc, startMutation]);
 
   const showExamLoading =
     !exam &&

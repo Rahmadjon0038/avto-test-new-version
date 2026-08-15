@@ -1091,6 +1091,7 @@ async function deleteTicket(id) {
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM tickets WHERE id = ?", [String(id)]);
+  await dbApi.run("INSERT INTO content_deletions (entity_type, entity_id) VALUES ('ticket', ?)", [String(id)]);
   invalidateTicketQuestionBankCache();
 }
 
@@ -2073,6 +2074,7 @@ async function deleteTopic(topicId) {
   if (!current) throw new Error("Mavzu topilmadi");
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(current.id)]);
   await dbApi.run("DELETE FROM topics WHERE id = ?", [String(current.id)]);
+  await dbApi.run("INSERT INTO content_deletions (entity_type, entity_id) VALUES ('topic', ?)", [String(current.id)]);
   await syncTopicQuestionBankFromTopics();
 }
 
@@ -2227,6 +2229,7 @@ async function deleteCustomTest(testId) {
   if (!current) throw new Error("Test topilmadi");
   await dbApi.run("DELETE FROM custom_test_progress WHERE custom_test_id = ?", [String(current.id)]);
   await dbApi.run("DELETE FROM custom_tests WHERE id = ?", [String(current.id)]);
+  await dbApi.run("INSERT INTO content_deletions (entity_type, entity_id) VALUES ('customTest', ?)", [String(current.id)]);
 }
 
 async function importCustomTests(testItems) {
@@ -5272,6 +5275,86 @@ app.get("/api/progress/:ticketId", requireUser, async (req, res) => {
   });
 });
 
+// Local-first content sync: lets the frontend cache topics/tickets/customTests (with their
+// questions) in IndexedDB and only pull down what changed since the client's last sync, gated
+// by an admin-controlled publish version so edits don't ship to clients until explicitly published.
+app.get("/api/content/sync", requireUser, async (req, res) => {
+  try {
+    const versionRow = await dbApi.get("SELECT version FROM content_versions WHERE key = 'questions'");
+    const serverVersion = Number(versionRow?.version || 1);
+    const clientVersion = Number(req.query.version || 0);
+    setNoStoreHeaders(res);
+
+    if (clientVersion === serverVersion) {
+      return res.json({ version: serverVersion, upToDate: true, syncedAt: new Date().toISOString() });
+    }
+
+    const updatedAfterRaw = String(req.query.updatedAfter || "").trim();
+    const updatedAfter =
+      updatedAfterRaw && !Number.isNaN(Date.parse(updatedAfterRaw)) ? updatedAfterRaw : "1970-01-01T00:00:00.000Z";
+    const syncedAt = new Date().toISOString();
+
+    const topicRows = await dbApi.all("SELECT id, updated_at FROM topics WHERE updated_at > ? ORDER BY id ASC", [
+      updatedAfter
+    ]);
+    const topics = [];
+    for (const row of topicRows) {
+      const topic = await getTopicFromDb(row.id);
+      if (topic) topics.push({ ...topic, updated_at: row.updated_at ? String(row.updated_at) : undefined });
+    }
+
+    // A ticket's served questions are hydrated from topic_question_bank at read time (see
+    // getTicketFromDb), so a ticket can change without tickets.updated_at moving. GREATEST()
+    // over both timestamps catches that without touching the existing write paths.
+    const ticketRows = await dbApi.all(
+      `
+        SELECT t.id
+        FROM tickets t
+        LEFT JOIN ticket_questions tq ON tq.ticket_id = t.id
+        LEFT JOIN topic_question_bank b ON b.question_key = tq.question_id
+        WHERE t.status = 'COMPLETED'
+        GROUP BY t.id
+        HAVING GREATEST(t.updated_at, COALESCE(MAX(b.updated_at), t.updated_at)) > ?
+        ORDER BY t.id ASC
+      `,
+      [updatedAfter]
+    );
+    const tickets = [];
+    for (const row of ticketRows) {
+      const ticket = await getTicketByIdFromDb(row.id);
+      if (ticket) tickets.push(ticket);
+    }
+
+    const customTestRows = await dbApi.all("SELECT id, updated_at FROM custom_tests WHERE updated_at > ? ORDER BY id ASC", [
+      updatedAfter
+    ]);
+    const customTests = [];
+    for (const row of customTestRows) {
+      const test = await getCustomTestFromDb(row.id);
+      if (test) customTests.push({ ...test, updated_at: row.updated_at ? String(row.updated_at) : undefined });
+    }
+
+    const deletionRows = await dbApi.all(
+      "SELECT entity_type, entity_id FROM content_deletions WHERE deleted_at > ? ORDER BY id ASC",
+      [updatedAfter]
+    );
+    const deletedIdsByType = { topic: [], ticket: [], customTest: [] };
+    for (const row of deletionRows) {
+      if (deletedIdsByType[row.entity_type]) deletedIdsByType[row.entity_type].push(row.entity_id);
+    }
+
+    res.json({
+      version: serverVersion,
+      syncedAt,
+      topics: { updated: topics, deletedIds: deletedIdsByType.topic },
+      tickets: { updated: tickets, deletedIds: deletedIdsByType.ticket },
+      customTests: { updated: customTests, deletedIds: deletedIdsByType.customTest }
+    });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
+});
+
 function shuffleInPlace(arr) {
   for (let i = arr.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -5905,7 +5988,12 @@ app.delete("/api/admin/topics", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
+    const existingIds = await dbApi.all("SELECT id FROM topics");
     const result = await dbApi.run("DELETE FROM topics");
+    for (const row of existingIds) {
+      await dbApi.run("INSERT INTO content_deletions (entity_type, entity_id) VALUES ('topic', ?)", [String(row.id)]);
+    }
+    await syncTopicQuestionBankFromTopics();
     res.json({ ok: true, deletedCount: Number(result?.rowCount || 0) });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
@@ -5931,8 +6019,12 @@ app.delete("/api/admin/custom-tests", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   try {
+    const existingIds = await dbApi.all("SELECT id FROM custom_tests");
     const progressResult = await dbApi.run("DELETE FROM custom_test_progress");
     const result = await dbApi.run("DELETE FROM custom_tests");
+    for (const row of existingIds) {
+      await dbApi.run("INSERT INTO content_deletions (entity_type, entity_id) VALUES ('customTest', ?)", [String(row.id)]);
+    }
     res.json({ ok: true, deletedCount: Number(result?.rowCount || progressResult?.rowCount || 0) });
   } catch (e) {
     res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
@@ -6210,6 +6302,22 @@ app.delete("/api/admin/users/:userId", async (req, res) => {
 
   await dbApi.run("DELETE FROM users WHERE id = ?", [String(target.id)]);
   res.json({ ok: true });
+});
+
+// Batches question content updates: clients only pick up admin edits after this is called,
+// instead of on every individual save. The UPDATE ... RETURNING is atomic, so a double-click
+// still only bumps the version once per click, not twice.
+app.post("/api/admin/content/publish", async (req, res) => {
+  const user = await getAdminFromAccess(req);
+  if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
+  try {
+    const result = await dbApi.get(
+      "UPDATE content_versions SET version = version + 1, published_at = NOW() WHERE key = 'questions' RETURNING version, published_at"
+    );
+    res.json({ ok: true, version: Number(result?.version || 1), publishedAt: result?.published_at || null });
+  } catch (e) {
+    res.status(400).json({ error: e?.message || "Noto‘g‘ri so‘rov" });
+  }
 });
 
 app.post("/api/admin/topics", async (req, res) => {

@@ -11,6 +11,9 @@ import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
+import { resolveQuestionImage } from "@/lib/question-image";
+import { getCachedMistakes, setMistakesForUser, type CachedMistake } from "@/lib/content-db";
+import { preloadQuestionImages } from "@/lib/image-preload";
 
 type MistakeQuestion = {
   id: string;
@@ -32,24 +35,6 @@ type MistakeQuestion = {
 type TabKey = "list" | "practice";
 
 const FALLBACK_IMAGE = "/default.png";
-
-function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return FALLBACK_IMAGE;
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
-}
 
 function isSafeHref(href: string) {
   return /^(https?:\/\/|\/)/i.test(href.trim());
@@ -251,7 +236,8 @@ function mistakeLabel(question: MistakeQuestion, index: number, t: (key: string)
 export default function MistakesPage() {
   const router = useRouter();
   const qc = useQueryClient();
-  const { authFetch } = useAuth();
+  const { authFetch, user } = useAuth();
+  const mistakesUserId = String(user?.id || "anon");
   const { t, language } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed("mistakes");
@@ -272,12 +258,29 @@ export default function MistakesPage() {
   const [imageLoading, setImageLoading] = useState(true);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
+  // Local-first: mistakes are per-user progress, not shared content, so they're cached in their
+  // own IndexedDB store (namespaced by user id, cleared on logout — see auth-provider.tsx) rather
+  // than mixed into the shared question cache. Last-synced list renders immediately; the network
+  // fetch below (still the source of truth when reachable) refreshes it in the background.
+  const [cachedMistakes, setCachedMistakes] = useState<CachedMistake[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getCachedMistakes(mistakesUserId).then((items) => {
+      if (!cancelled) setCachedMistakes(items);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mistakesUserId]);
+
   const mistakesQuery = useQuery({
     queryKey: ["mistakes", language],
     queryFn: async () => {
       const res = await authFetch("/api/mistakes");
       const data = await jsonOrError(res);
-      return Array.isArray(data.questions) ? (data.questions as MistakeQuestion[]) : [];
+      const list = Array.isArray(data.questions) ? (data.questions as MistakeQuestion[]) : [];
+      setMistakesForUser(mistakesUserId, list as unknown as CachedMistake[]).catch(() => {});
+      return list;
     }
   });
 
@@ -285,7 +288,7 @@ export default function MistakesPage() {
     if (mistakesQuery.error) toast.error((mistakesQuery.error as any)?.message || t("common.error"));
   }, [mistakesQuery.error, t]);
 
-  const questions = mistakesQuery.data || [];
+  const questions = mistakesQuery.data ?? (cachedMistakes as MistakeQuestion[] | null) ?? [];
   const currentQuestions = useMemo(
     () => (settings.shuffleQuestions ? shuffleQuestionsWithSeed(questions, shuffleSeed) : questions),
     [questions, settings.shuffleQuestions, shuffleSeed]
@@ -313,6 +316,10 @@ export default function MistakesPage() {
   useEffect(() => {
     setImageLoading(Boolean(currentQuestion?.image));
   }, [currentQuestion?.id, currentQuestion?.image]);
+
+  useEffect(() => {
+    if (currentQuestions.length) preloadQuestionImages(currentQuestions, idx);
+  }, [currentQuestions, idx]);
 
   useEffect(() => {
     return () => {

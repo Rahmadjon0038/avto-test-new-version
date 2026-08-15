@@ -3,13 +3,31 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronLeft, Menu } from "lucide-react";
+import { ChevronLeft, Menu, UploadCloud } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { adminSections } from "../admin-sections";
+import { useAuth } from "../../auth-provider";
+import { jsonOrError } from "@/lib/api-authed";
+import { broadcastQuerySync } from "../../query-provider";
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { authFetch } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+
+  const publishMutation = useMutation({
+    mutationFn: async () => {
+      const res = await authFetch("/api/admin/content/publish", { method: "POST" });
+      return jsonOrError(res);
+    },
+    onSuccess: (data: any) => {
+      toast.success(`Kontent yangilandi (versiya ${data?.version ?? ""})`.trim());
+      broadcastQuerySync({ type: "invalidate", queryKey: ["content-sync"] });
+    },
+    onError: (error: any) => toast.error(error?.message || "Xatolik")
+  });
   const isActive = (href: string) => (href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`));
 
   useEffect(() => {
@@ -70,6 +88,16 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             <Menu className="lucide" aria-hidden="true" />
           </button>
           <div className="adminTopbarTitle">Boshqaruv</div>
+          <button
+            className="adminPublishBtn"
+            type="button"
+            disabled={publishMutation.isPending}
+            onClick={() => publishMutation.mutate()}
+            title="Savollarga kiritilgan o‘zgarishlarni foydalanuvchilarga chiqarish"
+          >
+            <UploadCloud className="lucide" aria-hidden="true" />
+            {publishMutation.isPending ? "Yangilanmoqda..." : "Kontentni yangilash"}
+          </button>
         </header>
 
         <main className="adminMain">{children}</main>

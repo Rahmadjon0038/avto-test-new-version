@@ -2,55 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, BookOpen, ChevronDown, Check, Filter, Image, ImageOff, Search } from "lucide-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
-import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
-
-type AnswerQuestion = {
-  id: string;
-  kind: "ticket" | "topic" | "custom";
-  sourceId: string;
-  sourceTitle: string;
-  questionIndex: number;
-  text: string;
-  image: string;
-  audio?: string;
-  options: string[];
-  correctIndex: number;
-  correctAnswer: string;
-  explanation: string;
-  hasImage: boolean;
-};
-
-type AnswersPage = {
-  questions: AnswerQuestion[];
-  total: number;
-  offset: number;
-  limit: number;
-  hasMore: boolean;
-};
+import { resolveQuestionImage as resolveQuestionImageBase } from "@/lib/question-image";
+import { getLocalAnswerBank, type AnswerQuestion } from "@/lib/answer-bank";
+import { ensureSynced } from "@/lib/content-sync";
 
 type FilterKey = "all" | "with-image" | "without-image";
 
 function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return "";
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
+  return resolveQuestionImageBase(image, "");
 }
 
 function resolveFilterLabel(filter: FilterKey) {
@@ -62,8 +24,8 @@ function questionKeyLabel(index: number, t: (key: string, vars?: Record<string, 
 }
 
 export default function AnswersPage() {
-  const { authFetch } = useAuth();
-  const { t, language } = useSiteLanguage();
+  const { authFetch, authReady } = useAuth();
+  const { t } = useSiteLanguage();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -91,35 +53,59 @@ export default function AnswersPage() {
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, []);
 
-  const answersQuery = useInfiniteQuery({
-    queryKey: ["answers", language, debouncedSearch, filter],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      const params = new URLSearchParams({
-        offset: String(pageParam || 0),
-        limit: String(pageSize),
-        filter,
-        q: debouncedSearch
-      });
-      const res = await authFetch(`/api/answers?${params.toString()}`);
-      const data = await jsonOrError(res);
-      return {
-        questions: Array.isArray(data.questions) ? (data.questions as AnswerQuestion[]) : [],
-        total: Number(data.total || 0),
-        offset: Number(data.offset || 0),
-        limit: Number(data.limit || pageSize),
-        hasMore: Boolean(data.hasMore)
-      } as AnswersPage;
-    },
-    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.offset + lastPage.limit : undefined)
-  });
+  // Local-first: the whole answer bank lives in IndexedDB already (via the ticket cache), so this
+  // browse page never needs a network round trip — filtering/search/pagination all run client-side.
+  const [bank, setBank] = useState<AnswerQuestion[]>([]);
+  const [bankLoading, setBankLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(pageSize);
 
   useEffect(() => {
-    if (answersQuery.error) toast.error((answersQuery.error as any)?.message || "Xatolik");
-  }, [answersQuery.error]);
+    let cancelled = false;
+    getLocalAnswerBank()
+      .then((items) => {
+        if (!cancelled) setBank(items);
+      })
+      .finally(() => {
+        if (!cancelled) setBankLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const questions = useMemo(() => (answersQuery.data?.pages || []).flatMap((page) => page.questions), [answersQuery.data]);
-  const total = answersQuery.data?.pages?.[0]?.total ?? questions.length;
+  useEffect(() => {
+    if (!authReady) return;
+    ensureSynced(authFetch)
+      .then((result) => {
+        if (result.changed) getLocalAnswerBank().then(setBank);
+      })
+      .catch(() => {});
+  }, [authReady, authFetch]);
+
+  useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [debouncedSearch, filter]);
+
+  const filtered = useMemo(() => {
+    let items = bank;
+    if (filter === "with-image") items = items.filter((question) => question.hasImage);
+    if (filter === "without-image") items = items.filter((question) => !question.hasImage);
+    const searchValue = debouncedSearch.trim().toLowerCase();
+    if (searchValue) {
+      items = items.filter((question) => {
+        const text = String(question.text || "").toLowerCase();
+        const source = String(question.sourceTitle || "").toLowerCase();
+        const answer = String(question.correctAnswer || "").toLowerCase();
+        const explanation = String(question.explanation || "").toLowerCase();
+        return text.includes(searchValue) || source.includes(searchValue) || answer.includes(searchValue) || explanation.includes(searchValue);
+      });
+    }
+    return items;
+  }, [bank, filter, debouncedSearch]);
+
+  const questions = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const total = filtered.length;
+  const hasNextPage = visibleCount < filtered.length;
 
   const counts = useMemo(
     () => ({
@@ -129,8 +115,8 @@ export default function AnswersPage() {
     [questions.length, total]
   );
 
-  const isLoadingInitial = answersQuery.isLoading || (answersQuery.isFetching && !answersQuery.data);
-  const isLoadingMore = answersQuery.isFetchingNextPage;
+  const isLoadingInitial = bankLoading && !bank.length;
+  const isLoadingMore = false;
 
   return (
     <section className="view">
@@ -153,7 +139,7 @@ export default function AnswersPage() {
           <div className="answersHeroMeta">
           <span className="badge">{t("answers.total", { count: counts.all })}</span>
           <span className="badge">{t("answers.loaded", { count: counts.loaded })}</span>
-          <span className="badge">{answersQuery.hasNextPage ? t("answers.continue") : t("answers.allDone")}</span>
+          <span className="badge">{hasNextPage ? t("answers.continue") : t("answers.allDone")}</span>
           </div>
         </div>
 
@@ -307,9 +293,14 @@ export default function AnswersPage() {
         ))}
       </div>
 
-      {answersQuery.hasNextPage ? (
+      {hasNextPage ? (
         <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
-            <button className="btn btn-ghost" type="button" onClick={() => answersQuery.fetchNextPage()} disabled={isLoadingMore}>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setVisibleCount((count) => count + pageSize)}
+              disabled={isLoadingMore}
+            >
             {isLoadingMore ? t("common.loading") : t("answers.loadMore")}
             </button>
           </div>

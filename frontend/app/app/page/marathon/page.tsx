@@ -5,54 +5,21 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, Flame } from "lucide-react";
 import { Cell, Pie, PieChart } from "recharts";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
-import { appendLanguageQuery } from "@/lib/site-language";
-import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
-import { useShuffleSeed } from "@/lib/test-page-settings";
+import { useShuffleSeed, shuffleQuestionsWithSeed } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
+import { resolveQuestionImage } from "@/lib/question-image";
+import { getLocalAnswerBank, type AnswerQuestion } from "@/lib/answer-bank";
+import { ensureSynced } from "@/lib/content-sync";
+import { preloadQuestionImages } from "@/lib/image-preload";
 
-type AnswerQuestion = {
-  id: string;
-  kind: "ticket" | "topic" | "custom";
-  sourceId: string;
-  sourceTitle: string;
-  questionIndex: number;
-  text: string;
-  image: string;
-  options: string[];
-  correctIndex: number;
-  correctAnswer: string;
-  explanation: string;
-  hasImage: boolean;
-};
-
-const PAGE_SIZE = 20;
 const FALLBACK_IMAGE = "/default.png";
-
-function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return FALLBACK_IMAGE;
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
-}
 
 export default function MarathonPage() {
   const router = useRouter();
-  const { authFetch } = useAuth();
+  const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
   const { seed: marathonSeed, refreshSeed: refreshMarathonSeed } = useShuffleSeed("marathon");
   const questionCardRef = useRef<HTMLDivElement | null>(null);
@@ -66,34 +33,51 @@ export default function MarathonPage() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
 
-  const bankQuery = useInfiniteQuery({
-    queryKey: ["marathon-bank", language, marathonSeed],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam }) => {
-      const params = new URLSearchParams({
-        offset: String(pageParam),
-        limit: String(PAGE_SIZE),
-        shuffle: "1",
-        seed: String(marathonSeed)
-      });
-      const res = await authFetch(appendLanguageQuery(`/api/answers?${params.toString()}`, language));
-      const data = await jsonOrError(res);
-      const fetched = Array.isArray(data.questions) ? (data.questions as AnswerQuestion[]) : [];
-      return {
-        questions: fetched,
-        total: Number(data.total ?? fetched.length),
-        offset: Number(data.offset ?? pageParam),
-        limit: Number(data.limit ?? PAGE_SIZE),
-        hasMore: Boolean(data.hasMore)
-      };
-    },
-    getNextPageParam: (lastPage, allPages) => {
-      if (!lastPage.hasMore) return undefined;
-      return allPages.reduce((sum, page) => sum + page.questions.length, 0);
-    }
-  });
+  // Local-first: the whole question bank lives in IndexedDB already (via the ticket cache), so
+  // marathon mode never needs a network round trip — it's built and shuffled entirely client-side.
+  const [rawBank, setRawBank] = useState<AnswerQuestion[]>([]);
+  const [bankLoading, setBankLoading] = useState(true);
+  const [bankError, setBankError] = useState<Error | null>(null);
 
-  const bank = useMemo(() => bankQuery.data?.pages.flatMap((page) => page.questions) ?? [], [bankQuery.data]);
+  useEffect(() => {
+    let cancelled = false;
+    setBankLoading(true);
+    getLocalAnswerBank()
+      .then((items) => {
+        if (!cancelled) setRawBank(items);
+      })
+      .catch((error) => {
+        if (!cancelled) setBankError(error instanceof Error ? error : new Error("Marafon yuklanmadi"));
+      })
+      .finally(() => {
+        if (!cancelled) setBankLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+    ensureSynced(authFetch)
+      .then((result) => {
+        // Don't reshuffle content under an in-progress marathon session.
+        if (result.changed && Object.keys(answers).length === 0) {
+          getLocalAnswerBank().then(setRawBank);
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authReady, authFetch]);
+
+  useEffect(() => {
+    if (bankError) toast.error(bankError.message || "Marafon yuklanmadi");
+  }, [bankError]);
+
+  const bank = useMemo(
+    () => (rawBank.length ? shuffleQuestionsWithSeed(rawBank, marathonSeed) : rawBank),
+    [rawBank, marathonSeed]
+  );
   const currentQuestion = visibleQuestions[currentIndex] ?? null;
 
   const total = visibleQuestions.length;
@@ -106,12 +90,6 @@ export default function MarathonPage() {
     { name: "To‘g‘ri", value: correctCount },
     { name: "Qolgan", value: Math.max(total - correctCount, 0) }
   ];
-
-  useEffect(() => {
-    if (bankQuery.error) {
-      toast.error((bankQuery.error as any)?.message || "Marafon yuklanmadi");
-    }
-  }, [bankQuery.error]);
 
   useEffect(() => {
     setVisibleQuestions([]);
@@ -139,6 +117,10 @@ export default function MarathonPage() {
     setImageLoading(Boolean(currentQuestion?.image));
   }, [currentQuestion?.id, currentQuestion?.image]);
 
+  useEffect(() => {
+    if (visibleQuestions.length) preloadQuestionImages(visibleQuestions, currentIndex);
+  }, [visibleQuestions, currentIndex]);
+
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
   useArrowQuestionNavigation({
     enabled: Boolean(currentQuestion) && !zoomedImage && !finishOpen,
@@ -151,11 +133,7 @@ export default function MarathonPage() {
   });
 
   async function ensureNextQuestionLoaded() {
-    if (nextBankIndex < bank.length) return bank[nextBankIndex];
-    if (!bankQuery.hasNextPage) return null;
-    const result = await bankQuery.fetchNextPage();
-    const nextBank = result.data?.pages.flatMap((page) => page.questions) ?? [];
-    return nextBank[nextBankIndex] ?? null;
+    return bank[nextBankIndex] ?? null;
   }
 
   function scheduleAutoNext(nextIndex: number) {
@@ -203,7 +181,7 @@ export default function MarathonPage() {
     scrollTargetRef: questionCardRef
   });
 
-  if (bankQuery.isLoading && !bank.length) {
+  if (bankLoading && !bank.length) {
     return (
       <section className="view">
         <div className="muted">{t("marathon.loading")}</div>

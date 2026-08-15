@@ -14,6 +14,10 @@ import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
+import { resolveQuestionImage } from "@/lib/question-image";
+import { getCachedCustomTest, putCachedCustomTest, type CachedCustomTest } from "@/lib/content-db";
+import { ensureSynced } from "@/lib/content-sync";
+import { preloadQuestionImages } from "@/lib/image-preload";
 
 type Question = {
   id: string;
@@ -28,24 +32,6 @@ type Question = {
 type Topic = { id: string; title: string; questions: Question[] };
 
 const FALLBACK_IMAGE = "/default.png";
-
-function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return FALLBACK_IMAGE;
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
-}
 
 function isSafeHref(href: string) {
   return /^(https?:\/\/|\/)/i.test(href.trim());
@@ -266,7 +252,7 @@ export default function CustomTestPage() {
   const params = useParams<{ testId: string }>();
   const testId = String(params.testId || "");
   const qc = useQueryClient();
-  const { authFetch } = useAuth();
+  const { authFetch, authReady } = useAuth();
   const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`custom:${testId}`);
@@ -306,9 +292,33 @@ export default function CustomTestPage() {
       const res = await authFetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, language));
       const data = await jsonOrError(res);
       setCustomTest(data.customTest);
+      if (data.customTest?.id !== undefined) putCachedCustomTest(data.customTest as unknown as CachedCustomTest);
       return data;
     }
   });
+
+  // Local-first: while the network fetch above is in flight, show the last IndexedDB-cached
+  // copy of this custom test immediately instead of leaving the page blank.
+  useEffect(() => {
+    let cancelled = false;
+    getCachedCustomTest(testId).then((cached) => {
+      if (!cancelled && cached) {
+        setCustomTest((current) => current ?? (cached as unknown as Topic));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [testId]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    ensureSynced(authFetch).catch(() => {});
+  }, [authReady, authFetch]);
+
+  useEffect(() => {
+    if (customTestQuestions.length) preloadQuestionImages(customTestQuestions, idx);
+  }, [customTestQuestions, idx]);
 
   const progressQuery = useQuery({
     queryKey: ["custom-test-progress", testId, language],

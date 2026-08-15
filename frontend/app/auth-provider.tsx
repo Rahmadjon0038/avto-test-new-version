@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import toast from "react-hot-toast";
 import { useCookies } from "react-cookie";
 import { getBrowserLanguage, getTranslation } from "@/lib/site-language";
+import { clearUserScopedCaches } from "@/lib/content-db";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -134,6 +135,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {}
     setToken(null);
     setProfile(null);
+    // Mistakes/exam snapshots are per-user progress cached locally — wipe them so a different
+    // account signing in on this device never sees the previous user's data. The shared question
+    // content cache (topics/tickets/customTests) is intentionally left alone.
+    clearUserScopedCaches().catch(() => {});
     toast.success(getTranslation(getBrowserLanguage(), "common.close"));
   }, [setToken, setProfile]);
 

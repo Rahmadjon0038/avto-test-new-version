@@ -19,6 +19,10 @@ import {
   useTestPageSettings
 } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
+import { resolveQuestionImage } from "@/lib/question-image";
+import { getCachedTicket, putCachedTicket, type CachedTicket } from "@/lib/content-db";
+import { ensureSynced } from "@/lib/content-sync";
+import { preloadQuestionImages } from "@/lib/image-preload";
 
 type Question = {
   id: string;
@@ -34,24 +38,6 @@ type Ticket = { id: string; title: string; questions: Array<Question | null> };
 type QuestionOptionView = Question & { optionOrder: number[] };
 
 const FALLBACK_IMAGE = "/default.png";
-
-function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return FALLBACK_IMAGE;
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
-}
 
 function isSafeHref(href: string) {
   return /^(https?:\/\/|\/)/i.test(href.trim());
@@ -365,7 +351,32 @@ export default function TicketPage() {
     refetchOnReconnect: true
   });
 
-  const ticket = ticketQuery.data?.ticket ?? null;
+  // Local-first: render the last IndexedDB-cached copy of this ticket immediately, while the
+  // network request above (still the source of truth) runs in the background. Once it resolves,
+  // ticketQuery.data takes over below and the cache is refreshed for next time.
+  const [cachedTicket, setCachedTicket] = useState<Ticket | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setCachedTicket(null);
+    getCachedTicket(ticketId).then((cached) => {
+      if (!cancelled && cached) setCachedTicket(cached as unknown as Ticket);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ticketId]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    ensureSynced(authFetch).catch(() => {});
+  }, [authReady, authFetch]);
+
+  useEffect(() => {
+    const fetchedTicket = ticketQuery.data?.ticket;
+    if (fetchedTicket?.id) putCachedTicket(fetchedTicket as unknown as CachedTicket);
+  }, [ticketQuery.data]);
+
+  const ticket = ticketQuery.data?.ticket ?? cachedTicket ?? null;
   const ticketQuestions = useMemo(() => (ticket && Array.isArray(ticket.questions) ? ticket.questions : []), [ticket]);
   const displayQuestions = useMemo(() => {
     if (!ticketQuestions.length) return ticketQuestions;
@@ -383,6 +394,10 @@ export default function TicketPage() {
     () => (q ? buildQuestionOptionView(q, optionShuffleSeed, settings.shuffleQuestions) : null),
     [optionShuffleSeed, q, settings.shuffleQuestions]
   );
+
+  useEffect(() => {
+    if (displayQuestions.length) preloadQuestionImages(displayQuestions, idx);
+  }, [displayQuestions, idx]);
 
   const progressQuery = useQuery({
     queryKey: ["progress", ticketId, language],

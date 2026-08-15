@@ -6,6 +6,7 @@ import QueryProvider from "./query-provider";
 import { AuthProvider } from "./auth-provider";
 import ToasterClient from "./toaster-client";
 import { SiteLanguageProvider } from "./site-language-provider";
+import ServiceWorkerRegistrar from "./service-worker-registrar";
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export default function Providers({ children }: { children: ReactNode }) {
           <AuthProvider>
             {children}
             <ToasterClient />
+            <ServiceWorkerRegistrar />
           </AuthProvider>
         </QueryProvider>
       </SiteLanguageProvider>

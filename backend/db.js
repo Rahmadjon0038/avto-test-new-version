@@ -250,6 +250,25 @@ async function initDb(dbApi) {
   await dbApi.run(`ALTER TABLE custom_tests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();`);
 
   await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS content_versions (
+      key TEXT PRIMARY KEY,
+      version INTEGER NOT NULL DEFAULT 1,
+      published_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await dbApi.run(`INSERT INTO content_versions (key) VALUES ('questions') ON CONFLICT (key) DO NOTHING;`);
+
+  await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS content_deletions (
+      id BIGSERIAL PRIMARY KEY,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      deleted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await dbApi.run(`CREATE INDEX IF NOT EXISTS content_deletions_deleted_at_idx ON content_deletions (deleted_at);`);
+
+  await dbApi.run(`
     CREATE TABLE IF NOT EXISTS video_lessons (
       id BIGSERIAL PRIMARY KEY,
       topic_id BIGINT NOT NULL REFERENCES topics(id) ON DELETE CASCADE,

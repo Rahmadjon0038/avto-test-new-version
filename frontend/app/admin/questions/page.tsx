@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { resolveQuestionImage as resolveQuestionImageBase } from "@/lib/question-image";
 
 type AdminQuestion = {
   id: string;
@@ -38,21 +39,7 @@ function questionLabel(number: number) {
 }
 
 function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return "";
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
+  return resolveQuestionImageBase(image, "");
 }
 
 function resolveSourceHref(question: AdminQuestion) {

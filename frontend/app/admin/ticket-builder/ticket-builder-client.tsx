@@ -9,6 +9,7 @@ import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { broadcastQuerySync } from "@/app/query-provider";
+import { resolveQuestionImage as resolveQuestionImageBase } from "@/lib/question-image";
 
 type BuilderQuestion = {
   id: string;
@@ -137,21 +138,7 @@ function setCompactDragImage(event: DragEvent<HTMLElement>) {
 }
 
 function resolveQuestionImage(image?: string) {
-  const value = String(image || "").trim();
-  if (!value) return "";
-  if (value.startsWith("/")) return value;
-  if (/^https?:\/\//i.test(value)) {
-    try {
-      const parsed = new URL(value);
-      if (parsed.hostname.endsWith("r2.dev") || parsed.hostname.endsWith("r2.cloudflarestorage.com")) {
-        return value;
-      }
-    } catch {
-      // fall through to proxy
-    }
-    return `/api/image?u=${encodeURIComponent(value)}`;
-  }
-  return value;
+  return resolveQuestionImageBase(image, "");
 }
 
 function optionLabel(index: number) {
