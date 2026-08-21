@@ -6,7 +6,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/auth-provider";
-import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { broadcastQuerySync } from "@/app/query-provider";
 import { resolveQuestionImage as resolveQuestionImageBase } from "@/lib/question-image";
@@ -99,24 +98,6 @@ function normalizeDraftSlots(items: Array<BuilderQuestion | null>) {
   });
 }
 
-function syncQuestionLocale(question: BuilderQuestion, language: string) {
-  const normalizedLanguage = String(language || "").trim().toLowerCase();
-  if (!normalizedLanguage) return question;
-  return {
-    ...question,
-    i18n: {
-      [normalizedLanguage]: {
-        text: String(question.text || "").trim(),
-        image: String(question.image || "").trim(),
-        audio: String(question.audio || "").trim(),
-        options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [],
-        correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
-        explanation: String(question.explanation || "").trim()
-      }
-    }
-  };
-}
-
 function setCompactDragImage(event: DragEvent<HTMLElement>) {
   const source = event.currentTarget as HTMLElement | null;
   if (!source) return;
@@ -150,7 +131,6 @@ export default function AdminTicketBuilderPage() {
   const searchParams = useSearchParams();
   const qc = useQueryClient();
   const { authFetch } = useAuth();
-  const { language } = useSiteLanguage();
   const [draft, setDraft] = useState<DraftTicket | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -307,9 +287,7 @@ export default function AdminTicketBuilderPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!draft) throw new Error("Ticket topilmadi");
-      const normalizedQuestions = normalizeDraftSlots(
-        draft.questions.map((question) => (question ? syncQuestionLocale(cloneQuestion(question), language) : null))
-      );
+      const normalizedQuestions = normalizeDraftSlots(draft.questions.map((question) => (question ? cloneQuestion(question) : null)));
       if (isEditingExistingTicket) {
         const res = await authFetch(`/api/admin/tickets/${encodeURIComponent(activeTicketId)}`, {
           method: "PATCH",

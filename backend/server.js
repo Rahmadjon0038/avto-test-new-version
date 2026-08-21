@@ -634,9 +634,10 @@ function mergeTicketSlotQuestions(value, currentQuestions = null) {
     if ((!source || typeof source !== "object") && !current) return null;
 
     const next = source && typeof source === "object" ? source : {};
-    const hasSourceI18n = Boolean(next.i18n && Object.keys(parseJsonValue(next.i18n, {})).length);
     const currentI18n = current?.i18n && typeof current.i18n === "object" ? parseJsonValue(current.i18n, {}) : {};
-    const nextI18n = hasSourceI18n ? parseJsonValue(next.i18n, {}) : currentI18n;
+    const incomingI18n = next.i18n && typeof next.i18n === "object" ? parseJsonValue(next.i18n, {}) : null;
+    // Faqat kelgan tillarni yangilaymiz, boshqa tillarning tarjimalarini saqlab qolamiz
+    const nextI18n = incomingI18n ? { ...currentI18n, ...incomingI18n } : currentI18n;
 
     const hasImage = Object.prototype.hasOwnProperty.call(next, "image");
     const hasAudio = Object.prototype.hasOwnProperty.call(next, "audio");

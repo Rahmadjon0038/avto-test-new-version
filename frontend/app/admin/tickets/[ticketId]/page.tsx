@@ -9,6 +9,16 @@ import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { broadcastQuerySync } from "@/app/query-provider";
+import { DEFAULT_LANGUAGE, LANGUAGE_OPTIONS, type LanguageCode } from "@/lib/site-language";
+
+type QuestionLocale = {
+  text?: string;
+  image?: string;
+  audio?: string;
+  options?: string[];
+  correctIndex?: number;
+  explanation?: string;
+};
 
 type Question = {
   id: string;
@@ -17,18 +27,98 @@ type Question = {
   options: string[];
   correctIndex: number;
   explanation: string;
-  i18n?: Record<
-    string,
-    {
-      text?: string;
-      image?: string;
-      audio?: string;
-      options?: string[];
-      correctIndex?: number;
-      explanation?: string;
-    }
-  >;
+  i18n?: Record<string, QuestionLocale>;
 };
+
+type LocaleView = {
+  text: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  hasTranslation: boolean;
+};
+
+function getLocaleView(question: Question, lang: LanguageCode): LocaleView {
+  if (lang === DEFAULT_LANGUAGE) {
+    return {
+      text: question.text,
+      options: question.options,
+      correctIndex: question.correctIndex,
+      explanation: question.explanation,
+      hasTranslation: true
+    };
+  }
+  const entry = question.i18n?.[lang];
+  const hasTranslation = Boolean(entry && (String(entry.text || "").trim() || (entry.options || []).some((option) => String(option || "").trim())));
+  return {
+    text: entry?.text || "",
+    options:
+      Array.isArray(entry?.options) && entry.options.length === question.options.length
+        ? entry.options
+        : question.options.map(() => ""),
+    correctIndex: Number.isFinite(Number(entry?.correctIndex)) ? Number(entry?.correctIndex) : question.correctIndex,
+    explanation: entry?.explanation || "",
+    hasTranslation
+  };
+}
+
+function updateQuestionLocaleText(question: Question, lang: LanguageCode, field: "text" | "explanation", value: string): Question {
+  if (lang === DEFAULT_LANGUAGE) return { ...question, [field]: value };
+  const current = question.i18n?.[lang] || {};
+  return { ...question, i18n: { ...question.i18n, [lang]: { ...current, [field]: value } } };
+}
+
+function updateQuestionLocaleOption(question: Question, lang: LanguageCode, optionIndex: number, value: string): Question {
+  if (lang === DEFAULT_LANGUAGE) {
+    return { ...question, options: question.options.map((option, index) => (index === optionIndex ? value : option)) };
+  }
+  const current = question.i18n?.[lang] || {};
+  const baseOptions =
+    Array.isArray(current.options) && current.options.length === question.options.length
+      ? current.options
+      : question.options.map(() => "");
+  return {
+    ...question,
+    i18n: { ...question.i18n, [lang]: { ...current, options: baseOptions.map((option, index) => (index === optionIndex ? value : option)) } }
+  };
+}
+
+function updateQuestionLocaleCorrectIndex(question: Question, lang: LanguageCode, value: number): Question {
+  if (lang === DEFAULT_LANGUAGE) return { ...question, correctIndex: value };
+  const current = question.i18n?.[lang] || {};
+  return { ...question, i18n: { ...question.i18n, [lang]: { ...current, correctIndex: value } } };
+}
+
+const NON_DEFAULT_LANGUAGES = LANGUAGE_OPTIONS.map((option) => option.code).filter((code) => code !== DEFAULT_LANGUAGE);
+
+function addOptionAcrossLocales(question: Question): Question {
+  const nextOptions = [...question.options, ""];
+  const nextI18n = { ...(question.i18n || {}) };
+  for (const lang of NON_DEFAULT_LANGUAGES) {
+    const entry = nextI18n[lang];
+    if (entry && Array.isArray(entry.options) && entry.options.length === question.options.length) {
+      nextI18n[lang] = { ...entry, options: [...entry.options, ""] };
+    }
+  }
+  return { ...question, options: nextOptions, i18n: nextI18n };
+}
+
+function removeOptionAcrossLocales(question: Question): Question {
+  const nextOptions = question.options.slice(0, -1);
+  const nextCorrectIndex = Math.max(0, Math.min(question.correctIndex, nextOptions.length - 1));
+  const nextI18n = { ...(question.i18n || {}) };
+  for (const lang of NON_DEFAULT_LANGUAGES) {
+    const entry = nextI18n[lang];
+    if (entry && Array.isArray(entry.options) && entry.options.length === question.options.length) {
+      const trimmedOptions = entry.options.slice(0, -1);
+      const entryCorrectIndex = Number.isFinite(Number(entry.correctIndex))
+        ? Math.max(0, Math.min(Number(entry.correctIndex), trimmedOptions.length - 1))
+        : entry.correctIndex;
+      nextI18n[lang] = { ...entry, options: trimmedOptions, correctIndex: entryCorrectIndex };
+    }
+  }
+  return { ...question, options: nextOptions, correctIndex: nextCorrectIndex, i18n: nextI18n };
+}
 
 type AdminTicket = {
   id: string;
@@ -69,31 +159,25 @@ function cloneQuestionSlot(question: Question | null): Question | null {
 }
 
 function normalizeQuestionForSave(question: Question): Question {
+  const i18n: Record<string, QuestionLocale> = {};
+  for (const [lang, entry] of Object.entries(question.i18n || {})) {
+    if (!entry || typeof entry !== "object") continue;
+    i18n[lang] = {
+      text: String(entry.text || "").trim(),
+      image: String(question.image || "").trim(),
+      audio: String(entry.audio || "").trim(),
+      options: Array.isArray(entry.options) ? entry.options.map((option) => String(option || "").trim()) : [],
+      correctIndex: Number.isFinite(Number(entry.correctIndex)) ? Number(entry.correctIndex) : 0,
+      explanation: String(entry.explanation || "").trim()
+    };
+  }
   return {
     ...question,
     image: String(question.image || "").trim(),
     text: String(question.text || "").trim(),
     explanation: String(question.explanation || "").trim(),
     options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [],
-    i18n: question.i18n ? JSON.parse(JSON.stringify(question.i18n)) : undefined
-  };
-}
-
-function syncQuestionLocale(question: Question, language: string): Question {
-  const normalizedLanguage = String(language || "").trim().toLowerCase();
-  if (!normalizedLanguage) return question;
-  return {
-    ...question,
-    i18n: {
-      [normalizedLanguage]: {
-        text: String(question.text || "").trim(),
-        image: String(question.image || "").trim(),
-        audio: "",
-        options: Array.isArray(question.options) ? question.options.map((option) => String(option || "").trim()) : [],
-        correctIndex: Number.isFinite(Number(question.correctIndex)) ? Number(question.correctIndex) : 0,
-        explanation: String(question.explanation || "").trim()
-      }
-    }
+    i18n
   };
 }
 
@@ -113,6 +197,7 @@ export default function AdminTicketDetailPage() {
   const qc = useQueryClient();
   const { authFetch } = useAuth();
   const { language } = useSiteLanguage();
+  const [activeLang, setActiveLang] = useState<LanguageCode>(language || DEFAULT_LANGUAGE);
   const [ticket, setTicket] = useState<AdminTicket | null>(null);
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
@@ -162,9 +247,7 @@ export default function AdminTicketDetailPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!ticket) throw new Error("Ticket topilmadi");
-      const normalizedQuestions = ticket.questions.map((question) =>
-        question ? syncQuestionLocale(normalizeQuestionForSave(question), language) : null
-      );
+      const normalizedQuestions = ticket.questions.map((question) => (question ? normalizeQuestionForSave(question) : null));
       for (const question of normalizedQuestions) {
         if (!question) continue;
         if (!question.text) throw new Error("Savol matnini kiriting");
@@ -381,6 +464,25 @@ export default function AdminTicketDetailPage() {
         </div>
       </div>
 
+      <div className="card adminPanelCard">
+        <div className="adminPanelCardHead">
+          <div className="adminPanelCardTitle">Tahrirlash tili</div>
+          <div className="adminPanelCardDesc">Savol matni, variantlar va izohni har bir til uchun alohida kiritasiz.</div>
+        </div>
+        <div className="adminOptionsToolbar">
+          {LANGUAGE_OPTIONS.map((option) => (
+            <button
+              key={option.code}
+              type="button"
+              className={`btn btn-sm ${activeLang === option.code ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setActiveLang(option.code)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="adminQuestionsHeader">
         <div className="adminPanelCardTitle">Savollar</div>
         <button
@@ -405,8 +507,37 @@ export default function AdminTicketDetailPage() {
 
       <div className="adminQuestionsGrid">
         {ticket?.questions?.length ? (
-          ticket.questions.map((question, index) =>
-            question ? (
+          ticket.questions.map((question, index) => {
+            if (!question) {
+              return (
+                <article key={`empty-${index}`} className="card adminQuestionCard adminEmptyQuestionCard">
+                  <div className="adminQuestionHead">
+                    <div className="adminQuestionBadge">Savol {index + 1}</div>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      type="button"
+                      onClick={() =>
+                        setTicket((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                questions: prev.questions.map((item, slotIndex) => (slotIndex === index ? createEmptyQuestion(index + 1) : item))
+                              }
+                            : prev
+                        )
+                      }
+                    >
+                      <Plus className="lucide" aria-hidden="true" /> To‘ldirish
+                    </button>
+                  </div>
+                  <div className="adminEmptyText" style={{ paddingTop: 8 }}>
+                    Bu slot bo‘sh. Keyinroq savol qo‘shishingiz mumkin.
+                  </div>
+                </article>
+              );
+            }
+            const locale = getLocaleView(question, activeLang);
+            return (
               <article key={question.id} className="card adminQuestionCard">
                 <div className="adminQuestionHead">
                   <div className="adminQuestionBadge">Savol {index + 1}</div>
@@ -498,16 +629,21 @@ export default function AdminTicketDetailPage() {
                 </div>
 
                 <label className="adminField adminFieldWide">
-                  <span className="adminFieldLabel">Savol matni</span>
+                  <span className="adminFieldLabel">
+                    Savol matni
+                    {activeLang !== DEFAULT_LANGUAGE && !locale.hasTranslation ? " · tarjima kiritilmagan" : ""}
+                  </span>
                   <input
                     className="input"
-                    value={question.text}
+                    value={locale.text}
                     onChange={(event) =>
                       setTicket((prev) =>
                         prev
                           ? {
                               ...prev,
-                              questions: prev.questions.map((item) => (item && item.id === question.id ? { ...item, text: event.target.value } : item))
+                              questions: prev.questions.map((item) =>
+                                item && item.id === question.id ? updateQuestionLocaleText(item, activeLang, "text", event.target.value) : item
+                              )
                             }
                           : prev
                       )
@@ -521,14 +657,16 @@ export default function AdminTicketDetailPage() {
                   <textarea
                     className="input adminTextarea"
                     rows={7}
-                    value={question.explanation}
+                    value={locale.explanation}
                     onChange={(event) =>
                       setTicket((prev) =>
                         prev
                           ? {
                               ...prev,
                               questions: prev.questions.map((item) =>
-                                item && item.id === question.id ? { ...item, explanation: event.target.value } : item
+                                item && item.id === question.id
+                                  ? updateQuestionLocaleText(item, activeLang, "explanation", event.target.value)
+                                  : item
                               )
                             }
                           : prev
@@ -540,7 +678,7 @@ export default function AdminTicketDetailPage() {
               </div>
 
               <div className="adminOptionsGrid">
-                {question.options.map((option, optionIndex) => (
+                {locale.options.map((option, optionIndex) => (
                   <label key={optionIndex} className="adminField">
                     <span className="adminFieldLabel">Variant {optionIndex + 1}</span>
                     <input
@@ -553,10 +691,7 @@ export default function AdminTicketDetailPage() {
                                 ...prev,
                                 questions: prev.questions.map((item) =>
                                   item && item.id === question.id
-                                    ? {
-                                        ...item,
-                                        options: item.options.map((value, idx) => (idx === optionIndex ? event.target.value : value))
-                                      }
+                                    ? updateQuestionLocaleOption(item, activeLang, optionIndex, event.target.value)
                                     : item
                                 )
                               }
@@ -578,9 +713,7 @@ export default function AdminTicketDetailPage() {
                       prev
                         ? {
                             ...prev,
-                            questions: prev.questions.map((item) =>
-                              item && item.id === question.id ? { ...item, options: [...item.options, ""] } : item
-                            )
+                            questions: prev.questions.map((item) => (item && item.id === question.id ? addOptionAcrossLocales(item) : item))
                           }
                         : prev
                     )
@@ -597,16 +730,7 @@ export default function AdminTicketDetailPage() {
                       prev
                         ? {
                             ...prev,
-                            questions: prev.questions.map((item) => {
-                              if (!item || item.id !== question.id) return item;
-                              const nextOptions = item.options.slice(0, -1);
-                              const nextCorrectIndex = Math.min(item.correctIndex, nextOptions.length - 1);
-                              return {
-                                ...item,
-                                options: nextOptions,
-                                correctIndex: Math.max(0, nextCorrectIndex)
-                              };
-                            })
+                            questions: prev.questions.map((item) => (item && item.id === question.id ? removeOptionAcrossLocales(item) : item))
                           }
                         : prev
                     )
@@ -620,21 +744,23 @@ export default function AdminTicketDetailPage() {
                 <span className="adminFieldLabel">To‘g‘ri javob</span>
                 <select
                   className="input"
-                  value={String(question.correctIndex)}
+                  value={String(locale.correctIndex)}
                   onChange={(event) =>
                     setTicket((prev) =>
                       prev
                         ? {
                             ...prev,
                             questions: prev.questions.map((item) =>
-                              item && item.id === question.id ? { ...item, correctIndex: Number(event.target.value) } : item
+                              item && item.id === question.id
+                                ? updateQuestionLocaleCorrectIndex(item, activeLang, Number(event.target.value))
+                                : item
                             )
                           }
                         : prev
                     )
                   }
                 >
-                  {question.options.map((_, optionIndex) => (
+                  {locale.options.map((_, optionIndex) => (
                     <option key={optionIndex} value={optionIndex}>
                       {optionIndex + 1}-variant
                     </option>
@@ -642,33 +768,8 @@ export default function AdminTicketDetailPage() {
                 </select>
               </label>
               </article>
-            ) : (
-              <article key={`empty-${index}`} className="card adminQuestionCard adminEmptyQuestionCard">
-                <div className="adminQuestionHead">
-                  <div className="adminQuestionBadge">Savol {index + 1}</div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    type="button"
-                    onClick={() =>
-                      setTicket((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              questions: prev.questions.map((item, slotIndex) => (slotIndex === index ? createEmptyQuestion(index + 1) : item))
-                            }
-                          : prev
-                      )
-                    }
-                  >
-                    <Plus className="lucide" aria-hidden="true" /> To‘ldirish
-                  </button>
-                </div>
-                <div className="adminEmptyText" style={{ paddingTop: 8 }}>
-                  Bu slot bo‘sh. Keyinroq savol qo‘shishingiz mumkin.
-                </div>
-              </article>
-            )
-          )
+            );
+          })
         ) : (
           <section className="card adminEmpty adminEmptyCompact">
             <div className="adminEmptyTitle">Savollar yo‘q</div>
