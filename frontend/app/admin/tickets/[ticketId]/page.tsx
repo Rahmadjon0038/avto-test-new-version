@@ -6,7 +6,6 @@ import { ArrowLeft, Pencil, Plus, Save, Ticket, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
-import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { broadcastQuerySync } from "@/app/query-provider";
 import { DEFAULT_LANGUAGE, LANGUAGE_OPTIONS, type LanguageCode } from "@/lib/site-language";
@@ -196,8 +195,6 @@ export default function AdminTicketDetailPage() {
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
-  const { language } = useSiteLanguage();
-  const [activeLang, setActiveLang] = useState<LanguageCode>(language || DEFAULT_LANGUAGE);
   const [ticket, setTicket] = useState<AdminTicket | null>(null);
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
@@ -464,25 +461,6 @@ export default function AdminTicketDetailPage() {
         </div>
       </div>
 
-      <div className="card adminPanelCard">
-        <div className="adminPanelCardHead">
-          <div className="adminPanelCardTitle">Tahrirlash tili</div>
-          <div className="adminPanelCardDesc">Savol matni, variantlar va izohni har bir til uchun alohida kiritasiz.</div>
-        </div>
-        <div className="adminOptionsToolbar">
-          {LANGUAGE_OPTIONS.map((option) => (
-            <button
-              key={option.code}
-              type="button"
-              className={`btn btn-sm ${activeLang === option.code ? "btn-primary" : "btn-ghost"}`}
-              onClick={() => setActiveLang(option.code)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="adminQuestionsHeader">
         <div className="adminPanelCardTitle">Savollar</div>
         <button
@@ -536,7 +514,6 @@ export default function AdminTicketDetailPage() {
                 </article>
               );
             }
-            const locale = getLocaleView(question, activeLang);
             return (
               <article key={question.id} className="card adminQuestionCard">
                 <div className="adminQuestionHead">
@@ -628,80 +605,6 @@ export default function AdminTicketDetailPage() {
                   </div>
                 </div>
 
-                <label className="adminField adminFieldWide">
-                  <span className="adminFieldLabel">
-                    Savol matni
-                    {activeLang !== DEFAULT_LANGUAGE && !locale.hasTranslation ? " · tarjima kiritilmagan" : ""}
-                  </span>
-                  <input
-                    className="input"
-                    value={locale.text}
-                    onChange={(event) =>
-                      setTicket((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              questions: prev.questions.map((item) =>
-                                item && item.id === question.id ? updateQuestionLocaleText(item, activeLang, "text", event.target.value) : item
-                              )
-                            }
-                          : prev
-                      )
-                    }
-                    placeholder="Savol matni"
-                  />
-                </label>
-
-                <label className="adminField adminFieldWide">
-                  <span className="adminFieldLabel">Izoh</span>
-                  <textarea
-                    className="input adminTextarea"
-                    rows={7}
-                    value={locale.explanation}
-                    onChange={(event) =>
-                      setTicket((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              questions: prev.questions.map((item) =>
-                                item && item.id === question.id
-                                  ? updateQuestionLocaleText(item, activeLang, "explanation", event.target.value)
-                                  : item
-                              )
-                            }
-                          : prev
-                      )
-                    }
-                    placeholder="Markdown yozing: **qalin**, *qiya*, - ro‘yxat"
-                  />
-                </label>
-              </div>
-
-              <div className="adminOptionsGrid">
-                {locale.options.map((option, optionIndex) => (
-                  <label key={optionIndex} className="adminField">
-                    <span className="adminFieldLabel">Variant {optionIndex + 1}</span>
-                    <input
-                      className="input"
-                      value={option}
-                      onChange={(event) =>
-                        setTicket((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                questions: prev.questions.map((item) =>
-                                  item && item.id === question.id
-                                    ? updateQuestionLocaleOption(item, activeLang, optionIndex, event.target.value)
-                                    : item
-                                )
-                              }
-                            : prev
-                        )
-                      }
-                      placeholder={`Variant ${optionIndex + 1}`}
-                    />
-                  </label>
-                ))}
               </div>
 
               <div className="adminOptionsToolbar">
@@ -740,33 +643,119 @@ export default function AdminTicketDetailPage() {
                 </button>
               </div>
 
-              <label className="adminField adminFieldWide">
-                <span className="adminFieldLabel">To‘g‘ri javob</span>
-                <select
-                  className="input"
-                  value={String(locale.correctIndex)}
-                  onChange={(event) =>
-                    setTicket((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            questions: prev.questions.map((item) =>
-                              item && item.id === question.id
-                                ? updateQuestionLocaleCorrectIndex(item, activeLang, Number(event.target.value))
-                                : item
-                            )
-                          }
-                        : prev
-                    )
-                  }
-                >
-                  {locale.options.map((_, optionIndex) => (
-                    <option key={optionIndex} value={optionIndex}>
-                      {optionIndex + 1}-variant
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {LANGUAGE_OPTIONS.map((langOption) => {
+                const locale = getLocaleView(question, langOption.code);
+                return (
+                  <div key={langOption.code} className="adminLocaleSection">
+                    <div className="adminLocaleSectionTitle">
+                      {langOption.label}
+                      {langOption.code !== DEFAULT_LANGUAGE && !locale.hasTranslation ? " · tarjima kiritilmagan" : ""}
+                    </div>
+
+                    <label className="adminField adminFieldWide">
+                      <span className="adminFieldLabel">Savol matni</span>
+                      <input
+                        className="input"
+                        value={locale.text}
+                        onChange={(event) =>
+                          setTicket((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  questions: prev.questions.map((item) =>
+                                    item && item.id === question.id
+                                      ? updateQuestionLocaleText(item, langOption.code, "text", event.target.value)
+                                      : item
+                                  )
+                                }
+                              : prev
+                          )
+                        }
+                        placeholder="Savol matni"
+                      />
+                    </label>
+
+                    <label className="adminField adminFieldWide">
+                      <span className="adminFieldLabel">Izoh</span>
+                      <textarea
+                        className="input adminTextarea"
+                        rows={7}
+                        value={locale.explanation}
+                        onChange={(event) =>
+                          setTicket((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  questions: prev.questions.map((item) =>
+                                    item && item.id === question.id
+                                      ? updateQuestionLocaleText(item, langOption.code, "explanation", event.target.value)
+                                      : item
+                                  )
+                                }
+                              : prev
+                          )
+                        }
+                        placeholder="Markdown yozing: **qalin**, *qiya*, - ro‘yxat"
+                      />
+                    </label>
+
+                    <div className="adminOptionsGrid">
+                      {locale.options.map((option, optionIndex) => (
+                        <label key={optionIndex} className="adminField">
+                          <span className="adminFieldLabel">Variant {optionIndex + 1}</span>
+                          <input
+                            className="input"
+                            value={option}
+                            onChange={(event) =>
+                              setTicket((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      questions: prev.questions.map((item) =>
+                                        item && item.id === question.id
+                                          ? updateQuestionLocaleOption(item, langOption.code, optionIndex, event.target.value)
+                                          : item
+                                      )
+                                    }
+                                  : prev
+                              )
+                            }
+                            placeholder={`Variant ${optionIndex + 1}`}
+                          />
+                        </label>
+                      ))}
+                    </div>
+
+                    <label className="adminField adminFieldWide">
+                      <span className="adminFieldLabel">To‘g‘ri javob</span>
+                      <select
+                        className="input"
+                        value={String(locale.correctIndex)}
+                        onChange={(event) =>
+                          setTicket((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  questions: prev.questions.map((item) =>
+                                    item && item.id === question.id
+                                      ? updateQuestionLocaleCorrectIndex(item, langOption.code, Number(event.target.value))
+                                      : item
+                                  )
+                                }
+                              : prev
+                          )
+                        }
+                      >
+                        {locale.options.map((_, optionIndex) => (
+                          <option key={optionIndex} value={optionIndex}>
+                            {optionIndex + 1}-variant
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                );
+              })}
               </article>
             );
           })

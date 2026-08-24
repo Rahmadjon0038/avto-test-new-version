@@ -204,6 +204,7 @@ function hasQuestionI18n(value) {
 function localizeQuestion(question, lang) {
   const normalizedLang = normalizeLanguageCode(lang, "");
   if (!normalizedLang || !question || typeof question !== "object") return question;
+  if (normalizedLang === DEFAULT_LANGUAGE) return question;
   const i18n = parseJsonValue(question.i18n, {});
   const localized = getLanguageFallbackOrder(normalizedLang)
     .map((candidate) => i18n?.[candidate])
@@ -231,6 +232,9 @@ function localizeQuestions(questions, lang) {
 function localizeTopic(topic, lang) {
   const normalizedLang = normalizeLanguageCode(lang, "");
   if (!normalizedLang || !topic || typeof topic !== "object") return topic;
+  if (normalizedLang === DEFAULT_LANGUAGE) {
+    return { ...topic, questions: localizeQuestions(topic.questions, normalizedLang) };
+  }
   const title = getLanguageFallbackOrder(normalizedLang)
     .map((candidate) => String(topic.title_i18n?.[candidate] || "").trim())
     .find(Boolean) || "";
@@ -244,6 +248,9 @@ function localizeTopic(topic, lang) {
 function localizeTicket(ticket, lang) {
   const normalizedLang = normalizeLanguageCode(lang, "");
   if (!normalizedLang || !ticket || typeof ticket !== "object") return ticket;
+  if (normalizedLang === DEFAULT_LANGUAGE) {
+    return { ...ticket, questions: localizeQuestions(ticket.questions, normalizedLang) };
+  }
   const title = getLanguageFallbackOrder(normalizedLang)
     .map((candidate) => String(ticket.title_i18n?.[candidate] || "").trim())
     .find(Boolean) || "";
