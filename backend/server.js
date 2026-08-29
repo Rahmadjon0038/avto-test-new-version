@@ -1980,8 +1980,8 @@ function chunkArray(items, size) {
   return chunks;
 }
 
-function buildGeneratedCustomTestFromBankSize(bank, size, lang = "") {
-  const shuffledBank = shuffleWithSeed(bank, 9000 + size);
+function buildGeneratedCustomTestFromBankSize(bank, size, lang = "", seed = null) {
+  const shuffledBank = shuffleWithSeed(bank, seed || 9000 + size);
   const questions = shuffledBank.slice(0, size).map((item) => ({
     ...localizeQuestion(item.question, lang),
     id: String(item.questionKey || item.question?.id || ""),
@@ -2016,13 +2016,23 @@ async function getGeneratedCustomTestsFromDb(lang = "") {
   return results;
 }
 
-async function getGeneratedCustomTestByIdFromDb(testId, lang = "") {
+async function getGeneratedCustomTestByIdFromDb(testId, lang = "", seed = null) {
   const key = String(testId || "").trim();
   const match = /^(\d+)$/.exec(key);
   if (!match) return null;
   const rawId = Number(match[1]);
   const size = rawId >= 1000 ? rawId - 1000 : rawId;
   if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
+
+  // A caller-supplied seed asks for a fresh random subset of the bank instead of the fixed
+  // 9000+size selection — used so each visit to a "Sozlamali test" shows different questions.
+  // Bypass the (lang-only-keyed) cache in that case since it can't hold per-seed results.
+  if (seed) {
+    const bank = await getTicketQuestionBankFromDb();
+    if (size > bank.length) return null;
+    return buildGeneratedCustomTestFromBankSize(bank, size, lang, seed);
+  }
+
   const tests = await getGeneratedCustomTestsFromDb(lang);
   return tests.find((test) => Number(test.id) === Number(1000 + size) || Number(test.id) === Number(size)) || null;
 }
@@ -4771,7 +4781,9 @@ app.get("/api/custom-tests", async (_req, res) => {
 
 app.get("/api/custom-tests/:testId", async (req, res) => {
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
-  const customTest = await getGeneratedCustomTestByIdFromDb(String(req.params.testId), lang);
+  const seedRaw = req.query.seed || req.headers["x-shuffle-seed"] || "";
+  const seed = seedRaw ? normalizeShuffleSeed(seedRaw, 1) : null;
+  const customTest = await getGeneratedCustomTestByIdFromDb(String(req.params.testId), lang, seed);
   if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
   res.json({ customTest });
 });
@@ -4800,7 +4812,9 @@ app.post("/api/custom-test-progress/:testId", requireUser, async (req, res) => {
   const answers = req.body?.answers;
   if (!answers || typeof answers !== "object") return res.status(400).json({ error: "Javoblar obyekti kerak" });
 
-  const customTest = await getGeneratedCustomTestByIdFromDb(testId);
+  const seedRaw = req.body?.seed || req.query.seed || "";
+  const seed = seedRaw ? normalizeShuffleSeed(seedRaw, 1) : null;
+  const customTest = await getGeneratedCustomTestByIdFromDb(testId, "", seed);
   if (!customTest) return res.status(404).json({ error: "Test topilmadi" });
 
   const questions = Array.isArray(customTest.questions)

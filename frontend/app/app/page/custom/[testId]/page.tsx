@@ -256,6 +256,10 @@ export default function CustomTestPage() {
   const { language, t } = useSiteLanguage();
   const { settings, patchSettings } = useTestPageSettings();
   const { seed: shuffleSeed, refreshSeed: refreshShuffleSeed } = useShuffleSeed(`custom:${testId}`);
+  // A fresh random seed generated on every mount, sent to the backend so it hands back a
+  // different random subset of the ticket bank each time the user opens this test — instead of
+  // the same fixed set of questions every visit.
+  const { seed: poolSeed } = useShuffleSeed(`custom-pool:${testId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
       if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
@@ -287,9 +291,11 @@ export default function CustomTestPage() {
   const q = useMemo(() => customTestQuestions[idx] ?? null, [customTestQuestions, idx]);
 
   const customTestQuery = useQuery({
-    queryKey: ["custom-test", testId, language],
+    queryKey: ["custom-test", testId, language, poolSeed],
     queryFn: async () => {
-      const res = await authFetch(appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}`, language));
+      const res = await authFetch(
+        appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}?seed=${poolSeed}`, language)
+      );
       const data = await jsonOrError(res);
       setCustomTest(data.customTest);
       if (data.customTest?.id !== undefined) putCachedCustomTest(data.customTest as unknown as CachedCustomTest);
@@ -368,7 +374,7 @@ export default function CustomTestPage() {
       authFetch(`/api/custom-test-progress/${encodeURIComponent(testId)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: nextAnswers })
+        body: JSON.stringify({ answers: nextAnswers, seed: poolSeed })
       }).then(jsonOrError),
     onError: (e: any) => toast.error(e?.message || "Xatolik"),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["custom-test-progress", testId, language] })
