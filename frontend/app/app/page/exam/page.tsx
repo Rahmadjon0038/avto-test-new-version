@@ -224,6 +224,7 @@ export default function ExamPage() {
   const [examBootstrapping, setExamBootstrapping] = useState(false);
   const [examReady, setExamReady] = useState(false);
   const autoNextTimerRef = useRef<number | null>(null);
+  const autoFinishTriggeredRef = useRef(false);
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const autoStartRequestedRef = useRef(false);
@@ -255,10 +256,14 @@ export default function ExamPage() {
   const completed = Boolean(exam?.completed);
   const expired = Boolean(exam?.expired);
   const locked = completed || expired || finalResult !== null;
-  const draftScore = questions.reduce((total, question) => {
-    const selected = answers[question.id];
-    return total + (selected !== undefined && Number(selected) === Number(question.correctIndex) ? 1 : 0);
-  }, 0);
+  const draftWrongCount = useMemo(
+    () =>
+      questions.reduce((total, question) => {
+        const selected = answers[question.id];
+        return total + (selected !== undefined && Number(selected) !== Number(question.correctIndex) ? 1 : 0);
+      }, 0),
+    [answers, questions]
+  );
   const chartCorrectPercent = finalResult ? finalResult.percent : 0;
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
 
@@ -287,6 +292,7 @@ export default function ExamPage() {
     setSecondsLeft(Number(exam.remainingSeconds || 0));
     setTimerReady(true);
     autoSubmittedRef.current = false;
+    autoFinishTriggeredRef.current = false;
     setIdx((current) => Math.min(current, Math.max(0, questions.length - 1)));
   }, [exam?.updatedAt, exam?.startedAt, exam?.examCount, questions.length]);
 
@@ -359,6 +365,7 @@ export default function ExamPage() {
   useEffect(() => {
     if (!exam || completed || locked) {
       autoSubmittedRef.current = false;
+      autoFinishTriggeredRef.current = false;
       return;
     }
     if (examBootstrapping) return;
@@ -392,6 +399,7 @@ export default function ExamPage() {
       setFinishOpen(false);
       setExamBootstrapping(false);
       hasSeenPositiveTimerRef.current = false;
+      autoFinishTriggeredRef.current = false;
       if (settings.shuffleQuestions) refreshShuffleSeed();
       toast.success(t("exam.title"));
     }
@@ -433,10 +441,22 @@ export default function ExamPage() {
         const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
         setFinalResult({ correct, wrong, total, percent });
         setFinishOpen(true);
-        toast.success(t("exam.resultTitle"));
+      toast.success(t("exam.resultTitle"));
       }
     }
   });
+
+  useEffect(() => {
+    if (!exam || completed || expired || locked) {
+      autoFinishTriggeredRef.current = false;
+      return;
+    }
+    if (draftWrongCount < 3) return;
+    if (saveMutation.isPending) return;
+    if (autoFinishTriggeredRef.current) return;
+    autoFinishTriggeredRef.current = true;
+    saveMutation.mutate({ answers: latestAnswersRef.current, finalize: true });
+  }, [completed, draftWrongCount, expired, exam, locked, saveMutation.isPending]);
 
   const canFinalize = Boolean(exam && !completed && !expired && !examBootstrapping && !saveMutation.isPending);
   const handlePreviousQuestion = useCallback(() => {
@@ -500,6 +520,7 @@ export default function ExamPage() {
       setSecondsLeft(0);
       setAutoStartAttempted(true);
       hasSeenPositiveTimerRef.current = false;
+      autoFinishTriggeredRef.current = false;
       setTimerReady(false);
       void qc.cancelQueries({ queryKey: examQueryKey });
       qc.setQueryData(examQueryKey, null);
@@ -536,6 +557,7 @@ export default function ExamPage() {
     setSecondsLeft(0);
     setTimerReady(false);
     hasSeenPositiveTimerRef.current = false;
+    autoFinishTriggeredRef.current = false;
     void qc.cancelQueries({ queryKey: examQueryKey });
     qc.setQueryData(examQueryKey, null);
 
@@ -552,6 +574,10 @@ export default function ExamPage() {
       }
     });
   }, [authReady, autoStartAttempted, examUserId, qc, startMutation]);
+
+  const exitExamPage = useCallback(() => {
+    router.push("/app");
+  }, [router]);
 
   const showExamLoading =
     !exam &&
@@ -727,11 +753,11 @@ export default function ExamPage() {
 
       {finishOpen && finalResult ? (
         <>
-          <div className="modalOverlay" onClick={() => setFinishOpen(false)} />
+          <div className="modalOverlay" onClick={exitExamPage} />
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">{t("exam.resultTitle")}</div>
-              <button className="btn btn-ghost" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-ghost" type="button" onClick={exitExamPage}>
                 ✕
               </button>
             </div>
@@ -757,7 +783,7 @@ export default function ExamPage() {
                     </div>
                 </div>
               </div>
-              <button className="btn btn-primary resultCloseBtn" type="button" onClick={() => setFinishOpen(false)}>
+              <button className="btn btn-primary resultCloseBtn" type="button" onClick={exitExamPage}>
                 {t("publicRunner.finishButton")}
               </button>
             </div>
