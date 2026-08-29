@@ -89,14 +89,16 @@ function updateQuestionLocaleCorrectIndex(question: Question, lang: LanguageCode
 }
 
 const NON_DEFAULT_LANGUAGES = LANGUAGE_OPTIONS.map((option) => option.code).filter((code) => code !== DEFAULT_LANGUAGE);
+const DEFAULT_OPTION_COUNT = 4;
 
 function addOptionAcrossLocales(question: Question): Question {
   const nextOptions = [...question.options, ""];
   const nextI18n = { ...(question.i18n || {}) };
   for (const lang of NON_DEFAULT_LANGUAGES) {
     const entry = nextI18n[lang];
-    if (entry && Array.isArray(entry.options) && entry.options.length === question.options.length) {
-      nextI18n[lang] = { ...entry, options: [...entry.options, ""] };
+    if (entry) {
+      const entryOptions = Array.isArray(entry.options) ? entry.options.map((option) => String(option || "")) : question.options.map(() => "");
+      nextI18n[lang] = { ...entry, options: [...entryOptions, ""] };
     }
   }
   return { ...question, options: nextOptions, i18n: nextI18n };
@@ -108,8 +110,9 @@ function removeOptionAcrossLocales(question: Question): Question {
   const nextI18n = { ...(question.i18n || {}) };
   for (const lang of NON_DEFAULT_LANGUAGES) {
     const entry = nextI18n[lang];
-    if (entry && Array.isArray(entry.options) && entry.options.length === question.options.length) {
-      const trimmedOptions = entry.options.slice(0, -1);
+    if (entry) {
+      const entryOptions = Array.isArray(entry.options) ? entry.options.map((option) => String(option || "")) : question.options.map(() => "");
+      const trimmedOptions = entryOptions.slice(0, -1);
       const entryCorrectIndex = Number.isFinite(Number(entry.correctIndex))
         ? Math.max(0, Math.min(Number(entry.correctIndex), trimmedOptions.length - 1))
         : entry.correctIndex;
@@ -135,7 +138,7 @@ function createEmptyQuestion(seed: number): Question {
     id: `q-${Date.now()}-${seed}`,
     image: "",
     text: "",
-    options: ["", ""],
+    options: Array.from({ length: DEFAULT_OPTION_COUNT }, () => ""),
     correctIndex: 0,
     explanation: ""
   };
