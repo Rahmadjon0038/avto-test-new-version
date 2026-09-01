@@ -42,6 +42,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Savol izohlari sozlama orqali o'chirilgan bo'lsa, admin bo'lmagan so'rovlarga
+// yuborilayotgan javoblardan "explanation" maydonini olib tashlaymiz (i18n ichidagi
+// tarjimalar bilan birga). Admin panel ("/api/admin/...") va admin foydalanuvchilar
+// izohni doim ko'radi.
+app.use(async (req, res, next) => {
+  if (!req.path.startsWith("/api/")) return next();
+  try {
+    const appConfig = await getAppConfigFromDb();
+    if (!appConfig.explanationEnabled) {
+      const admin = await getAdminFromAccess(req);
+      if (!admin) {
+        const originalJson = res.json.bind(res);
+        res.json = (body) => originalJson(stripExplanationDeep(body));
+      }
+    }
+  } catch (error) {
+    console.error("[explanation-visibility] sozlamani tekshirishda xatolik:", error);
+  }
+  next();
+});
+
 const dbApi = openDb();
 const r2 = new S3Client({
   region: "auto",
@@ -112,6 +133,21 @@ function parseJsonValue(value, fallback) {
     }
   }
   return fallback;
+}
+
+function stripExplanationDeep(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripExplanationDeep(item));
+  }
+  if (value && typeof value === "object") {
+    const next = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (key === "explanation") continue;
+      next[key] = stripExplanationDeep(val);
+    }
+    return next;
+  }
+  return value;
 }
 
 function parseBoolean(value, fallback = false) {
@@ -344,6 +380,7 @@ function normalizeAppConfig(value) {
     audioOfflineCache: parseBoolean(source.audioOfflineCache, true),
     audioPremiumRequired: parseBoolean(source.audioPremiumRequired ?? source.audio_premium_required, false),
     videoPremiumRequired: parseBoolean(source.videoPremiumRequired ?? source.video_premium_required, false),
+    explanationEnabled: parseBoolean(source.explanationEnabled ?? source.explanation_enabled, false),
     warning: {
       titleI18n: normalizeI18nMap(warningSource.titleI18n, DEFAULT_APP_WARNING_TEXT.titleI18n),
       messageI18n: sanitizeWarningMessageI18n(warningSource.messageI18n),
@@ -368,6 +405,7 @@ function buildAppConfigPayload(input = {}) {
     audioOfflineCache: Boolean(normalized.audioOfflineCache),
     audioPremiumRequired: Boolean(normalized.audioPremiumRequired),
     videoPremiumRequired: Boolean(normalized.videoPremiumRequired),
+    explanationEnabled: Boolean(normalized.explanationEnabled),
     warning: {
       titleI18n: normalized.warning.titleI18n,
       messageI18n: normalized.warning.messageI18n,
@@ -5214,6 +5252,7 @@ app.patch("/api/admin/app-config", async (req, res) => {
     audioOfflineCache: req.body?.audioOfflineCache,
     audioPremiumRequired: req.body?.audioPremiumRequired,
     videoPremiumRequired: req.body?.videoPremiumRequired,
+    explanationEnabled: req.body?.explanationEnabled,
     warning: req.body?.warning
   });
 

@@ -1,0 +1,496 @@
+{
+  "questions": [
+    {
+      "id": "40347bae-995e-4b60-955b-8130aa733840",
+      "questionId": "40347bae-995e-4b60-955b-8130aa733840",
+      "order": 1,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Oq avtomobil qaysi yo'nalishga harakatlanishga ruxsat etiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Harakatlanish taqiqlanadi",
+        "To'g'riga, chapga va orqaga qayrilishga",
+        "To'g'riga va chapga",
+        "Faqat to'g'riga"
+      ],
+      "correctIndex": 3,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Oq avtomobil qaysi yo'nalishga harakatlanishga ruxsat etiladi?",
+          "options": ["Harakatlanish taqiqlanadi", "To'g'riga, chapga va orqaga qayrilishga", "To'g'riga va chapga", "Faqat to'g'riga"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Оқ автомобиль қайси йўналишга ҳаракатланишга рухсат этилади?",
+          "options": ["Ҳаракатланиш тақиқланади", "Тўғрига, чапга ва орқага қайрилишга", "Тўғрига ва чапга", "Фақат тўғрига"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каком направлении разрешено движение белому автомобилю?",
+          "options": ["Движение запрещено", "Прямо, налево и разворот", "Прямо и налево", "Только прямо"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "ac06f2de-5b6f-4a52-9416-51bb05e1dc78",
+      "questionId": "ac06f2de-5b6f-4a52-9416-51bb05e1dc78",
+      "order": 2,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ushbu qo'shimcha axborot belgisi qaysi yo'l belgisi bilan qo'llaniladi?",
+      "image": "",
+      "audio": "",
+      "options": ["1", "2", "3", "4"],
+      "correctIndex": 3,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu qo'shimcha axborot belgisi qaysi yo'l belgisi bilan qo'llaniladi?",
+          "options": ["1", "2", "3", "4"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Ушбу қўшимча ахборот белгиси қайси йўл белгиси билан қўлланилади?",
+          "options": ["1", "2", "3", "4"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "С каким дорожным знаком применяется данный знак дополнительной информации?",
+          "options": ["1", "2", "3", "4"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "4d829937-8a67-4ff3-8a9e-c31adb4b49b2",
+      "questionId": "4d829937-8a67-4ff3-8a9e-c31adb4b49b2",
+      "order": 3,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qizil avtomobilga qaysi yo'nalishlar bo'yicha harakatlanishga ruxsat etiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Faqat to'g'riga",
+        "To'g'riga va qayrilib olishga",
+        "Faqat chapga",
+        "To'g'riga va chapga"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qizil avtomobilga qaysi yo'nalishlar bo'yicha harakatlanishga ruxsat etiladi?",
+          "options": ["Faqat to'g'riga", "To'g'riga va qayrilib olishga", "Faqat chapga", "To'g'riga va chapga"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қизил автомобильга қайси йўналишлар бўйича ҳаракатланишга рухсат этилади?",
+          "options": ["Фақат тўғрига", "Тўғрига ва қайрилиб олишга", "Фақат чапга", "Тўғрига ва чапга"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каких направлениях разрешено движение красному автомобилю?",
+          "options": ["Только прямо", "Прямо и разворот", "Только налево", "Прямо и налево"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "74b9392b-e144-4c15-90a3-6388838dcf8a",
+      "questionId": "74b9392b-e144-4c15-90a3-6388838dcf8a",
+      "order": 4,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "O'zbekiston Respublikasi «Yo'l harakati to'g'risida»gi Qonunining asosiy maqsadi nimadan iborat?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Yo'l harakati sohasidagi munosabatlarni tartibga solishdan iborat",
+        "Avtotransport vositasi oynalarining tusini o'zgartirishga (qoraytirishga) ruxsatnoma berishdan iborat",
+        "Transport vositalarini texnik ko'rikdan o'tkazishdan iborat"
+      ],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "O'zbekiston Respublikasi «Yo'l harakati to'g'risida»gi Qonunining asosiy maqsadi nimadan iborat?",
+          "options": ["Yo'l harakati sohasidagi munosabatlarni tartibga solishdan iborat", "Avtotransport vositasi oynalarining tusini o'zgartirishga (qoraytirishga) ruxsatnoma berishdan iborat", "Transport vositalarini texnik ko'rikdan o'tkazishdan iborat"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Ўзбекистон Республикаси «Йўл ҳаракати тўғрисида»ги Қонунининг асосий мақсади нимадан иборат?",
+          "options": ["Йўл ҳаракати соҳасидаги муносабатларни тартибга солишдан иборат", "Автотранспорт воситаси ойналарининг тусини ўзгартиришга (қоратиришга) рухсатнома беришдан иборат", "Транспорт воситаларини техник кўрикдан ўтказишдан иборат"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В чём заключается основная цель Закона Республики Узбекистан «О дорожном движении»?",
+          "options": ["Заключается в регулировании отношений в сфере дорожного движения", "Заключается в выдаче разрешения на изменение (затемнение) цвета стёкол автотранспортного средства", "Заключается в проведении технического осмотра транспортных средств"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "74237374-ac8b-4b37-aa15-3ed0bb42f2b8",
+      "questionId": "74237374-ac8b-4b37-aa15-3ed0bb42f2b8",
+      "order": 5,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi transport vositasi yo'l berishi kerak?",
+      "image": "",
+      "audio": "",
+      "options": ["O'zaro kelishuvga binoan harakatlanish", "Ko'k", "Qizil"],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi transport vositasi yo'l berishi kerak?",
+          "options": ["O'zaro kelishuvga binoan harakatlanish", "Ko'k", "Qizil"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси транспорт воситаси йўл бериши керак?",
+          "options": ["Ўзаро келишувга биноан ҳаракатланиш", "Кўк", "Қизил"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Водитель какого транспортного средства должен уступить дорогу?",
+          "options": ["Двигаться по взаимной договорённости", "Синего", "Красного"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "46c87b01-e7ad-408a-85af-b794c4028ad7",
+      "questionId": "46c87b01-e7ad-408a-85af-b794c4028ad7",
+      "order": 6,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qattiq ulagichda shatakka olishda transport vositalari orasidagi masofa qancha bo'lganda harakatlanishi mumkin?",
+      "image": "",
+      "audio": "",
+      "options": ["3 metr", "5 metr", "6 metr", "Hech qaysisi"],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qattiq ulagichda shatakka olishda transport vositalari orasidagi masofa qancha bo'lganda harakatlanishi mumkin?",
+          "options": ["3 metr", "5 metr", "6 metr", "Hech qaysisi"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қаттиқ улагичда шатакка олишда транспорт воситалари орасидаги масофа қанча бўлганда ҳаракатланиши мумкин?",
+          "options": ["3 метр", "5 метр", "6 метр", "Ҳеч қайсиси"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "При буксировке на жёсткой сцепке при каком расстоянии между транспортными средствами разрешено движение?",
+          "options": ["3 метра", "5 метров", "6 метров", "Ни при каком"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "04b0bddd-5ff5-4d63-8db7-bbdeadd07538",
+      "questionId": "04b0bddd-5ff5-4d63-8db7-bbdeadd07538",
+      "order": 7,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "L toifadagi transport vositalari shina protektori naqshi necha mm bo'lishi kerak?",
+      "image": "",
+      "audio": "",
+      "options": ["0.8 mm", "0.6 mm", "0.4 mm"],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "L toifadagi transport vositalari shina protektori naqshi necha mm bo'lishi kerak?",
+          "options": ["0.8 mm", "0.6 mm", "0.4 mm"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "L тоифадаги транспорт воситалари шина протектори нақши неча мм бўлиши керак?",
+          "options": ["0.8 мм", "0.6 мм", "0.4 мм"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Какой должна быть высота рисунка протектора шин транспортных средств категории L?",
+          "options": ["0.8 мм", "0.6 мм", "0.4 мм"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "3f9dd3d9-733e-42ee-ad88-0c417b360c51",
+      "questionId": "3f9dd3d9-733e-42ee-ad88-0c417b360c51",
+      "order": 8,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Ushbu transport vositasiga sidirg'a chiziqni bosib o'tib, yo'l yoqasida to'xtashga ruxsat beriladimi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Faqat aholi punktlarida ruxsat beriladi",
+        "Ruxsat etiladi",
+        "Faqat majburiy to'xtash holatida ruxsat beriladi",
+        "Taqiqlanadi"
+      ],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Ushbu transport vositasiga sidirg'a chiziqni bosib o'tib, yo'l yoqasida to'xtashga ruxsat beriladimi?",
+          "options": ["Faqat aholi punktlarida ruxsat beriladi", "Ruxsat etiladi", "Faqat majburiy to'xtash holatida ruxsat beriladi", "Taqiqlanadi"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Ушбу транспорт воситасига сидирға чизиқни босиб ўтиб, йўл ёқасида тўхташга рухсат бериладими?",
+          "options": ["Фақат аҳоли пунктларида рухсат берилади", "Рухсат этилади", "Фақат мажбурий тўхташ ҳолатида рухсат берилади", "Тақиқланади"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Разрешена ли данному транспортному средству остановка на обочине с пересечением сплошной линии разметки?",
+          "options": ["Разрешается только в населённых пунктах", "Разрешается", "Разрешается только в случае вынужденной остановки", "Запрещается"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "d1973950-8c7f-45d8-bf7d-1bff5c07885c",
+      "questionId": "d1973950-8c7f-45d8-bf7d-1bff5c07885c",
+      "order": 9,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi yo'nalishlarga harakatlanishga ruxsat etiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Faqat to'g'riga",
+        "Barcha yo'nalishlarga",
+        "Barcha yo'nalishlarga o'ngga burilish va qayrilishdan tashqari",
+        "To'g'riga, chapga va qayrilishga"
+      ],
+      "correctIndex": 0,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo'nalishlarga harakatlanishga ruxsat etiladi?",
+          "options": ["Faqat to'g'riga", "Barcha yo'nalishlarga", "Barcha yo'nalishlarga o'ngga burilish va qayrilishdan tashqari", "To'g'riga, chapga va qayrilishga"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси йўналишларга ҳаракатланишга рухсат этилади?",
+          "options": ["Фақат тўғрига", "Барча йўналишларга", "Барча йўналишларга ўнгга бурилиш ва қайрилишдан ташқари", "Тўғрига, чапга ва қайрилишга"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каких направлениях разрешено движение?",
+          "options": ["Только прямо", "Во всех направлениях", "Во всех направлениях, кроме поворота направо и разворота", "Прямо, налево и разворот"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "d71c32e5-79b8-449d-957e-1554abbb624b",
+      "questionId": "d71c32e5-79b8-449d-957e-1554abbb624b",
+      "order": 10,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Haydovchiga ko'prikda turgan yo'lovchini chiqarish uchun orqaga harakatlanishga ruxsat etiladimi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Ruxsat etiladi",
+        "Agar boshqa yo'l harakati qatnashchilariga xalaqit bermasa, ruxsat etiladi",
+        "Taqiqlanadi"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Haydovchiga ko'prikda turgan yo'lovchini chiqarish uchun orqaga harakatlanishga ruxsat etiladimi?",
+          "options": ["Ruxsat etiladi", "Agar boshqa yo'l harakati qatnashchilariga xalaqit bermasa, ruxsat etiladi", "Taqiqlanadi"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Ҳайдовчига кўприкда турган йўловчини чиқариш учун орқага ҳаракатланишга рухсат этиладими?",
+          "options": ["Рухсат этилади", "Агар бошқа йўл ҳаракати қатнашчиларига халақит бермаса, рухсат этилади", "Тақиқланади"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Разрешено ли водителю движение задним ходом для высадки пассажира, стоящего на мосту?",
+          "options": ["Разрешается", "Разрешается, если это не создаёт помех другим участникам дорожного движения", "Запрещается"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "ad7d7685-232b-417c-a67e-47b74858ec1c",
+      "questionId": "ad7d7685-232b-417c-a67e-47b74858ec1c",
+      "order": 11,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Piyodalar yo'lning qatnov qismini qayerlaridan kesib o'tishlari kerak?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Chorrahalarda trotuarlar yoki yo'l yoqasi chiziqlari bo'ylab",
+        "Piyodalar o'tish joyidan",
+        "Piyodalar yer osti va yer usti o'tish joylaridan",
+        "Hamma javoblar to'g'ri"
+      ],
+      "correctIndex": 3,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Piyodalar yo'lning qatnov qismini qayerlaridan kesib o'tishlari kerak?",
+          "options": ["Chorrahalarda trotuarlar yoki yo'l yoqasi chiziqlari bo'ylab", "Piyodalar o'tish joyidan", "Piyodalar yer osti va yer usti o'tish joylaridan", "Hamma javoblar to'g'ri"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Пиёдалар йўлнинг қатнов қисмини қаерларидан кесиб ўтишлари керак?",
+          "options": ["Чорраҳаларда тротуарлар ёки йўл ёқаси чизиқлари бўйлаб", "Пиёдалар ўтиш жойидан", "Пиёдалар ер ости ва ер усти ўтиш жойларидан", "Ҳамма жавоблар тўғри"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каких местах пешеходы должны переходить проезжую часть дороги?",
+          "options": ["На перекрёстках по линиям тротуаров или обочины", "По пешеходному переходу", "По подземным и надземным пешеходным переходам", "Все ответы верны"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "4a8f22c5-7557-49d6-b202-ec8013b3f33b",
+      "questionId": "4a8f22c5-7557-49d6-b202-ec8013b3f33b",
+      "order": 12,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qaysi yo'nalishlarga harakatlanishga ruxsat etiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Faqat to'g'riga",
+        "Barcha yo'nalishlarga",
+        "Barcha yo'nalishlarga o'ngga burilish va qayrilishdan tashqari",
+        "To'g'riga, chapga va qayrilishga"
+      ],
+      "correctIndex": 2,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qaysi yo'nalishlarga harakatlanishga ruxsat etiladi?",
+          "options": ["Faqat to'g'riga", "Barcha yo'nalishlarga", "Barcha yo'nalishlarga o'ngga burilish va qayrilishdan tashqari", "To'g'riga, chapga va qayrilishga"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қайси йўналишларга ҳаракатланишга рухсат этилади?",
+          "options": ["Фақат тўғрига", "Барча йўналишларга", "Барча йўналишларга ўнгга бурилиш ва қайрилишдан ташқари", "Тўғрига, чапга ва қайрилишга"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "В каких направлениях разрешено движение?",
+          "options": ["Только прямо", "Во всех направлениях", "Во всех направлениях, кроме поворота направо и разворота", "Прямо, налево и разворот"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "78109b01-2abf-4785-86be-458689d0ecb8",
+      "questionId": "78109b01-2abf-4785-86be-458689d0ecb8",
+      "order": 13,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Qizil avtomobil chorrahani kesib o'tadi:",
+      "image": "",
+      "audio": "",
+      "options": ["Uchinchi bo'lib", "Ikkinchi bo'lib", "Birinchi bo'lib"],
+      "correctIndex": 1,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Qizil avtomobil chorrahani kesib o'tadi:",
+          "options": ["Uchinchi bo'lib", "Ikkinchi bo'lib", "Birinchi bo'lib"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Қизил автомобиль чорраҳани кесиб ўтади:",
+          "options": ["Учинчи бўлиб", "Иккинчи бўлиб", "Биринчи бўлиб"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Красный автомобиль пересечёт перекрёсток:",
+          "options": ["Третьим", "Вторым", "Первым"],
+          "explanation": ""
+        }
+      }
+    },
+    {
+      "id": "5860365e-521e-41e6-ad64-85ee48a21df5",
+      "questionId": "5860365e-521e-41e6-ad64-85ee48a21df5",
+      "order": 14,
+      "topicId": 0,
+      "topicSlug": "",
+      "topicTitle": "",
+      "questionIndex": 0,
+      "text": "Maxsus avtomatlashtirilgan foto va video qayd etish texnika vositalari orqali qayd etilgan yo'l harakati qoidalarini buzganlik uchun kimlar ma'muriy javobgarlikka tortiladi?",
+      "image": "",
+      "audio": "",
+      "options": [
+        "Transport vositasining mulkdori",
+        "Transport vositasidan foydalanish uchun mas'ul bo'lgan shaxs",
+        "Transport vositasining haydovchisi",
+        "Yuridik shaxsning navbatchi mexanigi",
+        "1- va 2-javoblarda ko'rsatilgan holatlar"
+      ],
+      "correctIndex": 4,
+      "explanation": "",
+      "i18n": {
+        "uz_latn": {
+          "text": "Maxsus avtomatlashtirilgan foto va video qayd etish texnika vositalari orqali qayd etilgan yo'l harakati qoidalarini buzganlik uchun kimlar ma'muriy javobgarlikka tortiladi?",
+          "options": ["Transport vositasining mulkdori", "Transport vositasidan foydalanish uchun mas'ul bo'lgan shaxs", "Transport vositasining haydovchisi", "Yuridik shaxsning navbatchi mexanigi", "1- va 2-javoblarda ko'rsatilgan holatlar"],
+          "explanation": ""
+        },
+        "uz_cyrl": {
+          "text": "Махсус автоматлаштирилган фото ва видео қайд этиш техника воситалари орқали қайд этилган йўл ҳаракати қоидаларини бузганлик учун кимлар маъмурий жавобгарликка тортилади?",
+          "options": ["Транспорт воситасининг мулкдори", "Транспорт воситасидан фойдаланиш учун масъул бўлган шахс", "Транспорт воситасининг ҳайдовчиси", "Юридик шахснинг навбатчи механиги", "1- ва 2-жавобларда кўрсатилган ҳолатлар"],
+          "explanation": ""
+        },
+        "ru": {
+          "text": "Кто привлекается к административной ответственности за нарушение правил дорожного движения, зафиксированное специальными автоматическими техническими средствами фото- и видеофиксации?",
+          "options": ["Собственник транспортного средства", "Лицо, ответственное за эксплуатацию транспортного средства", "Водитель транспортного средства", "Дежурный механик юридического лица", "Обстоятельства, указанные в ответах 1 и 2"],
+          "explanation": ""
+        }
+      }
+    }
+  ]
+}

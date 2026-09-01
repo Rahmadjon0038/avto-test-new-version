@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Save, ShieldAlert } from "lucide-react";
+import { Save, ShieldAlert, MessageSquareText } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -10,12 +10,14 @@ type AppConfig = {
   forceUpdate: boolean;
   minAppVersionAndroid: string;
   minAppVersionIos: string;
+  explanationEnabled: boolean;
 };
 
 const emptyConfig = (): AppConfig => ({
   forceUpdate: false,
   minAppVersionAndroid: "",
   minAppVersionIos: "",
+  explanationEnabled: false,
 });
 
 function readBool(value: any, fallback = false) {
@@ -39,6 +41,7 @@ function readConfig(value: any): AppConfig {
       typeof source.minAppVersionAndroid === "string" ? source.minAppVersionAndroid : "",
     minAppVersionIos:
       typeof source.minAppVersionIos === "string" ? source.minAppVersionIos : "",
+    explanationEnabled: readBool(source.explanationEnabled, false),
   };
 }
 
@@ -76,6 +79,7 @@ export default function AdminHomePage() {
           forceUpdate: config.forceUpdate,
           minAppVersionAndroid: config.minAppVersionAndroid,
           minAppVersionIos: config.minAppVersionIos,
+          explanationEnabled: config.explanationEnabled,
         }),
       });
       const data = await jsonOrError(res);
@@ -140,6 +144,39 @@ export default function AdminHomePage() {
                   ...current,
                   minAppVersionIos: event.target.value,
                 }))
+              }
+            />
+          </label>
+
+          <div className="adminFormActions">
+            <button className="btn btn-ghost" type="button" onClick={loadConfig} disabled={loading || saving}>
+              Yangilash
+            </button>
+            <button className="btn btn-primary" type="button" onClick={save} disabled={loading || saving}>
+              <Save className="lucide" aria-hidden="true" /> {saving ? "Saqlanmoqda..." : "Saqlash"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="adminPanelCard card">
+        <div className="adminPanelCardHead">
+          <div className="adminPanelCardTitle">
+            <MessageSquareText className="lucide" aria-hidden="true" /> Savol izohi
+          </div>
+          <div className="adminPanelCardDesc">
+            Yoqilsa, javob izohi foydalanuvchilarga ham ko‘rinadi. O‘chirilganda izoh faqat admin panelda ko‘rinadi.
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gap: 12, marginTop: 18 }}>
+          <label className="adminToggleRow">
+            <span className="adminToggleLabel">Izohni foydalanuvchilarga ko‘rsatish</span>
+            <input
+              type="checkbox"
+              checked={config.explanationEnabled}
+              onChange={(event) =>
+                setConfig((current) => ({ ...current, explanationEnabled: event.target.checked }))
               }
             />
           </label>
