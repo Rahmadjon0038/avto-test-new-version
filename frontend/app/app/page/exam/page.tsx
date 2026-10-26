@@ -15,6 +15,7 @@ import { resolveQuestionImage } from "@/lib/question-image";
 import { getCachedExamSnapshot, putCachedExamSnapshot } from "@/lib/content-db";
 import { preloadQuestionImages } from "@/lib/image-preload";
 import ResponsiveImage from "@/app/ui/responsive-image";
+import ZoomImage from "@/app/ui/zoom-image";
 
 type ExamQuestion = {
   id: string;
@@ -829,13 +830,7 @@ export default function ExamPage() {
           <button className="imageLightboxClose" type="button" onClick={() => setZoomedImage(null)} aria-label={t("common.close")}>
             ×
           </button>
-          <ResponsiveImage
-            className="imageLightboxImg"
-            sizes="100vw"
-            src={zoomedImage}
-            alt={currentQuestion?.text || t("common.noData")}
-            onClick={(event) => event.stopPropagation()}
-          />
+          <ZoomImage src={zoomedImage} alt={currentQuestion?.text || t("common.noData")} onClick={(event) => event.stopPropagation()} />
         </div>
       ) : null}
     </section>

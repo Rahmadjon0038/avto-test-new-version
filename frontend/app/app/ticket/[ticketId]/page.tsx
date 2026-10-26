@@ -25,6 +25,7 @@ import { localTicketQuery } from "@/lib/local-queries";
 import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
 import ResponsiveImage from "@/app/ui/responsive-image";
+import ZoomImage from "@/app/ui/zoom-image";
 
 type Question = {
   id: string;
@@ -764,7 +765,7 @@ export default function TicketPage() {
           <button className="imageLightboxClose" type="button" onClick={() => setZoomedImage(null)} aria-label="Yopish">
             ×
           </button>
-          <ResponsiveImage className="imageLightboxImg" src={zoomedImage} sizes="100vw" alt="Katta rasm" onClick={(event) => event.stopPropagation()} />
+          <ZoomImage src={zoomedImage} alt="Katta rasm" onClick={(event) => event.stopPropagation()} />
         </div>
       ) : null}
     </section>

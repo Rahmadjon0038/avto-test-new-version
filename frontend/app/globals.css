@@ -7098,3 +7098,24 @@ body {
   background: var(--panel2);
   outline: none;
 }
+
+/* Zoom: o'rtacha variant ustiga katta variant silliq almashadi (ikkalasi bir xil o'lchamda). */
+.zoomImageStack {
+  display: grid;
+  place-items: center;
+}
+
+.zoomImageStack > img {
+  grid-area: 1 / 1;
+  width: min(1280px, 96vw);
+  height: auto;
+}
+
+.zoomImageTop {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.zoomImageTop.isReady {
+  opacity: 1;
+}

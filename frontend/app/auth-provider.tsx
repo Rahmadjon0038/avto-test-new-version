@@ -42,6 +42,19 @@ function writeStoredUser(user: any | null) {
   }
 }
 
+// Sahifa yangi ochilganda bola komponentlarning so'rovlari AuthProvider effektidan OLDIN ishga tushadi
+// (effektlar bolalardan boshlanadi), shuning uchun token hali ref'ga yozilmagan bo'ladi. Ilgari bunda
+// so'rov tokensiz ketib 401 olar, keyin refresh va qayta urinish kutilardi (sekin internetda ~1 s+).
+// Endi token to'g'ridan-to'g'ri cookie'dan olinadi.
+function readAccessTokenCookie(): string | null {
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function tryJson(res: Response) {
   return res.json().catch(() => ({}));
 }
@@ -122,6 +135,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (path: string, init?: RequestInit) => {
       // If token is missing, try refresh once before the first request.
       let token = accessTokenRef.current;
+      if (!token) {
+        token = readAccessTokenCookie();
+        if (token) accessTokenRef.current = token;
+      }
       if (!token) token = await refresh();
 
       const [basePath, queryString = ""] = String(path || "").split("?");

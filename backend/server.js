@@ -560,20 +560,34 @@ async function buildOfflineManifest(lang = "") {
   return manifest;
 }
 
-async function localizeMistakeRow(row, lang) {
+async function resolveMistakeSourceTitle(sourceKind, sourceId) {
+  if (sourceKind === "ticket") {
+    const { byId } = await getTicketRowsCached();
+    const row = byId.get(String(sourceId));
+    return row && normalizeTicketStatus(row.status) === "COMPLETED" ? String(row.title || "").trim() : "";
+  }
+  if (sourceKind === "topic") {
+    const { byKey } = await getTopicRowsCached();
+    const row = byKey.get(String(sourceId));
+    return row ? String(row.title || "").trim() : "";
+  }
+  return "";
+}
+
+async function localizeMistakeRow(row, lang, titleCache = new Map()) {
   const question = row?.question && typeof row.question === "object" ? localizeQuestion(row.question, lang) : row?.question || {};
   let sourceTitle = String(row?.source_title || question?.sourceTitle || "").trim();
   const sourceKind = String(row?.source_kind || question?.kind || "").trim();
   const sourceId = String(row?.source_id || question?.sourceId || "").trim();
 
   if (lang && sourceKind && sourceId) {
-    if (sourceKind === "ticket") {
-      const ticket = await getTicketByIdFromDb(sourceId);
-      if (ticket) sourceTitle = String(localizeTicket(ticket, lang)?.title || sourceTitle).trim() || sourceTitle;
-    } else if (sourceKind === "topic") {
-      const topic = await getTopicFromDb(sourceId);
-      if (topic) sourceTitle = String(localizeTopic(topic, lang)?.title || sourceTitle).trim() || sourceTitle;
-    }
+    // Manba (bilet/mavzu) nomi: faqat sarlavha kerak, shuning uchun butun bilet/mavzu savollari bilan
+    // yig'ilmaydi (ilgari har bir xato uchun to'liq bilet qayta yig'ilib, 100 ta xato ~2 s olardi).
+    // Va'da (promise) keshlanadi: bir vaqtda boshlangan so'rovlar ham bitta hisobni kutadi.
+    const titleKey = `${sourceKind}:${sourceId}`;
+    if (!titleCache.has(titleKey)) titleCache.set(titleKey, resolveMistakeSourceTitle(sourceKind, sourceId));
+    const resolvedTitle = await titleCache.get(titleKey);
+    if (resolvedTitle) sourceTitle = resolvedTitle;
   }
 
   return {
@@ -5218,6 +5232,31 @@ app.get("/api/answers", requireUser, async (req, res) => {
 app.get("/api/mistakes", requireUser, async (req, res) => {
   const userId = String(req.user.id);
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+  const titleCache = new Map();
+
+  // ?limit=&offset= — sahifalab olish (web ro'yxati 20 tadan yuklaydi). Parametrsiz so'rov
+  // (eski mobil ilova) avvalgidek hamma xatolarni qaytaradi.
+  if (req.query.limit !== undefined) {
+    const limit = Math.max(1, Math.min(50, Number.parseInt(String(req.query.limit), 10) || 20));
+    const offset = Math.max(0, Number.parseInt(String(req.query.offset ?? "0"), 10) || 0);
+    const [pageRows, totalRow] = await Promise.all([
+      dbApi.all(
+        `
+        SELECT question_key, source_kind, source_id, source_title, question_index, question, wrong_answer, created_at, updated_at
+        FROM user_mistakes
+        WHERE user_id = ?
+        ORDER BY updated_at DESC, created_at DESC, question_key ASC
+        LIMIT ? OFFSET ?
+      `,
+        [userId, limit, offset]
+      ),
+      dbApi.get("SELECT COUNT(*)::int AS count FROM user_mistakes WHERE user_id = ?", [userId])
+    ]);
+    const questions = await Promise.all(pageRows.map((row) => localizeMistakeRow(row, lang, titleCache)));
+    const total = Number(totalRow?.count || 0);
+    return res.json({ questions, total, offset, limit, hasMore: offset + pageRows.length < total });
+  }
+
   const rows = await dbApi.all(
     `
     SELECT question_key, source_kind, source_id, source_title, question_index, question, wrong_answer, created_at, updated_at
@@ -5228,7 +5267,7 @@ app.get("/api/mistakes", requireUser, async (req, res) => {
     [userId]
   );
 
-  const questions = await Promise.all(rows.map((row) => localizeMistakeRow(row, lang)));
+  const questions = await Promise.all(rows.map((row) => localizeMistakeRow(row, lang, titleCache)));
 
   res.json({ questions });
 });

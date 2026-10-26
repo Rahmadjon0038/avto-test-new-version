@@ -7,6 +7,8 @@ type ResponsiveImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "s
   // resolveQuestionImage() natijasi (asl rasm URL'i).
   src: string;
   fallbackSrc?: string;
+  // Berilsa srcset o'rniga shu bitta variant (s/m/l) ishlatiladi; baribir asl rasmga va zaxiraga qaytadi.
+  variant?: "s" | "m" | "l";
   // Hamma urinish muvaffaqiyatsiz bo'lib, zaxira rasm ko'rsatilganda chaqiriladi.
   onFallback?: () => void;
 };
@@ -18,6 +20,7 @@ export default function ResponsiveImage({
   src,
   sizes = QUESTION_IMAGE_SIZES,
   fallbackSrc = "/default.png",
+  variant,
   onFallback,
   alt = "",
   ...rest
@@ -31,7 +34,7 @@ export default function ResponsiveImage({
   }, [src]);
 
   const useVariants = Boolean(variants) && stage === 0;
-  const currentSrc = stage === 2 ? fallbackSrc : useVariants ? variants!.m : src;
+  const currentSrc = stage === 2 ? fallbackSrc : useVariants ? variants![variant ?? "m"] : src;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -39,8 +42,8 @@ export default function ResponsiveImage({
       {...rest}
       alt={alt}
       src={currentSrc}
-      srcSet={useVariants ? variants!.srcSet : undefined}
-      sizes={useVariants ? sizes : undefined}
+      srcSet={useVariants && !variant ? variants!.srcSet : undefined}
+      sizes={useVariants && !variant ? sizes : undefined}
       onError={() => {
         if (stage === 0 && variants) {
           setStage(1);

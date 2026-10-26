@@ -4,7 +4,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type React
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target, Trash2 } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -37,6 +37,8 @@ type MistakeQuestion = {
 };
 
 type TabKey = "list" | "practice";
+
+const MISTAKES_PAGE_SIZE = 20;
 
 const FALLBACK_IMAGE = "/default.png";
 
@@ -279,22 +281,42 @@ export default function MistakesPage() {
     };
   }, [mistakesUserId]);
 
-  const mistakesQuery = useQuery({
+  // Sahifalab yuklash: oldin barcha xatolar (yuzlab savol, rasm bilan) bir yo'la yuklanib, hammasi
+  // DOM'ga chizilardi — sahifa shundan sekin edi. Endi 20 tadan: ro'yxatda "Ko'proq yuklash"
+  // (yoki pastga skroll), mashq rejimida esa oxiriga yaqinlashganda keyingi 20 tasi olinadi.
+  const mistakesQuery = useInfiniteQuery({
     queryKey: ["mistakes", language],
-    queryFn: async () => {
-      const res = await authFetch("/api/mistakes");
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const res = await authFetch(`/api/mistakes?limit=${MISTAKES_PAGE_SIZE}&offset=${pageParam}`);
       const data = await jsonOrError(res);
-      const list = Array.isArray(data.questions) ? (data.questions as MistakeQuestion[]) : [];
-      setMistakesForUser(mistakesUserId, list as unknown as CachedMistake[]).catch(() => {});
-      return list;
-    }
+      return {
+        questions: Array.isArray(data.questions) ? (data.questions as MistakeQuestion[]) : [],
+        total: Number(data.total ?? 0),
+        offset: Number(data.offset ?? pageParam),
+        hasMore: Boolean(data.hasMore)
+      };
+    },
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.offset + MISTAKES_PAGE_SIZE : undefined)
   });
+
+  const loadedMistakes = useMemo(
+    () => (mistakesQuery.data?.pages ? mistakesQuery.data.pages.flatMap((page) => page.questions) : null),
+    [mistakesQuery.data]
+  );
+  const totalMistakes = mistakesQuery.data?.pages?.[0]?.total ?? loadedMistakes?.length ?? 0;
+  const hasMoreMistakes = Boolean(mistakesQuery.hasNextPage);
+
+  // Oflayn nusxa: yuklangan qism IndexedDB'ga yoziladi.
+  useEffect(() => {
+    if (loadedMistakes) setMistakesForUser(mistakesUserId, loadedMistakes as unknown as CachedMistake[]).catch(() => {});
+  }, [loadedMistakes, mistakesUserId]);
 
   useEffect(() => {
     if (mistakesQuery.error) toast.error((mistakesQuery.error as any)?.message || t("common.error"));
   }, [mistakesQuery.error, t]);
 
-  const questions = mistakesQuery.data ?? (cachedMistakes as MistakeQuestion[] | null) ?? [];
+  const questions = loadedMistakes ?? (cachedMistakes as MistakeQuestion[] | null) ?? [];
   const currentQuestions = useMemo(
     () => (settings.shuffleQuestions ? shuffleQuestionsWithSeed(questions, shuffleSeed) : questions),
     [questions, settings.shuffleQuestions, shuffleSeed]
@@ -304,6 +326,38 @@ export default function MistakesPage() {
   useEffect(() => {
     if (idx >= currentQuestions.length) setIdx(Math.max(0, currentQuestions.length - 1));
   }, [currentQuestions.length, idx]);
+
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = mistakesQuery;
+  const canFetchMore = hasNextPage && !isFetchingNextPage;
+
+  // Mashq rejimi: oxirgi 3 ta savolga yaqinlashganda keyingi 20 tasi orqada yuklanadi.
+  useEffect(() => {
+    if (tab === "practice" && canFetchMore && idx >= currentQuestions.length - 3) void fetchNextPage();
+  }, [tab, canFetchMore, idx, currentQuestions.length, fetchNextPage]);
+
+  // Aralashtirish yoqilgan bo'lsa to'plam to'liq bo'lishi kerak: qolganlari ketma-ket yuklanadi.
+  useEffect(() => {
+    if (settings.shuffleQuestions && canFetchMore) void fetchNextPage();
+  }, [settings.shuffleQuestions, canFetchMore, fetchNextPage]);
+
+  // Ro'yxat rejimi: pastga skroll qilganda keyingi sahifa avtomatik yuklanadi (sentinel ekran
+  // pastidan 400 px yaqinlashganda). Skroll tinglovchisi IntersectionObserver'dan ishonchliroq:
+  // fon/yashirin oynalarda ham ishlaydi va tekshirib ko'rish oson.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (tab !== "list" || !canFetchMore) return;
+    const check = () => {
+      const node = loadMoreRef.current;
+      if (node && node.getBoundingClientRect().top < window.innerHeight + 400) void fetchNextPage();
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [tab, canFetchMore, fetchNextPage, questions.length]);
 
   useEffect(() => {
     if (shuffleSettingRef.current === settings.shuffleQuestions) return;
@@ -397,13 +451,9 @@ export default function MistakesPage() {
   const percent = currentQuestions.length > 0 ? Math.round((answered / currentQuestions.length) * 100) : 0;
   const fixPercent = currentQuestions.length > 0 ? Math.round((correctPlanned / currentQuestions.length) * 100) : 0;
 
-  if (mistakesQuery.isLoading) {
-    return (
-      <section className="view">
-        <div className="muted">{t("common.loading")}</div>
-      </section>
-    );
-  }
+  // Kutish matni o'rniga sahifa tuzilmasi (skelet) darhol chiziladi; oflayn nusxa bo'lsa u ko'rinadi.
+  const displayTotal = loadedMistakes ? Math.max(totalMistakes, questions.length) : questions.length;
+  const showSkeleton = mistakesQuery.isPending && !cachedMistakes?.length;
 
   return (
     <section className="view mistakesView">
@@ -422,8 +472,7 @@ export default function MistakesPage() {
 
         <div className="mistakesHeaderMeta">
           <TestPageSettingsButton settings={settings} onChange={handleSettingsChange} />
-          <span className="badge">{questions.length}</span>
-          <span className="badge">{currentQuestions.length}</span>
+          <span className="badge">{displayTotal}</span>
         </div>
       </div>
 
@@ -431,7 +480,7 @@ export default function MistakesPage() {
         <button className={`mistakesTab ${tab === "list" ? "active" : ""}`} type="button" onClick={() => setTab("list")}>
           <List className="lucide" aria-hidden="true" />
           <span>{t("mistakes.listTab")}</span>
-          <span className="badge">{questions.length}</span>
+          <span className="badge">{displayTotal}</span>
         </button>
         <button
           className={`mistakesTab mistakesTabPractice ${tab === "practice" ? "active" : ""}`}
@@ -440,13 +489,19 @@ export default function MistakesPage() {
         >
           <Target className="lucide" aria-hidden="true" />
           <span>{t("mistakes.practiceTab")}</span>
-          <span className="badge">{questions.length}</span>
+          <span className="badge">{displayTotal}</span>
         </button>
       </div>
 
       {tab === "list" ? (
         <>
-          {!questions.length ? (
+          {showSkeleton ? (
+            <div className="answersQuestionGrid mistakesQuestionGrid" aria-busy="true" aria-label={t("common.loading")}>
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item} className="card answersQuestionCard skeletonShimmer" style={{ minHeight: 220 }} aria-hidden="true" />
+              ))}
+            </div>
+          ) : !questions.length ? (
             <div className="card" style={{ padding: 16 }}>
               <div className="h2" style={{ margin: 0 }}>
                 {t("mistakes.empty")}
@@ -514,10 +569,19 @@ export default function MistakesPage() {
               ))}
             </div>
           )}
+          {hasMoreMistakes ? (
+            <div ref={loadMoreRef} style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+              <button className="btn btn-ghost" type="button" onClick={() => void fetchNextPage()} disabled={isFetchingNextPage}>
+                {isFetchingNextPage ? t("common.loading") : t("answers.loadMore")}
+              </button>
+            </div>
+          ) : null}
         </>
       ) : (
         <>
-          {!currentQuestions.length ? (
+          {showSkeleton ? (
+            <div className="card skeletonShimmer" style={{ minHeight: 280 }} aria-busy="true" aria-label={t("common.loading")} />
+          ) : !currentQuestions.length ? (
             <div className="card" style={{ padding: 16 }}>
               <div className="h2" style={{ margin: 0 }}>
                 {t("mistakes.empty")}
