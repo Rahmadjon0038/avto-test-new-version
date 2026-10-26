@@ -13,30 +13,7 @@
   --radius: 4px;
   --pageMax: 100%;
   /* Katta ekranlarda kontent cho'zilib ketmasligi uchun markazlashgan maksimal kenglik */
-  --content-max: 1200px;
-  /* Keng ekranlarda butun kontent (matn, kartalar, tugmalar) proporsional kattalashadi va yon
-     bo'shliqlar kamayadi. 1 = o'zgarishsiz. */
-  --ui-zoom: 1;
-}
-
-@media (min-width: 1440px) {
-  :root { --ui-zoom: 1.12; }
-}
-
-@media (min-width: 1700px) {
-  :root { --ui-zoom: 1.28; }
-}
-
-@media (min-width: 2200px) {
-  :root { --ui-zoom: 1.5; }
-}
-
-/* Faqat kontent qismi kattalashtiriladi (navbar foni va modallar emas). Landing (authContainer)
-   o'zining to'liq kenglikdagi fonini saqlaydi. */
-.container:not(.authContainer),
-.navbarInner,
-.siteFooterInner {
-  zoom: var(--ui-zoom);
+  --content-max: 1400px;
 }
 
 * {
