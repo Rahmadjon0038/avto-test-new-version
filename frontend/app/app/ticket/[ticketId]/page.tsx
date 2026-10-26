@@ -763,7 +763,7 @@ export default function TicketPage() {
           <button className="imageLightboxClose" type="button" onClick={() => setZoomedImage(null)} aria-label="Yopish">
             ×
           </button>
-          <img className="imageLightboxImg" src={zoomedImage} alt="Katta rasm" onClick={(event) => event.stopPropagation()} />
+          <ResponsiveImage className="imageLightboxImg" src={zoomedImage} sizes="100vw" alt="Katta rasm" onClick={(event) => event.stopPropagation()} />
         </div>
       ) : null}
     </section>

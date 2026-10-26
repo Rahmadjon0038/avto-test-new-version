@@ -402,7 +402,6 @@ export default function ExamPage() {
       hasSeenPositiveTimerRef.current = false;
       autoFinishTriggeredRef.current = false;
       if (settings.shuffleQuestions) refreshShuffleSeed();
-      toast.success(t("exam.title"));
     }
   });
 
@@ -829,8 +828,9 @@ export default function ExamPage() {
           <button className="imageLightboxClose" type="button" onClick={() => setZoomedImage(null)} aria-label={t("common.close")}>
             ×
           </button>
-          <img
+          <ResponsiveImage
             className="imageLightboxImg"
+            sizes="100vw"
             src={zoomedImage}
             alt={currentQuestion?.text || t("common.noData")}
             onClick={(event) => event.stopPropagation()}

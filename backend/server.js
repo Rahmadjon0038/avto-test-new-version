@@ -101,6 +101,8 @@ function invalidateContentCache() {
   contentCache.ticketSummaries = null;
   contentCache.ticketsList = null;
   contentCache.ticketQuestionRows = null;
+  // Savollar banki (imtihon/javoblar) ham shu jadvallardan quriladi: har qanday yozuvda eskirmasin.
+  invalidateTicketQuestionBankCache();
 }
 
 function invalidateUserCache() {
@@ -4188,9 +4190,24 @@ function buildExamQuestionKey({ kind, sourceId, questionId }) {
   return `${String(kind)}:${String(sourceId)}:${String(questionId)}`;
 }
 
+// Tilga moslangan imtihon fondi: butun bankni (~1300 savol) lokalizatsiya qilish har so'rovda
+// ~30 ms (prodda sekinroq) olardi. Endi har til uchun bir marta quriladi; `bank` massivi
+// invalidatsiyada yangisiga almashadi, shuning uchun kesh o'zi yaroqsiz bo'ladi.
+let examPoolCache = { bank: null, byLang: new Map() };
+
 async function getExamQuestionPool(lang = "") {
   const bank = await getTicketQuestionBankFromDb();
   const normalizedLang = normalizeLanguageCode(lang, "");
+  if (examPoolCache.bank !== bank) examPoolCache = { bank, byLang: new Map() };
+  const cachedPool = examPoolCache.byLang.get(normalizedLang);
+  if (cachedPool) return cachedPool;
+
+  const pool = await buildExamQuestionPool(bank, normalizedLang);
+  if (examPoolCache.bank === bank) examPoolCache.byLang.set(normalizedLang, pool);
+  return pool;
+}
+
+async function buildExamQuestionPool(bank, normalizedLang) {
   const ticketCache = new Map();
   const localizedTickets = normalizedLang
     ? await Promise.all(
