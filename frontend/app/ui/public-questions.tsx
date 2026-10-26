@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { resolveQuestionImage, type PublicQuestion } from "@/lib/server-api";
 import { useSiteLanguage } from "@/app/site-language-provider";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 export function RegisterCta({ text }: { text?: string }) {
   const { t } = useSiteLanguage();
@@ -71,7 +72,7 @@ export function PublicQuestionList({ questions }: { questions: PublicQuestion[] 
               {hasImage ? (
                 <div className="qLeft">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="qimg" src={resolveQuestionImage(q.image)} alt={`${i + 1}-savol rasmi`} loading="lazy" />
+                  <ResponsiveImage className="qimg" src={resolveQuestionImage(q.image)} alt={`${i + 1}-savol rasmi`} loading="lazy" decoding="async" />
                 </div>
               ) : null}
             </div>
@@ -80,47 +81,4 @@ export function PublicQuestionList({ questions }: { questions: PublicQuestion[] 
       })}
     </div>
   );
-}
-
-export function buildFaqJsonLd(questions: PublicQuestion[]) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: questions.slice(0, 50).map((q) => ({
-      "@type": "Question",
-      name: q.text,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: [q.options[q.correctIndex], q.explanation].filter(Boolean).join(" — ")
-      }
-    }))
-  };
-}
-
-export function buildBreadcrumbJsonLd(items: { name: string; url: string }[]) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      item: item.url
-    }))
-  };
-}
-
-export function buildItemListJsonLd(name: string, items: { name: string; url?: string }[]) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name,
-    numberOfItems: items.length,
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      ...(item.url ? { url: item.url } : {})
-    }))
-  };
 }

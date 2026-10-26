@@ -31,26 +31,28 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path?: s
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("transfer-encoding");
     responseHeaders.delete("content-length");
-    responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    // Backend o'zi aniq Cache-Control (masalan, ETag bilan "no-cache") bersa — o'shani saqlaymiz,
+    // aks holda hamma narsa no-store bo'lib, brauzer hech narsani qayta ishlatolmaydi.
+    if (!response.headers.get("cache-control")) {
+      responseHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    }
 
-    if (response.ok) {
-      return new Response(response.body, {
+    // 204/304 javoblarda tana bo'lishi mumkin emas (Response konstruktori xato beradi).
+    if (response.status === 204 || response.status === 304) {
+      return new Response(null, { status: response.status, headers: responseHeaders });
+    }
+
+    if (!response.ok && !response.headers.get("content-type")) {
+      return new Response(JSON.stringify({ error: `Upstream xatosi: ${response.status}` }), {
         status: response.status,
-        headers: responseHeaders
+        headers: { "content-type": "application/json", "cache-control": "no-store" }
       });
     }
 
-    const errorText = await response.text().catch(() => "");
-    return new Response(
-      errorText || JSON.stringify({ error: `Upstream xatosi: ${response.status}` }),
-      {
-        status: response.status,
-        headers: {
-          "content-type": response.headers.get("content-type") || "application/json",
-          "cache-control": "no-store, no-cache, must-revalidate, proxy-revalidate"
-        }
-      }
-    );
+    return new Response(response.body, {
+      status: response.status,
+      headers: responseHeaders
+    });
   } catch (error: any) {
     return Response.json(
       {

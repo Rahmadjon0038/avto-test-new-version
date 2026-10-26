@@ -6,7 +6,8 @@ import { siteName } from "@/lib/site";
 import { fetchPublicTicket } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
 import PublicTestRunner from "@/app/ui/public-test-runner";
-import { RegisterCta, buildFaqJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
+import { RegisterCta } from "@/app/ui/public-questions";
+import { buildFaqJsonLd, buildBreadcrumbJsonLd } from "@/lib/json-ld";
 import { getServerLanguage } from "@/lib/site-language-server";
 import { getTranslation } from "@/lib/site-language";
 

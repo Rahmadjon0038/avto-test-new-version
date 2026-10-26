@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save, ShieldAlert, MessageSquareText } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
@@ -47,50 +48,47 @@ function readConfig(value: any): AppConfig {
 
 export default function AdminHomePage() {
   const { authFetch } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const qc = useQueryClient();
   const [config, setConfig] = useState<AppConfig>(() => emptyConfig());
 
-  const loadConfig = async () => {
-    setLoading(true);
-    try {
-      const res = await authFetch("/api/admin/app-config");
-      const data = await jsonOrError(res);
-      setConfig(readConfig(data.appConfig));
-    } catch (error: any) {
-      toast.error(error?.message || "Sozlamalar yuklanmadi");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const configQuery = useQuery({
+    queryKey: ["admin-app-config"],
+    queryFn: async () => jsonOrError(await authFetch("/api/admin/app-config"))
+  });
+  const loading = configQuery.isPending;
+
+  // Forma holati (tahrirlanayotgan qiymatlar) serverdan kelgan sozlamadan to'ldiriladi.
+  useEffect(() => {
+    if (configQuery.data) setConfig(readConfig(configQuery.data.appConfig));
+  }, [configQuery.data]);
 
   useEffect(() => {
-    void loadConfig();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (configQuery.error) toast.error((configQuery.error as any)?.message || "Sozlamalar yuklanmadi");
+  }, [configQuery.error]);
 
-  const save = async () => {
-    try {
-      setSaving(true);
-      const res = await authFetch("/api/admin/app-config", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          forceUpdate: config.forceUpdate,
-          minAppVersionAndroid: config.minAppVersionAndroid,
-          minAppVersionIos: config.minAppVersionIos,
-          explanationEnabled: config.explanationEnabled,
-        }),
-      });
-      const data = await jsonOrError(res);
+  const saveMutation = useMutation({
+    mutationFn: async () =>
+      jsonOrError(
+        await authFetch("/api/admin/app-config", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            forceUpdate: config.forceUpdate,
+            minAppVersionAndroid: config.minAppVersionAndroid,
+            minAppVersionIos: config.minAppVersionIos,
+            explanationEnabled: config.explanationEnabled
+          })
+        })
+      ),
+    onSuccess: (data) => {
+      qc.setQueryData(["admin-app-config"], data);
       setConfig(readConfig(data.appConfig));
       toast.success("Saqlandi");
-    } catch (error: any) {
-      toast.error(error?.message || "Saqlab bo‘lmadi");
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+    onError: (error: any) => toast.error(error?.message || "Saqlab bo‘lmadi")
+  });
+  const saving = saveMutation.isPending;
+  const save = () => saveMutation.mutate();
 
   return (
     <section className="adminSectionPage">
@@ -149,7 +147,7 @@ export default function AdminHomePage() {
           </label>
 
           <div className="adminFormActions">
-            <button className="btn btn-ghost" type="button" onClick={loadConfig} disabled={loading || saving}>
+            <button className="btn btn-ghost" type="button" onClick={() => void configQuery.refetch()} disabled={loading || saving}>
               Yangilash
             </button>
             <button className="btn btn-primary" type="button" onClick={save} disabled={loading || saving}>
@@ -182,7 +180,7 @@ export default function AdminHomePage() {
           </label>
 
           <div className="adminFormActions">
-            <button className="btn btn-ghost" type="button" onClick={loadConfig} disabled={loading || saving}>
+            <button className="btn btn-ghost" type="button" onClick={() => void configQuery.refetch()} disabled={loading || saving}>
               Yangilash
             </button>
             <button className="btn btn-primary" type="button" onClick={save} disabled={loading || saving}>

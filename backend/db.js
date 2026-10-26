@@ -41,22 +41,46 @@ function openDb() {
     max: Number(process.env.PG_POOL_MAX || 10)
   });
 
+  // Yozuv (INSERT/UPDATE/DELETE) bajarilganda kesh egalari xabardor bo'lishi uchun kuzatuvchilar.
+  // Jadval nomi bo'yicha ishlaydi, shuning uchun yangi yozuv yo'llari qo'shilsa ham kesh avtomatik tozalanadi.
+  const writeListeners = [];
+  const WRITE_RE = /^\s*(?:WITH[\s\S]*?\)\s*)?(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|TRUNCATE(?:\s+TABLE)?)\s+"?([a-z_]+)"?/i;
+  const notifyWrite = (sql) => {
+    if (!writeListeners.length) return;
+    const match = WRITE_RE.exec(sql);
+    if (!match) return;
+    const table = match[1].toLowerCase();
+    for (const listener of writeListeners) {
+      try {
+        listener(table);
+      } catch (error) {
+        console.error("[db] write listener error:", error);
+      }
+    }
+  };
+  const onWrite = (listener) => {
+    writeListeners.push(listener);
+  };
+
   const run = async (sql, params = []) => {
     const r = await pool.query(toPgSql(sql), params);
+    notifyWrite(sql);
     return r;
   };
 
   const get = async (sql, params = []) => {
     const r = await pool.query(toPgSql(sql), params);
+    notifyWrite(sql);
     return r.rows[0] || null;
   };
 
   const all = async (sql, params = []) => {
     const r = await pool.query(toPgSql(sql), params);
+    notifyWrite(sql);
     return r.rows || [];
   };
 
-  return { pool, run, get, all };
+  return { pool, run, get, all, onWrite };
 }
 
 async function initDb(dbApi) {

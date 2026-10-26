@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { formatShortDate } from "@/lib/format-date";
 
 type AdminUser = {
   id: string;
@@ -22,19 +23,6 @@ type ResetPasswordResult = {
   temporaryPassword: string;
   telegramMessage: string;
 };
-
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("uz-UZ", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(date);
-}
 
 export default function AdminUsersPage() {
   const { authFetch } = useAuth();
@@ -198,11 +186,11 @@ export default function AdminUsersPage() {
               </div>
               <div className="adminUserRow">
                 <span className="muted">Ro‘yxatdan o‘tgan</span>
-                <strong>{formatDate(user.created_at)}</strong>
+                <strong>{formatShortDate(user.created_at)}</strong>
               </div>
               <div className="adminUserRow">
                 <span className="muted">Pro muddati</span>
-                <strong>{formatDate(user.pro_until)}</strong>
+                <strong>{formatShortDate(user.pro_until, false)}</strong>
               </div>
               <div className="adminUserRow">
                 <span className="muted">Parol holati</span>

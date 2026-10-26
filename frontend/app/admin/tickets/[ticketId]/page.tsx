@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useImageUpload } from "@/lib/use-image-upload";
 import { broadcastQuerySync } from "@/app/query-provider";
 import { DEFAULT_LANGUAGE, LANGUAGE_OPTIONS, type LanguageCode } from "@/lib/site-language";
 
@@ -198,6 +199,7 @@ export default function AdminTicketDetailPage() {
   const ticketId = String(params.ticketId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { uploadImage, deleteImage } = useImageUpload();
   const [ticket, setTicket] = useState<AdminTicket | null>(null);
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
@@ -329,19 +331,14 @@ export default function AdminTicketDetailPage() {
     const currentImage = ticket?.questions.find((question) => question?.id === questionId)?.image || "";
     const imageBase64 = await fileToDataUrl(file);
 
-    const res = await authFetch("/api/upload-image", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
+    const data = await uploadImage({
         imageBase64,
         imageName: file.name,
         imageType: file.type,
         ticketId,
         questionId,
         oldImageUrl: currentImage
-      })
-    });
-    const data = await jsonOrError(res);
+      });
     const imageUrl = String(data?.imageUrl || "").trim();
     if (!imageUrl) throw new Error("Rasm yuklanmadi");
 
@@ -371,16 +368,11 @@ export default function AdminTicketDetailPage() {
 
   async function deleteQuestionImage(questionId: string) {
     const currentImage = ticket?.questions.find((question) => question?.id === questionId)?.image || "";
-    const res = await authFetch("/api/upload-image", {
-      method: "DELETE",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
+    const data = await deleteImage({
         ticketId,
         questionId,
         imageUrl: currentImage
-      })
-    });
-    const data = await jsonOrError(res);
+      });
     const imageUrl = String(data?.imageUrl || "").trim();
 
     setTicket((prev) =>

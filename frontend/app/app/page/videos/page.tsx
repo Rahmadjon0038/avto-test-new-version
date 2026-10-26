@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import type Hls from "hls.js";
 import { ArrowLeft, CircleAlert, Play, RefreshCw, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
@@ -57,33 +57,36 @@ export default function VideosPage() {
 
   const videos = videosQuery.data || [];
 
-  const loadPlayback = async (video: VideoLesson) => {
-    setSelectedVideoId(video.id);
-    setPlaybackUrl("");
-    setPlayerError("");
-    setLoadingPlayback(true);
-    try {
-      const res = await authFetch(
-        appendLanguageQuery(`/api/video-lessons/${encodeURIComponent(String(video.id))}/playback`, language)
+  const playbackMutation = useMutation({
+    mutationFn: async (video: VideoLesson) => {
+      const data = await jsonOrError(
+        await authFetch(
+          appendLanguageQuery(`/api/video-lessons/${encodeURIComponent(String(video.id))}/playback`, language)
+        )
       );
-      const data = await jsonOrError(res);
-      if (!res.ok) {
-        throw new Error(data?.error || "Playback yuklanmadi");
-      }
       const nextPlaybackUrl = data?.playbackUrl ? String(data.playbackUrl) : "";
-      if (!nextPlaybackUrl) {
-        throw new Error("Playback URL topilmadi");
-      }
+      if (!nextPlaybackUrl) throw new Error("Playback URL topilmadi");
+      return nextPlaybackUrl;
+    },
+    onSuccess: (nextPlaybackUrl) => {
       setPlaybackUrl(nextPlaybackUrl);
       setRetrySeed((current) => current + 1);
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       const message = error?.message || "Video ochilmadi";
       setPlayerError(message);
       toast.error(message);
       setLoadingPlayback(false);
-    } finally {
-      // loadingPlayback faqat player ishga tushganda o'chadi
     }
+    // loadingPlayback faqat player ishga tushganda o'chadi
+  });
+
+  const loadPlayback = (video: VideoLesson) => {
+    setSelectedVideoId(video.id);
+    setPlaybackUrl("");
+    setPlayerError("");
+    setLoadingPlayback(true);
+    playbackMutation.mutate(video);
   };
 
   if (!authReady) {
@@ -201,6 +204,7 @@ function BunnyHlsPlayer({
     const video = videoRef.current;
     if (!video || !src) return;
     let settled = false;
+    let cancelled = false;
     let timeoutId: number | null = null;
     const isHlsSource = src.toLowerCase().includes(".m3u8");
 
@@ -240,25 +244,7 @@ function BunnyHlsPlayer({
       handleError();
     }, 15000);
 
-    if (isHlsSource && Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: false,
-        backBufferLength: 90
-      });
-      hlsRef.current = hls;
-      hls.loadSource(src);
-      hls.attachMedia(video);
-      hls.once(Hls.Events.MANIFEST_PARSED, () => {
-        handleReady();
-        void video.play().catch(() => {});
-      });
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data?.fatal) {
-          handleError();
-        }
-      });
-    } else if (isHlsSource && video.canPlayType("application/vnd.apple.mpegurl")) {
+    const playDirect = () => {
       video.src = src;
       const handleCanPlay = () => {
         handleReady();
@@ -266,19 +252,48 @@ function BunnyHlsPlayer({
         video.removeEventListener("canplay", handleCanPlay);
       };
       video.addEventListener("canplay", handleCanPlay, { once: true });
+    };
+
+    if (isHlsSource && video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Safari/iOS HLS'ni o'zi o'ynaydi — hls.js (~500 KB) umuman yuklanmaydi.
+      playDirect();
+    } else if (isHlsSource) {
+      // hls.js faqat kerak bo'lganda va faqat video ochilganda yuklanadi (sahifaning boshlang'ich
+      // JS hajmiga kirmaydi).
+      void import("hls.js")
+        .then(({ default: HlsLib }) => {
+          if (cancelled) return;
+          if (!HlsLib.isSupported()) {
+            playDirect();
+            return;
+          }
+          const hls: Hls = new HlsLib({
+            enableWorker: true,
+            lowLatencyMode: false,
+            backBufferLength: 90
+          });
+          hlsRef.current = hls;
+          hls.loadSource(src);
+          hls.attachMedia(video);
+          hls.once(HlsLib.Events.MANIFEST_PARSED, () => {
+            handleReady();
+            void video.play().catch(() => {});
+          });
+          hls.on(HlsLib.Events.ERROR, (_event, data) => {
+            if (data?.fatal) {
+              handleError();
+            }
+          });
+        })
+        .catch(() => handleError());
     } else {
-      video.src = src;
-      const handleCanPlay = () => {
-        handleReady();
-        void video.play().catch(() => {});
-        video.removeEventListener("canplay", handleCanPlay);
-      };
-      video.addEventListener("canplay", handleCanPlay, { once: true });
+      playDirect();
     }
 
     video.onerror = handleError;
 
     return () => {
+      cancelled = true;
       video.onerror = null;
       cleanup();
     };

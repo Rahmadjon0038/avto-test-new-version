@@ -2,7 +2,8 @@
   "name": "jorabek-avto-test-backend",
   "private": true,
   "dependencies": {
-    "nodemailer": "^6.10.1"
+    "nodemailer": "^6.10.1",
+    "sharp": "^0.34.5"
   },
   "scripts": {
     "dev": "PORT=4000 node server.js",

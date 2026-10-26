@@ -14,7 +14,7 @@ type AdminTicket = {
   title: string;
   ticketNumber?: number;
   status?: "DRAFT" | "COMPLETED" | string;
-  questions: any[];
+  filledCount?: number;
 };
 
 export default function AdminTicketsPage() {
@@ -26,7 +26,7 @@ export default function AdminTicketsPage() {
   const ticketsQuery = useQuery({
     queryKey: ["admin-tickets"],
     queryFn: async () => {
-      const res = await authFetch("/api/admin/tickets");
+      const res = await authFetch("/api/admin/tickets?lite=1");
       const data = (await jsonOrError(res)) as { tickets: AdminTicket[] };
       return Array.isArray(data.tickets) ? data.tickets : [];
     }
@@ -110,7 +110,7 @@ export default function AdminTicketsPage() {
               <div className="adminTicketNumber">{String(ticket.ticketNumber || index + 1).padStart(2, "0")}</div>
               <Link href={`/admin/tickets/${encodeURIComponent(ticket.id)}`} className="adminTicketBody adminTicketBodyLink">
                 <div className="adminTicketTitle">{ticket.title || `Bilet №${ticket.ticketNumber || ticket.id}`}</div>
-                <div className="adminTicketMeta">{Array.isArray(ticket.questions) ? ticket.questions.filter(Boolean).length : 0} ta to‘ldirilgan savol</div>
+                <div className="adminTicketMeta">{ticket.filledCount ?? 0} ta to‘ldirilgan savol</div>
                 <div className="adminTicketMeta">
                   <span className="badge badge-success">{ticket.status || "COMPLETED"}</span>
                 </div>

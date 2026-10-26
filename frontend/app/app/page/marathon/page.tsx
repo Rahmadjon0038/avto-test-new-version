@@ -4,18 +4,22 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw, Flame } from "lucide-react";
-import { Cell, Pie, PieChart } from "recharts";
+import DonutChart from "@/app/ui/donut-chart";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
 import { useShuffleSeed, shuffleQuestionsWithSeed } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
-import { getLocalAnswerBank, type AnswerQuestion } from "@/lib/answer-bank";
+import { useQuery } from "@tanstack/react-query";
+import type { AnswerQuestion } from "@/lib/answer-bank";
+import { answerBankQuery } from "@/lib/local-queries";
 import { ensureSynced } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 const FALLBACK_IMAGE = "/default.png";
+const EMPTY_BANK: AnswerQuestion[] = [];
 
 export default function MarathonPage() {
   const router = useRouter();
@@ -33,41 +37,17 @@ export default function MarathonPage() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
 
-  // Local-first: the whole question bank lives in IndexedDB already (via the ticket cache), so
-  // marathon mode never needs a network round trip — it's built and shuffled entirely client-side.
-  const [rawBank, setRawBank] = useState<AnswerQuestion[]>([]);
-  const [bankLoading, setBankLoading] = useState(true);
-  const [bankError, setBankError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setBankLoading(true);
-    getLocalAnswerBank()
-      .then((items) => {
-        if (!cancelled) setRawBank(items);
-      })
-      .catch((error) => {
-        if (!cancelled) setBankError(error instanceof Error ? error : new Error("Marafon yuklanmadi"));
-      })
-      .finally(() => {
-        if (!cancelled) setBankLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Local-first: butun savollar banki IndexedDB'da, marafon tarmoqsiz brauzerning o'zida quriladi.
+  // Sinxronlash bank o'zgarganini topsa so'rov yangilanadi; boshlangan sessiya esa qayta
+  // aralashtirilmaydi (pastdagi effekt faqat bo'sh sessiyani to'ldiradi).
+  const bankQuery = useQuery(answerBankQuery());
+  const rawBank = bankQuery.data ?? EMPTY_BANK;
+  const bankLoading = bankQuery.isPending;
+  const bankError = bankQuery.error instanceof Error ? bankQuery.error : null;
 
   useEffect(() => {
     if (!authReady) return;
-    ensureSynced(authFetch)
-      .then((result) => {
-        // Don't reshuffle content under an in-progress marathon session.
-        if (result.changed && Object.keys(answers).length === 0) {
-          getLocalAnswerBank().then(setRawBank);
-        }
-      })
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    ensureSynced(authFetch).catch(() => {});
   }, [authReady, authFetch]);
 
   useEffect(() => {
@@ -292,16 +272,14 @@ export default function MarathonPage() {
               onClick={() => setZoomedImage(resolveQuestionImage(currentQuestion.image))}
               aria-label="Rasmni kattalashtirish"
             >
-              <img
+              <ResponsiveImage
+                decoding="async"
+                fetchPriority="high"
                 className={`qimg ${imageLoading ? "isLoading" : ""}`}
                 src={resolveQuestionImage(currentQuestion.image)}
                 alt="Savol rasmi"
                 onLoad={() => setImageLoading(false)}
-                onError={(event) => {
-                  const img = event.currentTarget;
-                  setImageLoading(false);
-                  if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE;
-                }}
+                onFallback={() => setImageLoading(false)}
               />
             </button>
           </div>
@@ -357,24 +335,7 @@ export default function MarathonPage() {
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">
-                    <PieChart width={220} height={220} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={72}
-                        outerRadius={96}
-                        startAngle={90}
-                        endAngle={-270}
-                        paddingAngle={0}
-                        stroke="none"
-                        cornerRadius={8}
-                      >
-                        <Cell fill="#2f6dff" />
-                        <Cell fill="rgba(255, 255, 255, 0.09)" />
-                      </Pie>
-                    </PieChart>
+                    <DonutChart data={chartData} />
                     <div className="chartCenter">
                       <div className="chartValue">{percent}%</div>
                       <div className="chartLabel">{t("progress.title")}</div>

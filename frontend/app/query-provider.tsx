@@ -49,9 +49,18 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
             staleTime: 60 * 1000,
             gcTime: 10 * 60 * 1000,
             retry: 1,
+            // Offline-first ilova: "online" rejimida internet yo'q paytda so'rov umuman
+            // ishga tushmay "pending" bo'lib qotib qolardi. Endi birinchi urinish doim yuboriladi,
+            // xato bo'lsa keshdagi/IndexedDB'dagi nusxa ko'rinib turadi.
+            networkMode: "offlineFirst",
             refetchOnWindowFocus: false,
             refetchOnMount: false,
             refetchOnReconnect: false
+          },
+          mutations: {
+            // Saqlash so'rovi oflaynda jim kutib turmasdi: tezda xato qaytib, sahifalar
+            // (masalan imtihon) oflayn holatni o'zlari boshqaradi.
+            networkMode: "offlineFirst"
           }
         }
       })

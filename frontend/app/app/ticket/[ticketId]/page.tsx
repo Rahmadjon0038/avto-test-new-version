@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cell, Pie, PieChart } from "recharts";
+import DonutChart from "@/app/ui/donut-chart";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -20,9 +20,11 @@ import {
 } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
-import { getCachedTicket, putCachedTicket, type CachedTicket } from "@/lib/content-db";
-import { ensureSynced } from "@/lib/content-sync";
+import { putCachedTicket, type CachedTicket } from "@/lib/content-db";
+import { localTicketQuery } from "@/lib/local-queries";
+import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 type Question = {
   id: string;
@@ -345,30 +347,22 @@ export default function TicketPage() {
       return data as { ticket: Ticket | null };
     },
     enabled: authReady,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    // Test o'rtasida oynaga qaytganda har safar 35 KB'lik biletni qayta yuklamaymiz: yangilanishlar
+    // sinxronlashdan keyin ["ticket", id] kaliti bilan avtomatik invalidatsiya qilinadi.
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     refetchOnReconnect: true
   });
 
-  // Local-first: render the last IndexedDB-cached copy of this ticket immediately, while the
-  // network request above (still the source of truth) runs in the background. Once it resolves,
-  // ticketQuery.data takes over below and the cache is refreshed for next time.
-  const [cachedTicket, setCachedTicket] = useState<Ticket | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    setCachedTicket(null);
-    getCachedTicket(ticketId).then((cached) => {
-      if (!cancelled && cached) setCachedTicket(cached as unknown as Ticket);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [ticketId]);
+  // Local-first: tarmoq javobi kelguncha IndexedDB'dagi oxirgi nusxa darhol ko'rsatiladi; javob
+  // kelgach ticketQuery.data uning o'rnini oladi va keyingi safar uchun kesh yangilanadi.
+  const localTicket = useQuery(localTicketQuery(ticketId));
+  const cachedTicket = (localTicket.data as unknown as Ticket | null) ?? null;
 
   useEffect(() => {
     if (!authReady) return;
-    ensureSynced(authFetch).catch(() => {});
+    return ensureSyncedWhenIdle(authFetch);
   }, [authReady, authFetch]);
 
   useEffect(() => {
@@ -660,16 +654,14 @@ export default function TicketPage() {
               onClick={() => setZoomedImage(resolveQuestionImage(q?.image))}
               aria-label="Rasmni kattalashtirish"
             >
-              <img
+              <ResponsiveImage
+                decoding="async"
+                fetchPriority="high"
                 className={`qimg ${imageLoading ? "isLoading" : ""}`}
                 src={resolveQuestionImage(q?.image)}
                 alt="Savol rasmi"
                 onLoad={() => setImageLoading(false)}
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  setImageLoading(false);
-                  if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE;
-                }}
+                onFallback={() => setImageLoading(false)}
               />
             </button>
           </div>
@@ -732,24 +724,7 @@ export default function TicketPage() {
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">
-                    <PieChart width={220} height={220} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={72}
-                        outerRadius={96}
-                        startAngle={90}
-                        endAngle={-270}
-                        paddingAngle={0}
-                        stroke="none"
-                        cornerRadius={8}
-                      >
-                        <Cell fill="#2f6dff" />
-                        <Cell fill="rgba(255, 255, 255, 0.09)" />
-                      </Pie>
-                    </PieChart>
+                    <DonutChart data={chartData} />
                     <div className="chartCenter">
                       <div className="chartValue">{correctPercent}%</div>
                       <div className="chartLabel">To‘g‘ri</div>

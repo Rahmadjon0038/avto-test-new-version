@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useImageUpload } from "@/lib/use-image-upload";
 
 type Question = {
   id: string;
@@ -75,6 +76,7 @@ export default function AdminTopicDetailPage() {
   const testId = String(params.testId || "");
   const qc = useQueryClient();
   const { authFetch } = useAuth();
+  const { uploadImage, deleteImage } = useImageUpload();
   const [topic, setTopic] = useState<AdminTopic | null>(null);
   const [imageDrafts, setImageDrafts] = useState<Record<string, ImageDraft>>({});
   const objectUrlsRef = useRef<Record<string, string>>({});
@@ -199,19 +201,14 @@ export default function AdminTopicDetailPage() {
     const currentImage = topic?.questions.find((question) => question.id === questionId)?.image || "";
     const imageBase64 = await fileToDataUrl(file);
 
-    const res = await authFetch("/api/upload-image", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
+    const data = await uploadImage({
         imageBase64,
         imageName: file.name,
         imageType: file.type,
         customTestId: testId,
         questionId,
         oldImageUrl: currentImage
-      })
-    });
-    const data = await jsonOrError(res);
+      });
     const imageUrl = String(data?.imageUrl || "").trim();
     if (!imageUrl) throw new Error("Rasm yuklanmadi");
 
@@ -241,16 +238,11 @@ export default function AdminTopicDetailPage() {
 
   async function deleteQuestionImage(questionId: string) {
     const currentImage = topic?.questions.find((question) => question.id === questionId)?.image || "";
-    const res = await authFetch("/api/upload-image", {
-      method: "DELETE",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
+    const data = await deleteImage({
         customTestId: testId,
         questionId,
         imageUrl: currentImage
-      })
-    });
-    const data = await jsonOrError(res);
+      });
     const imageUrl = String(data?.imageUrl || "").trim();
 
     setTopic((prev) =>

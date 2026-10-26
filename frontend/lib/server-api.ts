@@ -26,8 +26,10 @@ async function getJson(
   init?: RequestInit
 ): Promise<{ ok: boolean; status: number; data: any }> {
   try {
+    // Ochiq (SEO) sahifalar kontenti kamdan-kam o'zgaradi: Next ma'lumotlar keshi 60 soniya
+    // saqlaydi, shuning uchun har tashrif backendga bormaydi (til URL'da — kesh kaliti alohida).
     const res = await fetch(`${getBackendUrl()}${path}`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
       ...init
     });
     const data = await res.json().catch(() => null);
@@ -49,9 +51,7 @@ export async function fetchPublicTickets(lang?: string | null): Promise<PublicTi
 }
 
 export async function fetchPublicTicket(id: string, lang?: string | null): Promise<{ ticket: PublicTicket | null; status: number }> {
-  const r = await getJson(appendLanguageQuery(`/api/public/tickets/${encodeURIComponent(id)}`, resolveLang(lang)), {
-    cache: "no-store"
-  });
+  const r = await getJson(appendLanguageQuery(`/api/public/tickets/${encodeURIComponent(id)}`, resolveLang(lang)));
   return { ticket: r.ok ? (r.data?.ticket ?? null) : null, status: r.status };
 }
 
@@ -61,9 +61,7 @@ export async function fetchPublicTopics(lang?: string | null): Promise<PublicTop
 }
 
 export async function fetchPublicTopic(id: string, lang?: string | null): Promise<{ topic: PublicTopic | null; status: number }> {
-  const r = await getJson(appendLanguageQuery(`/api/public/topics/${encodeURIComponent(id)}`, resolveLang(lang)), {
-    cache: "no-store"
-  });
+  const r = await getJson(appendLanguageQuery(`/api/public/topics/${encodeURIComponent(id)}`, resolveLang(lang)));
   return { topic: r.ok ? (r.data?.topic ?? null) : null, status: r.status };
 }
 

@@ -32,6 +32,10 @@ export function SiteLanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(initial);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = language.replace("_", "-");
+  }, [language]);
+
   const setLanguage = useCallback(
     (next: LanguageCode) => {
       const normalized = setBrowserLanguage(next);

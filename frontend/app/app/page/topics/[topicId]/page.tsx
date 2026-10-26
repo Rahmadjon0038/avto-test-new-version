@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, Mic, RotateCcw, Trash2, UploadCloud } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cell, Pie, PieChart } from "recharts";
+import DonutChart from "@/app/ui/donut-chart";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -14,9 +14,12 @@ import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation"
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
-import { getCachedTopic, putCachedTopic, type CachedTopic } from "@/lib/content-db";
-import { ensureSynced } from "@/lib/content-sync";
+import { putCachedTopic, type CachedTopic } from "@/lib/content-db";
+import { localTopicQuery } from "@/lib/local-queries";
+import { useMe } from "@/lib/use-me";
+import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 type Question = {
   id: string;
@@ -296,7 +299,18 @@ export default function TopicPage() {
     [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
   );
 
-  const [topic, setTopic] = useState<Topic | null>(null);
+  const topicQuery = useQuery({
+    queryKey: ["topic", topicId, language],
+    queryFn: async () => {
+      const res = await authFetch(`/api/topics/${encodeURIComponent(topicId)}`);
+      const data = await jsonOrError(res);
+      if (data.topic?.id !== undefined) putCachedTopic(data.topic as unknown as CachedTopic);
+      return data as { topic: Topic | null };
+    }
+  });
+  // Local-first: tarmoq javobi kelguncha IndexedDB'dagi oxirgi nusxa darhol ko'rsatiladi.
+  const localTopic = useQuery(localTopicQuery(topicId));
+  const topic: Topic | null = topicQuery.data?.topic ?? (localTopic.data as unknown as Topic | null) ?? null;
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const autoNextTimerRef = useRef<number | null>(null);
@@ -312,15 +326,7 @@ export default function TopicPage() {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaChunksRef = useRef<Blob[]>([]);
   const recordingQuestionIdRef = useRef<string | null>(null);
-  const meQuery = useQuery({
-    queryKey: ["topic-me", language],
-    queryFn: async () => {
-      const res = await authFetch("/api/auth/me");
-      return jsonOrError(res);
-    },
-    retry: false,
-    enabled: authReady && Boolean(accessToken)
-  });
+  const meQuery = useMe();
   const isAdmin = Boolean(meQuery.data?.user?.is_admin);
 
   const topicQuestions = useMemo(
@@ -334,34 +340,9 @@ export default function TopicPage() {
   );
   const q = useMemo(() => topicQuestions[idx] ?? null, [topicQuestions, idx]);
 
-  const topicQuery = useQuery({
-    queryKey: ["topic", topicId, language],
-    queryFn: async () => {
-      const res = await authFetch(`/api/topics/${encodeURIComponent(topicId)}`);
-      const data = await jsonOrError(res);
-      setTopic(data.topic);
-      if (data.topic?.id !== undefined) putCachedTopic(data.topic as unknown as CachedTopic);
-      return data;
-    }
-  });
-
-  // Local-first: while the network fetch above is in flight, show the last IndexedDB-cached
-  // copy of this topic immediately instead of leaving the page blank.
-  useEffect(() => {
-    let cancelled = false;
-    getCachedTopic(topicId).then((cached) => {
-      if (!cancelled && cached) {
-        setTopic((current) => current ?? (cached as unknown as Topic));
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [topicId]);
-
   useEffect(() => {
     if (!authReady) return;
-    ensureSynced(authFetch).catch(() => {});
+    return ensureSyncedWhenIdle(authFetch);
   }, [authReady, authFetch]);
 
   useEffect(() => {
@@ -545,6 +526,29 @@ export default function TopicPage() {
     }
   }
 
+  // Audio yuklash/o'chirish ham TanStack Query mutatsiyalari: holat (isPending), xato va
+  // qayta urinish bir joyda boshqariladi.
+  const uploadAudioMutation = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) =>
+      jsonOrError(
+        await authFetch("/api/upload-audio", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+      )
+  });
+  const deleteAudioMutation = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) =>
+      jsonOrError(
+        await authFetch("/api/upload-audio", {
+          method: "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+      )
+  });
+
   async function persistQuestionAudio(questionId: string, blob: Blob, previewUrlOverride?: string) {
     if (!topic) throw new Error("Mavzu topilmadi");
     if (!blob) throw new Error("Avval audio yozib oling");
@@ -567,31 +571,18 @@ export default function TopicPage() {
     const audioBase64 = await blobToDataUrl(blob);
     const audioName = `question-${questionId}.${getAudioFileExtension(audioType)}`;
 
-    const res = await authFetch("/api/upload-audio", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        audioBase64,
-        audioName,
-        audioType,
-        topicId,
-        questionId,
-        oldAudioUrl: currentAudio
-      })
+    const data = await uploadAudioMutation.mutateAsync({
+      audioBase64,
+      audioName,
+      audioType,
+      topicId,
+      questionId,
+      oldAudioUrl: currentAudio
     });
-    const data = await jsonOrError(res);
     const audioUrl = String(data?.audioUrl || "").trim();
     if (!audioUrl) throw new Error("Audio yuklanmadi");
 
     cleanupAudioPreview(questionId);
-    setTopic((prev) =>
-      prev
-        ? {
-            ...prev,
-            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
-          }
-        : prev
-    );
     qc.setQueryData<{ topic: Topic } | undefined>(["topic", topicId, language], (prev) =>
       prev?.topic
         ? {
@@ -675,14 +666,6 @@ export default function TopicPage() {
         delete next[questionId];
         return next;
       });
-      setTopic((prev) =>
-        prev
-          ? {
-              ...prev,
-              questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: "" } : question))
-            }
-          : prev
-      );
       qc.setQueryData<{ topic: Topic } | undefined>(["topic", topicId, language], (prev) =>
         prev?.topic
           ? {
@@ -698,26 +681,9 @@ export default function TopicPage() {
       return;
     }
 
-    const res = await authFetch("/api/upload-audio", {
-      method: "DELETE",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        topicId,
-        questionId,
-        audioUrl: currentAudio
-      })
-    });
-    const data = await jsonOrError(res);
+    const data = await deleteAudioMutation.mutateAsync({ topicId, questionId, audioUrl: currentAudio });
     const audioUrl = String(data?.audioUrl || "").trim();
 
-    setTopic((prev) =>
-      prev
-        ? {
-            ...prev,
-            questions: prev.questions.map((question) => (question.id === questionId ? { ...question, audio: audioUrl } : question))
-          }
-        : prev
-    );
     qc.setQueryData<{ topic: Topic } | undefined>(["topic", topicId, language], (prev) =>
       prev?.topic
         ? {
@@ -1008,16 +974,14 @@ export default function TopicPage() {
               onClick={() => setZoomedImage(resolveQuestionImage(q?.image))}
               aria-label="Rasmni kattalashtirish"
             >
-                <img
+                <ResponsiveImage
+                  decoding="async"
+                  fetchPriority="high"
                   className={`qimg ${imageLoading ? "isLoading" : ""}`}
                   src={resolveQuestionImage(q?.image)}
                   alt="Savol rasmi"
                 onLoad={() => setImageLoading(false)}
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  setImageLoading(false);
-                  if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE;
-                }}
+                onFallback={() => setImageLoading(false)}
               />
             </button>
           </div>
@@ -1075,24 +1039,7 @@ export default function TopicPage() {
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">
-                    <PieChart width={220} height={220} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={72}
-                        outerRadius={96}
-                        startAngle={90}
-                        endAngle={-270}
-                        paddingAngle={0}
-                        stroke="none"
-                        cornerRadius={8}
-                      >
-                        <Cell fill="#2f6dff" />
-                        <Cell fill="rgba(255, 255, 255, 0.09)" />
-                      </Pie>
-                    </PieChart>
+                    <DonutChart data={chartData} />
                     <div className="chartCenter">
                       <div className="chartValue">{correctPercent}%</div>
                       <div className="chartLabel">To‘g‘ri</div>

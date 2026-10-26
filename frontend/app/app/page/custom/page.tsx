@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { ArrowLeft, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -8,40 +8,37 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { fetchCustomTests, type CustomTestCard } from "../custom-data";
-import { getLocalGeneratedCustomTestList } from "@/lib/answer-bank";
+import { generatedCustomTestsQuery } from "@/lib/local-queries";
 import { putCachedCustomTests } from "@/lib/content-db";
-import { ensureSynced } from "@/lib/content-sync";
+import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 
 export default function CustomTestsPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
 
-  // Local-first: "Sozlamali testlar" are a deterministic function of the already-cached ticket
-  // bank (see lib/answer-bank.ts), so the list and each test's content are reconstructed
-  // client-side with no network call, and pre-written into the customTests IndexedDB store so
-  // opening one is instant (custom/[testId]/page.tsx already reads that cache first). The ticket
-  // bank is built exactly once (not once per test size) — that repeated rebuild used to make this
-  // page extremely slow once there were many generated tests.
-  const [localTests, setLocalTests] = useState<CustomTestCard[] | null>(null);
+  // Local-first: "Sozlamali testlar" — keshlangan bilet bankining deterministik funksiyasi
+  // (lib/answer-bank.ts), shuning uchun ro'yxat va har bir testning mazmuni tarmoqsiz brauzerda
+  // tiklanadi va customTests IndexedDB do'koniga oldindan yoziladi (custom/[testId] sahifasi
+  // avval shu keshni o'qiydi). Bank bir marta quriladi (har test hajmi uchun emas) va so'rov
+  // natijasi keshlanadi.
+  const localTestsQuery = useQuery(generatedCustomTestsQuery());
+  const generatedTests = localTestsQuery.data;
+  const localTests: CustomTestCard[] | null = useMemo(
+    () =>
+      generatedTests
+        ? generatedTests.map((test) => ({ id: test.id, title: test.title, questionsCount: test.questionsCount }))
+        : null,
+    [generatedTests]
+  );
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const tests = await getLocalGeneratedCustomTestList();
-      if (!cancelled) {
-        setLocalTests(tests.map((test) => ({ id: test.id, title: test.title, questionsCount: test.questionsCount })));
-      }
-      putCachedCustomTests(tests).catch(() => {});
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (generatedTests?.length) putCachedCustomTests(generatedTests).catch(() => {});
+  }, [generatedTests]);
 
   useEffect(() => {
     if (!authReady) return;
-    ensureSynced(authFetch).catch(() => {});
+    return ensureSyncedWhenIdle(authFetch);
   }, [authReady, authFetch]);
 
   const customTestsQuery = useQuery({

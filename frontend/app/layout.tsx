@@ -1,10 +1,8 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import Providers from "./providers";
 import { getSiteUrl, siteDescription, siteKeywords, siteName } from "@/lib/site";
-import { LANGUAGE_COOKIE, normalizeLanguageCode } from "@/lib/site-language";
 
 const siteUrl = getSiteUrl();
 
@@ -95,11 +93,12 @@ const webApplicationJsonLd = {
   }
 };
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const cookieStore = await cookies();
-  const lang = normalizeLanguageCode(cookieStore.get(LANGUAGE_COOKIE)?.value || "uz_latn");
+// Cookie o'qilmaydi: aks holda butun sayt (shu jumladan /app) har so'rovda serverda qayta
+// chiziladi va statik HTML sifatida keshlanmaydi. Haqiqiy til brauzerda SiteLanguageProvider
+// orqali <html lang> ga yoziladi.
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang={lang.replace("_", "-")} suppressHydrationWarning>
+    <html lang="uz-Latn" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <script
           type="application/ld+json"

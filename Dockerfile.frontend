@@ -18,10 +18,13 @@ ARG BACKEND_URL=http://backend:4000
 ARG NEXT_PUBLIC_BACKEND_URL=https://api.topshirdi.uz
 ARG BASE_URL=https://topshirdi.uz
 ARG NEXT_PUBLIC_SITE_URL=https://topshirdi.uz
+# R2 o'z domeniga ulangan bo'lsa (masalan cdn.topshirdi.uz) shu yerga yozing — rasmlar proksisiz beriladi.
+ARG NEXT_PUBLIC_IMAGE_HOSTS=
 ENV BACKEND_URL=${BACKEND_URL}
 ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
 ENV BASE_URL=${BASE_URL}
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+ENV NEXT_PUBLIC_IMAGE_HOSTS=${NEXT_PUBLIC_IMAGE_HOSTS}
 
 RUN npm --prefix frontend run build
 

@@ -58,3 +58,24 @@ Brauzerda test qilish uchun:
 ## 6) Browser orqali login
 
 Sayt bosh sahifasida ism + telefon orqali kirish (MVP) mavjud.
+
+## 7) Rasmlarni optimallashtirish (3 o'lcham)
+
+Savol rasmlari R2 da `images/<nom>.<ext>` ko'rinishida turadi. Har biri uchun 3 ta webp variant
+saqlanadi: `images/s/<nom>.webp` (480 px), `images/m/…` (800 px), `images/l/…` (1280 px).
+Frontend (`ResponsiveImage`, `srcset`) ekran o'lchamiga mosini o'zi tanlaydi; variant bo'lmasa
+asl rasmga qaytadi, shuning uchun bazadagi URL'larni o'zgartirish shart emas.
+
+- **Yangi rasmlar** admin paneldan yuklanganda avtomatik siqiladi (asl nusxa webp, ≤1600 px) va 3 ta
+  variant yaratiladi; rasm almashtirilsa/o'chirilsa variantlari ham o'chadi.
+- **Mavjud rasmlar** uchun bir martalik skript (serverda, `.env` da R2 kalitlari bo'lishi kerak):
+
+```bash
+./scripts/optimize-images.sh                 # DRY-RUN: nima qilinishini ko'rsatadi
+./scripts/optimize-images.sh --apply --limit=20   # avval 20 tasida sinab ko'ring
+./scripts/optimize-images.sh --apply         # hammasini bajarish (qayta ishga tushirish xavfsiz)
+./scripts/optimize-images.sh --apply --fix-cache-headers   # asl fayllarga ham uzoq kesh sarlavhasi
+```
+
+Asl rasmlar o'chirilmaydi. R2 ni o'z domeniga (masalan `cdn.topshirdi.uz`) ulasangiz,
+`NEXT_PUBLIC_IMAGE_HOSTS=cdn.topshirdi.uz` ni build argumenti sifatida bering.

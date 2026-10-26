@@ -8,36 +8,33 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { readPersisted, writePersisted } from "@/lib/persisted-cache";
 
-type TicketProgress = {
-  ticketId: string;
-  completed: boolean;
-  score: number;
-  updatedAt: string | null;
-  totalCount: number;
-  answeredCount: number;
-  correctCount: number;
-  wrongCount: number;
-  unansweredCount: number;
-};
-
+// Ro'yxat faqat "N-bilet" yorlig'i va id'ni chizadi (?lite=1): nom, savollar, progress yuklanmaydi.
 type Ticket = {
   id: string;
-  title: string;
-  locked: boolean;
+  number: number;
 };
+
+type TicketsResponse = { tickets: Ticket[] };
 
 export default function TicketsPage() {
   const router = useRouter();
   const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
 
+  // Ro'yxat uchun faqat id va nom kerak (lite=1): savollar va progress yuklanmaydi.
+  // Oxirgi ro'yxat localStorage'dan darhol chiqadi, orqada ETag bilan tekshiriladi.
+  const cacheKey = `tickets-lite:${language}`;
   const ticketsQuery = useQuery({
     queryKey: ["tickets", language],
     queryFn: async () => {
-      const res = await authFetch("/api/tickets");
-      return (await jsonOrError(res)) as { tickets: Ticket[] };
+      const res = await authFetch("/api/tickets?lite=1", { cache: "no-cache" });
+      const data = (await jsonOrError(res)) as TicketsResponse;
+      writePersisted(cacheKey, data);
+      return data;
     },
+    placeholderData: () => readPersisted<TicketsResponse>(cacheKey),
     enabled: authReady
   });
 
@@ -50,16 +47,20 @@ export default function TicketsPage() {
   const isTicketsLoading = !authReady || (!ticketsQuery.data && (ticketsQuery.isPending || ticketsQuery.isLoading || ticketsQuery.isFetching));
 
   if (isTicketsLoading) {
+    // Spinner o'rniga sahifa tuzilmasi darhol chiziladi: foydalanuvchi kutayotganini emas,
+    // sahifa ochilganini ko'radi.
     return (
-      <section className="view">
-        <div className="examLoadingView">
-          <div className="examLoadingCard">
-            <div className="examLoadingSpinnerWrap">
-              <span className="examLoadingSpinner" />
-            </div>
-            <div className="examLoadingTitle">{t("tickets.loading")}</div>
-            <div className="examLoadingText">{t("common.loading")}</div>
-          </div>
+      <section className="view" aria-busy="true">
+        <div className="ticketsHeader card">
+          <button className="btn btn-ghost btn-sm ticketsBackBtn" type="button" onClick={() => router.push("/app")}>
+            <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
+          </button>
+          <div className="ticketsHeaderTitle">{t("tickets.title")}</div>
+        </div>
+        <div className="ticketsGrid ticketsGridCompact" aria-label={t("common.loading")}>
+          {Array.from({ length: 24 }, (_, index) => (
+            <div key={index} className="card ticketCard ticketCardCompact ticketCardSkeleton" aria-hidden="true" />
+          ))}
         </div>
       </section>
     );

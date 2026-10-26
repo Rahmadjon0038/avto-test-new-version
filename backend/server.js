@@ -14,6 +14,15 @@ try {
   console.warn("[backend] nodemailer module not installed; phone-based temporary password reset is active.");
 }
 const { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+// Rasmlarni siqish va 3 o'lchamga (s/m/l) bo'lish. sharp o'rnatilmagan bo'lsa yuklash eskicha
+// (siqmasdan) ishlashda davom etadi.
+let imageVariants = null;
+try {
+  imageVariants = require("./image-variants");
+} catch (error) {
+  console.warn("[backend] sharp/image-variants yuklanmadi, rasmlar siqilmaydi:", error?.message || error);
+}
+const R2_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 const PORT = Number(process.env.PORT || 3000);
 const JSON_BODY_LIMIT = process.env.JSON_BODY_LIMIT || "15mb";
@@ -64,6 +73,61 @@ app.use(async (req, res, next) => {
 });
 
 const dbApi = openDb();
+
+// --- Xotira keshi ---------------------------------------------------------------------------
+// Mavzu/bilet/test ma'lumotlari kamdan-kam o'zgaradi, lekin har bir so'rovda bazadan qayta
+// o'qilib, yuzlab so'rov bilan yig'ilar edi. Endi xom qatorlar xotirada saqlanadi va tegishli
+// jadvalga yozuv bo'lishi bilan (dbApi.onWrite) avtomatik tozalanadi. TTL — bazaga tashqaridan
+// (psql, skript) tegilganda ham kesh eskirib qolmasligi uchun xavfsizlik chorasi.
+const CONTENT_CACHE_TTL_MS = Number(process.env.CONTENT_CACHE_TTL_MS || 5 * 60 * 1000);
+const SHORT_CACHE_TTL_MS = Number(process.env.SHORT_CACHE_TTL_MS || 30 * 1000);
+const contentCache = {
+  topicRows: null, // { at, rows, byKey }
+  topicQuestions: new Map(), // "topicId:questionId" -> normalized question
+  ticketSummaries: null, // { at, rows }
+  ticketsList: null, // { at, tickets }
+  ticketQuestionRows: null // { at, byTicketId: Map }
+};
+const userCache = new Map(); // userId -> { at, user }
+let appConfigCache = null; // { at, value }
+
+// Yuklash paytida yozuv bo'lib o'tsa, eskirgan natija keshga tushib qolmasligi uchun avlod hisoblagichi.
+let contentGeneration = 0;
+
+function invalidateContentCache() {
+  contentGeneration += 1;
+  contentCache.topicRows = null;
+  contentCache.topicQuestions.clear();
+  contentCache.ticketSummaries = null;
+  contentCache.ticketsList = null;
+  contentCache.ticketQuestionRows = null;
+}
+
+function invalidateUserCache() {
+  userCache.clear();
+}
+
+const CONTENT_TABLES = new Set(["topics", "tickets", "ticket_questions", "topic_question_bank", "custom_tests"]);
+dbApi.onWrite((table) => {
+  if (CONTENT_TABLES.has(table)) invalidateContentCache();
+  if (table === "users") invalidateUserCache();
+  if (table === "app_settings") appConfigCache = null;
+});
+
+// Sana javobda qisqa va standart ko'rinishda: "2026-10-26T14:44:08Z" (20 belgi). Ilgari
+// `String(date)` JS'ning "Mon Oct 26 2026 19:44:08 GMT+0500 (Uzbekistan Standard Time)" ko'rinishini
+// (~70 belgi) yuborardi: ortiqcha hajm, millisekundlar yo'qolardi va Dart'ning DateTime.tryParse
+// uni umuman o'qiy olmasdi. null/bo'sh qiymat null qaytaradi.
+function shortDate(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const time = value instanceof Date ? value.getTime() : new Date(value).getTime();
+  if (Number.isNaN(time)) return String(value);
+  return new Date(time).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+function isFresh(entry, ttl = CONTENT_CACHE_TTL_MS) {
+  return Boolean(entry) && Date.now() - entry.at < ttl;
+}
 const r2 = new S3Client({
   region: "auto",
   endpoint: process.env.R2_ENDPOINT,
@@ -105,8 +169,8 @@ function normalizeTicketRow(row) {
     ticketNumber: Number(row.ticket_number || 0),
     status: normalizeTicketStatus(row.status),
     questions: parseQuestionsValue(row.questions),
-    created_at: row.created_at ? String(row.created_at) : undefined,
-    updated_at: row.updated_at ? String(row.updated_at) : undefined
+    created_at: shortDate(row.created_at) ?? undefined,
+    updated_at: shortDate(row.updated_at) ?? undefined
   };
 }
 
@@ -139,6 +203,7 @@ function stripExplanationDeep(value) {
   if (Array.isArray(value)) {
     return value.map((item) => stripExplanationDeep(item));
   }
+  if (value instanceof Date) return value;
   if (value && typeof value === "object") {
     const next = {};
     for (const [key, val] of Object.entries(value)) {
@@ -416,11 +481,14 @@ function buildAppConfigPayload(input = {}) {
 }
 
 async function getAppConfigFromDb() {
+  if (isFresh(appConfigCache, SHORT_CACHE_TTL_MS)) return structuredClone(appConfigCache.value);
   const row = await dbApi.get("SELECT * FROM app_settings WHERE id = 1");
-  return {
+  const value = {
     ...buildAppConfigPayload(row?.config_json || {}),
-    updatedAt: row?.updated_at ? String(row.updated_at) : null
+    updatedAt: shortDate(row?.updated_at)
   };
+  appConfigCache = { at: Date.now(), value };
+  return structuredClone(value);
 }
 
 async function saveAppConfigToDb(nextConfig) {
@@ -447,7 +515,7 @@ async function saveAppConfigToDb(nextConfig) {
   );
   return {
     ...buildAppConfigPayload(row?.config_json || payload),
-    updatedAt: row?.updated_at ? String(row.updated_at) : null
+    updatedAt: shortDate(row?.updated_at)
   };
 }
 
@@ -466,19 +534,19 @@ async function buildOfflineManifest(lang = "") {
     sections: {
       topics: {
         count: Number(topicStats?.count || 0),
-        updatedAt: topicStats?.updated_at ? String(topicStats.updated_at) : null
+        updatedAt: shortDate(topicStats?.updated_at)
       },
       tickets: {
         count: Number(ticketStats?.count || 0),
-        updatedAt: ticketStats?.updated_at ? String(ticketStats.updated_at) : null
+        updatedAt: shortDate(ticketStats?.updated_at)
       },
       customTests: {
         count: Number(customTestStats?.count || 0),
-        updatedAt: customTestStats?.updated_at ? String(customTestStats.updated_at) : null
+        updatedAt: shortDate(customTestStats?.updated_at)
       },
       videos: {
         count: Number(videoStats?.count || 0),
-        updatedAt: videoStats?.updated_at ? String(videoStats.updated_at) : null
+        updatedAt: shortDate(videoStats?.updated_at)
       }
     }
   };
@@ -572,8 +640,8 @@ function normalizeTicket(row) {
     title: String(row.title || ""),
     titleI18n: normalizeTitleI18n(row.title_i18n, row.title),
     questions: normalizeQuestions(row.questions),
-    created_at: row.created_at ? String(row.created_at) : undefined,
-    updated_at: row.updated_at ? String(row.updated_at) : undefined
+    created_at: shortDate(row.created_at) ?? undefined,
+    updated_at: shortDate(row.updated_at) ?? undefined
   };
 }
 
@@ -740,12 +808,19 @@ async function getTopicQuestionSnapshot(topicId, questionKey) {
   const questionId = extractTopicQuestionId(questionKey);
   if (!key || !questionId) return null;
 
+  const cacheKey = `${key}:${questionId}`;
+  if (isFresh(contentCache.topicRows) && contentCache.topicQuestions.has(cacheKey)) {
+    const hit = contentCache.topicQuestions.get(cacheKey);
+    return hit ? structuredClone(hit) : null;
+  }
+
   const topic = await getTopicFromDb(key);
   if (!topic || !Array.isArray(topic.questions)) return null;
 
   const rawQuestion = topic.questions.find((question) => String(question?.id || "") === questionId) || null;
-  if (!rawQuestion) return null;
-  return normalizeQuestions([rawQuestion])[0] || null;
+  const snapshot = rawQuestion ? normalizeQuestions([rawQuestion])[0] || null : null;
+  if (isFresh(contentCache.topicRows)) contentCache.topicQuestions.set(cacheKey, snapshot);
+  return snapshot ? structuredClone(snapshot) : null;
 }
 
 async function hydrateTicketSlotQuestions(rawQuestions, questionRows = []) {
@@ -837,7 +912,11 @@ function buildTicketBuilderQuestion(questionRow) {
   };
 }
 
-async function getTicketQuestionsFromDb(ticketId) {
+// Barcha biletlarning savol qatorlari BITTA so'rovda olinadi va ticket_id bo'yicha guruhlanadi
+// (ilgari har bir bilet uchun alohida so'rov ketardi).
+async function getTicketQuestionRowsCached() {
+  if (isFresh(contentCache.ticketQuestionRows)) return contentCache.ticketQuestionRows.byTicketId;
+  const generation = contentGeneration;
   const rows = await dbApi.all(
     `
       SELECT
@@ -849,15 +928,25 @@ async function getTicketQuestionsFromDb(ticketId) {
         bank.topic_slug,
         bank.topic_title,
         bank.question_index,
-      bank.question
+        bank.question
       FROM ticket_questions tq
       LEFT JOIN topic_question_bank bank ON bank.question_key = tq.question_id
-      WHERE tq.ticket_id = ?
-      ORDER BY tq."order" ASC, tq.id ASC
-    `,
-    [String(ticketId)]
+      ORDER BY tq.ticket_id ASC, tq."order" ASC, tq.id ASC
+    `
   );
-  return rows.map(normalizeTicketQuestionRow);
+  const byTicketId = new Map();
+  for (const row of rows) {
+    const key = String(row.ticket_id);
+    if (!byTicketId.has(key)) byTicketId.set(key, []);
+    byTicketId.get(key).push(row);
+  }
+  if (generation === contentGeneration) contentCache.ticketQuestionRows = { at: Date.now(), byTicketId };
+  return byTicketId;
+}
+
+async function getTicketQuestionsFromDb(ticketId) {
+  const byTicketId = await getTicketQuestionRowsCached();
+  return (byTicketId.get(String(ticketId)) || []).map(normalizeTicketQuestionRow);
 }
 
 async function refreshTicketQuestionsMirror(ticketId) {
@@ -878,15 +967,46 @@ async function refreshTicketQuestionsMirror(ticketId) {
   return getTicketBuilderFromDb(ticketId);
 }
 
-async function getTicketFromDb(ticketId) {
-  const row = await dbApi.get("SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE id = ?", [String(ticketId)]);
-  if (!row) return null;
-  const questionRows = await getTicketQuestionsFromDb(ticketId);
+const TICKET_ROW_COLUMNS = "id, title, title_i18n, ticket_number, status, questions, created_at, updated_at";
+
+async function getTicketRowsCached() {
+  if (isFresh(contentCache.ticketSummaries)) return contentCache.ticketSummaries;
+  const generation = contentGeneration;
+  const rows = await dbApi.all(`SELECT ${TICKET_ROW_COLUMNS} FROM tickets ORDER BY ticket_number ASC, created_at ASC, id ASC`);
+  const byId = new Map(rows.map((row) => [String(row.id), row]));
+  const entry = { at: Date.now(), rows, byId };
+  if (generation === contentGeneration) contentCache.ticketSummaries = entry;
+  return entry;
+}
+
+async function hydrateTicketRow(row) {
+  const questionRows = await getTicketQuestionsFromDb(row.id);
   const sourceQuestions = await hydrateTicketSlotQuestions(row.questions, questionRows);
   return {
     ...normalizeTicketRow(row),
     questions: sourceQuestions
   };
+}
+
+async function getTicketFromDb(ticketId) {
+  const { byId } = await getTicketRowsCached();
+  const row = byId.get(String(ticketId));
+  if (!row) return null;
+  return hydrateTicketRow(row);
+}
+
+// Savollarsiz yengil ro'yxat: faqat id, nom, raqam. Bilet ro'yxati sahifalari uchun yetarli.
+async function getTicketSummariesFromDb() {
+  const { rows } = await getTicketRowsCached();
+  return rows
+    .filter((row) => normalizeTicketStatus(row.status) === "COMPLETED")
+    .map((row) => ({
+      id: String(row.id),
+      title: String(row.title || ""),
+      titleI18n: normalizeTitleI18n(row.title_i18n, row.title),
+      ticketNumber: Number(row.ticket_number || 0),
+      status: "COMPLETED"
+    }));
 }
 
 async function getTicketBuilderFromDb(ticketId) {
@@ -933,13 +1053,11 @@ async function persistTicketSlotQuestions(ticketId, slots) {
 }
 
 async function getTicketsFromDb() {
-  const rows = await dbApi.all(
-    "SELECT id, title, title_i18n, ticket_number, status, questions, created_at, updated_at FROM tickets WHERE status = 'COMPLETED' ORDER BY ticket_number ASC, created_at ASC, id ASC"
-  );
+  const { rows } = await getTicketRowsCached();
   const tickets = [];
   for (const row of rows) {
-    const ticket = await getTicketFromDb(row.id);
-    if (ticket) tickets.push(ticket);
+    if (normalizeTicketStatus(row.status) !== "COMPLETED") continue;
+    tickets.push(await hydrateTicketRow(row));
   }
   return tickets;
 }
@@ -1265,15 +1383,32 @@ function normalizeImportedTopicQuestion(input = {}, index = 0) {
   };
 }
 
-async function getTopicsFromDb() {
+async function getTopicRowsCached() {
+  if (isFresh(contentCache.topicRows)) return contentCache.topicRows;
+  contentCache.topicQuestions.clear();
+  const generation = contentGeneration;
   const rows = await dbApi.all("SELECT id, slug, title, title_i18n, questions, admin_marked FROM topics ORDER BY id ASC");
+  const byKey = new Map();
+  for (const row of rows) {
+    // id bo'yicha qidiruv slug'dan ustun turishi uchun avval slug, keyin id yoziladi.
+    if (row.slug) byKey.set(String(row.slug), row);
+  }
+  for (const row of rows) byKey.set(String(row.id), row);
+  const entry = { at: Date.now(), rows, byKey };
+  if (generation === contentGeneration) contentCache.topicRows = entry;
+  return entry;
+}
+
+async function getTopicsFromDb() {
+  const { rows } = await getTopicRowsCached();
   return rows.map(normalizeTopicRow);
 }
 
 async function getTopicFromDb(topicId) {
   const key = String(topicId || "").trim();
   if (!key) return null;
-  const row = await dbApi.get("SELECT id, slug, title, title_i18n, questions, admin_marked FROM topics WHERE CAST(id AS TEXT) = ? OR slug = ? LIMIT 1", [key, key]);
+  const { byKey } = await getTopicRowsCached();
+  const row = byKey.get(key);
   return row ? normalizeTopicRow(row) : null;
 }
 
@@ -1357,8 +1492,8 @@ function normalizeVideoLessonRow(row) {
     playbackUrl: playbackUrlRaw
       ? (playbackUrlIsHls ? buildProxiedMediaUrl(playbackUrlRaw, "video-stream") : playbackUrlRaw)
       : "",
-    createdAt: row.created_at ? String(row.created_at) : undefined,
-    updatedAt: row.updated_at ? String(row.updated_at) : undefined
+    createdAt: shortDate(row.created_at) ?? undefined,
+    updatedAt: shortDate(row.updated_at) ?? undefined
   };
 }
 
@@ -3307,6 +3442,7 @@ async function mergeUserAccounts(targetUserId, donorUserId) {
 
     await client.query("DELETE FROM users WHERE id = $1", [donorId]);
     await client.query("COMMIT");
+    invalidateUserCache();
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -3589,6 +3725,8 @@ function signRefreshToken(userId) {
   const payload = {
     typ: "refresh",
     sub: String(userId),
+    // jti: bir soniyada ikki marta berilgan token bir xil bo'lib qolmasin (token_hash UNIQUE → 500 xato).
+    jti: crypto.randomBytes(12).toString("hex"),
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + REFRESH_TOKEN_MAX_AGE_SECONDS
   };
@@ -3664,8 +3802,16 @@ async function getUserFromAccess(req) {
   if (!match) return null;
   const verified = await verifyToken(match[1]);
   if (!verified.ok || verified.payload.typ !== "access") return null;
-  const user = await dbApi.get("SELECT * FROM users WHERE id = ?", [String(verified.payload.sub)]);
-  return user || null;
+  const userId = String(verified.payload.sub);
+  const cached = userCache.get(userId);
+  if (isFresh(cached, SHORT_CACHE_TTL_MS)) return { ...cached.user };
+  const user = await dbApi.get("SELECT * FROM users WHERE id = ?", [userId]);
+  if (user) {
+    userCache.set(userId, { at: Date.now(), user });
+    return { ...user };
+  }
+  userCache.delete(userId);
+  return null;
 }
 
 async function getAdminFromAccess(req) {
@@ -3674,8 +3820,15 @@ async function getAdminFromAccess(req) {
   return user;
 }
 
+// Asl rasmni va (bo'lsa) uning s/m/l variantlarini o'chiradi; xatolar yuklash oqimini to'xtatmaydi.
+async function removeR2ImageWithVariants(bucket, key) {
+  await r2.send(new DeleteObjectCommand({ Bucket: bucket, Key: key })).catch(() => {});
+  if (imageVariants) await imageVariants.deleteVariants({ s3: r2, bucket, originalKey: key }).catch(() => {});
+}
+
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+// Yuklangan rasm baribir siqiladi, shuning uchun telefon kamerasidagi katta fayllar ham qabul qilinadi.
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_AUDIO_TYPES = new Set(["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav"]);
 const MAX_AUDIO_SIZE = 10 * 1024 * 1024;
 const ADMIN_ACCESS_DENIED_MESSAGE = "Bu bo‘limga kirish uchun admin akkaunt kerak.";
@@ -4124,7 +4277,7 @@ async function updateExamSession(userId, fields) {
   const nextAnswers = fields.answers !== undefined ? JSON.stringify(fields.answers) : JSON.stringify(current.answers || {});
   const nextCompleted = fields.completed !== undefined ? Boolean(fields.completed) : Boolean(current.completed);
   const nextScore = Number.isFinite(Number(fields.score)) ? Number(fields.score) : Number(current.score || 0);
-  const nextStartedAt = fields.startedAt ? new Date(fields.startedAt).toISOString() : String(current.started_at);
+  const nextStartedAt = new Date(fields.startedAt || current.started_at).toISOString();
   const result = await dbApi.get(
     `
     UPDATE exam_sessions
@@ -4162,9 +4315,9 @@ function getExamTiming(session) {
   const expiresAt = startedAt + durationSeconds * 1000;
   const remainingSeconds = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
   return {
-    startedAt: new Date(startedAt).toISOString(),
+    startedAt: shortDate(startedAt),
     durationSeconds,
-    expiresAt: new Date(expiresAt).toISOString(),
+    expiresAt: shortDate(expiresAt),
     remainingSeconds,
     expired: remainingSeconds <= 0
   };
@@ -4310,6 +4463,16 @@ async function uploadVideoToR2({ buffer, fileName = "video.mp4", contentType = "
   };
 }
 
+// Foydalanuvchi qatoridan mijozga yuborilmasligi kerak bo'lgan maydonlarni olib tashlaydi
+// (parol hash'i va OAuth identifikatorlari ilgari login javobida to'liq qaytardi).
+function omitUserSecrets(user) {
+  if (!user || typeof user !== "object") return user;
+  const { password_hash, google_sub, apple_sub, ...safe } = user;
+  if ("created_at" in safe) safe.created_at = shortDate(safe.created_at);
+  if ("pro_until" in safe) safe.pro_until = shortDate(safe.pro_until);
+  return safe;
+}
+
 async function respondWithAuthUser(req, res, user) {
   const phoneUi = user.phone ? formatUzPhoneForUi(user.phone) : null;
   const tokens = await issueTokensForUser(user.id, req, res);
@@ -4318,7 +4481,7 @@ async function respondWithAuthUser(req, res, user) {
     ok: true,
     accessToken: tokens.accessToken,
     user: {
-      ...user,
+      ...omitUserSecrets(user),
       phone: phoneUi,
       password_reset_required: passwordResetRequired,
       must_change_password: passwordResetRequired
@@ -4332,7 +4495,7 @@ function publicAuthUser(user) {
   const phoneUi = user.phone ? formatUzPhoneForUi(user.phone) : null;
   const passwordResetRequired = Boolean(user.password_reset_required || user.must_change_password);
   return {
-    ...user,
+    ...omitUserSecrets(user),
     phone: phoneUi,
     password_reset_required: passwordResetRequired,
     must_change_password: passwordResetRequired
@@ -4477,6 +4640,7 @@ async function handleDeleteAccount(req, res) {
       await client.query("BEGIN");
       await client.query("DELETE FROM users WHERE id = $1", [String(user.id)]);
       await client.query("COMMIT");
+      invalidateUserCache();
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -4563,6 +4727,23 @@ app.get("/api/topics", async (req, res) => {
   const user = await getUserFromAccess(req);
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
   const topics = await getTopicsFromDb();
+
+  // ?lite=1 — ro'yxat sahifasi faqat id, nom va "tugallangan" belgisini chizadi. To'liq javobdagi
+  // har bir mavzuning javoblar xaritasi (progress.answers) va statistikasi hisoblanmaydi/yuborilmaydi.
+  if (String(req.query.lite || "") === "1") {
+    const doneRows = user
+      ? await dbApi.all("SELECT ticket_id FROM test_progress WHERE user_id = ? AND completed = TRUE", [String(user.id)])
+      : [];
+    const done = new Set(doneRows.map((row) => String(row.ticket_id)));
+    setRevalidateHeaders(res);
+    return res.json({
+      topics: topics.map((topic) => ({
+        id: topic.id,
+        title: lang ? String(topic.titleI18n?.[lang] || topic.title || "") : topic.title,
+        completed: done.has(String(topic.id))
+      }))
+    });
+  }
   let completedMap = new Map();
   let progressMap = new Map();
   if (user) {
@@ -4593,7 +4774,7 @@ app.get("/api/topics", async (req, res) => {
           answers,
           completed: !!row.completed,
           score: Number(row.score || 0),
-          updatedAt: row.updated_at ? String(row.updated_at) : null,
+          updatedAt: shortDate(row.updated_at) ?? null,
           ...calculateTicketProgressStats(topic, answers)
         };
       })()
@@ -4653,16 +4834,26 @@ app.get("/api/public/topics/:topicId", async (req, res) => {
   });
 });
 
+// Bilet sloti soni (savollar to'liq yuklanmasdan ro'yxatda ko'rsatish uchun).
+const TICKET_SLOT_COUNT = 20;
+
+// Ro'yxatlar kamdan-kam o'zgaradi: brauzer ETag bilan tekshiradi (304 — bo'sh javob),
+// har safar to'liq yuklamaydi.
+function setRevalidateHeaders(res, visibility = "private") {
+  res.setHeader("Cache-Control", `${visibility}, no-cache`);
+  if (visibility === "private") res.vary("Authorization");
+}
+
 app.get("/api/public/tickets", async (req, res) => {
-  const tickets = await getTicketsFromDb();
+  const tickets = await getTicketSummariesFromDb();
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
-  setNoStoreHeaders(res);
+  setRevalidateHeaders(res, "public");
   res.json({
     tickets: tickets.map((ticket, index) => ({
       id: ticket.id,
       title: lang ? String(ticket.titleI18n?.[lang] || ticket.title || "") : ticket.title,
       free: index < FREE_TICKET_COUNT,
-      questionCount: Array.isArray(ticket.questions) ? ticket.questions.length : 0
+      questionCount: TICKET_SLOT_COUNT
     }))
   });
 });
@@ -5262,6 +5453,15 @@ app.patch("/api/admin/app-config", async (req, res) => {
 
 app.get("/api/tickets", requireUser, async (req, res) => {
   const lang = normalizeLanguageCode(req.query.lang || req.headers["x-lang"] || "", "");
+
+  // ?lite=1 — faqat ro'yxatni chizish uchun kerak bo'lgan maydonlar (id, nom): savollar va
+  // progress hisoblanmaydi, javob bir necha baytga tushadi.
+  if (String(req.query.lite || "") === "1") {
+    const summaries = await getTicketSummariesFromDb();
+    setRevalidateHeaders(res);
+    return res.json({ tickets: summaries.map((ticket) => ({ id: ticket.id, number: ticket.ticketNumber })) });
+  }
+
   const tickets = await getTicketsFromDb();
   const progressRows = await dbApi.all("SELECT ticket_id, answers, completed, score, updated_at FROM test_progress WHERE user_id = ?", [
     String(req.user.id)
@@ -5288,7 +5488,7 @@ app.get("/api/tickets", requireUser, async (req, res) => {
           ticketId: String(ticket.id),
           completed: Boolean(row.completed),
           score: Number(row.score || 0),
-          updatedAt: row.updated_at ? String(row.updated_at) : null,
+          updatedAt: shortDate(row.updated_at) ?? null,
           ...calculateTicketProgressStats(ticket, answers)
         };
       })()
@@ -5361,7 +5561,7 @@ app.get("/api/content/sync", requireUser, async (req, res) => {
     const topics = [];
     for (const row of topicRows) {
       const topic = await getTopicFromDb(row.id);
-      if (topic) topics.push({ ...topic, updated_at: row.updated_at ? String(row.updated_at) : undefined });
+      if (topic) topics.push({ ...topic, updated_at: shortDate(row.updated_at) ?? undefined });
     }
 
     // A ticket's served questions are hydrated from topic_question_bank at read time (see
@@ -5392,7 +5592,7 @@ app.get("/api/content/sync", requireUser, async (req, res) => {
     const customTests = [];
     for (const row of customTestRows) {
       const test = await getCustomTestFromDb(row.id);
-      if (test) customTests.push({ ...test, updated_at: row.updated_at ? String(row.updated_at) : undefined });
+      if (test) customTests.push({ ...test, updated_at: shortDate(row.updated_at) ?? undefined });
     }
 
     const deletionRows = await dbApi.all(
@@ -5480,12 +5680,12 @@ function serializeExamSessionRow(row) {
     userId: Number(row.user_id),
     examCount: Number(row.exam_count || 50),
     durationSeconds: Number(row.duration_seconds || getExamDurationSeconds(row.exam_count || 50)),
-    startedAt: String(row.started_at),
+    startedAt: shortDate(row.started_at),
     completed: Boolean(row.completed),
     score: Number(row.score || 0),
     selection: Array.isArray(selection) ? selection : [],
     answers: answers && typeof answers === "object" ? answers : {},
-    updatedAt: row.updated_at ? String(row.updated_at) : null
+    updatedAt: shortDate(row.updated_at) ?? null
   };
 }
 
@@ -5736,13 +5936,27 @@ app.post("/api/promo/activate", requireUser, async (req, res) => {
   );
 
   const updatedUser = await dbApi.get("SELECT * FROM users WHERE id = ?", [userId]);
-  res.json({ ok: true, user: updatedUser, isPro: isUserPro(updatedUser), proUntil: updatedUser.pro_until });
+  res.json({ ok: true, user: omitUserSecrets(updatedUser), isPro: isUserPro(updatedUser), proUntil: shortDate(updatedUser.pro_until) });
 });
 
 app.get("/api/admin/tickets", async (req, res) => {
   const user = await getAdminFromAccess(req);
   if (!user) return res.status(403).json({ error: ADMIN_ACCESS_DENIED_MESSAGE });
   const tickets = await getTicketsFromDb();
+  // ?lite=1 — admin ro'yxati har bir biletning barcha savollarini (~1 MB) emas, faqat
+  // sarlavha ma'lumotlari va to'ldirilgan savollar sonini oladi.
+  if (String(req.query.lite || "") === "1") {
+    return res.json({
+      tickets: tickets.map((ticket) => ({
+        id: ticket.id,
+        title: ticket.title,
+        titleI18n: ticket.titleI18n,
+        ticketNumber: ticket.ticketNumber,
+        status: ticket.status,
+        filledCount: Array.isArray(ticket.questions) ? ticket.questions.filter(Boolean).length : 0
+      }))
+    });
+  }
   res.json({ tickets });
 });
 
@@ -6337,8 +6551,8 @@ app.get("/api/admin/users", async (req, res) => {
       id: String(row.id),
       full_name: String(row.full_name || ""),
       phone: row.phone ? String(row.phone) : "",
-      pro_until: row.pro_until ? String(row.pro_until) : null,
-      created_at: row.created_at ? String(row.created_at) : null,
+      pro_until: shortDate(row.pro_until) ?? null,
+      created_at: shortDate(row.created_at) ?? null,
       is_admin: row.is_admin === true,
       password_reset_required: row.password_reset_required === true || row.must_change_password === true,
       must_change_password: row.password_reset_required === true || row.must_change_password === true
@@ -6483,7 +6697,7 @@ app.post("/api/upload-image", async (req, res) => {
 
     const buffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ""), "base64");
     if (buffer.length > MAX_IMAGE_SIZE) {
-      return res.status(400).json({ error: "Rasm hajmi 5MB dan oshmasligi kerak" });
+      return res.status(400).json({ error: "Rasm hajmi 10MB dan oshmasligi kerak" });
     }
 
     const extension = getExtensionFromFile({ name: imageName, type: imageType });
@@ -6492,20 +6706,36 @@ app.post("/api/upload-image", async (req, res) => {
     const bucket = getR2BucketName();
     if (!bucket) return res.status(500).json({ error: "R2 bucket sozlanmagan" });
 
-    const fileKey = createFileKey(extension);
-    await r2.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: fileKey,
-        Body: buffer,
-        ContentType: imageType
-      })
-    );
+    let fileKey;
+    if (imageVariants) {
+      // Avtomatik siqish: asl rasm webp (<=1600 px) qilib saqlanadi va yoniga 3 ta variant
+      // (images/s|m|l/<nom>.webp) yuklanadi. Yaroqsiz fayl bo'lsa 400 qaytadi.
+      let compressed;
+      try {
+        compressed = await imageVariants.compressOriginal(buffer);
+      } catch {
+        return res.status(400).json({ error: "Rasm o‘qib bo‘lmadi yoki shikastlangan" });
+      }
+      fileKey = createFileKey("webp");
+      await imageVariants.putWebp(r2, bucket, fileKey, compressed.buffer);
+      await imageVariants.uploadVariants({ s3: r2, bucket, originalKey: fileKey, buffer });
+    } else {
+      fileKey = createFileKey(extension);
+      await r2.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: fileKey,
+          Body: buffer,
+          ContentType: imageType,
+          CacheControl: R2_CACHE_CONTROL
+        })
+      );
+    }
 
     const imageUrl = buildR2PublicUrl(fileKey);
     const oldKey = deriveR2KeyFromPublicUrl(oldImageUrl);
     if (oldKey && oldKey !== fileKey) {
-      await r2.send(new DeleteObjectCommand({ Bucket: bucket, Key: oldKey })).catch(() => {});
+      await removeR2ImageWithVariants(bucket, oldKey);
     }
 
     if (ticketId && questionId) {
@@ -6558,7 +6788,7 @@ app.delete("/api/upload-image", async (req, res) => {
 
     const oldKey = deriveR2KeyFromPublicUrl(imageUrl);
     if (oldKey) {
-      await r2.send(new DeleteObjectCommand({ Bucket: bucket, Key: oldKey })).catch(() => {});
+      await removeR2ImageWithVariants(bucket, oldKey);
     }
 
     if (ticketId) {

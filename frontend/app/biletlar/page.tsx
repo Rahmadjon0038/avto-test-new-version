@@ -4,7 +4,8 @@ import { Lock } from "lucide-react";
 import { siteName, getSiteUrl } from "@/lib/site";
 import { fetchPublicTickets } from "@/lib/server-api";
 import PublicShell from "@/app/ui/public-shell";
-import { RegisterCta, buildItemListJsonLd, buildBreadcrumbJsonLd } from "@/app/ui/public-questions";
+import { RegisterCta } from "@/app/ui/public-questions";
+import { buildItemListJsonLd, buildBreadcrumbJsonLd } from "@/lib/json-ld";
 import { getServerLanguage } from "@/lib/site-language-server";
 import { getTranslation } from "@/lib/site-language";
 

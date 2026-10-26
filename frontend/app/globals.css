@@ -12,6 +12,8 @@
   --shadow: none;
   --radius: 4px;
   --pageMax: 100%;
+  /* Katta ekranlarda kontent cho'zilib ketmasligi uchun markazlashgan maksimal kenglik */
+  --content-max: 1200px;
 }
 
 * {
@@ -62,8 +64,8 @@ body {
   gap: 12px;
   padding: 12px 14px;
   width: 100%;
-  max-width: none;
-  margin: 0;
+  max-width: var(--content-max);
+  margin: 0 auto;
 }
 
 .brand {
@@ -350,7 +352,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: none;
+  max-width: var(--content-max);
   margin: 0 auto;
   padding: 16px 16px 24px;
   background: transparent;
@@ -3215,6 +3217,10 @@ body {
   }
 }
 
+.container.authContainer {
+  max-width: none;
+}
+
 .authContainer {
   padding: 22px 32px 32px;
   padding-bottom: 132px;
@@ -3222,7 +3228,7 @@ body {
   overflow: hidden;
   background:
     linear-gradient(rgba(7, 10, 18, 0.72), rgba(7, 10, 18, 0.72)),
-    url("/way.png");
+    url("/way.webp");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
@@ -4344,7 +4350,7 @@ body {
 }
 
 .siteFooterInner {
-  width: min(1560px, calc(100% - 12px));
+  width: min(var(--content-max), calc(100% - 12px));
   max-width: none;
   margin: 0 auto;
   display: flex;
@@ -4912,7 +4918,7 @@ body {
   }
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1200px) {
   .ticketsGrid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
@@ -5021,6 +5027,20 @@ body {
 .ticketCardCompact .ticketTitleNumbered {
   font-size: 18px;
   letter-spacing: -0.02em;
+}
+
+.ticketCardSkeleton {
+  pointer-events: none;
+  animation: skeletonPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticketCardSkeleton { animation: none; }
 }
 
 .ticketCardLocked {

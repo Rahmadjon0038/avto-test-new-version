@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-react";
-import { Cell, Pie, PieChart } from "recharts";
+import DonutChart from "@/app/ui/donut-chart";
 import type { PublicQuestion } from "@/lib/server-api";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useSiteLanguage } from "@/app/site-language-provider";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 const FALLBACK_IMAGE = "/default.png";
 
@@ -152,7 +153,7 @@ export default function PublicTestRunner({
           </div>
           <div className="qLeft">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="qimg" src={resolveImg(q?.image)} alt="Savol rasmi" />
+            <ResponsiveImage className="qimg" src={resolveImg(q?.image)} alt="Savol rasmi" decoding="async" fetchPriority="high" />
           </div>
         </div>
       </div>
@@ -220,24 +221,7 @@ export default function PublicTestRunner({
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">
-                    <PieChart width={220} height={220} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={72}
-                        outerRadius={96}
-                        startAngle={90}
-                        endAngle={-270}
-                        paddingAngle={0}
-                        stroke="none"
-                        cornerRadius={8}
-                      >
-                        <Cell fill="#2f6dff" />
-                        <Cell fill="rgba(255, 255, 255, 0.09)" />
-                      </Pie>
-                    </PieChart>
+                    <DonutChart data={chartData} />
                     <div className="chartCenter">
                       <div className="chartValue">{correctPercent}%</div>
                       <div className="chartLabel">To‘g‘ri</div>

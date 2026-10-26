@@ -14,6 +14,10 @@ import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
 import { getCachedMistakes, setMistakesForUser, type CachedMistake } from "@/lib/content-db";
 import { preloadQuestionImages } from "@/lib/image-preload";
+import ResponsiveImage from "@/app/ui/responsive-image";
+
+// Ro'yxat kartalaridagi rasm tor (≈420 px).
+const LIST_IMAGE_SIZES = "(max-width: 859px) calc(100vw - 32px), 420px";
 
 type MistakeQuestion = {
   id: string;
@@ -472,7 +476,7 @@ export default function MistakesPage() {
 
                   {question.image ? (
                     <div className="answersQuestionImageWrap">
-                      <img className="answersQuestionImage" src={resolveQuestionImage(question.image)} alt={question.text} />
+                      <ResponsiveImage className="answersQuestionImage" src={resolveQuestionImage(question.image)} alt={question.text} sizes={LIST_IMAGE_SIZES} loading="lazy" decoding="async" />
                     </div>
                   ) : null}
 
@@ -566,16 +570,14 @@ export default function MistakesPage() {
                           <span className="qSpinner" />
                         </div>
                       )}
-                      <img
+                      <ResponsiveImage
+                        decoding="async"
+                        fetchPriority="high"
                         className={`qimg ${imageLoading ? "isLoading" : ""}`}
                         src={resolveQuestionImage(currentQuestion.image)}
                         alt={t("public.explanation")}
                         onLoad={() => setImageLoading(false)}
-                        onError={(event) => {
-                          const img = event.currentTarget;
-                          setImageLoading(false);
-                          if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE;
-                        }}
+                        onFallback={() => setImageLoading(false)}
                       />
                     </div>
                   </div>

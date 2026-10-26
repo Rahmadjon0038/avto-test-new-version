@@ -37,6 +37,22 @@ export function ensureSynced(authFetch: AuthFetch): Promise<SyncResult> {
   return syncPromise;
 }
 
+// Sahifa o'z kontentini ko'rsatib bo'lgach, orqa fonda sinxronlaydi. Birinchi sinxronlash barcha
+// mavzu/bilet/testlarni yuklaydi (megabaytlar), shuning uchun u sahifaning o'zi va rasmlari bilan
+// sekin internetda "kurashib" qolmasligi kerak.
+export function ensureSyncedWhenIdle(authFetch: AuthFetch): () => void {
+  if (typeof window === "undefined") return () => {};
+  const run = () => {
+    ensureSynced(authFetch).catch(() => {});
+  };
+  if (typeof window.requestIdleCallback === "function") {
+    const handle = window.requestIdleCallback(run, { timeout: 4000 });
+    return () => window.cancelIdleCallback(handle);
+  }
+  const timer = window.setTimeout(run, 2000);
+  return () => window.clearTimeout(timer);
+}
+
 async function runSync(authFetch: AuthFetch): Promise<SyncResult> {
   const localVersion = Number((await getMeta<number>(LOCAL_VERSION_KEY)) || 0);
   const lastSync = (await getMeta<string>(LAST_SYNC_KEY)) || "";
@@ -83,6 +99,12 @@ async function runSync(authFetch: AuthFetch): Promise<SyncResult> {
     }
 
     devLog("Sync completed");
+
+    // IndexedDB'dan o'qiydigan barcha mahalliy so'rovlar (javoblar banki, sozlamali testlar,
+    // bilet/mavzu nusxalari) yangi ma'lumot bilan qayta o'qiladi.
+    if (updatedCount > 0 || deletedCount > 0) {
+      broadcastQuerySync({ type: "invalidate", queryKey: ["local"] });
+    }
 
     for (const topic of data.topics?.updated || []) {
       broadcastQuerySync({ type: "invalidate", queryKey: ["topic", String(topic.id)] });

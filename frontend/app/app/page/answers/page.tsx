@@ -6,10 +6,18 @@ import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { QuestionAudio } from "@/lib/question-audio";
 import { resolveQuestionImage as resolveQuestionImageBase } from "@/lib/question-image";
-import { getLocalAnswerBank, type AnswerQuestion } from "@/lib/answer-bank";
+import { useQuery } from "@tanstack/react-query";
+import type { AnswerQuestion } from "@/lib/answer-bank";
+import { answerBankQuery } from "@/lib/local-queries";
 import { ensureSynced } from "@/lib/content-sync";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 type FilterKey = "all" | "with-image" | "without-image";
+
+const EMPTY_BANK: AnswerQuestion[] = [];
+
+// Ro'yxat kartalaridagi rasm tor (≈420 px).
+const LIST_IMAGE_SIZES = "(max-width: 859px) calc(100vw - 32px), 420px";
 
 function resolveQuestionImage(image?: string) {
   return resolveQuestionImageBase(image, "");
@@ -53,33 +61,17 @@ export default function AnswersPage() {
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, []);
 
-  // Local-first: the whole answer bank lives in IndexedDB already (via the ticket cache), so this
-  // browse page never needs a network round trip — filtering/search/pagination all run client-side.
-  const [bank, setBank] = useState<AnswerQuestion[]>([]);
-  const [bankLoading, setBankLoading] = useState(true);
+  // Local-first: butun javoblar banki IndexedDB'da (bilet keshi orqali), shuning uchun bu sahifa
+  // tarmoqqa muhtoj emas — filtr, qidiruv va sahifalash brauzerda. Bank so'rovi keshlanadi
+  // (har kirishda qayta qurilmaydi), sinxronlash o'zgarish topsa avtomatik yangilanadi.
+  const bankQuery = useQuery(answerBankQuery());
+  const bank = bankQuery.data ?? EMPTY_BANK;
+  const bankLoading = bankQuery.isPending;
   const [visibleCount, setVisibleCount] = useState(pageSize);
 
   useEffect(() => {
-    let cancelled = false;
-    getLocalAnswerBank()
-      .then((items) => {
-        if (!cancelled) setBank(items);
-      })
-      .finally(() => {
-        if (!cancelled) setBankLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
     if (!authReady) return;
-    ensureSynced(authFetch)
-      .then((result) => {
-        if (result.changed) getLocalAnswerBank().then(setBank);
-      })
-      .catch(() => {});
+    ensureSynced(authFetch).catch(() => {});
   }, [authReady, authFetch]);
 
   useEffect(() => {
@@ -271,7 +263,7 @@ export default function AnswersPage() {
 
             {question.image ? (
               <div className="answersQuestionImageWrap">
-                <img className="answersQuestionImage" src={resolveQuestionImage(question.image)} alt={question.text} />
+                <ResponsiveImage className="answersQuestionImage" src={resolveQuestionImage(question.image)} alt={question.text} sizes={LIST_IMAGE_SIZES} loading="lazy" decoding="async" />
               </div>
             ) : null}
 

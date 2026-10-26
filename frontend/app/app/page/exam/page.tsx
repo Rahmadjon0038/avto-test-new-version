@@ -14,6 +14,7 @@ import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
 import { getCachedExamSnapshot, putCachedExamSnapshot } from "@/lib/content-db";
 import { preloadQuestionImages } from "@/lib/image-preload";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 type ExamQuestion = {
   id: string;
@@ -687,16 +688,14 @@ export default function ExamPage() {
                 onClick={() => setZoomedImage(resolveQuestionImage(currentQuestion.image))}
                 aria-label={t("common.loading")}
               >
-                <img
+                <ResponsiveImage
+                  decoding="async"
+                  fetchPriority="high"
                   className={`qimg ${imageLoading ? "isLoading" : ""}`}
                   src={resolveQuestionImage(currentQuestion.image)}
                   alt={t("common.loading")}
                   onLoad={() => setImageLoading(false)}
-                  onError={(event) => {
-                    const img = event.currentTarget;
-                    setImageLoading(false);
-                    if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE;
-                  }}
+                  onFallback={() => setImageLoading(false)}
                 />
               </button>
             </div>

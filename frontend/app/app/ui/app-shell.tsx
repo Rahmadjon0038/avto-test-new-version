@@ -17,10 +17,11 @@ import {
   UserCircle2,
   Wallet
 } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { useMe } from "@/lib/use-me";
 
 type SubPlan = "1w" | "2w" | "1m";
 type PayProvider = "click" | "payme";
@@ -66,15 +67,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute("data-theme", "dark");
   }, []);
 
-  const meQuery = useQuery({
-    queryKey: ["me", accessToken || "anonymous"],
-    queryFn: async () => {
-      const res = await authFetch("/api/auth/me");
-      return jsonOrError(res);
-    },
-    retry: false,
-    enabled: authReady && !!accessToken
-  });
+  const meQuery = useMe();
   const isAdmin = Boolean(me?.is_admin || user?.is_admin || meQuery.data?.user?.is_admin);
   const mustChangePassword = Boolean(
     me?.password_reset_required ||

@@ -8,20 +8,32 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import { readPersisted, writePersisted } from "@/lib/persisted-cache";
 import type { TopicCard } from "../topics-data";
 
 export default function TopicsPage() {
   const router = useRouter();
   const qc = useQueryClient();
-  const { authFetch, authReady } = useAuth();
+  const { authFetch, authReady, user } = useAuth();
   const { t, language } = useSiteLanguage();
+  // Ro'yxat uchun faqat id, nom va "tugallangan" belgisi kerak (lite=1): har bir mavzuning
+  // javoblar xaritasi yuklanmaydi. Oxirgi ro'yxat localStorage'dan darhol chiqadi, orqada ETag
+  // bilan tekshiriladi (o'zgarmagan bo'lsa javob bo'sh — 304).
+  // Kesh foydalanuvchi bo'yicha ajratiladi: boshqa akkauntning belgilari placeholder sifatida
+  // ham ko'rinmasligi uchun user id ma'lum bo'lmaguncha kesh o'qilmaydi ham, yozilmaydi ham.
+  const userId = user?.id ? String(user.id) : null;
+  const cacheKey = `topics-lite:${userId}:${language}`;
+  const topicsQueryKey = ["topics", language];
   const topicsQuery = useQuery({
-    queryKey: ["topics", language],
+    queryKey: topicsQueryKey,
     queryFn: async () => {
-      const res = await authFetch("/api/topics");
+      const res = await authFetch("/api/topics?lite=1", { cache: "no-cache" });
       const data = await jsonOrError(res);
-      return Array.isArray(data.topics) ? (data.topics as TopicCard[]) : [];
+      const topics = Array.isArray(data.topics) ? (data.topics as TopicCard[]) : [];
+      if (userId) writePersisted(cacheKey, topics);
+      return topics;
     },
+    placeholderData: () => (userId ? readPersisted<TopicCard[]>(cacheKey) : undefined),
     enabled: authReady
   });
 
@@ -40,10 +52,20 @@ export default function TopicsPage() {
       });
       return jsonOrError(res);
     },
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["topics"] });
+    // Optimistik yangilash: belgi darhol o'zgaradi, xato bo'lsa avvalgi holatga qaytadi.
+    onMutate: async ({ topicId, completed }) => {
+      await qc.cancelQueries({ queryKey: topicsQueryKey });
+      const previous = qc.getQueryData<TopicCard[]>(topicsQueryKey);
+      qc.setQueryData<TopicCard[]>(topicsQueryKey, (current) =>
+        current?.map((topic) => (topic.id === topicId ? { ...topic, completed } : topic))
+      );
+      return { previous };
     },
-    onError: (error: any) => toast.error(error?.message || "Xatolik")
+    onError: (error: any, _variables, context) => {
+      if (context?.previous) qc.setQueryData(topicsQueryKey, context.previous);
+      toast.error(error?.message || "Xatolik");
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["topics"] })
   });
 
   return (
@@ -64,9 +86,12 @@ export default function TopicsPage() {
         </div>
       </div>
 
-      {topicsQuery.isLoading ? <div className="muted">{t("topics.loading")}</div> : null}
-
-      <div className="topicsGrid">
+      <div className="topicsGrid" aria-busy={topicsQuery.isLoading}>
+        {topicsQuery.isLoading
+          ? Array.from({ length: 12 }, (_, index) => (
+              <div key={index} className="topicCard topicCardCentered ticketCardSkeleton" aria-hidden="true" />
+            ))
+          : null}
         {(topicsQuery.data || []).map((topic, index) => (
           <article
             key={topic.id}

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronLeft, ChevronRight, Flag, RotateCcw } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cell, Pie, PieChart } from "recharts";
+import DonutChart from "@/app/ui/donut-chart";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { appendLanguageQuery } from "@/lib/site-language";
@@ -15,9 +15,11 @@ import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation"
 import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
-import { getCachedCustomTest, putCachedCustomTest, type CachedCustomTest } from "@/lib/content-db";
-import { ensureSynced } from "@/lib/content-sync";
+import { putCachedCustomTest, type CachedCustomTest } from "@/lib/content-db";
+import { localCustomTestQuery } from "@/lib/local-queries";
+import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
+import ResponsiveImage from "@/app/ui/responsive-image";
 
 type Question = {
   id: string;
@@ -268,7 +270,23 @@ export default function CustomTestPage() {
     [patchSettings, refreshShuffleSeed, settings.shuffleQuestions]
   );
 
-  const [customTest, setCustomTest] = useState<Topic | null>(null);
+  const customTestQuery = useQuery({
+    queryKey: ["custom-test", testId, language, poolSeed],
+    queryFn: async () => {
+      const res = await authFetch(
+        appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}?seed=${poolSeed}`, language)
+      );
+      const data = await jsonOrError(res);
+      if (data.customTest?.id !== undefined) putCachedCustomTest(data.customTest as unknown as CachedCustomTest);
+      return data as { customTest: Topic | null };
+    },
+    // Seed almashganda yangi savollar kelguncha oldingi to'plam ko'rinib turadi.
+    placeholderData: (previous) => previous
+  });
+  // Local-first: tarmoq javobi kelguncha IndexedDB'dagi oxirgi nusxa darhol ko'rsatiladi.
+  const localCustomTest = useQuery(localCustomTestQuery(testId));
+  const customTest: Topic | null =
+    customTestQuery.data?.customTest ?? (localCustomTest.data as unknown as Topic | null) ?? null;
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const autoNextTimerRef = useRef<number | null>(null);
@@ -290,36 +308,9 @@ export default function CustomTestPage() {
   );
   const q = useMemo(() => customTestQuestions[idx] ?? null, [customTestQuestions, idx]);
 
-  const customTestQuery = useQuery({
-    queryKey: ["custom-test", testId, language, poolSeed],
-    queryFn: async () => {
-      const res = await authFetch(
-        appendLanguageQuery(`/api/custom-tests/${encodeURIComponent(testId)}?seed=${poolSeed}`, language)
-      );
-      const data = await jsonOrError(res);
-      setCustomTest(data.customTest);
-      if (data.customTest?.id !== undefined) putCachedCustomTest(data.customTest as unknown as CachedCustomTest);
-      return data;
-    }
-  });
-
-  // Local-first: while the network fetch above is in flight, show the last IndexedDB-cached
-  // copy of this custom test immediately instead of leaving the page blank.
-  useEffect(() => {
-    let cancelled = false;
-    getCachedCustomTest(testId).then((cached) => {
-      if (!cancelled && cached) {
-        setCustomTest((current) => current ?? (cached as unknown as Topic));
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [testId]);
-
   useEffect(() => {
     if (!authReady) return;
-    ensureSynced(authFetch).catch(() => {});
+    return ensureSyncedWhenIdle(authFetch);
   }, [authReady, authFetch]);
 
   useEffect(() => {
@@ -560,16 +551,14 @@ export default function CustomTestPage() {
               onClick={() => setZoomedImage(resolveQuestionImage(q?.image))}
               aria-label="Rasmni kattalashtirish"
             >
-                <img
+                <ResponsiveImage
+                  decoding="async"
+                  fetchPriority="high"
                   className={`qimg ${imageLoading ? "isLoading" : ""}`}
                   src={resolveQuestionImage(q?.image)}
                   alt="Savol rasmi"
                 onLoad={() => setImageLoading(false)}
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  setImageLoading(false);
-                  if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE;
-                }}
+                onFallback={() => setImageLoading(false)}
               />
             </button>
           </div>
@@ -627,24 +616,7 @@ export default function CustomTestPage() {
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">
-                    <PieChart width={220} height={220} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Pie
-                        data={chartData}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={72}
-                        outerRadius={96}
-                        startAngle={90}
-                        endAngle={-270}
-                        paddingAngle={0}
-                        stroke="none"
-                        cornerRadius={8}
-                      >
-                        <Cell fill="#2f6dff" />
-                        <Cell fill="rgba(255, 255, 255, 0.09)" />
-                      </Pie>
-                    </PieChart>
+                    <DonutChart data={chartData} />
                     <div className="chartCenter">
                       <div className="chartValue">{correctPercent}%</div>
                       <div className="chartLabel">To‘g‘ri</div>
