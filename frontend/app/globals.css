@@ -1106,27 +1106,47 @@ body {
 
 .mistakesQuestionCardHead {
   position: relative;
-  padding-right: 40px;
 }
 
+/* O'chirish tugmasi: sarlavha qatorida tinch (shaffof) ikonka; ustiga borganda qizaradi.
+   Tasodifiy bosishdan himoya: birinchi bosish "tasdiqlash" holatiga o'tkazadi (.armed). */
 .mistakesDeleteBtn {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 32px;
-  height: 32px;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--bad) 85%, var(--border));
-  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
-  color: var(--bad);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
   display: grid;
   place-items: center;
   box-shadow: none;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
-.mistakesDeleteBtn:hover {
-  border-color: color-mix(in srgb, var(--bad) 85%, var(--border));
-  background: color-mix(in srgb, var(--bad) 85%, var(--panel2));
+.mistakesDeleteBtn .lucide {
+  width: 16px;
+  height: 16px;
+}
+
+.mistakesDeleteBtn:hover,
+.mistakesDeleteBtn:focus-visible {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 60%, var(--border));
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+  outline: none;
+}
+
+.mistakesDeleteBtn.armed {
+  color: #fff;
+  border-color: var(--bad);
+  background: var(--bad);
+}
+
+.mistakesDeleteBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .mistakesCardActions {

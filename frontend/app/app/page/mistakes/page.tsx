@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { ArrowLeft, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Flag, List, RotateCcw, Target, Trash2 } from "lucide-react";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
@@ -404,6 +404,16 @@ export default function MistakesPage() {
     }
   });
 
+  // Tasodifiy o'chirishdan himoya: birinchi bosish tugmani "tasdiqlash" holatiga o'tkazadi (3 soniya),
+  // ikkinchi bosish o'chiradi.
+  const [armedDeleteKey, setArmedDeleteKey] = useState<string | null>(null);
+  const armTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (armTimerRef.current) window.clearTimeout(armTimerRef.current);
+    };
+  }, []);
+
   const removeMistakeMutation = useMutation({
     mutationFn: async (questionKey: string) => {
       const res = await authFetch(`/api/mistakes/${encodeURIComponent(questionKey)}`, {
@@ -518,12 +528,27 @@ export default function MistakesPage() {
                     <div className="answersQuestionCardTitle">{mistakeLabel(question, index, t)}</div>
                     <span className="badge">{question.hasImage ? t("answers.withImage") : t("answers.withoutImage")}</span>
                     <button
-                      className="mistakesDeleteBtn"
+                      className={`mistakesDeleteBtn ${armedDeleteKey === question.id ? "armed" : ""}`}
                       type="button"
                       aria-label={t("mistakes.clear")}
-                      onClick={() => removeMistakeMutation.mutate(question.id)}
+                      title={t("mistakes.clear")}
+                      disabled={removeMistakeMutation.isPending && removeMistakeMutation.variables === question.id}
+                      onClick={() => {
+                        if (armTimerRef.current) window.clearTimeout(armTimerRef.current);
+                        if (armedDeleteKey === question.id) {
+                          setArmedDeleteKey(null);
+                          removeMistakeMutation.mutate(question.id);
+                          return;
+                        }
+                        setArmedDeleteKey(question.id);
+                        armTimerRef.current = window.setTimeout(() => setArmedDeleteKey(null), 3000);
+                      }}
                     >
-                      <Trash2 className="lucide" aria-hidden="true" />
+                      {armedDeleteKey === question.id ? (
+                        <Check className="lucide" aria-hidden="true" />
+                      ) : (
+                        <Trash2 className="lucide" aria-hidden="true" />
+                      )}
                     </button>
                   </div>
 
