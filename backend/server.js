@@ -13,6 +13,7 @@ try {
 } catch (error) {
   console.warn("[backend] nodemailer module not installed; phone-based temporary password reset is active.");
 }
+const { createTelegramAuth } = require("./telegram-auth");
 const { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 // Rasmlarni siqish va 3 o'lchamga (s/m/l) bo'lish. sharp o'rnatilmagan bo'lsa yuklash eskicha
 // (siqmasdan) ishlashda davom etadi.
@@ -4707,6 +4708,15 @@ app.post("/api/register", handleRegister);
 app.post("/api/auth/login", handleLogin);
 app.post("/api/login", handleLogin);
 
+// Telegram bot orqali kirish (kod va "Telegram orqali kirish" tugmasi). Sozlanmagan bo'lsa 503.
+const telegramAuth = createTelegramAuth({
+  dbApi,
+  normalizeUzPhone,
+  respondWithAuthUser,
+  secret: process.env.AUTH_JWT_SECRET || process.env.SESSION_SECRET || ""
+});
+telegramAuth.registerRoutes(app);
+
 app.post("/api/auth/google", handleGoogleLogin);
 app.post("/api/login/google", handleGoogleLogin);
 app.post("/api/auth/apple", handleAppleLogin);
@@ -7190,12 +7200,14 @@ async function migrateTicketData() {
 
 async function start() {
   await initDb(dbApi);
+  await telegramAuth.ensureTables();
   await migrateTicketData();
   await seedTopicsIfEmpty();
   await seedCustomTestsIfEmpty();
   app.listen(PORT, () => {
     console.log(`Web server listening on http://localhost:${PORT}`);
     console.log(`Swagger docs: http://localhost:${PORT}/docs`);
+    telegramAuth.startPolling().catch((error) => console.error("[telegram] bot ishga tushmadi:", error?.message || error));
   });
 }
 
