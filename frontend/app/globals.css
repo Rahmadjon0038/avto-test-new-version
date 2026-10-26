@@ -14,6 +14,29 @@
   --pageMax: 100%;
   /* Katta ekranlarda kontent cho'zilib ketmasligi uchun markazlashgan maksimal kenglik */
   --content-max: 1200px;
+  /* Keng ekranlarda butun kontent (matn, kartalar, tugmalar) proporsional kattalashadi va yon
+     bo'shliqlar kamayadi. 1 = o'zgarishsiz. */
+  --ui-zoom: 1;
+}
+
+@media (min-width: 1440px) {
+  :root { --ui-zoom: 1.12; }
+}
+
+@media (min-width: 1700px) {
+  :root { --ui-zoom: 1.28; }
+}
+
+@media (min-width: 2200px) {
+  :root { --ui-zoom: 1.5; }
+}
+
+/* Faqat kontent qismi kattalashtiriladi (navbar foni va modallar emas). Landing (authContainer)
+   o'zining to'liq kenglikdagi fonini saqlaydi. */
+.container:not(.authContainer),
+.navbarInner,
+.siteFooterInner {
+  zoom: var(--ui-zoom);
 }
 
 * {
@@ -4918,12 +4941,6 @@ body {
   }
 }
 
-@media (min-width: 1200px) {
-  .ticketsGrid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-}
-
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -5510,13 +5527,38 @@ body {
   }
 }
 
+/* Yuklanish paytida aylanuvchi spinner emas, sahifa tuzilmasi (skelet) ko'rinadi. */
+.skeletonShimmer,
+.qImageLoader {
+  background: linear-gradient(
+    100deg,
+    var(--panel) 20%,
+    color-mix(in srgb, var(--panel2) 85%, white 6%) 45%,
+    var(--panel) 70%
+  );
+  background-size: 220% 100%;
+  animation: skeletonSweep 1.3s ease-in-out infinite;
+}
+
 .qImageLoader {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  background: var(--bg);
   z-index: 1;
+}
+
+/* Eski spinner markup'i (boshqa sahifalarda) endi ko'rinmaydi: o'rniga shimmer. */
+.qImageLoader .qSpinner {
+  display: none;
+}
+
+@keyframes skeletonSweep {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonShimmer,
+  .qImageLoader { animation: none; }
 }
 
 .qSpinner {
@@ -5526,6 +5568,30 @@ body {
   border: 2px solid color-mix(in srgb, var(--muted) 35%, transparent);
   border-top-color: var(--primary);
   animation: qspin 0.8s linear infinite;
+}
+
+.skeletonLine {
+  height: 1em;
+  border-radius: 6px;
+}
+
+.skeletonOption {
+  height: 56px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.skeletonImage {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 58vh;
+}
+
+.skeletonChip {
+  display: inline-block;
+  width: 64px;
+  height: 14px;
+  border-radius: 6px;
 }
 
 .examLoadingView {

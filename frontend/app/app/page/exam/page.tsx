@@ -585,14 +585,48 @@ export default function ExamPage() {
     (!authReady || startMutation.isPending || resetMutation.isPending || examBootstrapping || !autoStartAttempted);
 
   if (showExamLoading) {
+    // Markaziy spinner o'rniga imtihon sahifasining o'zi (sarlavha, taymer, savol, variantlar,
+    // rasm) skelet ko'rinishida darhol chiziladi: foydalanuvchi "kutish"ni emas, ochilgan sahifani ko'radi.
     return (
-      <section className="view examLoadingView">
-        <div className="examLoadingCard">
-          <div className="examLoadingSpinnerWrap">
-            <span className="examLoadingSpinner" />
+      <section className="view examView" aria-busy="true" aria-label={t("exam.loading")}>
+        <div className="topicHeader examHeader">
+          <div className="topicHeaderLeft">
+            <button className="btn btn-ghost btn-sm" type="button" onClick={() => router.push("/app")}>
+              <ArrowLeft className="lucide" aria-hidden="true" /> {t("common.back")}
+            </button>
+            <div>
+              <div className="h2" style={{ margin: 0 }}>
+                {t("exam.title")}
+              </div>
+              <div className="muted">
+                <span className="skeletonChip skeletonShimmer" />
+              </div>
+            </div>
           </div>
-          <div className="examLoadingTitle">{t("exam.loading")}</div>
-          <div className="examLoadingText">{t("common.loading")}</div>
+          <div className="topicHeaderActions">
+            <div className="examTimerChip">
+              <TimerReset className="lucide" aria-hidden="true" />
+              <span>--:--</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="card" aria-hidden="true">
+          <div className="qTitleBar">
+            <div className="skeletonLine skeletonShimmer" style={{ width: "72%" }} />
+          </div>
+          <div className="qLayout">
+            <div className="qRight">
+              <div className="options">
+                {[0, 1, 2, 3].map((item) => (
+                  <div key={item} className="skeletonOption skeletonShimmer" />
+                ))}
+              </div>
+            </div>
+            <div className="qLeft">
+              <div className="skeletonImage skeletonShimmer" />
+            </div>
+          </div>
         </div>
       </section>
     );
