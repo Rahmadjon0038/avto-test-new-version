@@ -33,7 +33,9 @@ export default function MarathonPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextBankIndex, setNextBankIndex] = useState(3);
-  const [imageLoading, setImageLoading] = useState(true);
+  // Qaysi rasm yuklanib bo'lgani URL bo'yicha eslab qolinadi (boolean emas): kesh/preload qilingan rasmning
+  // `load` hodisasi effektdan oldin kelsa ham loader qotib qolmaydi.
+  const [loadedImageKey, setLoadedImageKey] = useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
 
@@ -93,9 +95,8 @@ export default function MarathonPage() {
     setNextBankIndex(initialCount);
   }, [bank, visibleQuestions.length]);
 
-  useEffect(() => {
-    setImageLoading(Boolean(currentQuestion?.image));
-  }, [currentQuestion?.id, currentQuestion?.image]);
+  const currentImageKey = String(currentQuestion?.image || "");
+  const imageLoading = Boolean(currentImageKey) && loadedImageKey !== currentImageKey;
 
   useEffect(() => {
     if (visibleQuestions.length) preloadQuestionImages(visibleQuestions, currentIndex);
@@ -278,8 +279,8 @@ export default function MarathonPage() {
                 className={`qimg ${imageLoading ? "isLoading" : ""}`}
                 src={resolveQuestionImage(currentQuestion.image)}
                 alt="Savol rasmi"
-                onLoad={() => setImageLoading(false)}
-                onFallback={() => setImageLoading(false)}
+                onLoad={() => setLoadedImageKey(currentImageKey)}
+                onFallback={() => setLoadedImageKey(currentImageKey)}
               />
             </button>
           </div>

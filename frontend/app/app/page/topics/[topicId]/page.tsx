@@ -316,7 +316,9 @@ export default function TopicPage() {
   const autoNextTimerRef = useRef<number | null>(null);
   const questionCardRef = useRef<HTMLDivElement | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
+  // Qaysi rasm yuklanib bo'lgani URL bo'yicha eslab qolinadi (boolean emas): kesh/preload qilingan rasmning
+  // `load` hodisasi effektdan oldin kelsa ham loader qotib qolmaydi.
+  const [loadedImageKey, setLoadedImageKey] = useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const autoResetRef = useRef(false);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
@@ -379,9 +381,8 @@ export default function TopicPage() {
     }
   }, [settings.autoNext]);
 
-  useEffect(() => {
-    setImageLoading(Boolean(q?.image));
-  }, [q?.id, q?.image]);
+  const currentImageKey = String(q?.image || "");
+  const imageLoading = Boolean(currentImageKey) && loadedImageKey !== currentImageKey;
 
   useEffect(() => {
     if (!zoomedImage) return;
@@ -980,8 +981,8 @@ export default function TopicPage() {
                   className={`qimg ${imageLoading ? "isLoading" : ""}`}
                   src={resolveQuestionImage(q?.image)}
                   alt="Savol rasmi"
-                onLoad={() => setImageLoading(false)}
-                onFallback={() => setImageLoading(false)}
+                onLoad={() => setLoadedImageKey(currentImageKey)}
+                onFallback={() => setLoadedImageKey(currentImageKey)}
               />
             </button>
           </div>

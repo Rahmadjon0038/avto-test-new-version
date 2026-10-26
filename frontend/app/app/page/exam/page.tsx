@@ -218,7 +218,9 @@ export default function ExamPage() {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
   const [finalResult, setFinalResult] = useState<{ correct: number; wrong: number; total: number; percent: number } | null>(null);
-  const [imageLoading, setImageLoading] = useState(true);
+  // Qaysi rasm yuklanib bo'lgani URL bo'yicha eslab qolinadi (boolean emas): kesh/preload qilingan rasmning
+  // `load` hodisasi effektdan oldin kelsa ham loader qotib qolmaydi.
+  const [loadedImageKey, setLoadedImageKey] = useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [timerReady, setTimerReady] = useState(false);
   const [autoStartAttempted, setAutoStartAttempted] = useState(false);
@@ -346,9 +348,8 @@ export default function ExamPage() {
     return () => window.clearInterval(timer);
   }, [exam?.expiresAt, locked]);
 
-  useEffect(() => {
-    setImageLoading(Boolean(currentQuestion?.image));
-  }, [currentQuestion?.id, currentQuestion?.image]);
+  const currentImageKey = String(currentQuestion?.image || "");
+  const imageLoading = Boolean(currentImageKey) && loadedImageKey !== currentImageKey;
 
   useEffect(() => {
     if (questions.length) preloadQuestionImages(questions, idx);
@@ -727,8 +728,8 @@ export default function ExamPage() {
                   className={`qimg ${imageLoading ? "isLoading" : ""}`}
                   src={resolveQuestionImage(currentQuestion.image)}
                   alt={t("common.loading")}
-                  onLoad={() => setImageLoading(false)}
-                  onFallback={() => setImageLoading(false)}
+                  onLoad={() => setLoadedImageKey(currentImageKey)}
+                  onFallback={() => setLoadedImageKey(currentImageKey)}
                 />
               </button>
             </div>

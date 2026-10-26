@@ -259,7 +259,9 @@ export default function MistakesPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const autoNextTimerRef = useRef<number | null>(null);
   const questionCardRef = useRef<HTMLDivElement | null>(null);
-  const [imageLoading, setImageLoading] = useState(true);
+  // Qaysi rasm yuklanib bo'lgani URL bo'yicha eslab qolinadi (boolean emas): kesh/preload qilingan rasmning
+  // `load` hodisasi effektdan oldin kelsa ham loader qotib qolmaydi.
+  const [loadedImageKey, setLoadedImageKey] = useState<string | null>(null);
   const shuffleSettingRef = useRef(settings.shuffleQuestions);
 
   // Local-first: mistakes are per-user progress, not shared content, so they're cached in their
@@ -317,9 +319,8 @@ export default function MistakesPage() {
     }
   }, [settings.autoNext]);
 
-  useEffect(() => {
-    setImageLoading(Boolean(currentQuestion?.image));
-  }, [currentQuestion?.id, currentQuestion?.image]);
+  const currentImageKey = String(currentQuestion?.image || "");
+  const imageLoading = Boolean(currentImageKey) && loadedImageKey !== currentImageKey;
 
   useEffect(() => {
     if (currentQuestions.length) preloadQuestionImages(currentQuestions, idx);
@@ -576,8 +577,8 @@ export default function MistakesPage() {
                         className={`qimg ${imageLoading ? "isLoading" : ""}`}
                         src={resolveQuestionImage(currentQuestion.image)}
                         alt={t("public.explanation")}
-                        onLoad={() => setImageLoading(false)}
-                        onFallback={() => setImageLoading(false)}
+                        onLoad={() => setLoadedImageKey(currentImageKey)}
+                        onFallback={() => setLoadedImageKey(currentImageKey)}
                       />
                     </div>
                   </div>
