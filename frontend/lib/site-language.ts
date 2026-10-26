@@ -89,8 +89,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       videosDesc: "Mavzulashtirilgan video darsliklar.",
       marathonTitle: "Marafon rejimi",
       marathonDesc: "Uzluksiz savollar: tezlik va aniqlikni oshiring.",
-      customTitle: "Sozlamali testlar",
-      customDesc: "Savol soni va rejimni o‘zingiz tanlang.",
+      customTitle: "Random",
+      customDesc: "Savol sonini tanlang: savollar har safar tasodifiy tushadi.",
       mistakesTitle: "Mening xatolarim",
       mistakesDesc: "Xato qilgan savollaringizni qayta ko‘rib chiqing.",
       answersTitle: "Barcha testlar javoblari",
@@ -128,8 +128,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       empty: "Biletlar hozircha mavjud emas."
     },
     custom: {
-      title: "Sozlamali testlar",
-      subtitle: "Kartalar biletlar bankidagi savollardan yig‘iladi.",
+      title: "Random",
+      subtitle: "Savollar har safar biletlar ichidan tasodifiy tanlanadi.",
       loading: "Testlar yuklanmoqda...",
       empty: "Testlar topilmadi"
     },
@@ -356,8 +356,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       videosDesc: "Мавзуллаштирилган видео дарсликлар.",
       marathonTitle: "Марафон режими",
       marathonDesc: "Узлуксиз саволлар: тезлик ва аниқликни оширинг.",
-      customTitle: "Созламали тестлар",
-      customDesc: "Савол сони ва режимни ўзингиз танланг.",
+      customTitle: "Рандом",
+      customDesc: "Савол сонини танланг: саволлар ҳар сафар тасодифий тушади.",
       mistakesTitle: "Менинг хатоларим",
       mistakesDesc: "Хато қилган саволларингизни қайта кўриб чиқинг.",
       answersTitle: "Барча тестлар жавоблари",
@@ -395,8 +395,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       empty: "Билетлар ҳозирча мавжуд эмас."
     },
     custom: {
-      title: "Созламали тестлар",
-      subtitle: "Карталар билетлар банкидаги саволлардан йиғилади.",
+      title: "Рандом",
+      subtitle: "Саволлар ҳар сафар билетлар ичидан тасодифий танланади.",
       loading: "Тестлар юкланмоқда...",
       empty: "Тестлар топилмади"
     },
@@ -619,8 +619,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       videosDesc: "Тематические видеоуроки.",
       marathonTitle: "Режим марафона",
       marathonDesc: "Непрерывные вопросы: повышайте скорость и точность.",
-      customTitle: "Настраиваемые тесты",
-      customDesc: "Выберите количество вопросов и режим.",
+      customTitle: "Рандом",
+      customDesc: "Выберите количество вопросов: вопросы каждый раз выпадают случайно.",
       mistakesTitle: "Мои ошибки",
       mistakesDesc: "Посмотрите вопросы, в которых были ошибки.",
       answersTitle: "Ответы ко всем тестам",
@@ -658,8 +658,8 @@ const translations: Record<LanguageCode, TranslationTree> = {
       empty: "Пока нет билетов."
     },
     custom: {
-      title: "Настраиваемые тесты",
-      subtitle: "Карточки собираются из банка вопросов билетов.",
+      title: "Рандом",
+      subtitle: "Вопросы каждый раз случайно выбираются из билетов.",
       loading: "Загрузка тестов...",
       empty: "Тесты не найдены"
     },
