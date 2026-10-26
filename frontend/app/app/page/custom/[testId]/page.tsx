@@ -261,7 +261,9 @@ export default function CustomTestPage() {
   // A fresh random seed generated on every mount, sent to the backend so it hands back a
   // different random subset of the ticket bank each time the user opens this test — instead of
   // the same fixed set of questions every visit.
-  const { seed: poolSeed } = useShuffleSeed(`custom-pool:${testId}`);
+  // poolSeed: qaysi savollar biletlar bankidan tanlanishini belgilaydi. Har kirishda va har "Qayta
+  // boshlash"da yangilanadi — savollar doim almashib tushadi.
+  const { seed: poolSeed, refreshSeed: refreshPoolSeed } = useShuffleSeed(`custom-pool:${testId}`);
   const handleSettingsChange = useCallback(
     (next: typeof settings) => {
       if (next.shuffleQuestions && !settings.shuffleQuestions) refreshShuffleSeed();
@@ -284,9 +286,12 @@ export default function CustomTestPage() {
     placeholderData: (previous) => previous
   });
   // Local-first: tarmoq javobi kelguncha IndexedDB'dagi oxirgi nusxa darhol ko'rsatiladi.
-  const localCustomTest = useQuery(localCustomTestQuery(testId));
+  const localCustomTest = useQuery(localCustomTestQuery(testId, poolSeed));
+  // Joriy seed uchun: avval serverdan kelgan to'plam, u kelguncha mahalliy (bir xil algoritm bilan
+  // bir xil to'plam), seed almashganda eski to'plam emas — yangisi ko'rinadi.
+  const serverTest = customTestQuery.isPlaceholderData ? null : customTestQuery.data?.customTest ?? null;
   const customTest: Topic | null =
-    customTestQuery.data?.customTest ?? (localCustomTest.data as unknown as Topic | null) ?? null;
+    serverTest ?? (localCustomTest.data as unknown as Topic | null) ?? customTestQuery.data?.customTest ?? null;
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const autoNextTimerRef = useRef<number | null>(null);
@@ -418,6 +423,7 @@ export default function CustomTestPage() {
   });
 
   function reset() {
+    refreshPoolSeed();
     if (settings.shuffleQuestions) refreshShuffleSeed();
     resetMutation.mutate();
   }

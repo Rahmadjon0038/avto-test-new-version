@@ -4,7 +4,7 @@
 //
 // networkMode: "always" — bular tarmoqqa bog'liq emas, oflayn rejimda ham to'xtab qolmasligi kerak.
 import { queryOptions } from "@tanstack/react-query";
-import { getLocalAnswerBank, getLocalGeneratedCustomTestList } from "./answer-bank";
+import { getLocalAnswerBank, getLocalGeneratedCustomTestById, getLocalGeneratedCustomTestList } from "./answer-bank";
 import { getCachedCustomTest, getCachedTicket, getCachedTopic } from "./content-db";
 
 export const LOCAL_QUERY_ROOT = ["local"] as const;
@@ -44,9 +44,12 @@ export const localTopicQuery = (topicId: string) =>
     ...localDefaults
   });
 
-export const localCustomTestQuery = (testId: string) =>
+// Sozlamali test: seed bilan mahalliy bankdan tasodifiy to'plam quriladi (backend ?seed= bilan
+// bir xil algoritm), shuning uchun tarmoqsiz ham, darhol ham ochiladi va keyin serverdagi
+// to'plam bilan bir xil bo'ladi. Generatsiya qilinmagan (eski) test bo'lsa IndexedDB nusxasi olinadi.
+export const localCustomTestQuery = (testId: string, seed: number) =>
   queryOptions({
-    queryKey: [...LOCAL_QUERY_ROOT, "custom-test", testId],
-    queryFn: async () => (await getCachedCustomTest(testId)) ?? null,
+    queryKey: [...LOCAL_QUERY_ROOT, "custom-test", testId, seed],
+    queryFn: async () => (await getLocalGeneratedCustomTestById(testId, seed)) ?? (await getCachedCustomTest(testId)) ?? null,
     ...localDefaults
   });

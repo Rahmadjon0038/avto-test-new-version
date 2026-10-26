@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { ArrowLeft, LayoutGrid } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,6 @@ import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { fetchCustomTests, type CustomTestCard } from "../custom-data";
 import { generatedCustomTestsQuery } from "@/lib/local-queries";
-import { putCachedCustomTests } from "@/lib/content-db";
 import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 
 export default function CustomTestsPage() {
@@ -17,24 +16,11 @@ export default function CustomTestsPage() {
   const { authFetch, authReady } = useAuth();
   const { t, language } = useSiteLanguage();
 
-  // Local-first: "Sozlamali testlar" — keshlangan bilet bankining deterministik funksiyasi
-  // (lib/answer-bank.ts), shuning uchun ro'yxat va har bir testning mazmuni tarmoqsiz brauzerda
-  // tiklanadi va customTests IndexedDB do'koniga oldindan yoziladi (custom/[testId] sahifasi
-  // avval shu keshni o'qiydi). Bank bir marta quriladi (har test hajmi uchun emas) va so'rov
-  // natijasi keshlanadi.
+  // Local-first: "Sozlamali testlar" ro'yxati keshlangan bilet bankidan (lib/answer-bank.ts)
+  // tarmoqsiz quriladi — faqat id, nom va son. Savollarning o'zi test ochilganda har safar
+  // biletlar bankidan yangi tasodifiy to'plam sifatida tanlanadi (custom/[testId]).
   const localTestsQuery = useQuery(generatedCustomTestsQuery());
-  const generatedTests = localTestsQuery.data;
-  const localTests: CustomTestCard[] | null = useMemo(
-    () =>
-      generatedTests
-        ? generatedTests.map((test) => ({ id: test.id, title: test.title, questionsCount: test.questionsCount }))
-        : null,
-    [generatedTests]
-  );
-
-  useEffect(() => {
-    if (generatedTests?.length) putCachedCustomTests(generatedTests).catch(() => {});
-  }, [generatedTests]);
+  const localTests: CustomTestCard[] | null = localTestsQuery.data ?? null;
 
   useEffect(() => {
     if (!authReady) return;
@@ -43,7 +29,7 @@ export default function CustomTestsPage() {
 
   const customTestsQuery = useQuery({
     queryKey: ["custom-tests", language],
-    queryFn: () => fetchCustomTests(language),
+    queryFn: () => fetchCustomTests(language, true),
     enabled: localTests !== null && localTests.length === 0,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -79,28 +65,25 @@ export default function CustomTestsPage() {
       </div>
 
       {isLoading ? (
-        <div className="muted" style={{ display: "flex", alignItems: "center", gap: 10, padding: "24px 4px" }}>
-          <span className="qSpinner" aria-hidden="true" /> {t("custom.loading")}
+        <div className="customSizeGrid" aria-busy="true" aria-label={t("custom.loading")}>
+          {Array.from({ length: 12 }, (_, index) => (
+            <div key={index} className="customSizeBtn skeletonShimmer" aria-hidden="true" />
+          ))}
         </div>
-      ) : null}
-
-      <div className="topicsGrid">
-        {items.map((customTest, index) => (
-          <button
-            key={customTest.id}
-            className="topicCard topicCardCentered topicCardLarge"
-            type="button"
-            onClick={() => router.push(`/app/page/custom/${customTest.id}`)}
-          >
-            <span className="topicIndex" aria-hidden="true">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <div className="topicNameRow">
-              <div className="topicName">{customTest.title}</div>
-            </div>
-          </button>
-        ))}
-      </div>
+      ) : (
+        <div className="customSizeGrid">
+          {items.map((customTest) => (
+            <button
+              key={customTest.id}
+              className="customSizeBtn"
+              type="button"
+              onClick={() => router.push(`/app/page/custom/${customTest.id}`)}
+            >
+              {customTest.title}
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

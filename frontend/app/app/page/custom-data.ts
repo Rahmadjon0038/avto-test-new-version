@@ -20,9 +20,10 @@ async function parseJson(res: Response) {
   return data as any;
 }
 
-export async function fetchCustomTests(language?: string | null): Promise<CustomTestCard[]> {
+export async function fetchCustomTests(language?: string | null, compact = false): Promise<CustomTestCard[]> {
   const lang = normalizeLanguageCode(language || getBrowserLanguage());
-  const res = await fetch(appendLanguageQuery("/api/custom-tests", lang), { cache: "no-store" });
+  const url = appendLanguageQuery("/api/custom-tests", lang);
+  const res = await fetch(compact ? `${url}${url.includes("?") ? "&" : "?"}compact=1` : url, { cache: "no-store" });
   const data = await parseJson(res);
   return Array.isArray(data.customTests) ? data.customTests : [];
 }

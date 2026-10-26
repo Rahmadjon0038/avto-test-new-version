@@ -151,19 +151,25 @@ export async function getLocalAnswerBank(): Promise<AnswerQuestion[]> {
   return bank.map((item) => buildAnswerQuestion(item.ticketId, item.ticketTitle, item.question, item.questionIndex));
 }
 
+// "Sozlamali testlar" hajmlari (backend CUSTOM_TEST_SIZES bilan bir xil bo'lishi kerak).
+export const CUSTOM_TEST_SIZES = [20, 40, 50, 80, 100, 120, 200, 400, 500, 600, 800, 1000];
+
+function isValidCustomTestSize(size: number): boolean {
+  return Number.isFinite(size) && size > 0 && (CUSTOM_TEST_SIZES.includes(size) || size % 20 === 0);
+}
+
 function sizesForBankLength(bankLength: number): number[] {
-  const sizes: number[] = [];
-  for (let size = 20; size <= bankLength; size += 20) sizes.push(size);
-  return sizes;
+  return CUSTOM_TEST_SIZES.filter((size) => size <= bankLength);
 }
 
 // Pure — takes an already-built bank, does no IndexedDB reads. Must stay a byte-for-byte port of
 // buildGeneratedCustomTestFromBankSize() (same rawShuffleWithSeed algorithm, same 9000+size seed,
 // same slice) so a given generated test id shows the same questions online and offline.
-function buildGeneratedCustomTestFromBank(bank: BankItem[], size: number): LocalGeneratedCustomTest | null {
-  if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0 || size > bank.length) return null;
+function buildGeneratedCustomTestFromBank(bank: BankItem[], size: number, seed?: number): LocalGeneratedCustomTest | null {
+  if (!isValidCustomTestSize(size) || size > bank.length) return null;
 
-  const shuffled = rawShuffleWithSeed(bank, 9000 + size);
+  // seed berilsa — har kirishda yangi tasodifiy to'plam (backend ?seed= bilan bir xil tanlaydi).
+  const shuffled = rawShuffleWithSeed(bank, seed && seed > 0 ? seed : 9000 + size);
   const questions: LocalGeneratedQuestion[] = shuffled.slice(0, size).map((item) => {
     const question = item.question || ({} as CachedQuestion);
     return {
@@ -185,29 +191,24 @@ function buildGeneratedCustomTestFromBank(bank: BankItem[], size: number): Local
   return { id: 1000 + size, title: `${size} ta`, questions, questionsCount: questions.length };
 }
 
-export async function getLocalGeneratedCustomTest(size: number): Promise<LocalGeneratedCustomTest | null> {
+export async function getLocalGeneratedCustomTest(size: number, seed?: number): Promise<LocalGeneratedCustomTest | null> {
   const bank = await getLocalTicketQuestionBank();
-  return buildGeneratedCustomTestFromBank(bank, size);
+  return buildGeneratedCustomTestFromBank(bank, size, seed);
 }
 
-export async function getLocalGeneratedCustomTestById(testId: string | number): Promise<LocalGeneratedCustomTest | null> {
+export async function getLocalGeneratedCustomTestById(
+  testId: string | number,
+  seed?: number
+): Promise<LocalGeneratedCustomTest | null> {
   const raw = Number(testId);
   if (!Number.isFinite(raw)) return null;
   const size = raw >= 1000 ? raw - 1000 : raw;
-  return getLocalGeneratedCustomTest(size);
+  return getLocalGeneratedCustomTest(size, seed);
 }
 
-// Builds every generated test in one pass — fetches the ticket bank exactly once instead of once
-// per size, which is what made the "Sozlamali testlar" list page slow (it used to call
-// getLocalGeneratedCustomTest() per size, each rebuilding the whole bank from IndexedDB from
-// scratch).
-export async function getLocalGeneratedCustomTestList(): Promise<LocalGeneratedCustomTest[]> {
+// Ro'yxat sahifasi uchun: faqat id, nom va son (savollar yig'ilmaydi). Ilgari har bir o'lcham uchun
+// butun savollar massivi qurilib, IndexedDB'ga yozilardi — ro'yxatni ochish uchun ortiqcha ish.
+export async function getLocalGeneratedCustomTestList(): Promise<Array<{ id: number; title: string; questionsCount: number }>> {
   const bank = await getLocalTicketQuestionBank();
-  const sizes = sizesForBankLength(bank.length);
-  const tests: LocalGeneratedCustomTest[] = [];
-  for (const size of sizes) {
-    const test = buildGeneratedCustomTestFromBank(bank, size);
-    if (test) tests.push(test);
-  }
-  return tests;
+  return sizesForBankLength(bank.length).map((size) => ({ id: 1000 + size, title: `${size} ta`, questionsCount: size }));
 }

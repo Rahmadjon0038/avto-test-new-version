@@ -2177,16 +2177,27 @@ async function getProgressTicketById(ticketId) {
   return getTicketByIdFromDb(ticketId);
 }
 
-async function getGeneratedCustomTestsFromDb(lang = "") {
-  const cacheKey = normalizeLanguageCode(lang || "");
-  if (generatedCustomTestsCache.has(cacheKey)) {
-    return generatedCustomTestsCache.get(cacheKey);
-  }
+// "Sozlamali testlar" hajmlari. Kompakt ro'yxat (web va yangi mobil ilova) shu 12 tani ko'rsatadi;
+// eski mobil ilova uchun standart ro'yxat avvalgidek 20 dan 20 tadan o'sib boradi (?compact=1 siz).
+const CUSTOM_TEST_SIZES = [20, 40, 50, 80, 100, 120, 200, 400, 500, 600, 800, 1000];
+
+function isValidCustomTestSize(size) {
+  return Number.isFinite(size) && size > 0 && (CUSTOM_TEST_SIZES.includes(size) || size % 20 === 0);
+}
+
+// Ro'yxat uchun savollarning o'zi kerak emas — faqat id, nom va son. Ilgari bu funksiya har bir
+// o'lcham uchun butun savollar massivini (jami o'n minglab obyekt) yig'ib, keyin tashlab yuborardi.
+async function getGeneratedCustomTestsFromDb(lang = "", compact = false) {
+  const cacheKey = `${normalizeLanguageCode(lang || "")}:${compact ? "c" : "a"}:list`;
+  if (generatedCustomTestsCache.has(cacheKey)) return generatedCustomTestsCache.get(cacheKey);
   const bank = await getTicketQuestionBankFromDb();
-  const results = [];
-  for (let size = 20; size <= bank.length; size += 20) {
-    results.push(buildGeneratedCustomTestFromBankSize(bank, size, lang));
+  const sizes = [];
+  if (compact) {
+    for (const size of CUSTOM_TEST_SIZES) if (size <= bank.length) sizes.push(size);
+  } else {
+    for (let size = 20; size <= bank.length; size += 20) sizes.push(size);
   }
+  const results = sizes.map((size) => ({ id: 1000 + size, title: `${size} ta`, questionsCount: size }));
   generatedCustomTestsCache.set(cacheKey, results);
   return results;
 }
@@ -2197,19 +2208,20 @@ async function getGeneratedCustomTestByIdFromDb(testId, lang = "", seed = null) 
   if (!match) return null;
   const rawId = Number(match[1]);
   const size = rawId >= 1000 ? rawId - 1000 : rawId;
-  if (!Number.isFinite(size) || size <= 0 || size % 20 !== 0) return null;
+  if (!isValidCustomTestSize(size)) return null;
 
-  // A caller-supplied seed asks for a fresh random subset of the bank instead of the fixed
-  // 9000+size selection — used so each visit to a "Sozlamali test" shows different questions.
-  // Bypass the (lang-only-keyed) cache in that case since it can't hold per-seed results.
-  if (seed) {
-    const bank = await getTicketQuestionBankFromDb();
-    if (size > bank.length) return null;
-    return buildGeneratedCustomTestFromBankSize(bank, size, lang, seed);
+  const bank = await getTicketQuestionBankFromDb();
+  if (size > bank.length) return null;
+
+  // Seed berilsa — har kirishda yangi tasodifiy to'plam (savollar biletlar bankidan tanlanadi);
+  // kesh faqat seedsiz (barqaror) tanlov uchun.
+  if (seed) return buildGeneratedCustomTestFromBankSize(bank, size, lang, seed);
+
+  const cacheKey = `${normalizeLanguageCode(lang || "")}:test:${size}`;
+  if (!generatedCustomTestsCache.has(cacheKey)) {
+    generatedCustomTestsCache.set(cacheKey, buildGeneratedCustomTestFromBankSize(bank, size, lang));
   }
-
-  const tests = await getGeneratedCustomTestsFromDb(lang);
-  return tests.find((test) => Number(test.id) === Number(1000 + size) || Number(test.id) === Number(size)) || null;
+  return generatedCustomTestsCache.get(cacheKey);
 }
 
 async function ensureUniqueTopicSlug(baseSlug, ignoreId = null) {
@@ -5015,7 +5027,7 @@ app.get("/api/videos/:lessonId/playback", requireUser, async (req, res) => {
 
 app.get("/api/custom-tests", async (_req, res) => {
   const lang = normalizeLanguageCode(_req.query.lang || _req.headers["x-lang"] || "", "");
-  const customTests = await getGeneratedCustomTestsFromDb(lang);
+  const customTests = await getGeneratedCustomTestsFromDb(lang, String(_req.query.compact || "") === "1");
   res.json({
     customTests: customTests.map((test) => ({
       id: test.id,
