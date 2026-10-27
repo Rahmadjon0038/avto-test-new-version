@@ -7207,7 +7207,6 @@ async function start() {
   app.listen(PORT, () => {
     console.log(`Web server listening on http://localhost:${PORT}`);
     console.log(`Swagger docs: http://localhost:${PORT}/docs`);
-    telegramAuth.startPolling().catch((error) => console.error("[telegram] bot ishga tushmadi:", error?.message || error));
   });
 }
 
