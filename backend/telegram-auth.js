@@ -146,6 +146,15 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS tg_user_id BIGINT;`);
     await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS chat_id BIGINT;`);
     await dbApi.run(`CREATE INDEX IF NOT EXISTS telegram_oidc_states_tg_user_idx ON telegram_oidc_states (tg_user_id, id DESC);`);
+    // Telegram akkaunt -> telefon: raqam bir marta (kontakt ulashish bilan) tasdiqlangach, keyingi kirishlar faqat Start + "Kirish".
+    await dbApi.run(`
+      CREATE TABLE IF NOT EXISTS telegram_bot_links (
+        tg_user_id BIGINT PRIMARY KEY,
+        phone TEXT NOT NULL,
+        full_name TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
   }
 
   async function findOrCreateUser(phone, fullName) {
@@ -387,7 +396,7 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
       await botApi("setWebhook", {
         url: botWebhookUrl,
         secret_token: botWebhookSecret,
-        allowed_updates: ["message"]
+        allowed_updates: ["message", "callback_query"]
       });
       console.log(`[telegram] bot @${botUsername} tayyor, webhook: ${botWebhookUrl}`);
     } catch (error) {
@@ -425,6 +434,14 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
       return botSend(chatId, "Havola eskirgan yoki allaqachon ishlatilgan. Ilovada «Telegram orqali kirish» tugmasini qaytadan bosing.", NO_KEYBOARD);
     }
     await dbApi.run("UPDATE telegram_oidc_states SET tg_user_id = ?, chat_id = ? WHERE id = ?", [message.from.id, chatId, row.id]);
+    const link = await dbApi.get("SELECT phone FROM telegram_bot_links WHERE tg_user_id = ?", [message.from.id]);
+    if (link) {
+      return botSend(
+        chatId,
+        "Topshirdi ilovasiga kirish uchun «Kirish» tugmasini bosing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, bosmang.",
+        { inline_keyboard: [[{ text: "✅ Kirish", callback_data: `login:${payload}` }]] }
+      );
+    }
     return botSend(
       chatId,
       "Topshirdi ilovasiga kirish uchun pastdagi tugma orqali telefon raqamingizni ulashing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, tugmani bosmang.",
@@ -460,10 +477,47 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
       [phone, fullName, row.id]
     );
     if (!done) return botSend(chatId, "Havola allaqachon ishlatilgan. Ilovada qaytadan urinib ko‘ring.", NO_KEYBOARD);
+    await dbApi.run(
+      "INSERT INTO telegram_bot_links (tg_user_id, phone, full_name) VALUES (?, ?, ?) ON CONFLICT (tg_user_id) DO UPDATE SET phone = EXCLUDED.phone, full_name = EXCLUDED.full_name",
+      [message.from.id, phone, fullName]
+    );
     return botSend(chatId, "✅ Muvaffaqiyatli kirildi!\n\nEndi Topshirdi ilovasiga qayting — kirish avtomatik bajariladi.", NO_KEYBOARD);
   }
 
+  async function handleBotCallback(query) {
+    const answer = (text) => botApi("answerCallbackQuery", { callback_query_id: query.id, ...(text ? { text, show_alert: true } : {}) }).catch(() => {});
+    const match = /^login:([a-f0-9]{48})$/.exec(String(query.data || ""));
+    if (!match) return answer();
+    const row = await dbApi.get("SELECT * FROM telegram_oidc_states WHERE state_hash = ? AND code_verifier = 'bot'", [sha(match[1])]);
+    const link = await dbApi.get("SELECT * FROM telegram_bot_links WHERE tg_user_id = ?", [query.from.id]);
+    const valid =
+      row &&
+      link &&
+      row.status === "pending" &&
+      new Date(row.expires_at).getTime() > Date.now() &&
+      String(row.tg_user_id) === String(query.from.id);
+    if (!valid) return answer("Havola eskirgan yoki allaqachon ishlatilgan. Ilovada qaytadan urinib ko‘ring.");
+    const done = await dbApi.get(
+      "UPDATE telegram_oidc_states SET status = 'done', phone = ?, full_name = ? WHERE id = ? AND status = 'pending' RETURNING id",
+      [link.phone, link.full_name, row.id]
+    );
+    if (!done) return answer("Havola allaqachon ishlatilgan.");
+    await answer();
+    const chatId = query.message?.chat?.id;
+    if (chatId && query.message?.message_id) {
+      await botApi("editMessageText", {
+        chat_id: chatId,
+        message_id: query.message.message_id,
+        text: "✅ Muvaffaqiyatli kirildi!\n\nEndi Topshirdi ilovasiga qayting — kirish avtomatik bajariladi."
+      }).catch(() => {});
+    }
+  }
+
   async function processBotUpdate(update) {
+    if (update?.callback_query?.from?.id) {
+      if (!limiter.hit(`bot-user:${update.callback_query.from.id}`, 30, 10 * 60 * 1000)) return;
+      return handleBotCallback(update.callback_query);
+    }
     const message = update?.message;
     if (!message || message.chat?.type !== "private" || !message.from?.id) return;
     if (!limiter.hit(`bot-user:${message.from.id}`, 30, 10 * 60 * 1000)) return;
