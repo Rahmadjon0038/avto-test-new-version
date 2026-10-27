@@ -90,6 +90,8 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     ? crypto.createHmac("sha256", String(secret || "telegram")).update(botToken).digest("hex").slice(0, 48)
     : "";
   const isBotReady = () => Boolean(botToken && botUsername);
+  const configuredSite = String(env.BASE_URL || env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");
+  const siteUrl = /^https:\/\//i.test(configuredSite) ? configuredSite : "https://topshirdi.uz";
   const codeEnabled = Boolean(gatewayToken);
   const loginEnabled = Boolean(oidcClientId && oidcClientSecret);
   const limiter = createRateLimiter();
@@ -149,6 +151,8 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     // Bot orqali kirishda shu jadval ham ishlatiladi (code_verifier = 'bot').
     await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS tg_user_id BIGINT;`);
     await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS chat_id BIGINT;`);
+    // Kirish qayerdan boshlangan: 'web' (sayt) yoki 'app' (mobil ilova) — bot "qaytish" tugmasini shunga qarab beradi.
+    await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS source TEXT;`);
     await dbApi.run(`CREATE INDEX IF NOT EXISTS telegram_oidc_states_tg_user_idx ON telegram_oidc_states (tg_user_id, id DESC);`);
     // Bot orqali kirgan foydalanuvchilar Telegram ID bilan aniqlanadi (telefon keyinroq, kerak bo'lsa, ulanadi).
     await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_id BIGINT;`);
@@ -421,8 +425,10 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
       return res.status(429).json({ error: "Juda ko‘p urinish. Keyinroq qayta urinib ko‘ring" });
     }
     const state = crypto.randomBytes(24).toString("hex");
-    await dbApi.run("INSERT INTO telegram_oidc_states (state_hash, code_verifier, expires_at) VALUES (?, 'bot', ?)", [
+    const source = req.body?.source === "web" ? "web" : "app";
+    await dbApi.run("INSERT INTO telegram_oidc_states (state_hash, code_verifier, source, expires_at) VALUES (?, 'bot', ?, ?)", [
       sha(state),
+      source,
       new Date(Date.now() + OIDC_TTL_MS).toISOString()
     ]);
     res.json({ ok: true, state, authUrl: `https://t.me/${botUsername}?start=${state}`, expiresIn: OIDC_TTL_MS / 1000 });
@@ -441,7 +447,7 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     await dbApi.run("UPDATE telegram_oidc_states SET tg_user_id = ?, chat_id = ? WHERE id = ?", [message.from.id, chatId, row.id]);
     return botSend(
       chatId,
-      "Topshirdi ilovasiga kirish uchun «Kirish» tugmasini bosing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, bosmang.",
+      row.source === "web" ? "Topshirdi saytiga kirish uchun «Kirish» tugmasini bosing." : "Topshirdi ilovasiga kirish uchun «Kirish» tugmasini bosing.",
       { inline_keyboard: [[{ text: "✅ Kirish", callback_data: `login:${payload}` }]] }
     );
   }
@@ -465,10 +471,18 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     await answer();
     const chatId = query.message?.chat?.id;
     if (chatId && query.message?.message_id) {
+      // Kirish qayerdan boshlangan bo'lsa, o'sha yerga qaytaruvchi tugma: saytga yoki ilovaga.
+      // Ilova tugmasi sayt sahifasiga (/open) olib boradi, u esa ilovani ochadi (topshirdi:// manzili orqali).
+      const isWeb = row.source === "web";
       await botApi("editMessageText", {
         chat_id: chatId,
         message_id: query.message.message_id,
-        text: "✅ Muvaffaqiyatli kirildi!\n\nEndi Topshirdi ilovasiga qayting — kirish avtomatik bajariladi."
+        text: isWeb
+          ? "✅ Muvaffaqiyatli kirildi!\n\nSaytga qayting — kirish avtomatik bajariladi."
+          : "✅ Muvaffaqiyatli kirildi!\n\nIlovaga qayting — kirish avtomatik bajariladi.",
+        reply_markup: {
+          inline_keyboard: [[{ text: isWeb ? "🌐 Saytga qaytish" : "📱 Ilovaga qaytish", url: isWeb ? `${siteUrl}/app` : `${siteUrl}/open` }]]
+        }
       }).catch(() => {});
     }
   }

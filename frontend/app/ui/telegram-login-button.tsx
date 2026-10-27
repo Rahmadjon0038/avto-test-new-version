@@ -108,7 +108,8 @@ export default function TelegramLoginButton({ onSuccess }: { onSuccess: (data: a
       const res = await fetch(`/api/auth/telegram/${config.botEnabled ? "bot" : "oidc"}/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: "{}"
+        // source: botdagi "qaytish" tugmasi saytga olib borishi uchun (ilovadan kelgan so'rovda yuborilmaydi).
+        body: JSON.stringify({ source: "web" })
       });
       const data = await jsonOrError(res);
       if (!data?.state || !data?.authUrl) throw new Error(t("auth.telegramFailed"));
