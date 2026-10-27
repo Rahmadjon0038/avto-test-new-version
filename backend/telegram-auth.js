@@ -92,6 +92,14 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
   const isBotReady = () => Boolean(botToken && botUsername);
   const configuredSite = String(env.BASE_URL || env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");
   const siteUrl = /^https:\/\//i.test(configuredSite) ? configuredSite : "https://topshirdi.uz";
+  // Botdagi admin(lar): Telegram ID'lar (vergul bilan). Faqat ular "Reklama yuborish" menyusini ko'radi.
+  const botAdminIds = new Set(
+    String(env.TELEGRAM_ADMIN_IDS || "7013085087")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean)
+  );
+  const isBotAdmin = (telegramId) => botAdminIds.has(String(telegramId));
   const codeEnabled = Boolean(gatewayToken);
   const loginEnabled = Boolean(oidcClientId && oidcClientSecret);
   const limiter = createRateLimiter();
@@ -487,14 +495,135 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     }
   }
 
+  // --- Admin: reklama yuborish ---------------------------------------------------------------
+  // Oqim: admin "📢 Reklama yuborish" ni bosadi -> xabarni (matn/rasm/video) yuboradi -> bot uni admin'ga
+  // ko'rsatib, "Yuborish" tasdig'ini so'raydi -> tasdiqlansa botni ishlatgan hamma foydalanuvchilarga nusxa yuboriladi.
+  const BROADCAST_BUTTON = "📢 Reklama yuborish";
+  const ADMIN_KEYBOARD = { keyboard: [[{ text: BROADCAST_BUTTON }]], resize_keyboard: true, is_persistent: true };
+  const broadcastDrafts = new Map(); // adminId -> { step: "await" } | { step: "confirm", id, messageId, chatId, count }
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // Botga yozgan (chat ochgan) hamma foydalanuvchi: Telegram orqali kirganlar va botni ochganlar. Adminlar chiqarib tashlanadi.
+  async function listBroadcastRecipients() {
+    const rows = await dbApi.all(
+      `SELECT DISTINCT id FROM (
+         SELECT telegram_id AS id FROM users WHERE telegram_id IS NOT NULL
+         UNION
+         SELECT chat_id AS id FROM telegram_oidc_states WHERE chat_id IS NOT NULL
+       ) recipients`
+    );
+    return rows.map((row) => String(row.id)).filter((id) => !botAdminIds.has(id));
+  }
+
+  async function copyToChat(chatId, fromChatId, messageId) {
+    try {
+      await botApi("copyMessage", { chat_id: chatId, from_chat_id: fromChatId, message_id: messageId });
+    } catch (error) {
+      // Telegram tezlikni cheklasa ("retry after N"), ko'rsatilgan vaqt kutib, bir marta qayta uriniladi.
+      const wait = /retry after (\d+)/i.exec(String(error?.message || ""));
+      if (!wait) throw error;
+      await sleep((Number(wait[1]) + 1) * 1000);
+      await botApi("copyMessage", { chat_id: chatId, from_chat_id: fromChatId, message_id: messageId });
+    }
+  }
+
+  async function runBroadcast(draft, adminChatId) {
+    const recipients = await listBroadcastRecipients();
+    let delivered = 0;
+    let failed = 0;
+    for (const id of recipients) {
+      try {
+        await copyToChat(id, draft.chatId, draft.messageId);
+        delivered += 1;
+      } catch {
+        failed += 1; // bot bloklangan yoki chat yopilgan
+      }
+      await sleep(50); // Telegram chegarasi (~30 xabar/soniya) ichida qolish uchun
+    }
+    console.log(`[telegram] reklama yuborildi: ${delivered} ta yetkazildi, ${failed} ta yetkazilmadi`);
+    await botSend(
+      adminChatId,
+      `✅ Reklama yuborildi.\n\nYetkazildi: ${delivered}\nYetkazilmadi: ${failed} (bot bloklangan yoki chat yopilgan)`,
+      ADMIN_KEYBOARD
+    );
+  }
+
+  // true qaytarsa, xabar admin oqimida ishlatilgan (oddiy bot javobi berilmaydi).
+  async function handleAdminMessage(message) {
+    const chatId = message.chat.id;
+    const adminId = String(message.from.id);
+    const text = String(message.text || "").trim();
+    const draft = broadcastDrafts.get(adminId);
+
+    if (/^\/(?:start|admin)(?:@\w+)?$/.test(text)) {
+      broadcastDrafts.delete(adminId);
+      await botSend(chatId, "Salom, admin! Reklama yuborish uchun pastdagi tugmani bosing.", ADMIN_KEYBOARD);
+      return true;
+    }
+    if (text === BROADCAST_BUTTON || /^\/broadcast(?:@\w+)?$/.test(text)) {
+      broadcastDrafts.set(adminId, { step: "await" });
+      await botSend(
+        chatId,
+        "Reklama xabarini yuboring: matn, rasm yoki video (izoh bilan). U foydalanuvchilarga aynan shu ko‘rinishda boradi.\n\nBekor qilish: /cancel",
+        { remove_keyboard: true }
+      );
+      return true;
+    }
+    if (/^\/cancel(?:@\w+)?$/.test(text)) {
+      broadcastDrafts.delete(adminId);
+      await botSend(chatId, "Bekor qilindi.", ADMIN_KEYBOARD);
+      return true;
+    }
+    if (draft?.step === "await") {
+      const recipients = await listBroadcastRecipients();
+      const id = crypto.randomBytes(6).toString("hex");
+      broadcastDrafts.set(adminId, { step: "confirm", id, chatId, messageId: message.message_id, count: recipients.length });
+      await botSend(chatId, "Xabar shunday ko‘rinadi:");
+      await copyToChat(chatId, chatId, message.message_id).catch(() => botSend(chatId, "(xabarni ko‘rsatib bo‘lmadi)"));
+      await botSend(chatId, `Jami ${recipients.length} ta foydalanuvchiga yuboriladi. Tasdiqlaysizmi?`, {
+        inline_keyboard: [
+          [
+            { text: `✅ Yuborish (${recipients.length})`, callback_data: `bc:go:${id}` },
+            { text: "❌ Bekor qilish", callback_data: `bc:no:${id}` }
+          ]
+        ]
+      });
+      return true;
+    }
+    return false;
+  }
+
+  async function handleBroadcastCallback(query) {
+    const answer = (text) => botApi("answerCallbackQuery", { callback_query_id: query.id, ...(text ? { text, show_alert: true } : {}) }).catch(() => {});
+    const adminId = String(query.from.id);
+    const match = /^bc:(go|no):([a-f0-9]{12})$/.exec(String(query.data || ""));
+    if (!match || !isBotAdmin(adminId)) return answer();
+    const draft = broadcastDrafts.get(adminId);
+    if (!draft || draft.step !== "confirm" || draft.id !== match[2]) {
+      return answer("Bu so‘rov eskirgan. Reklamani qaytadan boshlang.");
+    }
+    broadcastDrafts.delete(adminId); // ikki marta yuborilmasin
+    const chatId = query.message?.chat?.id || draft.chatId;
+    await answer();
+    if (match[1] === "no") return botSend(chatId, "Bekor qilindi.", ADMIN_KEYBOARD);
+    await botSend(chatId, `Yuborilmoqda: ${draft.count} ta foydalanuvchi. Tugagach xabar beraman.`, ADMIN_KEYBOARD);
+    // Uzoq davom etishi mumkin: webhook javobini kutdirmaslik uchun fonda ishlaydi.
+    void runBroadcast(draft, chatId).catch((error) => {
+      console.error("[telegram] reklama xatosi:", error?.message || error);
+      void botSend(chatId, "Reklama yuborishda xatolik yuz berdi. Loglarni tekshiring.", ADMIN_KEYBOARD);
+    });
+  }
+
   async function processBotUpdate(update) {
     if (update?.callback_query?.from?.id) {
       if (!limiter.hit(`bot-user:${update.callback_query.from.id}`, 30, 10 * 60 * 1000)) return;
+      if (String(update.callback_query.data || "").startsWith("bc:")) return handleBroadcastCallback(update.callback_query);
       return handleBotCallback(update.callback_query);
     }
     const message = update?.message;
     if (!message || message.chat?.type !== "private" || !message.from?.id) return;
     if (!limiter.hit(`bot-user:${message.from.id}`, 30, 10 * 60 * 1000)) return;
+    if (isBotAdmin(message.from.id) && (await handleAdminMessage(message))) return;
     const match = /^\/start(?:@\w+)?(?:\s+(\S+))?$/.exec(String(message.text || "").trim());
     if (match) return handleBotStartCommand(message, match[1] || "");
     return botSend(message.chat.id, HELP_TEXT, NO_KEYBOARD);
