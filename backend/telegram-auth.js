@@ -76,7 +76,10 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
   const oidcClientSecret = String(env.TELEGRAM_OIDC_CLIENT_SECRET || "").trim();
   const oidcBase = String(env.TELEGRAM_OIDC_BASE || "https://oauth.telegram.org").replace(/\/+$/, "");
   const oidcIssuer = String(env.TELEGRAM_OIDC_ISSUER || "https://oauth.telegram.org");
-  const publicApiBase = String(env.PUBLIC_API_BASE_URL || env.BACKEND_URL || "https://api.topshirdi.uz").replace(/\/+$/, "");
+  // Docker ichida PUBLIC_API_BASE_URL ichki manzil (http://backend:4000) bo'ladi: Telegram uchun (webhook,
+  // OIDC redirect) u yaroqsiz, faqat ochiq https manzil ishlatiladi.
+  const configuredBase = String(env.PUBLIC_API_BASE_URL || env.BACKEND_URL || "").replace(/\/+$/, "");
+  const publicApiBase = /^https:\/\//i.test(configuredBase) ? configuredBase : "https://api.topshirdi.uz";
   const oidcRedirectUri = String(env.TELEGRAM_OIDC_REDIRECT_URI || `${publicApiBase}/api/auth/telegram/oidc/callback`);
   const botToken = String(env.TELEGRAM_BOT_TOKEN || "").trim();
   let botUsername = String(env.TELEGRAM_BOT_USERNAME || "").replace(/^@/, "").trim();
