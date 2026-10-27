@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
-import TelegramLoginButton from "./telegram-login-button";
+import TelegramLoginButton, { useTelegramConfig } from "./telegram-login-button";
 
 type Tab = "register" | "login";
 
@@ -52,6 +52,8 @@ export default function PublicAuthModal({
   const [phoneLoginLocal, setPhoneLoginLocal] = useState("");
   const [passwordLogin, setPasswordLogin] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const telegramConfig = useTelegramConfig();
 
   useEffect(() => {
     if (!open) return;
@@ -124,6 +126,11 @@ export default function PublicAuthModal({
   });
 
   function openForgotTelegram() {
+    // Bot yoqilgan bo'lsa parol botda tiklanadi (yangi parol beradi va sayt avtomatik kiradi).
+    if (telegramConfig?.botEnabled) {
+      setResetOpen(true);
+      return;
+    }
     const phoneDigits = normalizeUzLocalDigits(phoneLoginLocal);
     const phone = phoneDigits.length === 9 ? `+998${phoneDigits}` : "";
     const text = `Salom, men Topshirdi ilovasida parolimni unutdim. Telefon raqamim: ${phone}`;
@@ -186,6 +193,8 @@ export default function PublicAuthModal({
             {t("auth.registerTitle")}
           </button>
         </div>
+
+        {tab === "login" ? <p className="authLoginHint">{t("auth.loginRegisterHint")}</p> : null}
 
         {tab === "register" ? (
           <form className="formGrid authForm" onSubmit={onRegister}>
@@ -282,6 +291,19 @@ export default function PublicAuthModal({
             </button>
           </form>
         )}
+
+        {resetOpen && tab === "login" ? (
+          <TelegramLoginButton
+            mode="reset"
+            onSuccess={(data) => {
+              if (data?.accessToken) setAccessToken(String(data.accessToken));
+              if (data?.user) setUser(data.user);
+              toast.success(t("auth.loginSuccess"));
+              close();
+              router.push("/app");
+            }}
+          />
+        ) : null}
 
         <TelegramLoginButton
           onSuccess={(data) => {

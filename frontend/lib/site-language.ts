@@ -79,7 +79,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       telegramHint: "Telegramda botni oching, «Start» ni bosing, so‘ng «Kirish» tugmasini bosing. Sayt avtomatik kiradi.",
       telegramOpen: "Telegramni ochish",
       telegramCancel: "Bekor qilish",
-      telegramFailed: "Telegram orqali kirib bo‘lmadi"
+      telegramFailed: "Telegram orqali kirib bo‘lmadi",
+      telegramReset: "Telegram orqali tiklash",
+      telegramResetHint: "Telegramda botni oching, «Start» ni bosing va raqamingizni ulashing. Bot sizga yangi parol beradi va sayt avtomatik kiradi.",
+      resetNote: "Parolni tiklash uchun avval shu raqam bilan ro‘yxatdan o‘tgan bo‘lishingiz kerak.",
+      loginRegisterHint: "Kirishdan oldin ro‘yxatdan o‘tgan bo‘lishingiz kerak."
     },
     home: {
       hero: "Prava olish endi biz bilan oson!",
@@ -353,7 +357,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       telegramHint: "Telegramда ботни очинг, «Start» ни босинг, сўнг «Кириш» тугмасини босинг. Сайт автоматик киради.",
       telegramOpen: "Telegramни очиш",
       telegramCancel: "Бекор қилиш",
-      telegramFailed: "Telegram орқали кириб бўлмади"
+      telegramFailed: "Telegram орқали кириб бўлмади",
+      telegramReset: "Telegram орқали тиклаш",
+      telegramResetHint: "Telegramда ботни очинг, «Start» ни босинг ва рақамингизни улашинг. Бот сизга янги парол беради ва сайт автоматик киради.",
+      resetNote: "Паролни тиклаш учун аввал шу рақам билан рўйхатдан ўтган бўлишингиз керак.",
+      loginRegisterHint: "Киришдан олдин рўйхатдан ўтган бўлишингиз керак."
     },
     home: {
       hero: "Права олиш энди биз билан осон!",
@@ -623,7 +631,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       telegramHint: "Откройте бота в Telegram, нажмите «Start», затем «Войти». Сайт войдёт автоматически.",
       telegramOpen: "Открыть Telegram",
       telegramCancel: "Отмена",
-      telegramFailed: "Не удалось войти через Telegram"
+      telegramFailed: "Не удалось войти через Telegram",
+      telegramReset: "Восстановить через Telegram",
+      telegramResetHint: "Откройте бота в Telegram, нажмите «Start» и поделитесь номером. Бот выдаст новый пароль, и сайт войдёт автоматически.",
+      resetNote: "Для восстановления пароля нужно сначала зарегистрироваться с этим номером.",
+      loginRegisterHint: "Перед входом нужно зарегистрироваться."
     },
     home: {
       hero: "Получить права теперь легко вместе с нами!",

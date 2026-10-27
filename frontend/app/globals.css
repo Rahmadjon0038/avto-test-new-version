@@ -4154,6 +4154,18 @@ a.authTelegramBtn {
   margin-top: 16px;
 }
 
+.authLoginHint {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border) 70%);
+  background: color-mix(in srgb, var(--panel) 88%, var(--primary) 12%);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .authTelegramWaiting {
   display: grid;
   gap: 10px;

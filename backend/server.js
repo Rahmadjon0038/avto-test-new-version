@@ -4718,6 +4718,7 @@ const telegramAuth = createTelegramAuth({
   dbApi,
   normalizeUzPhone,
   respondWithAuthUser,
+  hashPassword: (password) => bcrypt.hash(password, 10),
   secret: process.env.AUTH_JWT_SECRET || process.env.SESSION_SECRET || ""
 });
 telegramAuth.registerRoutes(app);
