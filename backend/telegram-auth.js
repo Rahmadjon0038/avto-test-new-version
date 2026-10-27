@@ -7,9 +7,10 @@
 //     foydalanuvchi Telegram ilovasida tasdiqlaydi, backend id_token ichidan telefon raqamni oladi.
 //     Mobil ilova brauzer/Telegramni ochadi va natijani `state` bo'yicha so'rab (polling) sessiyani oladi.
 //  3) Bot orqali kirish (BEPUL): ilova t.me/<bot>?start=<state> ni ochadi, foydalanuvchi botda
-//     "Start" bosib telefon raqamini ulashadi (Telegram raqamni o'zi tasdiqlaydi), bot
-//     "muvaffaqiyatli kirdingiz" deb yozadi, ilova esa `state` bo'yicha so'rab (polling) kirib oladi.
-//     Bot yangilanishlari webhook orqali keladi: POST /api/auth/telegram/bot/webhook.
+//     "Start" va "Kirish" tugmasini bosadi, bot "muvaffaqiyatli kirdingiz" deb yozadi, ilova esa
+//     `state` bo'yicha so'rab (polling) kirib oladi. Foydalanuvchi Telegram ID (users.telegram_id)
+//     bilan aniqlanadi, telefon raqam so'ralmaydi. Bot yangilanishlari webhook orqali keladi:
+//     POST /api/auth/telegram/bot/webhook.
 //
 // .env:
 //   TELEGRAM_BOT_TOKEN            — BotFather bergan bot tokeni (bot orqali kirish uchun)
@@ -146,15 +147,9 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS tg_user_id BIGINT;`);
     await dbApi.run(`ALTER TABLE telegram_oidc_states ADD COLUMN IF NOT EXISTS chat_id BIGINT;`);
     await dbApi.run(`CREATE INDEX IF NOT EXISTS telegram_oidc_states_tg_user_idx ON telegram_oidc_states (tg_user_id, id DESC);`);
-    // Telegram akkaunt -> telefon: raqam bir marta (kontakt ulashish bilan) tasdiqlangach, keyingi kirishlar faqat Start + "Kirish".
-    await dbApi.run(`
-      CREATE TABLE IF NOT EXISTS telegram_bot_links (
-        tg_user_id BIGINT PRIMARY KEY,
-        phone TEXT NOT NULL,
-        full_name TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-    `);
+    // Bot orqali kirgan foydalanuvchilar Telegram ID bilan aniqlanadi (telefon keyinroq, kerak bo'lsa, ulanadi).
+    await dbApi.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_id BIGINT;`);
+    await dbApi.run(`CREATE UNIQUE INDEX IF NOT EXISTS users_telegram_id_key ON users (telegram_id);`);
   }
 
   async function findOrCreateUser(phone, fullName) {
@@ -163,6 +158,15 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     return dbApi.get(
       "INSERT INTO users (full_name, phone) VALUES (?, ?) ON CONFLICT (phone) DO UPDATE SET phone = EXCLUDED.phone RETURNING *",
       [String(fullName || "").trim() || null, phone]
+    );
+  }
+
+  async function findOrCreateTelegramUser(telegramId, fullName) {
+    const existing = await dbApi.get("SELECT * FROM users WHERE telegram_id = ?", [telegramId]);
+    if (existing) return existing;
+    return dbApi.get(
+      "INSERT INTO users (full_name, telegram_id) VALUES (?, ?) ON CONFLICT (telegram_id) DO UPDATE SET telegram_id = EXCLUDED.telegram_id RETURNING *",
+      [String(fullName || "").trim() || null, telegramId]
     );
   }
 
@@ -358,7 +362,10 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
 
     const claimed = await dbApi.get("UPDATE telegram_oidc_states SET status = 'claimed' WHERE id = ? AND status = 'done' RETURNING *", [row.id]);
     if (!claimed) return res.status(410).json({ status: "expired", error: "Havola allaqachon ishlatilgan" });
-    const user = await findOrCreateUser(claimed.phone, claimed.full_name);
+    const user =
+      claimed.code_verifier === "bot"
+        ? await findOrCreateTelegramUser(claimed.tg_user_id, claimed.full_name)
+        : await findOrCreateUser(claimed.phone, claimed.full_name);
     if (isAdminUser(user)) return res.status(403).json({ error: "Admin akkaunt faqat parol bilan kiradi" });
     await respondWithAuthUser(req, res, user);
   }
@@ -417,71 +424,22 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     res.json({ ok: true, state, authUrl: `https://t.me/${botUsername}?start=${state}`, expiresIn: OIDC_TTL_MS / 1000 });
   }
 
-  const SHARE_KEYBOARD = {
-    keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
-    resize_keyboard: true,
-    one_time_keyboard: true
-  };
   const NO_KEYBOARD = { remove_keyboard: true };
+  const HELP_TEXT = "Topshirdi ilovasini oching va «Telegram orqali kirish» tugmasini bosing — shunda shu yerga qaytib kelasiz.";
 
   async function handleBotStartCommand(message, payload) {
     const chatId = message.chat.id;
-    if (!/^[a-f0-9]{48}$/.test(payload)) {
-      return botSend(chatId, "Topshirdi ilovasini oching va «Telegram orqali kirish» tugmasini bosing — shunda shu yerga qaytib kelasiz.", NO_KEYBOARD);
-    }
+    if (!/^[a-f0-9]{48}$/.test(payload)) return botSend(chatId, HELP_TEXT, NO_KEYBOARD);
     const row = await dbApi.get("SELECT * FROM telegram_oidc_states WHERE state_hash = ? AND code_verifier = 'bot'", [sha(payload)]);
     if (!row || row.status !== "pending" || new Date(row.expires_at).getTime() < Date.now()) {
       return botSend(chatId, "Havola eskirgan yoki allaqachon ishlatilgan. Ilovada «Telegram orqali kirish» tugmasini qaytadan bosing.", NO_KEYBOARD);
     }
     await dbApi.run("UPDATE telegram_oidc_states SET tg_user_id = ?, chat_id = ? WHERE id = ?", [message.from.id, chatId, row.id]);
-    const link = await dbApi.get("SELECT phone FROM telegram_bot_links WHERE tg_user_id = ?", [message.from.id]);
-    if (link) {
-      return botSend(
-        chatId,
-        "Topshirdi ilovasiga kirish uchun «Kirish» tugmasini bosing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, bosmang.",
-        { inline_keyboard: [[{ text: "✅ Kirish", callback_data: `login:${payload}` }]] }
-      );
-    }
     return botSend(
       chatId,
-      "Topshirdi ilovasiga kirish uchun pastdagi tugma orqali telefon raqamingizni ulashing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, tugmani bosmang.",
-      SHARE_KEYBOARD
+      "Topshirdi ilovasiga kirish uchun «Kirish» tugmasini bosing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, bosmang.",
+      { inline_keyboard: [[{ text: "✅ Kirish", callback_data: `login:${payload}` }]] }
     );
-  }
-
-  async function handleBotContact(message) {
-    const chatId = message.chat.id;
-    const contact = message.contact;
-    // Faqat foydalanuvchining O'Z raqami: Telegram contact.user_id ni o'zi to'ldiradi, qo'lda yuborilgan kontaktda u boshqacha.
-    if (String(contact.user_id || "") !== String(message.from.id)) {
-      return botSend(chatId, "Faqat o‘zingizning raqamingizni ulashing (pastdagi tugma orqali).", SHARE_KEYBOARD);
-    }
-    const row = await dbApi.get(
-      "SELECT * FROM telegram_oidc_states WHERE tg_user_id = ? AND code_verifier = 'bot' AND status = 'pending' AND expires_at > NOW() ORDER BY id DESC LIMIT 1",
-      [message.from.id]
-    );
-    if (!row) {
-      return botSend(chatId, "Avval ilovada «Telegram orqali kirish» tugmasini bosing, so‘ng shu yerga qaytib raqamingizni ulashing.", NO_KEYBOARD);
-    }
-    const phone = normalizePhoneOrNull(contact.phone_number);
-    if (!phone) {
-      await dbApi.run("UPDATE telegram_oidc_states SET status = 'failed', error = ? WHERE id = ? AND status = 'pending'", [
-        "Faqat O‘zbekiston (+998) raqamlari qabul qilinadi",
-        row.id
-      ]);
-      return botSend(chatId, "Faqat O‘zbekiston (+998) raqamlari qabul qilinadi. Boshqa usul bilan kirishingiz mumkin.", NO_KEYBOARD);
-    }
-    const fullName = [message.from.first_name, message.from.last_name].filter(Boolean).join(" ").trim() || null;
-    const done = await dbApi.get(
-      "UPDATE telegram_oidc_states SET status = 'done', phone = ?, full_name = ? WHERE id = ? AND status = 'pending' RETURNING id",
-      [phone, fullName, row.id]
-    );
-    if (!done) return botSend(chatId, "Havola allaqachon ishlatilgan. Ilovada qaytadan urinib ko‘ring.", NO_KEYBOARD);
-    await dbApi.run(
-      "INSERT INTO telegram_bot_links (tg_user_id, phone, full_name) VALUES (?, ?, ?) ON CONFLICT (tg_user_id) DO UPDATE SET phone = EXCLUDED.phone, full_name = EXCLUDED.full_name",
-      [message.from.id, phone, fullName]
-    );
-    return botSend(chatId, "✅ Muvaffaqiyatli kirildi!\n\nEndi Topshirdi ilovasiga qayting — kirish avtomatik bajariladi.", NO_KEYBOARD);
   }
 
   async function handleBotCallback(query) {
@@ -489,17 +447,16 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     const match = /^login:([a-f0-9]{48})$/.exec(String(query.data || ""));
     if (!match) return answer();
     const row = await dbApi.get("SELECT * FROM telegram_oidc_states WHERE state_hash = ? AND code_verifier = 'bot'", [sha(match[1])]);
-    const link = await dbApi.get("SELECT * FROM telegram_bot_links WHERE tg_user_id = ?", [query.from.id]);
     const valid =
       row &&
-      link &&
       row.status === "pending" &&
       new Date(row.expires_at).getTime() > Date.now() &&
       String(row.tg_user_id) === String(query.from.id);
     if (!valid) return answer("Havola eskirgan yoki allaqachon ishlatilgan. Ilovada qaytadan urinib ko‘ring.");
+    const fullName = [query.from.first_name, query.from.last_name].filter(Boolean).join(" ").trim() || null;
     const done = await dbApi.get(
-      "UPDATE telegram_oidc_states SET status = 'done', phone = ?, full_name = ? WHERE id = ? AND status = 'pending' RETURNING id",
-      [link.phone, link.full_name, row.id]
+      "UPDATE telegram_oidc_states SET status = 'done', full_name = ? WHERE id = ? AND status = 'pending' RETURNING id",
+      [fullName, row.id]
     );
     if (!done) return answer("Havola allaqachon ishlatilgan.");
     await answer();
@@ -521,10 +478,9 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     const message = update?.message;
     if (!message || message.chat?.type !== "private" || !message.from?.id) return;
     if (!limiter.hit(`bot-user:${message.from.id}`, 30, 10 * 60 * 1000)) return;
-    if (message.contact) return handleBotContact(message);
     const match = /^\/start(?:@\w+)?(?:\s+(\S+))?$/.exec(String(message.text || "").trim());
     if (match) return handleBotStartCommand(message, match[1] || "");
-    return botSend(message.chat.id, "Topshirdi ilovasini oching va «Telegram orqali kirish» tugmasini bosing — shunda shu yerga qaytib kelasiz.", NO_KEYBOARD);
+    return botSend(message.chat.id, HELP_TEXT, NO_KEYBOARD);
   }
 
   async function handleBotWebhook(req, res) {

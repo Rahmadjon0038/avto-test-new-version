@@ -76,7 +76,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       orPassword: "yoki parol bilan",
       telegramLogin: "Telegram orqali kirish",
       telegramWaiting: "Telegramda tasdiqlang...",
-      telegramHint: "Telegramda botni oching, «Start» ni bosing, so‘ng «Kirish» tugmasini bosing (birinchi marta raqamingizni ulashasiz). Sayt avtomatik kiradi.",
+      telegramHint: "Telegramda botni oching, «Start» ni bosing, so‘ng «Kirish» tugmasini bosing. Sayt avtomatik kiradi.",
       telegramOpen: "Telegramni ochish",
       telegramCancel: "Bekor qilish",
       telegramFailed: "Telegram orqali kirib bo‘lmadi"
@@ -345,7 +345,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       orPassword: "ёки парол билан",
       telegramLogin: "Telegram орқали кириш",
       telegramWaiting: "Telegramда тасдиқланг...",
-      telegramHint: "Telegramда ботни очинг, «Start» ни босинг, сўнг «Кириш» тугмасини босинг (биринчи марта рақамингизни улашасиз). Сайт автоматик киради.",
+      telegramHint: "Telegramда ботни очинг, «Start» ни босинг, сўнг «Кириш» тугмасини босинг. Сайт автоматик киради.",
       telegramOpen: "Telegramни очиш",
       telegramCancel: "Бекор қилиш",
       telegramFailed: "Telegram орқали кириб бўлмади"
@@ -610,7 +610,7 @@ const translations: Record<LanguageCode, TranslationTree> = {
       orPassword: "или по паролю",
       telegramLogin: "Войти через Telegram",
       telegramWaiting: "Подтвердите в Telegram...",
-      telegramHint: "Откройте бота в Telegram, нажмите «Start», затем «Войти» (в первый раз поделитесь номером). Сайт войдёт автоматически.",
+      telegramHint: "Откройте бота в Telegram, нажмите «Start», затем «Войти». Сайт войдёт автоматически.",
       telegramOpen: "Открыть Telegram",
       telegramCancel: "Отмена",
       telegramFailed: "Не удалось войти через Telegram"
