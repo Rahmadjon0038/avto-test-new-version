@@ -178,16 +178,6 @@ export default function PublicAuthModal({
           </button>
         </div>
 
-        <TelegramLoginButton
-          onSuccess={(data) => {
-            if (data?.accessToken) setAccessToken(String(data.accessToken));
-            if (data?.user) setUser(data.user);
-            toast.success(t("auth.loginSuccess"));
-            close();
-            router.push("/app");
-          }}
-        />
-
         <div className="authTabs" role="tablist" aria-label="Auth tabs">
           <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
             {t("auth.loginTitle")}
@@ -292,6 +282,16 @@ export default function PublicAuthModal({
             </button>
           </form>
         )}
+
+        <TelegramLoginButton
+          onSuccess={(data) => {
+            if (data?.accessToken) setAccessToken(String(data.accessToken));
+            if (data?.user) setUser(data.user);
+            toast.success(t("auth.loginSuccess"));
+            close();
+            router.push("/app");
+          }}
+        />
       </div>
     </div>
   );

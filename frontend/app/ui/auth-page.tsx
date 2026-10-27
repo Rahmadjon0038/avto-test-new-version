@@ -410,8 +410,6 @@ export default function AuthPage() {
               </button>
             </div>
 
-            <TelegramLoginButton onSuccess={onTelegramSuccess} />
-
             <div className="authTabs" role="tablist" aria-label="Auth tabs">
               <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
                 {t("auth.loginTitle")}
@@ -517,6 +515,7 @@ export default function AuthPage() {
               </form>
             )}
 
+            <TelegramLoginButton onSuccess={onTelegramSuccess} />
           </div>
         </div>
       ) : null}

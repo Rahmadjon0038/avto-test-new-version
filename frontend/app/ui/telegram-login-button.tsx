@@ -130,6 +130,9 @@ export default function TelegramLoginButton({ onSuccess }: { onSuccess: (data: a
 
   return (
     <div className="authTelegramBlock">
+      <div className="authDivider">
+        <span>{t("auth.orTelegram")}</span>
+      </div>
       {openUrl ? (
         <div className="authTelegramWaiting">
           <Loader2 className="lucide authTelegramSpin" aria-hidden="true" />
@@ -149,9 +152,6 @@ export default function TelegramLoginButton({ onSuccess }: { onSuccess: (data: a
           {t("auth.telegramLogin")}
         </button>
       )}
-      <div className="authDivider">
-        <span>{t("auth.orPassword")}</span>
-      </div>
     </div>
   );
 }
