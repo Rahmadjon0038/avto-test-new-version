@@ -7211,6 +7211,8 @@ async function start() {
   app.listen(PORT, () => {
     console.log(`Web server listening on http://localhost:${PORT}`);
     console.log(`Swagger docs: http://localhost:${PORT}/docs`);
+    // Bot webhook'ini ro'yxatdan o'tkazish server so'rov qabul qila boshlagandan keyin (xato bo'lsa ham server ishlayveradi).
+    void telegramAuth.startBot();
   });
 }
 
