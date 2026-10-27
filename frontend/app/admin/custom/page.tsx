@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LayoutGrid, RefreshCw, Save, Trash2, Upload } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAdminQuery } from "@/lib/use-admin-query";
+import AdminLoadError from "../ui/admin-load-error";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -45,8 +47,9 @@ export default function AdminCustomTestsPage() {
   const [importText, setImportText] = useState('{"customTests":[]}');
   const titleInputRef = useRef<HTMLInputElement | null>(null);
 
-  const customTestsQuery = useQuery({
+  const customTestsQuery = useAdminQuery<CustomTestItem[]>({
     queryKey: ["admin-custom-tests"],
+    persistKey: "custom-tests",
     queryFn: async () => {
       const res = await authFetch("/api/admin/custom-tests");
       const data = await jsonOrError(res);
@@ -223,6 +226,10 @@ export default function AdminCustomTestsPage() {
           </button>
         </div>
       </div>
+
+      {customTestsQuery.loadError ? (
+        <AdminLoadError message={customTestsQuery.loadError} onRetry={() => void customTestsQuery.refetch()} retrying={customTestsQuery.isFetching} />
+      ) : null}
 
       <div className="adminTopicsGrid">
         {(customTestsQuery.data || []).map((customTest: CustomTestItem, index: number) => (

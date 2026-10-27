@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Pencil, RefreshCw, Search, Ticket, Trash2 } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAdminQuery } from "@/lib/use-admin-query";
+import AdminLoadError from "../ui/admin-load-error";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth-provider";
@@ -23,8 +25,9 @@ export default function AdminTicketsPage() {
   const { authFetch } = useAuth();
   const [search, setSearch] = useState("");
 
-  const ticketsQuery = useQuery({
+  const ticketsQuery = useAdminQuery<AdminTicket[]>({
     queryKey: ["admin-tickets"],
+    persistKey: "tickets",
     queryFn: async () => {
       const res = await authFetch("/api/admin/tickets?lite=1");
       const data = (await jsonOrError(res)) as { tickets: AdminTicket[] };
@@ -48,7 +51,7 @@ export default function AdminTicketsPage() {
     });
   }, [search, ticketsQuery.data]);
   const totalTickets = ticketsQuery.data?.length || 0;
-  const isLoading = ticketsQuery.isLoading || ticketsQuery.isFetching;
+  const isLoading = ticketsQuery.isLoading;
 
   const deleteMutation = useMutation({
     mutationFn: async (ticketId: string) => {
@@ -99,7 +102,9 @@ export default function AdminTicketsPage() {
       </div>
 
       <div className="adminTicketsGrid">
-        {isLoading ? (
+        {ticketsQuery.loadError ? (
+          <AdminLoadError message={ticketsQuery.loadError} onRetry={() => void ticketsQuery.refetch()} retrying={ticketsQuery.isFetching} />
+        ) : isLoading ? (
           <section className="adminEmpty card">
             <div className="adminEmptyTitle">Biletlar yuklanmoqda</div>
             <div className="adminEmptyText">Iltimos kuting.</div>

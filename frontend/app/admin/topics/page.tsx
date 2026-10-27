@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, LayoutGrid, RefreshCw, Save, Trash2, Upload } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAdminQuery } from "@/lib/use-admin-query";
+import AdminLoadError from "../ui/admin-load-error";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -41,8 +43,9 @@ export default function AdminTopicsPage() {
   const [importText, setImportText] = useState('{"topics":[]}');
   const titleInputRef = useRef<HTMLInputElement | null>(null);
 
-  const topicsQuery = useQuery({
+  const topicsQuery = useAdminQuery<TopicItem[]>({
     queryKey: ["admin-topics"],
+    persistKey: "topics",
     queryFn: async () => {
       const res = await authFetch("/api/admin/topics");
       const data = await jsonOrError(res);
@@ -239,6 +242,10 @@ export default function AdminTopicsPage() {
           </button>
         </div>
       </div>
+
+      {topicsQuery.loadError ? (
+        <AdminLoadError message={topicsQuery.loadError} onRetry={() => void topicsQuery.refetch()} retrying={topicsQuery.isFetching} />
+      ) : null}
 
       <div className="adminTopicsGrid">
         {(topicsQuery.data || []).map((topic: TopicItem, index: number) => (

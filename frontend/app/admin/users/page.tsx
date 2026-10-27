@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Copy, KeyRound, RefreshCw, Search, ShieldCheck, Trash2, UserRound, X } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAdminQuery } from "@/lib/use-admin-query";
+import AdminLoadError from "../ui/admin-load-error";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -30,8 +32,9 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [resetResult, setResetResult] = useState<ResetPasswordResult | null>(null);
 
-  const usersQuery = useQuery({
+  const usersQuery = useAdminQuery<AdminUser[]>({
     queryKey: ["admin-users"],
+    persistKey: "users",
     queryFn: async () => {
       const res = await authFetch("/api/admin/users");
       const data = await jsonOrError(res);
@@ -129,9 +132,12 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="adminUsersGrid">
+        {usersQuery.loadError ? (
+          <AdminLoadError message={usersQuery.loadError} onRetry={() => void usersQuery.refetch()} retrying={usersQuery.isFetching} />
+        ) : null}
         {usersQuery.isLoading ? <div className="muted">Foydalanuvchilar yuklanmoqda...</div> : null}
 
-        {!usersQuery.isLoading && filteredUsers.length === 0 ? (
+        {!usersQuery.isLoading && !usersQuery.loadError && filteredUsers.length === 0 ? (
           <section className="adminEmpty card">
             <div className="adminEmptyTitle">Foydalanuvchi topilmadi</div>
             <div className="adminEmptyText">Qidiruv bo‘yicha hech narsa chiqmayapti.</div>

@@ -59,6 +59,32 @@ async function tryJson(res: Response) {
   return res.json().catch(() => ({}));
 }
 
+const REQUEST_TIMEOUT_MESSAGE = "Server javob bermayapti. Birozdan keyin qayta urinib ko‘ring.";
+
+// So'rov belgilangan vaqtda tugamasa, uni to'xtatib aniq xato qaytaradi: aks holda sekin/osilib qolgan server
+// sahifani cheksiz "yuklanmoqda" yoki bo'sh holatda qoldirardi. Foydalanuvchi bergan signal ham hurmat qilinadi.
+async function fetchWithTimeout(input: string, init: RequestInit | undefined, timeoutMs: number) {
+  const controller = new AbortController();
+  const outer = init?.signal;
+  if (outer) {
+    if (outer.aborted) controller.abort();
+    else outer.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (error: any) {
+    if (timedOut) throw new Error(REQUEST_TIMEOUT_MESSAGE);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [cookies, setCookie, removeCookie] = useCookies(["accessToken", "authUser"]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -87,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     if (refreshInFlightRef.current) return refreshInFlightRef.current;
     refreshInFlightRef.current = (async () => {
-      const res = await fetch("/api/auth/refresh", { method: "POST" });
+      const res = await fetchWithTimeout("/api/auth/refresh", { method: "POST" }, 15000);
       if (!res.ok) return null;
       const data: any = await tryJson(res);
       const token = data?.accessToken ? String(data.accessToken) : null;
@@ -153,11 +179,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // GET'lar odatda no-store; ETag bilan tekshiriladigan ro'yxatlar `cache: "no-cache"` berib
       // 304 (bo'sh javob) olishi mumkin.
       const cacheMode = init?.cache ?? (method === "GET" ? "no-store" : undefined);
-      let res = await fetch(requestPath, {
-        ...init,
-        headers,
-        cache: cacheMode,
-      });
+      // GET'lar 30 soniyada, yuklash/saqlash kabi boshqa so'rovlar 2 daqiqada tugamasa to'xtatiladi.
+      const timeoutMs = method === "GET" ? 30000 : 120000;
+      let res = await fetchWithTimeout(requestPath, { ...init, headers, cache: cacheMode }, timeoutMs);
 
       if (res.status !== 401) return res;
 
@@ -166,11 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!refreshed) return res;
       const headers2 = new Headers(init?.headers);
       headers2.set("authorization", `Bearer ${refreshed}`);
-      res = await fetch(requestPath, {
-        ...init,
-        headers: headers2,
-        cache: cacheMode,
-      });
+      res = await fetchWithTimeout(requestPath, { ...init, headers: headers2, cache: cacheMode }, timeoutMs);
       return res;
     },
     [refresh]

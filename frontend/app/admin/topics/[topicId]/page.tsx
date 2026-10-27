@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ChevronRight, Mic, Pencil, Plus, Save, Trash2, Upload, UploadCloud } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AdminLoadError from "../../ui/admin-load-error";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -744,6 +745,17 @@ export default function AdminTopicDetailPage() {
     });
 
     toast.success("Audio o‘chirildi");
+  }
+
+  // Server xato bergan/javob bermagan bo'lsa "topilmadi" emas, xato va "Qayta urinish" ko'rsatiladi.
+  if (!topic && topicQuery.isError) {
+    return (
+      <AdminLoadError
+        message={String((topicQuery.error as any)?.message || "Yuklab bo‘lmadi")}
+        onRetry={() => void topicQuery.refetch()}
+        retrying={topicQuery.isFetching}
+      />
+    );
   }
 
   if (!topic && !topicQuery.isLoading) {

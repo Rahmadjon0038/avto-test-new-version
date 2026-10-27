@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Pencil, Plus, Save, Ticket, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AdminLoadError from "../../ui/admin-load-error";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -408,6 +409,17 @@ export default function AdminTicketDetailPage() {
         return next;
       });
     });
+  }
+
+  // Server xato bergan/javob bermagan bo'lsa "topilmadi" emas, xato va "Qayta urinish" ko'rsatiladi.
+  if (!ticket && ticketQuery.isError) {
+    return (
+      <AdminLoadError
+        message={String((ticketQuery.error as any)?.message || "Yuklab bo‘lmadi")}
+        onRetry={() => void ticketQuery.refetch()}
+        retrying={ticketQuery.isFetching}
+      />
+    );
   }
 
   if (!ticket && !ticketQuery.isLoading) {
