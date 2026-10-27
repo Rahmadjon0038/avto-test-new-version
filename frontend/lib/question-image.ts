@@ -36,8 +36,10 @@ export function resolveQuestionImage(image?: string | null, fallback: string = "
 // Variant URL'i faqat nomdan hosil qilinadi, shuning uchun bazadagi `image` maydonlari o'zgarmaydi.
 export const IMAGE_VARIANT_WIDTHS = { s: 480, m: 800, l: 1280 } as const;
 
-// Savol rasmi ≥860 px da taxminan 600 px, undan tor ekranlarda deyarli to'liq kenglikda ko'rinadi.
-export const QUESTION_IMAGE_SIZES = "(max-width: 859px) calc(100vw - 32px), 600px";
+// Savol rasmi keng ekranda 920 px gacha (CSS: .qimg max-width), undan tor ekranlarda deyarli to'liq
+// kenglikda ko'rinadi. `sizes` rasmning "tabiiy" CSS kengligini ham belgilaydi, shuning uchun 920 bo'lishi shart:
+// kichikroq yozilsa rasm keng ekranda ham shu kenglikda qolib, kichik ko'rinadi.
+export const QUESTION_IMAGE_SIZES = "(max-width: 859px) calc(100vw - 32px), 920px";
 
 export type ImageVariants = { s: string; m: string; l: string; srcSet: string };
 

@@ -5568,6 +5568,11 @@ a.authTelegramBtn {
     max-height: 58vh;
     border-radius: 0;
   }
+
+  /* Rasm o'z tabiiy kengligida qolmasin: konteynerni to'ldirsin (920 px gacha, 58vh balandlikkacha). */
+  .imageZoomTrigger {
+    width: 100%;
+  }
 }
 
 /* Yuklanish paytida aylanuvchi spinner emas, sahifa tuzilmasi (skelet) ko'rinadi. */
