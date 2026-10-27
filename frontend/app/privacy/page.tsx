@@ -5,6 +5,7 @@ import {
   CalendarClock,
   Download,
   Mail,
+  Send,
   ShieldCheck,
   UserRoundCheck,
   Users,
@@ -173,9 +174,9 @@ export default function PrivacyPage() {
         </div>
 
         <div className={styles.contactCard}>
-          <a href={`mailto:${privacyPolicy.contact.email}`} className={styles.contactLink}>
-            <Mail size={18} />
-            {privacyPolicy.contact.email}
+          <a href={privacyPolicy.contact.telegram} className={styles.contactLink} target="_blank" rel="noreferrer">
+            <Send size={18} />
+            Telegram: {privacyPolicy.contact.telegramLabel}
           </a>
           <a href={privacyPolicy.contact.website} className={styles.contactLink} target="_blank" rel="noreferrer">
             <Globe2 size={18} />

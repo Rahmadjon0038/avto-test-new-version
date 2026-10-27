@@ -161,6 +161,7 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     );
   }
 
+  // Telegram ismi saqlanmaydi: ism bo'sh qoladi (ilovada standart nom), foydalanuvchi xohlasa o'zi yozadi.
   async function findOrCreateTelegramUser(telegramId, fullName) {
     const existing = await dbApi.get("SELECT * FROM users WHERE telegram_id = ?", [telegramId]);
     if (existing) return existing;
@@ -364,7 +365,7 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
     if (!claimed) return res.status(410).json({ status: "expired", error: "Havola allaqachon ishlatilgan" });
     const user =
       claimed.code_verifier === "bot"
-        ? await findOrCreateTelegramUser(claimed.tg_user_id, claimed.full_name)
+        ? await findOrCreateTelegramUser(claimed.tg_user_id, null)
         : await findOrCreateUser(claimed.phone, claimed.full_name);
     if (isAdminUser(user)) return res.status(403).json({ error: "Admin akkaunt faqat parol bilan kiradi" });
     await respondWithAuthUser(req, res, user);
@@ -453,10 +454,9 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secr
       new Date(row.expires_at).getTime() > Date.now() &&
       String(row.tg_user_id) === String(query.from.id);
     if (!valid) return answer("Havola eskirgan yoki allaqachon ishlatilgan. Ilovada qaytadan urinib ko‘ring.");
-    const fullName = [query.from.first_name, query.from.last_name].filter(Boolean).join(" ").trim() || null;
     const done = await dbApi.get(
-      "UPDATE telegram_oidc_states SET status = 'done', full_name = ? WHERE id = ? AND status = 'pending' RETURNING id",
-      [fullName, row.id]
+      "UPDATE telegram_oidc_states SET status = 'done' WHERE id = ? AND status = 'pending' RETURNING id",
+      [row.id]
     );
     if (!done) return answer("Havola allaqachon ishlatilgan.");
     await answer();

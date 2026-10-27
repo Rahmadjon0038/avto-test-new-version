@@ -97,7 +97,7 @@ function buildElements() {
   });
 
   elements.push({ text: "Aloqa", size: 14, font: "F2", indent: 0, lineHeight: 18, before: 8 });
-  addLine(`Email: ${policy.contact.email}`, 11.0, "F1", 0, 1.42);
+  addLine(`Telegram: ${policy.contact.telegramLabel} (${policy.contact.telegram})`, 11.0, "F1", 0, 1.42);
   addLine(`Website: ${policy.contact.website}`, 11.0, "F1", 0, 1.42);
 
   return elements;

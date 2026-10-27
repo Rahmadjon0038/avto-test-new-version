@@ -4543,6 +4543,8 @@ function publicAuthUser(user) {
   const passwordResetRequired = Boolean(user.password_reset_required || user.must_change_password);
   return {
     ...omitUserSecrets(user),
+    // Parolsiz (masalan Telegram orqali kirgan) foydalanuvchilarga "Parolni almashtirish" ko'rsatilmaydi.
+    has_password: Boolean(user.password_hash),
     phone: phoneUi,
     password_reset_required: passwordResetRequired,
     must_change_password: passwordResetRequired
@@ -4778,6 +4780,24 @@ app.get("/api/me", requireUser, async (req, res) => {
   const u = req.user;
   res.json({ user: publicAuthUser(u), isPro: isUserPro(u) });
 });
+
+// Foydalanuvchi o'z ismini o'zgartiradi (bo'sh qoldirsa ism o'chadi va ilovalarda standart nom ko'rinadi).
+async function handleUpdateMyName(req, res) {
+  const raw = req.body?.fullName ?? req.body?.full_name;
+  if (raw !== undefined && raw !== null && typeof raw !== "string") {
+    return res.status(400).json({ error: "Ism matn bo‘lishi kerak" });
+  }
+  const fullName =
+    String(raw || "")
+      .replace(/[\u0000-\u001f\u007f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 40) || null;
+  const updated = await dbApi.get("UPDATE users SET full_name = ? WHERE id = ? RETURNING *", [fullName, String(req.user.id)]);
+  res.json({ ok: true, user: publicAuthUser(updated), isPro: isUserPro(updated) });
+}
+app.patch("/api/me", requireUser, handleUpdateMyName);
+app.patch("/api/auth/me", requireUser, handleUpdateMyName);
 
 app.get("/api/topics", async (req, res) => {
   const user = await getUserFromAccess(req);

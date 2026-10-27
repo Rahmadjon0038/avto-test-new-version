@@ -55,9 +55,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
-  const initials = useMemo(() => getInitials(me?.full_name || ""), [me]);
-  const displayName = useMemo(() => me?.full_name || t("profile.title"), [me, t]);
+  const [nameDraft, setNameDraft] = useState("");
+
+  const displayName = useMemo(() => me?.full_name || t("profile.defaultName"), [me, t]);
+  const initials = useMemo(() => getInitials(displayName), [displayName]);
   const displayPhone = useMemo(() => me?.phone || t("profile.phoneMissing"), [me, t]);
+  // Parolsiz (Telegram orqali kirgan) foydalanuvchilarda parolni almashtirish yo'q.
+  const hasPassword = me?.has_password !== false;
 
   useEffect(() => {
     if (user) setMe(user);
@@ -111,8 +115,29 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   function openProfile() {
     setSubOpen(false);
+    setNameDraft(me?.full_name || "");
     setProfileOpen(true);
   }
+
+  const nameMutation = useMutation({
+    mutationFn: async (fullName: string) => {
+      const res = await authFetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName })
+      });
+      return jsonOrError(res);
+    },
+    onSuccess: (data: any) => {
+      const nextMe = { ...(me || {}), ...(data?.user || {}) };
+      setMe(nextMe);
+      setUser(nextMe);
+      setNameDraft(nextMe.full_name || "");
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.success(t("profile.nameSaved"));
+    },
+    onError: (error: any) => toast.error(error?.message || t("profile.nameSaveFailed"))
+  });
 
   function openPasswordChange() {
     setProfileOpen(false);
@@ -365,16 +390,50 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </div>
 
             <div className="profileBlock">
-              <div className="profileRow profileRowCard">
-                <div className="profileKey">
-                  <Phone className="lucide profileKeyIcon" aria-hidden="true" />
-                  {t("profile.phone")}
+              <form
+                className="profileRowCard profileNameCard"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  nameMutation.mutate(nameDraft.trim());
+                }}
+              >
+                <label className="profileKey" htmlFor="profileNameInput">
+                  <UserCircle2 className="lucide profileKeyIcon" aria-hidden="true" />
+                  {t("profile.nameLabel")}
+                </label>
+                <div className="profileNameEdit">
+                  <input
+                    id="profileNameInput"
+                    className="input"
+                    value={nameDraft}
+                    maxLength={40}
+                    placeholder={t("profile.defaultName")}
+                    autoComplete="name"
+                    onChange={(event) => setNameDraft(event.target.value)}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={nameMutation.isPending || nameDraft.trim() === (me?.full_name || "")}
+                  >
+                    {t("profile.saveName")}
+                  </button>
                 </div>
-                <div className="profileVal">{displayPhone}</div>
-              </div>
-              <button className="btn btn-primary" type="button" onClick={openPasswordChange}>
-                {t("profile.changePassword")}
-              </button>
+              </form>
+              {me?.phone ? (
+                <div className="profileRow profileRowCard">
+                  <div className="profileKey">
+                    <Phone className="lucide profileKeyIcon" aria-hidden="true" />
+                    {t("profile.phone")}
+                  </div>
+                  <div className="profileVal">{displayPhone}</div>
+                </div>
+              ) : null}
+              {hasPassword ? (
+                <button className="btn btn-primary" type="button" onClick={openPasswordChange}>
+                  {t("profile.changePassword")}
+                </button>
+              ) : null}
             </div>
             <button className="btn btn-danger" type="button" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
               {t("profile.logout")}

@@ -1,7 +1,7 @@
 {
   "title": "Maxfiylik siyosati",
-  "lastUpdated": "2026-06-14",
-  "lastUpdatedLabel": "14 iyun 2026",
+  "lastUpdated": "2026-10-27",
+  "lastUpdatedLabel": "27 oktyabr 2026",
   "intro": [
     "Topshirdi sizning shaxsiy ma'lumotlaringizni hurmat qiladi va ularni himoya qilishga intiladi.",
     "Ushbu siyosat platformadan foydalanganda qanday ma'lumotlar yig'ilishi, ular qanday ishlatilishi va qanday himoya qilinishini tushuntiradi.",
@@ -13,31 +13,29 @@
       "text": "Hozircha xizmatlar bepul va reklamalar yo'q."
     },
     {
-      "title": "Saqlanadigan progress",
-      "text": "Testlar, statistikalar va natijalar hisobingizda saqlanadi."
+      "title": "Minimal ma'lumot",
+      "text": "Telegram orqali kirishda telefon raqam va ism so'ralmaydi, faqat Telegram identifikatori ishlatiladi."
     },
     {
       "title": "Maxfiylik nazorati",
-      "text": "Siz accountni o'chirish yoki ma'lumotni tuzatishni so'rashingiz mumkin."
+      "text": "Ismingizni o'zingiz o'zgartirasiz va hisobingizni profil bo'limidan o'chirishingiz mumkin."
     }
   ],
   "sections": [
     {
       "title": "Qanday ma'lumotlar to'planadi",
       "items": [
-        "Ism",
-        "Email address",
-        "Login credentials",
-        "O'qish va mashq qilish progressi",
-        "Test natijalari",
-        "Imtihon statistikasi",
-        "Ilova ishlashi uchun kerak bo'lgan device information"
+        "Telegram orqali kirsangiz: Telegram foydalanuvchi identifikatori (ID). Telefon raqamingiz, ismingiz va Telegramdagi boshqa ma'lumotlaringiz so'ralmaydi va saqlanmaydi.",
+        "Telefon raqam va parol bilan kirsangiz: telefon raqamingiz va parolingiz. Parol faqat shifrlangan ko'rinishda saqlanadi.",
+        "Ism: ixtiyoriy. O'zingiz yozmasangiz, «Yo'lchivoy» nomi ko'rsatiladi.",
+        "O'qish va mashq qilish progressi, test natijalari, xatolar va imtihon statistikasi.",
+        "Xizmat ishlashi uchun zarur texnik ma'lumotlar: kirish sessiyasi va til sozlamasi. Server jurnallarida IP manzil va so'rov vaqti saqlanishi mumkin."
       ]
     },
     {
       "title": "Ma'lumotlardan qanday foydalanamiz",
       "items": [
-        "Foydalanuvchi accountini yaratish va boshqarish",
+        "Sizni aniqlash va hisobingizga kirishni ta'minlash",
         "Progress va natijalarni saqlash",
         "Statistikalarni ko'rsatish",
         "Platforma sifatini yaxshilash",
@@ -48,21 +46,25 @@
       "title": "Ma'lumotlarni ulashish",
       "items": [
         "Topshirdi foydalanuvchi ma'lumotlarini sotmaydi.",
-        "Ma'lumotlar faqat qonun talab qilganda yoki ruxsat etilgan holatlarda ulashilishi mumkin."
+        "Telegram orqali kirish Telegram xizmati orqali amalga oshadi va Telegramning o'z maxfiylik siyosatiga bo'ysunadi.",
+        "Rasm va fayllarni yetkazish uchun Cloudflare xizmatlaridan foydalaniladi.",
+        "Boshqa hollarda ma'lumotlar faqat qonun talab qilganda ulashilishi mumkin."
       ]
     },
     {
       "title": "Ma'lumotlar xavfsizligi",
       "items": [
+        "Parollar shifrlangan holda saqlanadi.",
         "Biz foydalanuvchi ma'lumotlarini himoya qilish uchun oqilona texnik va tashkiliy choralarni qo'llaymiz."
       ]
     },
     {
       "title": "Foydalanuvchi huquqlari",
       "items": [
-        "Accountni o'chirishni so'rash",
-        "Ma'lumotlarni tuzatishni so'rash",
-        "Support bilan bog'lanish"
+        "Profil bo'limida ismingizni o'zgartirish yoki o'chirish",
+        "Profil bo'limidan hisobingizni o'chirish (hisob o'chirilganda unga bog'liq ma'lumotlar ham o'chadi)",
+        "Ma'lumotlarni tuzatish yoki o'chirishni so'rash",
+        "Support bilan Telegram orqali bog'lanish"
       ]
     },
     {
@@ -81,7 +83,8 @@
     }
   ],
   "contact": {
-    "email": "support@topshirdi.uz",
+    "telegram": "https://t.me/Rahmadjonn",
+    "telegramLabel": "@Rahmadjonn",
     "website": "https://topshirdi.uz/"
   }
 }

@@ -6758,6 +6758,21 @@ a.authTelegramBtn {
   transform: translateX(2px);
 }
 
+.profileNameCard {
+  display: grid;
+  gap: 8px;
+}
+
+.profileNameEdit {
+  display: flex;
+  gap: 8px;
+}
+
+.profileNameEdit .input {
+  flex: 1;
+  min-width: 0;
+}
+
 .profileKey {
   display: inline-flex;
   align-items: center;
