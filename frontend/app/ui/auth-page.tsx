@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
@@ -24,16 +24,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import TelegramLoginButton from "./telegram-login-button";
 
 type Tab = "register" | "login";
-
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
-
-const GOOGLE_WEB_CLIENT_ID = "844953821020-2dcgvd7i32rvpj552gkgopat9278tnfe.apps.googleusercontent.com";
 
 function formatUzLocalPhone(value: string) {
   const digits = normalizeUzLocalDigits(value);
@@ -126,8 +119,6 @@ export default function AuthPage() {
   const [passwordLogin, setPasswordLogin] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
-  const googleButtonRef = useRef<HTMLDivElement | null>(null);
-  const googleButtonLoadedRef = useRef(false);
 
   useEffect(() => {
     if (authReady && accessToken) router.replace("/app");
@@ -151,82 +142,6 @@ export default function AuthPage() {
       document.body.style.overflow = "";
     };
   }, [authOpen]);
-
-  useEffect(() => {
-    if (!authOpen) return;
-    if (googleButtonLoadedRef.current) {
-      const google = window.google;
-      if (google?.accounts?.id && googleButtonRef.current) {
-        googleButtonRef.current.innerHTML = "";
-        google.accounts.id.renderButton(googleButtonRef.current, {
-          theme: "outline",
-          size: "large",
-          width: googleButtonRef.current.offsetWidth || 360,
-          text: "signin_with",
-          shape: "pill"
-        });
-      }
-      return;
-    }
-
-    const scriptId = "google-gsi-script";
-    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
-    const initGoogle = () => {
-      const google = window.google;
-      if (!google?.accounts?.id || !googleButtonRef.current) return;
-      googleButtonRef.current.innerHTML = "";
-      google.accounts.id.initialize({
-        client_id: GOOGLE_WEB_CLIENT_ID,
-        callback: async (response: { credential?: string }) => {
-          const credential = String(response?.credential || "");
-          if (!credential) {
-            toast.error(t("auth.googleTokenMissing"));
-            return;
-          }
-          try {
-            const data = await fetch("/api/auth/google", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ idToken: credential })
-            }).then(jsonOrError);
-            if (data?.accessToken) setAccessToken(String(data.accessToken));
-            if (data?.user) setUser(data.user);
-            toast.success(t("auth.googleLoginSuccess"));
-            setAuthOpen(false);
-            router.push("/app");
-          } catch (error: any) {
-            toast.error(error?.message || t("auth.googleLoginFailed"));
-          }
-        }
-      });
-      google.accounts.id.renderButton(googleButtonRef.current, {
-        theme: "outline",
-        size: "large",
-        width: googleButtonRef.current.offsetWidth || 360,
-        text: "signin_with",
-        shape: "pill"
-      });
-      googleButtonLoadedRef.current = true;
-    };
-
-    if (window.google?.accounts?.id) {
-      initGoogle();
-      return;
-    }
-
-    const script = existingScript || document.createElement("script");
-    if (!existingScript) {
-      script.id = scriptId;
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initGoogle;
-      document.head.appendChild(script);
-    } else {
-      existingScript.addEventListener("load", initGoogle, { once: true });
-      initGoogle();
-    }
-  }, [authOpen, router, setAccessToken, setUser]);
 
   function switchTab(nextTab: Tab) {
     toast.dismiss();
@@ -313,6 +228,15 @@ export default function AuthPage() {
     },
     onError: (e: any) => toast.error(e?.message || t("common.error"))
   });
+
+  function onTelegramSuccess(data: any) {
+    if (data?.accessToken) setAccessToken(String(data.accessToken));
+    if (data?.user) setUser(data.user);
+    toast.success(t("auth.loginSuccess"));
+    setAuthOpen(false);
+    router.push(pendingRedirect || "/app");
+    setPendingRedirect("");
+  }
 
   function forgotTelegramUrl() {
     const phoneDigits = uzLocalDigits(phoneLoginLocal);
@@ -486,6 +410,8 @@ export default function AuthPage() {
               </button>
             </div>
 
+            <TelegramLoginButton onSuccess={onTelegramSuccess} />
+
             <div className="authTabs" role="tablist" aria-label="Auth tabs">
               <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
                 {t("auth.loginTitle")}
@@ -591,12 +517,6 @@ export default function AuthPage() {
               </form>
             )}
 
-            <div className="authGoogleBlock">
-              <div className="authDivider">
-                <span>{t("auth.orGoogle")}</span>
-              </div>
-              <div className="googleButtonMount" ref={googleButtonRef} />
-            </div>
           </div>
         </div>
       ) : null}

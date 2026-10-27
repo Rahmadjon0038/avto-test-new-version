@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
+import TelegramLoginButton from "./telegram-login-button";
 
 type Tab = "register" | "login";
 
@@ -176,6 +177,16 @@ export default function PublicAuthModal({
             <X className="lucide" aria-hidden="true" />
           </button>
         </div>
+
+        <TelegramLoginButton
+          onSuccess={(data) => {
+            if (data?.accessToken) setAccessToken(String(data.accessToken));
+            if (data?.user) setUser(data.user);
+            toast.success(t("auth.loginSuccess"));
+            close();
+            router.push("/app");
+          }}
+        />
 
         <div className="authTabs" role="tablist" aria-label="Auth tabs">
           <button type="button" className={`authTab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")} aria-pressed={tab === "login"}>
