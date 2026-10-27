@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Save, ShieldAlert, MessageSquareText } from "lucide-react";
+import { Save, ShieldAlert, MessageSquareText, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/auth-provider";
 import { jsonOrError } from "@/lib/api-authed";
@@ -12,6 +12,7 @@ type AppConfig = {
   minAppVersionAndroid: string;
   minAppVersionIos: string;
   explanationEnabled: boolean;
+  videoLessonsEnabled: boolean;
 };
 
 const emptyConfig = (): AppConfig => ({
@@ -19,6 +20,7 @@ const emptyConfig = (): AppConfig => ({
   minAppVersionAndroid: "",
   minAppVersionIos: "",
   explanationEnabled: false,
+  videoLessonsEnabled: true,
 });
 
 function readBool(value: any, fallback = false) {
@@ -43,6 +45,7 @@ function readConfig(value: any): AppConfig {
     minAppVersionIos:
       typeof source.minAppVersionIos === "string" ? source.minAppVersionIos : "",
     explanationEnabled: readBool(source.explanationEnabled, false),
+    videoLessonsEnabled: readBool(source.videoLessonsEnabled, true),
   };
 }
 
@@ -76,7 +79,8 @@ export default function AdminHomePage() {
             forceUpdate: config.forceUpdate,
             minAppVersionAndroid: config.minAppVersionAndroid,
             minAppVersionIos: config.minAppVersionIos,
-            explanationEnabled: config.explanationEnabled
+            explanationEnabled: config.explanationEnabled,
+            videoLessonsEnabled: config.videoLessonsEnabled
           })
         })
       ),
@@ -175,6 +179,39 @@ export default function AdminHomePage() {
               checked={config.explanationEnabled}
               onChange={(event) =>
                 setConfig((current) => ({ ...current, explanationEnabled: event.target.checked }))
+              }
+            />
+          </label>
+
+          <div className="adminFormActions">
+            <button className="btn btn-ghost" type="button" onClick={() => void configQuery.refetch()} disabled={loading || saving}>
+              Yangilash
+            </button>
+            <button className="btn btn-primary" type="button" onClick={save} disabled={loading || saving}>
+              <Save className="lucide" aria-hidden="true" /> {saving ? "Saqlanmoqda..." : "Saqlash"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="adminPanelCard card">
+        <div className="adminPanelCardHead">
+          <div className="adminPanelCardTitle">
+            <Video className="lucide" aria-hidden="true" /> Video darslar
+          </div>
+          <div className="adminPanelCardDesc">
+            O‘chirilsa, mobil ilovaning bosh sahifasida «Video darsliklar» bo‘limi ko‘rinmaydi. Yoqilsa, yana paydo bo‘ladi.
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gap: 12, marginTop: 18 }}>
+          <label className="adminToggleRow">
+            <span className="adminToggleLabel">Mobil ilovada video darslarni ko‘rsatish</span>
+            <input
+              type="checkbox"
+              checked={config.videoLessonsEnabled}
+              onChange={(event) =>
+                setConfig((current) => ({ ...current, videoLessonsEnabled: event.target.checked }))
               }
             />
           </label>

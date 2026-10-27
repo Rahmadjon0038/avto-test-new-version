@@ -449,6 +449,7 @@ function normalizeAppConfig(value) {
     audioPremiumRequired: parseBoolean(source.audioPremiumRequired ?? source.audio_premium_required, false),
     videoPremiumRequired: parseBoolean(source.videoPremiumRequired ?? source.video_premium_required, false),
     explanationEnabled: parseBoolean(source.explanationEnabled ?? source.explanation_enabled, false),
+    videoLessonsEnabled: parseBoolean(source.videoLessonsEnabled ?? source.video_lessons_enabled, true),
     warning: {
       titleI18n: normalizeI18nMap(warningSource.titleI18n, DEFAULT_APP_WARNING_TEXT.titleI18n),
       messageI18n: sanitizeWarningMessageI18n(warningSource.messageI18n),
@@ -474,6 +475,7 @@ function buildAppConfigPayload(input = {}) {
     audioPremiumRequired: Boolean(normalized.audioPremiumRequired),
     videoPremiumRequired: Boolean(normalized.videoPremiumRequired),
     explanationEnabled: Boolean(normalized.explanationEnabled),
+    videoLessonsEnabled: Boolean(normalized.videoLessonsEnabled),
     warning: {
       titleI18n: normalized.warning.titleI18n,
       messageI18n: normalized.warning.messageI18n,
@@ -498,7 +500,8 @@ async function saveAppConfigToDb(nextConfig) {
   const current = await dbApi.get("SELECT * FROM app_settings WHERE id = 1");
   const mergedInput = {
     ...(current?.config_json || {}),
-    ...(nextConfig || {}),
+    // Yuborilmagan (undefined) maydonlar saqlangan qiymatni o'chirib yubormasin.
+    ...Object.fromEntries(Object.entries(nextConfig || {}).filter(([, value]) => value !== undefined)),
     warning: {
       ...parseJsonValue(current?.config_json?.warning, {}),
       ...parseJsonValue(nextConfig?.warning, {})
@@ -5522,6 +5525,7 @@ app.patch("/api/admin/app-config", async (req, res) => {
     audioPremiumRequired: req.body?.audioPremiumRequired,
     videoPremiumRequired: req.body?.videoPremiumRequired,
     explanationEnabled: req.body?.explanationEnabled,
+    videoLessonsEnabled: req.body?.videoLessonsEnabled,
     warning: req.body?.warning
   });
 
