@@ -24,7 +24,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
-import TelegramLoginButton, { useTelegramConfig } from "./telegram-login-button";
+import TelegramLoginButton from "./telegram-login-button";
 
 type Tab = "register" | "login";
 
@@ -119,7 +119,6 @@ export default function AuthPage() {
   const [passwordLogin, setPasswordLogin] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
-  const telegramConfig = useTelegramConfig();
 
   useEffect(() => {
     if (authReady && accessToken) router.replace("/app");
@@ -229,11 +228,6 @@ export default function AuthPage() {
     },
     onError: (e: any) => toast.error(e?.message || t("common.error"))
   });
-
-  function onResetSuccess(data: any) {
-    setForgotOpen(false);
-    onTelegramSuccess(data);
-  }
 
   function onTelegramSuccess(data: any) {
     if (data?.accessToken) setAccessToken(String(data.accessToken));
@@ -540,21 +534,15 @@ export default function AuthPage() {
                 ✕
               </button>
             </div>
-            {telegramConfig?.botEnabled ? (
-              <TelegramLoginButton mode="reset" onSuccess={onResetSuccess} />
-            ) : (
-              <>
-                <p className="authForgotText">{t("auth.forgotText")}</p>
-                <button className="authTelegramBtn" type="button" onClick={openForgotTelegram}>
-                  <Send className="lucide" aria-hidden="true" />
-                  {t("auth.forgotTelegram")}
-                </button>
-                <div className="authResetNotice">
-                  <div className="authResetTitle">{t("auth.forgotNoteTitle")}</div>
-                  <div className="authResetText">{t("auth.forgotNoteText")}</div>
-                </div>
-              </>
-            )}
+            <p className="authForgotText">{t("auth.forgotText")}</p>
+            <button className="authTelegramBtn" type="button" onClick={openForgotTelegram}>
+              <Send className="lucide" aria-hidden="true" />
+              {t("auth.forgotTelegram")}
+            </button>
+            <div className="authResetNotice">
+              <div className="authResetTitle">{t("auth.forgotNoteTitle")}</div>
+              <div className="authResetText">{t("auth.forgotNoteText")}</div>
+            </div>
           </div>
         </div>
       ) : null}

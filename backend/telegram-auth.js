@@ -11,9 +11,6 @@
 //     `state` bo'yicha so'rab (polling) kirib oladi. Foydalanuvchi Telegram ID (users.telegram_id)
 //     bilan aniqlanadi, telefon raqam so'ralmaydi. Bot yangilanishlari webhook orqali keladi:
 //     POST /api/auth/telegram/bot/webhook.
-//  4) Parolni bot orqali tiklash: "Parolni unutdingizmi?" botni ochadi (t.me/<bot>?start=r<state>),
-//     foydalanuvchi o'z raqamini ulashadi (Telegram raqam egasini tasdiqlaydi), bot ro'yxatdan o'tgan
-//     hisobni topib YANGI PAROL beradi va ilova o'sha hisobga avtomatik kiradi.
 //
 // .env:
 //   TELEGRAM_BOT_TOKEN            — BotFather bergan bot tokeni (bot orqali kirish uchun)
@@ -60,14 +57,6 @@ function clientIp(req) {
   return forwarded || req.ip || "unknown";
 }
 
-function generatePassword() {
-  // O'xshash belgilarsiz (0/O, 1/l/I) 8 belgili parol: qo'lda yozishga qulay.
-  const alphabet = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out = "";
-  for (const byte of crypto.randomBytes(8)) out += alphabet[byte % alphabet.length];
-  return out;
-}
-
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
 }
@@ -80,7 +69,7 @@ function resultPage(ok, message) {
 <body><div class="card"><div class="icon">${ok ? "✅" : "⚠️"}</div><h1>${ok ? "Tasdiqlandi" : "Kirish amalga oshmadi"}</h1><p>${escapeHtml(message)}</p></div></body></html>`;
 }
 
-function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, hashPassword, secret, env = process.env }) {
+function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, secret, env = process.env }) {
   const gatewayToken = String(env.TELEGRAM_GATEWAY_TOKEN || "").trim();
   const gatewayBase = String(env.TELEGRAM_GATEWAY_BASE || "https://gatewayapi.telegram.org").replace(/\/+$/, "");
   const oidcClientId = String(env.TELEGRAM_OIDC_CLIENT_ID || "").trim();
@@ -374,11 +363,10 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, hash
 
     const claimed = await dbApi.get("UPDATE telegram_oidc_states SET status = 'claimed' WHERE id = ? AND status = 'done' RETURNING *", [row.id]);
     if (!claimed) return res.status(410).json({ status: "expired", error: "Havola allaqachon ishlatilgan" });
-    let user;
-    if (claimed.code_verifier === "bot") user = await findOrCreateTelegramUser(claimed.tg_user_id, null);
-    else if (claimed.code_verifier === "reset") user = await dbApi.get("SELECT * FROM users WHERE phone = ?", [claimed.phone]);
-    else user = await findOrCreateUser(claimed.phone, claimed.full_name);
-    if (!user) return res.status(410).json({ status: "failed", error: "Hisob topilmadi" });
+    const user =
+      claimed.code_verifier === "bot"
+        ? await findOrCreateTelegramUser(claimed.tg_user_id, null)
+        : await findOrCreateUser(claimed.phone, claimed.full_name);
     if (isAdminUser(user)) return res.status(403).json({ error: "Admin akkaunt faqat parol bilan kiradi" });
     await respondWithAuthUser(req, res, user);
   }
@@ -396,12 +384,11 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, hash
     return data.result;
   }
 
-  async function botSend(chatId, text, replyMarkup, parseMode) {
+  async function botSend(chatId, text, replyMarkup) {
     try {
       await botApi("sendMessage", {
         chat_id: chatId,
         text,
-        ...(parseMode ? { parse_mode: parseMode } : {}),
         ...(replyMarkup ? { reply_markup: replyMarkup } : {})
       });
     } catch (error) {
@@ -438,111 +425,22 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, hash
     res.json({ ok: true, state, authUrl: `https://t.me/${botUsername}?start=${state}`, expiresIn: OIDC_TTL_MS / 1000 });
   }
 
-  async function handleResetStart(req, res) {
-    if (!isBotReady()) return res.status(503).json({ error: "Telegram bot orqali tiklash hozircha sozlanmagan" });
-    if (!limiter.hit(`reset-ip:${clientIp(req)}`, 15, 60 * 60 * 1000)) {
-      return res.status(429).json({ error: "Juda ko‘p urinish. Keyinroq qayta urinib ko‘ring" });
-    }
-    const state = crypto.randomBytes(24).toString("hex");
-    await dbApi.run("INSERT INTO telegram_oidc_states (state_hash, code_verifier, expires_at) VALUES (?, 'reset', ?)", [
-      sha(state),
-      new Date(Date.now() + OIDC_TTL_MS).toISOString()
-    ]);
-    res.json({ ok: true, state, authUrl: `https://t.me/${botUsername}?start=r${state}`, expiresIn: OIDC_TTL_MS / 1000 });
-  }
-
-  const SHARE_KEYBOARD = {
-    keyboard: [[{ text: "📱 Raqamni ulashish", request_contact: true }]],
-    resize_keyboard: true,
-    one_time_keyboard: true
-  };
   const NO_KEYBOARD = { remove_keyboard: true };
   const HELP_TEXT = "Topshirdi ilovasini oching va «Telegram orqali kirish» tugmasini bosing — shunda shu yerga qaytib kelasiz.";
 
   async function handleBotStartCommand(message, payload) {
     const chatId = message.chat.id;
-    const match = /^(r?)([a-f0-9]{48})$/.exec(payload);
-    if (!match) return botSend(chatId, HELP_TEXT, NO_KEYBOARD);
-    const isReset = match[1] === "r";
-    const row = await dbApi.get("SELECT * FROM telegram_oidc_states WHERE state_hash = ? AND code_verifier = ?", [
-      sha(match[2]),
-      isReset ? "reset" : "bot"
-    ]);
+    if (!/^[a-f0-9]{48}$/.test(payload)) return botSend(chatId, HELP_TEXT, NO_KEYBOARD);
+    const row = await dbApi.get("SELECT * FROM telegram_oidc_states WHERE state_hash = ? AND code_verifier = 'bot'", [sha(payload)]);
     if (!row || row.status !== "pending" || new Date(row.expires_at).getTime() < Date.now()) {
-      return botSend(chatId, "Havola eskirgan yoki allaqachon ishlatilgan. Ilovada tugmani qaytadan bosing.", NO_KEYBOARD);
+      return botSend(chatId, "Havola eskirgan yoki allaqachon ishlatilgan. Ilovada «Telegram orqali kirish» tugmasini qaytadan bosing.", NO_KEYBOARD);
     }
     await dbApi.run("UPDATE telegram_oidc_states SET tg_user_id = ?, chat_id = ? WHERE id = ?", [message.from.id, chatId, row.id]);
-    if (isReset) {
-      return botSend(
-        chatId,
-        "Parolni tiklash uchun pastdagi tugma orqali telefon raqamingizni ulashing. Raqamingiz orqali hisobingiz topiladi va sizga yangi parol beriladi.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, tugmani bosmang.",
-        SHARE_KEYBOARD
-      );
-    }
     return botSend(
       chatId,
       "Topshirdi ilovasiga kirish uchun «Kirish» tugmasini bosing.\n\nAgar bu so‘rovni siz boshlamagan bo‘lsangiz, bosmang.",
-      { inline_keyboard: [[{ text: "✅ Kirish", callback_data: `login:${match[2]}` }]] }
+      { inline_keyboard: [[{ text: "✅ Kirish", callback_data: `login:${payload}` }]] }
     );
-  }
-
-  // Parolni tiklash: ulashilgan raqam bo'yicha hisob topiladi, yangi parol beriladi, ilova avtomatik kiradi.
-  async function handleResetContact(message) {
-    const chatId = message.chat.id;
-    const contact = message.contact;
-    // Faqat foydalanuvchining O'Z raqami: contact.user_id ni Telegram o'zi to'ldiradi.
-    if (String(contact.user_id || "") !== String(message.from.id)) {
-      return botSend(chatId, "Faqat o‘zingizning raqamingizni ulashing (pastdagi tugma orqali).", SHARE_KEYBOARD);
-    }
-    const row = await dbApi.get(
-      "SELECT * FROM telegram_oidc_states WHERE tg_user_id = ? AND code_verifier = 'reset' AND status = 'pending' AND expires_at > NOW() ORDER BY id DESC LIMIT 1",
-      [message.from.id]
-    );
-    if (!row) {
-      return botSend(chatId, "Avval ilovada «Parolni unutdingizmi?» tugmasini bosing, so‘ng shu yerga qaytib raqamingizni ulashing.", NO_KEYBOARD);
-    }
-    const fail = async (error, text) => {
-      await dbApi.run("UPDATE telegram_oidc_states SET status = 'failed', error = ? WHERE id = ? AND status = 'pending'", [error, row.id]);
-      return botSend(chatId, text, NO_KEYBOARD);
-    };
-    const phone = normalizePhoneOrNull(contact.phone_number);
-    if (!phone) return fail("Faqat O‘zbekiston (+998) raqamlari qabul qilinadi", "Faqat O‘zbekiston (+998) raqamlari qabul qilinadi.");
-    if (!limiter.hit(`reset-phone:${phone}`, 5, 60 * 60 * 1000)) {
-      return fail("Urinishlar soni oshib ketdi. Keyinroq urinib ko‘ring", "Urinishlar soni oshib ketdi. Bir soatdan keyin qayta urinib ko‘ring.");
-    }
-    const user = await dbApi.get("SELECT * FROM users WHERE phone = ?", [phone]);
-    if (!user) {
-      return fail(
-        "Bu raqam bilan ro‘yxatdan o‘tilmagan. Avval ro‘yxatdan o‘ting",
-        "Bu raqam bilan ro‘yxatdan o‘tilmagan. Ilovada avval «Ro‘yxatdan o‘tish» orqali hisob yarating."
-      );
-    }
-    if (isAdminUser(user)) return fail("Admin akkaunt faqat parol bilan kiradi", "Bu hisob uchun parolni bot orqali tiklab bo‘lmaydi.");
-
-    // Bitta so'rov bitta parol beradi: avval satrni "resetting" qilib band qilamiz.
-    const locked = await dbApi.get("UPDATE telegram_oidc_states SET status = 'resetting', phone = ? WHERE id = ? AND status = 'pending' RETURNING id", [phone, row.id]);
-    if (!locked) return botSend(chatId, "Havola allaqachon ishlatilgan. Ilovada qaytadan urinib ko‘ring.", NO_KEYBOARD);
-    try {
-      const newPassword = generatePassword();
-      const passwordHash = await hashPassword(newPassword);
-      await dbApi.run(
-        "UPDATE users SET password_hash = ?, password_reset_required = FALSE, must_change_password = FALSE WHERE id = ?",
-        [passwordHash, String(user.id)]
-      );
-      // Eski sessiyalar yopiladi; ilova yangi sessiyani avtomatik oladi (status 'done' bo'lgandan keyin).
-      await dbApi.run("UPDATE refresh_tokens SET revoked = TRUE WHERE user_id = ?", [String(user.id)]);
-      await dbApi.run("UPDATE telegram_oidc_states SET status = 'done' WHERE id = ?", [row.id]);
-      await botSend(
-        chatId,
-        `✅ Parol tiklandi!\n\nYangi parolingiz: <code>${newPassword}</code>\n\nTopshirdi ilovasiga qayting — kirish avtomatik bajariladi. Parolni profil bo‘limida o‘zgartirishingiz mumkin.`,
-        NO_KEYBOARD,
-        "HTML"
-      );
-    } catch (error) {
-      console.error("[telegram] parol tiklanmadi:", error?.message || error);
-      await dbApi.run("UPDATE telegram_oidc_states SET status = 'failed', error = ? WHERE id = ?", ["Parolni tiklab bo‘lmadi. Keyinroq urinib ko‘ring", row.id]);
-      await botSend(chatId, "Parolni tiklab bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.", NO_KEYBOARD);
-    }
   }
 
   async function handleBotCallback(query) {
@@ -580,7 +478,6 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, hash
     const message = update?.message;
     if (!message || message.chat?.type !== "private" || !message.from?.id) return;
     if (!limiter.hit(`bot-user:${message.from.id}`, 30, 10 * 60 * 1000)) return;
-    if (message.contact) return handleResetContact(message);
     const match = /^\/start(?:@\w+)?(?:\s+(\S+))?$/.exec(String(message.text || "").trim());
     if (match) return handleBotStartCommand(message, match[1] || "");
     return botSend(message.chat.id, HELP_TEXT, NO_KEYBOARD);
@@ -614,7 +511,6 @@ function createTelegramAuth({ dbApi, normalizeUzPhone, respondWithAuthUser, hash
     app.get("/api/auth/telegram/oidc/callback", wrap(handleOidcCallback));
     app.get("/api/auth/telegram/oidc/status", wrap(handleOidcStatus));
     app.post("/api/auth/telegram/bot/start", wrap(handleBotStart));
-    app.post("/api/auth/telegram/reset/start", wrap(handleResetStart));
     app.get("/api/auth/telegram/bot/status", wrap(handleOidcStatus));
     app.post("/api/auth/telegram/bot/webhook", wrap(handleBotWebhook));
   }

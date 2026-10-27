@@ -26,8 +26,20 @@ function loadConfig(): Promise<TelegramConfig> {
   return configPromise;
 }
 
-export function useTelegramConfig(): TelegramConfig | null {
+// "Telegram orqali kirish": bot (yoki Telegram OIDC) ochiladi, foydalanuvchi Telegramda tasdiqlaydi,
+// sayt esa natijani `state` bo'yicha so'rab (polling) kirishni yakunlaydi.
+export default function TelegramLoginButton({ onSuccess }: { onSuccess: (data: any) => void }) {
+  const { t } = useSiteLanguage();
   const [config, setConfig] = useState<TelegramConfig | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [openUrl, setOpenUrl] = useState<string | null>(null);
+  const stateRef = useRef<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const deadlineRef = useRef(0);
+  const inFlightRef = useRef(false);
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
   useEffect(() => {
     let alive = true;
     loadConfig().then((value) => {
@@ -37,30 +49,6 @@ export function useTelegramConfig(): TelegramConfig | null {
       alive = false;
     };
   }, []);
-  return config;
-}
-
-// "Telegram orqali kirish": bot (yoki Telegram OIDC) ochiladi, foydalanuvchi Telegramda tasdiqlaydi,
-// sayt esa natijani `state` bo'yicha so'rab (polling) kirishni yakunlaydi.
-// mode="reset": "Parolni unutdingizmi?" — bot yangi parol beradi va sayt avtomatik kiradi (faqat bot bilan).
-export default function TelegramLoginButton({
-  onSuccess,
-  mode = "login"
-}: {
-  onSuccess: (data: any) => void;
-  mode?: "login" | "reset";
-}) {
-  const { t } = useSiteLanguage();
-  const config = useTelegramConfig();
-  const isReset = mode === "reset";
-  const [busy, setBusy] = useState(false);
-  const [openUrl, setOpenUrl] = useState<string | null>(null);
-  const stateRef = useRef<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const deadlineRef = useRef(0);
-  const inFlightRef = useRef(false);
-  const onSuccessRef = useRef(onSuccess);
-  onSuccessRef.current = onSuccess;
 
   function stop() {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -117,8 +105,7 @@ export default function TelegramLoginButton({
     const popup = window.open("about:blank", "_blank");
     setBusy(true);
     try {
-      const startPath = isReset ? "reset" : config.botEnabled ? "bot" : "oidc";
-      const res = await fetch(`/api/auth/telegram/${startPath}/start`, {
+      const res = await fetch(`/api/auth/telegram/${config.botEnabled ? "bot" : "oidc"}/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: "{}"
@@ -139,20 +126,18 @@ export default function TelegramLoginButton({
     }
   }
 
-  if (!config || (isReset ? !config.botEnabled : !config.botEnabled && !config.loginEnabled)) return null;
+  if (!config || (!config.botEnabled && !config.loginEnabled)) return null;
 
   return (
     <div className="authTelegramBlock">
-      {isReset ? null : (
-        <div className="authDivider">
-          <span>{t("auth.orTelegram")}</span>
-        </div>
-      )}
+      <div className="authDivider">
+        <span>{t("auth.orTelegram")}</span>
+      </div>
       {openUrl ? (
         <div className="authTelegramWaiting">
           <Loader2 className="lucide authTelegramSpin" aria-hidden="true" />
           <div className="authTelegramWaitingTitle">{t("auth.telegramWaiting")}</div>
-          <p className="authTelegramWaitingText">{t(isReset ? "auth.telegramResetHint" : "auth.telegramHint")}</p>
+          <p className="authTelegramWaitingText">{t("auth.telegramHint")}</p>
           <a className="authTelegramBtn" href={openUrl} target="_blank" rel="noopener noreferrer">
             <Send className="lucide" aria-hidden="true" />
             {t("auth.telegramOpen")}
@@ -164,10 +149,9 @@ export default function TelegramLoginButton({
       ) : (
         <button className="authTelegramBtn" type="button" onClick={() => void start()} disabled={busy}>
           <Send className="lucide" aria-hidden="true" />
-          {t(isReset ? "auth.telegramReset" : "auth.telegramLogin")}
+          {t("auth.telegramLogin")}
         </button>
       )}
-      {isReset ? <p className="authTelegramWaitingText">{t("auth.resetNote")}</p> : null}
     </div>
   );
 }

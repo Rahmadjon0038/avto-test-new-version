@@ -3725,7 +3725,11 @@ function isSecureRequest(req) {
 
 // 2 oy atrofida sessiya saqlash uchun access va refresh tokenlar muddati uzaytirildi.
 const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 60;
-const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 60;
+// Foydalanuvchi uzoq vaqt ilovaga kirmasa ham tizimdan chiqib qolmasligi uchun yangilash tokeni uzoq yashaydi
+// (har bir yangilashda muddat qaytadan boshlanadi).
+const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
+// Yangilashdan keyin eski token shuncha vaqt yana ishlaydi (qarang: rotateRefreshToken).
+const REFRESH_ROTATION_GRACE_SECONDS = 60 * 60 * 24 * 7;
 
 function getSecret() {
   return process.env.AUTH_JWT_SECRET || process.env.SESSION_SECRET || process.env.BOT_TOKEN || "";
@@ -3824,7 +3828,13 @@ async function rotateRefreshToken(refreshToken, req, res) {
   if (!row) throw new Error("Yangilash tokeni topilmadi");
   if (row.revoked) throw new Error("Yangilash tokeni bekor qilingan");
   if (new Date(row.expires_at).getTime() <= Date.now()) throw new Error("Yangilash tokeni muddati tugagan");
-  await dbApi.run(`UPDATE refresh_tokens SET revoked = TRUE WHERE id = ?`, [row.id]);
+  // Eski token darrov bekor qilinmaydi: yangi token qurilmaga yetib bormasa (tarmoq uzilishi, ilovaning yopilib
+  // qolishi, ikkita parallel so'rov) foydalanuvchi tizimdan chiqib qolmasin. Chiqish (logout) va parolni
+  // o'zgartirish esa baribir `revoked = TRUE` qiladi.
+  await dbApi.run(
+    `UPDATE refresh_tokens SET expires_at = LEAST(expires_at, NOW() + (? * INTERVAL '1 second')) WHERE id = ?`,
+    [REFRESH_ROTATION_GRACE_SECONDS, row.id]
+  );
   return issueTokensForUser(verified.payload.sub, req, res);
 }
 
@@ -4718,7 +4728,6 @@ const telegramAuth = createTelegramAuth({
   dbApi,
   normalizeUzPhone,
   respondWithAuthUser,
-  hashPassword: (password) => bcrypt.hash(password, 10),
   secret: process.env.AUTH_JWT_SECRET || process.env.SESSION_SECRET || ""
 });
 telegramAuth.registerRoutes(app);
