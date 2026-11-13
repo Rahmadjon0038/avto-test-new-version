@@ -5782,6 +5782,16 @@ a.authTelegramBtn {
   }
 }
 
+.option.pending {
+  border-color: #eab308;
+  background: #facc15;
+  color: #422006;
+}
+
+.option.pending .optionText {
+  color: #422006;
+}
+
 .option.correct {
   border-color: var(--ok);
   background: var(--ok);

@@ -16,7 +16,8 @@ import {
   TestPageSettingsButton,
   shuffleQuestionsWithSeed,
   useShuffleSeed,
-  useTestPageSettings
+  useTestPageSettings,
+  useTwoStepConfirm
 } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
@@ -536,6 +537,7 @@ export default function TicketPage() {
       if (idx < total - 1) setIdx((current) => Math.min(total - 1, current + 1));
     }
   });
+  const { pending: pendingOption, select: selectOption } = useTwoStepConfirm(settings.confirmTwice, idx);
   useTestInteractions({
     enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
     currentIndex: idx,
@@ -545,9 +547,11 @@ export default function TicketPage() {
       if (!q || !viewQuestion) return;
       const originalIndex = viewQuestion.optionOrder[optionIndex];
       if (originalIndex === undefined) return;
-      const nextAnswers = { ...answers, [q.id]: originalIndex };
-      save(nextAnswers);
-      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+      selectOption(optionIndex, () => {
+        const nextAnswers = { ...answers, [q.id]: originalIndex };
+        save(nextAnswers);
+        if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+      });
     },
     scrollTargetRef: questionCardRef
   });
@@ -617,14 +621,16 @@ export default function TicketPage() {
                   return (
                     <button
                       key={oi}
-                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""} ${!hasAnswered && pendingOption === oi ? "pending" : ""}`}
                       type="button"
                       disabled={hasAnswered}
                       onClick={() => {
                         if (!q) return;
-                        const nextAnswers = { ...answers, [q.id]: originalIndex };
-                        save(nextAnswers);
-                        if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+                        selectOption(oi, () => {
+                          const nextAnswers = { ...answers, [q.id]: originalIndex };
+                          save(nextAnswers);
+                          if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+                        });
                       }}
                     >
                       <span className="optionKey">F{oi + 1}</span>

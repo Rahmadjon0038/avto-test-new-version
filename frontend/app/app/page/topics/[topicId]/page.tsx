@@ -11,7 +11,7 @@ import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
-import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings, useTwoStepConfirm } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
 import { putCachedTopic, type CachedTopic } from "@/lib/content-db";
@@ -793,6 +793,7 @@ export default function TopicPage() {
       if (idx < total - 1) setIdx((current) => Math.min(total - 1, current + 1));
     }
   });
+  const { pending: pendingOption, select: selectOption } = useTwoStepConfirm(settings.confirmTwice, idx);
   useTestInteractions({
     enabled: Boolean(q) && !currentAnswered && !zoomedImage && !finishOpen,
     currentIndex: idx,
@@ -800,9 +801,11 @@ export default function TopicPage() {
     mode: "function",
     onSelect: (optionIndex) => {
       if (!q) return;
-      const nextAnswers = { ...answers, [q.id]: optionIndex };
-      save(nextAnswers);
-      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+      selectOption(optionIndex, () => {
+        const nextAnswers = { ...answers, [q.id]: optionIndex };
+        save(nextAnswers);
+        if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+      });
     },
     scrollTargetRef: questionCardRef
   });
@@ -866,13 +869,15 @@ export default function TopicPage() {
                 return (
                   <button
                     key={oi}
-                    className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                    className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""} ${!hasAnswered && pendingOption === oi ? "pending" : ""}`}
                     type="button"
                     disabled={hasAnswered}
                     onClick={() => {
-                      const nextAnswers = { ...answers, [q.id]: oi };
-                      save(nextAnswers);
-                      if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+                      selectOption(oi, () => {
+                        const nextAnswers = { ...answers, [q.id]: oi };
+                        save(nextAnswers);
+                        if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+                      });
                     }}
                   >
                     <span className="optionKey">F{oi + 1}</span>

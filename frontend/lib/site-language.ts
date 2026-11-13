@@ -218,7 +218,9 @@ const translations: Record<LanguageCode, TranslationTree> = {
       shuffleTitle: "Testlarni aralashtirish",
       shuffleDesc: "Savollar tartibi har safar aralash ko‘rinadi.",
       autoNextTitle: "Avtomatik o‘tish",
-      autoNextDesc: "Javob tanlanganda keyingi savolga o‘tadi."
+      autoNextDesc: "Javob tanlanganda keyingi savolga o‘tadi.",
+      confirmTwiceTitle: "Ikki bosishda tasdiqlash",
+      confirmTwiceDesc: "Javob birinchi bosishda sariq bo‘ladi, ikkinchi bosishda belgilanadi."
     },
     progress: {
       correct: "{count} ta to‘g‘ri",
@@ -494,7 +496,9 @@ const translations: Record<LanguageCode, TranslationTree> = {
       shuffleTitle: "Тестларни аралаштириш",
       shuffleDesc: "Саволлар тартиби ҳар сафар аралаш кўринади.",
       autoNextTitle: "Автоматик ўтиш",
-      autoNextDesc: "Жавоб танланганда кейинги саволга ўтади."
+      autoNextDesc: "Жавоб танланганда кейинги саволга ўтади.",
+      confirmTwiceTitle: "Икки босишда тасдиқлаш",
+      confirmTwiceDesc: "Жавоб биринчи босишда сариқ бўлади, иккинчи босишда белгиланади."
     },
     progress: {
       correct: "{count} та тўғри",
@@ -774,7 +778,9 @@ const translations: Record<LanguageCode, TranslationTree> = {
       shuffleTitle: "Перемешивать вопросы",
       shuffleDesc: "Порядок вопросов каждый раз будет другим.",
       autoNextTitle: "Автопереход",
-      autoNextDesc: "После ответа переходить к следующему вопросу."
+      autoNextDesc: "После ответа переходить к следующему вопросу.",
+      confirmTwiceTitle: "Подтверждение двойным нажатием",
+      confirmTwiceDesc: "Первое нажатие выделяет вариант жёлтым, второе — подтверждает ответ."
     },
     progress: {
       correct: "{count} верных",

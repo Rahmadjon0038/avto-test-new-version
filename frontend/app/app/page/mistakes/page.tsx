@@ -9,7 +9,7 @@ import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { QuestionAudio } from "@/lib/question-audio";
-import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings, useTwoStepConfirm } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
 import { getCachedMistakes, setMistakesForUser, type CachedMistake } from "@/lib/content-db";
@@ -446,12 +446,13 @@ export default function MistakesPage() {
   }
 
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
+  const { pending: pendingOption, select: selectOption } = useTwoStepConfirm(settings.confirmTwice, idx);
   useTestInteractions({
     enabled: tab === "practice" && Boolean(currentQuestion) && !currentAnswered && !finishOpen,
     currentIndex: idx,
     optionCount: currentQuestion?.options.length || 0,
     mode: "alpha",
-    onSelect: (optionIndex) => answerCurrent(optionIndex),
+    onSelect: (optionIndex) => selectOption(optionIndex, () => answerCurrent(optionIndex)),
     scrollTargetRef: questionCardRef
   });
 
@@ -631,10 +632,10 @@ export default function MistakesPage() {
                           return (
                             <button
                               key={optionIndex}
-                              className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""}`}
+                              className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""} ${!hasAnswered && pendingOption === optionIndex ? "pending" : ""}`}
                               type="button"
                               disabled={hasAnswered}
-                              onClick={() => answerCurrent(optionIndex)}
+                              onClick={() => selectOption(optionIndex, () => answerCurrent(optionIndex))}
                             >
                               <span className="optionKey">{optionLetter(optionIndex)}</span>
                               <span className="optionText">{option}</span>

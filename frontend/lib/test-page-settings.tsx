@@ -1,18 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Cog, Shuffle, Sparkles, X } from "lucide-react";
+import { Cog, MousePointerClick, Shuffle, Sparkles, X } from "lucide-react";
 import { useSiteLanguage } from "@/app/site-language-provider";
 
 export type TestPageSettings = {
   shuffleQuestions: boolean;
   autoNext: boolean;
+  confirmTwice: boolean;
 };
 
 const STORAGE_KEY = "road-test:test-page-settings";
 const DEFAULT_SETTINGS: TestPageSettings = {
   shuffleQuestions: false,
-  autoNext: true
+  autoNext: true,
+  confirmTwice: false
 };
 
 function readStoredSettings() {
@@ -23,7 +25,8 @@ function readStoredSettings() {
     const parsed = JSON.parse(raw) as Partial<TestPageSettings>;
     return {
       shuffleQuestions: Boolean(parsed.shuffleQuestions),
-      autoNext: parsed.autoNext !== false
+      autoNext: parsed.autoNext !== false,
+      confirmTwice: Boolean(parsed.confirmTwice)
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -79,6 +82,36 @@ export function useTestPageSettings() {
   }, [setSettings]);
 
   return { settings, setSettings, patchSettings, ready };
+}
+
+/**
+ * "Ikki bosishda tasdiqlash": the first press only marks an option as pending (yellow),
+ * the second press on the same option confirms it. Pressing another option moves the mark.
+ */
+export function useTwoStepConfirm(enabled: boolean, resetKey: string | number) {
+  const [pending, setPending] = useState<number | null>(null);
+
+  useEffect(() => {
+    setPending(null);
+  }, [resetKey, enabled]);
+
+  const select = useCallback(
+    (index: number, confirm: () => void) => {
+      if (!enabled) {
+        confirm();
+        return;
+      }
+      if (pending === index) {
+        setPending(null);
+        confirm();
+        return;
+      }
+      setPending(index);
+    },
+    [enabled, pending]
+  );
+
+  return { pending: enabled ? pending : null, select };
 }
 
 type ToggleRowProps = {
@@ -171,6 +204,13 @@ export function TestPageSettingsButton({ settings, onChange, className }: TestPa
                 enabled={settings.autoNext}
                 onToggle={(next) => onChange({ ...settings, autoNext: next })}
                 icon={<Sparkles className="lucide" aria-hidden="true" />}
+              />
+              <ToggleRow
+                title={t("settings.confirmTwiceTitle")}
+                description={t("settings.confirmTwiceDesc")}
+                enabled={settings.confirmTwice}
+                onToggle={(next) => onChange({ ...settings, confirmTwice: next })}
+                icon={<MousePointerClick className="lucide" aria-hidden="true" />}
               />
             </div>
           </div>

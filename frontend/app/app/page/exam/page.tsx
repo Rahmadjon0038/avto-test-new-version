@@ -9,7 +9,7 @@ import { useAuth } from "@/app/auth-provider";
 import { useSiteLanguage } from "@/app/site-language-provider";
 import { jsonOrError } from "@/lib/api-authed";
 import { useArrowQuestionNavigation } from "@/lib/use-arrow-question-navigation";
-import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings } from "@/lib/test-page-settings";
+import { TestPageSettingsButton, shuffleQuestionsWithSeed, useShuffleSeed, useTestPageSettings, useTwoStepConfirm } from "@/lib/test-page-settings";
 import { useTestInteractions } from "@/lib/test-interactions";
 import { resolveQuestionImage } from "@/lib/question-image";
 import { getCachedExamSnapshot, putCachedExamSnapshot } from "@/lib/content-db";
@@ -272,16 +272,19 @@ export default function ExamPage() {
   const chartCorrectPercent = finalResult ? finalResult.percent : 0;
   const currentAnswered = Boolean(currentQuestion && answers[currentQuestion.id] !== undefined);
 
+  const { pending: pendingOption, select: selectOption } = useTwoStepConfirm(settings.confirmTwice, idx);
   useTestInteractions({
     enabled: Boolean(currentQuestion) && !currentAnswered && !zoomedImage && !locked,
     currentIndex: idx,
     optionCount: currentQuestion?.options.length || 0,
-    mode: "alpha",
+    mode: "function",
     onSelect: (optionIndex) => {
       if (!currentQuestion || locked) return;
-      const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
-      save(nextAnswers);
-      if (settings.autoNext && idx < questions.length - 1) scheduleAutoNext(idx + 1);
+      selectOption(optionIndex, () => {
+        const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
+        save(nextAnswers);
+        if (settings.autoNext && idx < questions.length - 1) scheduleAutoNext(idx + 1);
+      });
     },
     scrollTargetRef: questionCardRef
   });
@@ -689,7 +692,7 @@ export default function ExamPage() {
                   return (
                     <button
                       key={optionIndex}
-                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""} ${locked ? "locked" : ""}`}
+                      className={`option ${hasAnswered && correct ? "correct" : ""} ${wrong ? "wrong" : ""} ${locked ? "locked" : ""} ${!hasAnswered && !locked && pendingOption === optionIndex ? "pending" : ""}`}
                       type="button"
                       disabled={hasAnswered}
                       onClick={() => {
@@ -698,12 +701,14 @@ export default function ExamPage() {
                           return;
                         }
                         if (hasAnswered) return;
-                        const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
-                        save(nextAnswers);
-                        if (settings.autoNext && idx < questions.length - 1) scheduleAutoNext(idx + 1);
+                        selectOption(optionIndex, () => {
+                          const nextAnswers = { ...answers, [currentQuestion.id]: optionIndex };
+                          save(nextAnswers);
+                          if (settings.autoNext && idx < questions.length - 1) scheduleAutoNext(idx + 1);
+                        });
                       }}
                     >
-                      <span className="optionKey">{String.fromCharCode(65 + optionIndex)}</span>
+                      <span className="optionKey">F{optionIndex + 1}</span>
                       <span className="optionText">{opt}</span>
                     </button>
                   );
