@@ -26,6 +26,7 @@ import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
 import ResponsiveImage from "@/app/ui/responsive-image";
 import ZoomImage from "@/app/ui/zoom-image";
+import { CELEBRATE_MIN_CORRECT, CelebrationBanner, CelebrationEffects } from "@/app/ui/celebration";
 
 type Question = {
   id: string;
@@ -715,6 +716,7 @@ export default function TicketPage() {
       {finishOpen && (
         <>
           <div className="modalOverlay" onClick={closeResult} />
+          {correctCount >= CELEBRATE_MIN_CORRECT ? <CelebrationEffects /> : null}
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">Natija</div>
@@ -723,6 +725,7 @@ export default function TicketPage() {
               </button>
             </div>
             <div className="modalBody modalBodyResult">
+              {correctCount >= CELEBRATE_MIN_CORRECT ? <CelebrationBanner kind="ticket" /> : null}
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">

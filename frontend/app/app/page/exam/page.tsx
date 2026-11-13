@@ -16,6 +16,7 @@ import { getCachedExamSnapshot, putCachedExamSnapshot } from "@/lib/content-db";
 import { preloadQuestionImages } from "@/lib/image-preload";
 import ResponsiveImage from "@/app/ui/responsive-image";
 import ZoomImage from "@/app/ui/zoom-image";
+import { CELEBRATE_MIN_CORRECT, CelebrationBanner, CelebrationEffects } from "@/app/ui/celebration";
 
 type ExamQuestion = {
   id: string;
@@ -788,6 +789,7 @@ export default function ExamPage() {
       {finishOpen && finalResult ? (
         <>
           <div className="modalOverlay" onClick={exitExamPage} />
+          {finalResult.correct >= CELEBRATE_MIN_CORRECT ? <CelebrationEffects /> : null}
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">{t("exam.resultTitle")}</div>
@@ -796,6 +798,7 @@ export default function ExamPage() {
               </button>
             </div>
             <div className="modalBody">
+              {finalResult.correct >= CELEBRATE_MIN_CORRECT ? <CelebrationBanner kind="exam" /> : null}
               <div className="resultBlock resultChartBlock">
                 <div className="resultChart">
                   <div className="resultSolved">

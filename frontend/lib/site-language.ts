@@ -228,6 +228,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       title: "Progres",
       empty: "Natija hali yo‘q"
     },
+    celebrate: {
+      title: "Tabriklaymiz! 🎉",
+      ticketText: "Siz biletni a‘lo darajada yechdingiz!",
+      examText: "Siz imtihondan o‘tdingiz!"
+    },
     profile: {
       title: "Profil",
       subtitle: "Sizning shaxsiy kabinet ma’lumotlaringiz",
@@ -498,6 +503,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       questionCounter: "{current}/{total} савол",
       title: "Прогресс",
       empty: "Натижа ҳали йўқ"
+    },
+    celebrate: {
+      title: "Табриклаймиз! 🎉",
+      ticketText: "Сиз билетни аъло даражада ечдингиз!",
+      examText: "Сиз имтиҳондан ўтдингиз!"
     },
     profile: {
       title: "Профиль",
@@ -773,6 +783,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       questionCounter: "{current}/{total} вопрос",
       title: "Прогресс",
       empty: "Пока нет результата"
+    },
+    celebrate: {
+      title: "Поздравляем! 🎉",
+      ticketText: "Вы решили билет на отлично!",
+      examText: "Вы сдали экзамен!"
     },
     profile: {
       title: "Профиль",
