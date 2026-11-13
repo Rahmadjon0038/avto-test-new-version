@@ -1183,6 +1183,7 @@ async function renumberTicket(ticketRow, nextNumber) {
     currentId
   ]);
   await dbApi.run("UPDATE test_progress SET ticket_id = ? WHERE ticket_id = ?", [nextId, currentId]);
+  await dbApi.run("UPDATE ticket_results SET ticket_id = ? WHERE ticket_id = ?", [nextId, currentId]);
   await syncTicketQuestionsFromSlots(nextId, slots);
   invalidateTicketQuestionBankCache();
   return nextId;
@@ -1273,6 +1274,7 @@ async function updateTicket(id, input) {
 
 async function deleteTicket(id) {
   await dbApi.run("DELETE FROM test_progress WHERE ticket_id = ?", [String(id)]);
+  await dbApi.run("DELETE FROM ticket_results WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM ticket_questions WHERE ticket_id = ?", [String(id)]);
   await dbApi.run("DELETE FROM tickets WHERE id = ?", [String(id)]);
   await dbApi.run("INSERT INTO content_deletions (entity_type, entity_id) VALUES ('ticket', ?)", [String(id)]);
@@ -5570,8 +5572,20 @@ app.get("/api/tickets", requireUser, async (req, res) => {
   // progress hisoblanmaydi, javob bir necha baytga tushadi.
   if (String(req.query.lite || "") === "1") {
     const summaries = await getTicketSummariesFromDb();
+    // `result` — foydalanuvchining shu biletdagi oxirgi natijasi (yo'q bo'lsa null). Eski ilovalar bu maydonni e'tiborsiz qoldiradi.
+    const resultRows = await dbApi.all("SELECT ticket_id, correct, wrong, total FROM ticket_results WHERE user_id = ?", [String(req.user.id)]);
+    const resultByTicketId = new Map(resultRows.map((row) => [String(row.ticket_id), row]));
     setRevalidateHeaders(res);
-    return res.json({ tickets: summaries.map((ticket) => ({ id: ticket.id, number: ticket.ticketNumber })) });
+    return res.json({
+      tickets: summaries.map((ticket) => {
+        const row = resultByTicketId.get(String(ticket.id));
+        return {
+          id: ticket.id,
+          number: ticket.ticketNumber,
+          result: row ? { correct: Number(row.correct || 0), wrong: Number(row.wrong || 0), total: Number(row.total || 0) } : null
+        };
+      })
+    });
   }
 
   const tickets = await getTicketsFromDb();
@@ -6015,6 +6029,55 @@ app.post("/api/progress/:ticketId/reset", requireUser, async (req, res) => {
     [userId, ticketId, JSON.stringify({})]
   );
 
+  res.json({ ok: true });
+});
+
+// Biletni yakunlaganda oxirgi natijani saqlaydi (to'g'ri / xato javoblar soni).
+app.post("/api/ticket-results/:ticketId", requireUser, async (req, res) => {
+  const userId = String(req.user.id);
+  const ticketId = String(req.params.ticketId);
+  const answers = req.body?.answers;
+  if (!answers || typeof answers !== "object") return res.status(400).json({ error: "Javoblar obyekti kerak" });
+
+  const ticket = await getProgressTicketById(ticketId);
+  if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+
+  const questions = Array.isArray(ticket.questions)
+    ? ticket.questions.filter((question) => question && String(question.id || "").trim())
+    : [];
+  let correct = 0;
+  let wrong = 0;
+  for (const q of questions) {
+    const a = answers[q.id];
+    if (a === undefined || a === null) continue;
+    if (Number(a) === q.correctIndex) correct += 1;
+    else wrong += 1;
+  }
+
+  await dbApi.run(
+    `
+    INSERT INTO ticket_results (user_id, ticket_id, correct, wrong, total, finished_at)
+    VALUES (?, ?, ?, ?, ?, NOW())
+    ON CONFLICT(user_id, ticket_id) DO UPDATE SET
+      correct = excluded.correct,
+      wrong = excluded.wrong,
+      total = excluded.total,
+      finished_at = excluded.finished_at
+  `,
+    [userId, ticketId, correct, wrong, questions.length]
+  );
+  res.json({ ok: true, result: { correct, wrong, total: questions.length } });
+});
+
+// Bitta biletning oxirgi natijasini o'chiradi.
+app.delete("/api/ticket-results/:ticketId", requireUser, async (req, res) => {
+  await dbApi.run("DELETE FROM ticket_results WHERE user_id = ? AND ticket_id = ?", [String(req.user.id), String(req.params.ticketId)]);
+  res.json({ ok: true });
+});
+
+// Hamma biletlarning oxirgi natijalarini o'chiradi.
+app.delete("/api/ticket-results", requireUser, async (req, res) => {
+  await dbApi.run("DELETE FROM ticket_results WHERE user_id = ?", [String(req.user.id)]);
   res.json({ ok: true });
 });
 

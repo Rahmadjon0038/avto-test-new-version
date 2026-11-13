@@ -458,6 +458,22 @@ export default function TicketPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["progress", ticketId, language] })
   });
 
+  // "Yakunlash" bosilganda oxirgi natija saqlanadi: bilet ro'yxatida "Oxirgi: N to'g'ri, M xato" chiqadi.
+  const finishMutation = useMutation({
+    mutationFn: (currentAnswers: Record<string, number>) =>
+      authFetch(`/api/ticket-results/${encodeURIComponent(ticketId)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: currentAnswers })
+      }).then(jsonOrError),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tickets"] })
+  });
+
+  function openFinish() {
+    if (Object.keys(answers).length > 0) finishMutation.mutate(answers);
+    setFinishOpen(true);
+  }
+
   function save(nextAnswers: Record<string, number>) {
     setAnswers(nextAnswers);
     saveMutation.mutate(nextAnswers);
@@ -717,7 +733,7 @@ export default function TicketPage() {
           </button>
         </div>
         <div className="footerRight">
-          <button className="btn btn-primary" type="button" onClick={() => setFinishOpen(true)}>
+          <button className="btn btn-primary" type="button" onClick={openFinish}>
             <Flag className="lucide" aria-hidden="true" /> Yakunlash
           </button>
         </div>

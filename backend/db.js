@@ -146,6 +146,20 @@ async function initDb(dbApi) {
     );
   `);
 
+  // Biletni oxirgi marta yakunlagandagi natija ("Yakunlash" bosilganda). test_progress bilet ochilganda
+  // tozalanadi, shuning uchun oxirgi natija alohida saqlanadi.
+  await dbApi.run(`
+    CREATE TABLE IF NOT EXISTS ticket_results (
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ticket_id TEXT NOT NULL,
+      correct INTEGER NOT NULL DEFAULT 0,
+      wrong INTEGER NOT NULL DEFAULT 0,
+      total INTEGER NOT NULL DEFAULT 0,
+      finished_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (user_id, ticket_id)
+    );
+  `);
+
   await dbApi.run(`
     CREATE TABLE IF NOT EXISTS user_mistakes (
       id BIGSERIAL PRIMARY KEY,

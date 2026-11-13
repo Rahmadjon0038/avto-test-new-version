@@ -128,7 +128,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       lockedTitle: "Bu bilet yopiq",
       lockedText: "Bu bilet faqat ro‘yxatdan o‘tgan foydalanuvchilar uchun. Birinchi biletlar bepul ochiq.",
       loading: "Biletlar yuklanmoqda...",
-      empty: "Biletlar hozircha mavjud emas."
+      empty: "Biletlar hozircha mavjud emas.",
+      lastResult: "Oxirgi: {correct} to‘g‘ri, {wrong} xato",
+      clear: "Tozalash",
+      clearAll: "Hammasini tozalash",
+      clearAllConfirm: "Barcha biletlardagi oxirgi natijalar o‘chirilsinmi?"
     },
     custom: {
       title: "Random",
@@ -410,7 +414,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       lockedTitle: "Бу билет ёпиқ",
       lockedText: "Бу билет фақат рўйхатдан ўтган фойдаланувчилар учун. Биринчи билетлар бепул очиқ.",
       loading: "Билетлар юкланмоқда...",
-      empty: "Билетлар ҳозирча мавжуд эмас."
+      empty: "Билетлар ҳозирча мавжуд эмас.",
+      lastResult: "Охирги: {correct} тўғри, {wrong} хато",
+      clear: "Тозалаш",
+      clearAll: "Ҳаммасини тозалаш",
+      clearAllConfirm: "Барча билетлардаги охирги натижалар ўчирилсинми?"
     },
     custom: {
       title: "Рандом",
@@ -688,7 +696,11 @@ const translations: Record<LanguageCode, TranslationTree> = {
       lockedTitle: "Этот билет закрыт",
       lockedText: "Этот билет доступен только зарегистрированным пользователям. Первые билеты открыты бесплатно.",
       loading: "Загрузка билетов...",
-      empty: "Пока нет билетов."
+      empty: "Пока нет билетов.",
+      lastResult: "Последний: {correct} верно, {wrong} ошибок",
+      clear: "Очистить",
+      clearAll: "Очистить всё",
+      clearAllConfirm: "Удалить последние результаты по всем билетам?"
     },
     custom: {
       title: "Рандом",
