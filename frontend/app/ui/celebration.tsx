@@ -6,6 +6,12 @@ import { useSiteLanguage } from "@/app/site-language-provider";
 // Biletni yoki imtihonni shuncha va undan ko'p to'g'ri javob bilan tugatgan foydalanuvchi tabriklanadi.
 export const CELEBRATE_MIN_CORRECT = 18;
 
+/** To'liq bo'lmagan biletlarda (20 tadan kam savol) shu foizga mos keladigan miqdor talab qilinadi. */
+export function celebrationThreshold(total: number) {
+  if (!Number.isFinite(total) || total <= 0) return CELEBRATE_MIN_CORRECT;
+  return Math.min(CELEBRATE_MIN_CORRECT, Math.ceil(total * 0.9));
+}
+
 const COLORS = ["#ff5a5f", "#ffb400", "#22c55e", "#3b82f6", "#a855f7", "#f472b6", "#14b8a6", "#f97316"];
 
 type Piece = { left: number; delay: number; duration: number; size: number; rotate: number; color: string; round: boolean };

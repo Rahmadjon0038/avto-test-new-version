@@ -27,7 +27,7 @@ import { ensureSyncedWhenIdle } from "@/lib/content-sync";
 import { preloadQuestionImages } from "@/lib/image-preload";
 import ResponsiveImage from "@/app/ui/responsive-image";
 import ZoomImage from "@/app/ui/zoom-image";
-import { CELEBRATE_MIN_CORRECT, CelebrationBanner, CelebrationEffects } from "@/app/ui/celebration";
+import { CelebrationBanner, CelebrationEffects, celebrationThreshold } from "@/app/ui/celebration";
 
 type Question = {
   id: string;
@@ -487,8 +487,12 @@ export default function TicketPage() {
     (question) => question && answers[question.id] !== undefined && Number(answers[question.id]) === Number(question.correctIndex)
   ).length || 0;
   const wrongCount = Math.max(answered - correctCount, 0);
-  const unansweredCount = Math.max(total - answered, 0);
+  // Bilet to'liq bo'lmasa (masalan 6 ta savol), natija faqat to'ldirilgan savollar bo'yicha hisoblanadi.
   const scoredTotal = answeredQuestions.length || total;
+  const unansweredCount = Math.max(scoredTotal - answered, 0);
+  const celebrate = correctCount >= celebrationThreshold(scoredTotal);
+  // Avtomatik o'tish oxirgi to'ldirilgan savoldan keyin bo'sh slotlarga o'tib ketmasligi uchun.
+  const lastFilledIndex = displayQuestions.reduce((last, question, index) => (question ? index : last), -1);
   const correctPercent = scoredTotal > 0 ? Math.round((correctCount / scoredTotal) * 100) : 0;
   const chartData = [
     { name: "To‘g‘ri", value: correctCount },
@@ -550,7 +554,7 @@ export default function TicketPage() {
       selectOption(optionIndex, () => {
         const nextAnswers = { ...answers, [q.id]: originalIndex };
         save(nextAnswers);
-        if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+        if (settings.autoNext && idx < lastFilledIndex) scheduleAutoNext(idx + 1);
       });
     },
     scrollTargetRef: questionCardRef
@@ -593,7 +597,7 @@ export default function TicketPage() {
             <div className="h2" style={{ margin: 0 }}>
               {ticket.title}
             </div>
-            <div className="muted">{t("progress.questionCounter", { current: idx + 1, total })}</div>
+            <div className="muted">{t("progress.questionCounter", { current: Math.min(idx + 1, scoredTotal), total: scoredTotal })}</div>
           </div>
         </div>
 
@@ -629,7 +633,7 @@ export default function TicketPage() {
                         selectOption(oi, () => {
                           const nextAnswers = { ...answers, [q.id]: originalIndex };
                           save(nextAnswers);
-                          if (settings.autoNext && idx < total - 1) scheduleAutoNext(idx + 1);
+                          if (settings.autoNext && idx < lastFilledIndex) scheduleAutoNext(idx + 1);
                         });
                       }}
                     >
@@ -722,7 +726,7 @@ export default function TicketPage() {
       {finishOpen && (
         <>
           <div className="modalOverlay" onClick={closeResult} />
-          {correctCount >= CELEBRATE_MIN_CORRECT ? <CelebrationEffects /> : null}
+          {celebrate ? <CelebrationEffects /> : null}
           <div className="modal modalResult" role="dialog" aria-modal="true">
             <div className="modalHeader">
               <div className="modalTitle">Natija</div>
@@ -731,7 +735,7 @@ export default function TicketPage() {
               </button>
             </div>
             <div className="modalBody modalBodyResult">
-              {correctCount >= CELEBRATE_MIN_CORRECT ? <CelebrationBanner kind="ticket" /> : null}
+              {celebrate ? <CelebrationBanner kind="ticket" /> : null}
               <div className="finishStats finishStatsResult">
                 <div className="chartBlock">
                   <div className="chartWrap" aria-hidden="true">
@@ -743,7 +747,7 @@ export default function TicketPage() {
                   </div>
                   <div className="chartMeta">
                     <div className="muted">To‘g‘ri javoblar</div>
-                    <div className="chartCount">{correctCount}/{total}</div>
+                    <div className="chartCount">{correctCount}/{scoredTotal}</div>
                   </div>
                 </div>
                 <div className="ticketResultStats">
