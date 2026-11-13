@@ -7307,6 +7307,51 @@ a.authTelegramBtn {
   }
 }
 
+/* Pastki ikki burchakdan otilib chiqadigan konfetti: gorizontal siljish (translate) va vertikal yoy (transform) alohida animatsiya. */
+.celebrateShot {
+  position: absolute;
+  bottom: 1vh;
+  opacity: 0;
+  animation-name: celebrateShootX, celebrateShootY;
+  animation-timing-function: cubic-bezier(0.15, 0.65, 0.4, 1), linear;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1;
+}
+
+.celebrateShot.left {
+  left: 1.5vw;
+}
+
+.celebrateShot.right {
+  right: 1.5vw;
+}
+
+@keyframes celebrateShootX {
+  0% {
+    translate: 0 0;
+  }
+  100% {
+    translate: var(--dx, 30vw) 0;
+  }
+}
+
+@keyframes celebrateShootY {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.1, 0.8, 0.3, 1);
+  }
+  38% {
+    opacity: 1;
+    transform: translateY(var(--up, -60vh)) rotate(calc(var(--rotate, 600deg) * 0.45));
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(12vh) rotate(var(--rotate, 600deg));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .celebrateLayer {
     display: none;

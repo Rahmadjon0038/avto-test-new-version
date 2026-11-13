@@ -15,6 +15,7 @@ export function celebrationThreshold(total: number) {
 const COLORS = ["#ff5a5f", "#ffb400", "#22c55e", "#3b82f6", "#a855f7", "#f472b6", "#14b8a6", "#f97316"];
 
 type Piece = { left: number; delay: number; duration: number; size: number; rotate: number; color: string; round: boolean };
+type Shot = { side: "left" | "right"; delay: number; duration: number; dx: number; up: number; size: number; rotate: number; color: string; round: boolean };
 type Balloon = { left: number; delay: number; duration: number; sway: number; color: string; scale: number };
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
@@ -51,6 +52,24 @@ export function CelebrationEffects() {
       })),
     []
   );
+  // Pastki ikki burchakdan tez otilib chiqadigan "to'p" konfettilari: ikki to'lqin, markazga qarab yoy bo'ylab uchadi.
+  const shots = useMemo<Shot[]>(
+    () =>
+      (["left", "right"] as const).flatMap((side) =>
+        Array.from({ length: 56 }, (_, index) => ({
+          side,
+          delay: (index < 28 ? 0 : 0.85) + rand(0, 0.18),
+          duration: rand(1.7, 2.6),
+          dx: rand(14, 62),
+          up: rand(38, 88),
+          size: rand(7, 12),
+          rotate: rand(360, 1000),
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          round: Math.random() < 0.3
+        }))
+      ),
+    []
+  );
   const balloons = useMemo<Balloon[]>(
     () =>
       Array.from({ length: 10 }, (_, index) => ({
@@ -79,6 +98,25 @@ export function CelebrationEffects() {
               "--sway": `${balloon.sway}px`,
               "--balloon": balloon.color,
               "--scale": balloon.scale
+            } as React.CSSProperties
+          }
+        />
+      ))}
+      {shots.map((shot, index) => (
+        <span
+          key={`s${index}`}
+          className={`celebrateShot ${shot.side}`}
+          style={
+            {
+              width: shot.size,
+              height: shot.round ? shot.size : shot.size * 1.7,
+              borderRadius: shot.round ? "50%" : 2,
+              background: shot.color,
+              animationDelay: `${shot.delay}s`,
+              animationDuration: `${shot.duration}s`,
+              "--dx": `${shot.side === "left" ? shot.dx : -shot.dx}vw`,
+              "--up": `${-shot.up}vh`,
+              "--rotate": `${shot.rotate}deg`
             } as React.CSSProperties
           }
         />
